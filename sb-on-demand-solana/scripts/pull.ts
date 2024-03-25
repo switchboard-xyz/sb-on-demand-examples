@@ -48,12 +48,10 @@ function buildBinanceComJob(pair: String): OracleJob {
 export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
 
 (async () => {
-  const [wallet, payer] = await AnchorUtils.initWalletFromFile(
-    "/Users/mgild/switchboard_environments_v2/devnet/upgrade_authority/test.json"
-  );
+  const [wallet, payer] = await AnchorUtils.initWalletFromFile("payer.json");
   const PID = sb.SB_ON_DEMAND_PID;
   const connection = new Connection(
-    "https://switchbo-switchbo-6225.devnet.rpcpool.com/f6fb9f02-0777-498b-b8f5-67cbb1fc0d14",
+    "https://api.devnet.solana.com",
     "confirmed"
   );
   const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
@@ -81,7 +79,9 @@ export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
         }
       }
       console.log(
-        `Current value of feed ${feedKp.publicKey}: ${currentValue.value.toString()} at slot ${maxSlot}, staleness: ${
+        `Current value of feed ${
+          feedKp.publicKey
+        }: ${currentValue.value.toString()} at slot ${maxSlot}, staleness: ${
           maxSlot - lastSlot
         }`
       );

@@ -29,6 +29,7 @@ import {
   PullFeed,
   Queue,
   RecentSlotHashes,
+  sleep,
 } from "@switchboard-xyz/on-demand";
 
 function buildBinanceComJob(pair: String): OracleJob {
@@ -57,9 +58,7 @@ async function myAnchorProgram(
 }
 
 (async () => {
-  const [wallet, payer] = await AnchorUtils.initWalletFromFile(
-    "/Users/mgild/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
-  );
+  const [wallet, payer] = await AnchorUtils.initWalletFromFile("payer.json");
   const PID = sb.SB_ON_DEMAND_PID;
   const connection = new Connection(
     "https://api.devnet.solana.com",
@@ -144,7 +143,3 @@ async function myAnchorProgram(
   }
   return;
 })();
-
-function sleep(milliseconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}

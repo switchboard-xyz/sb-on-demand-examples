@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::on_demand::accounts::pull_feed::PullFeedAccountData;
 
-declare_id!("84LSTTNKxiQFey1mx4b2C74GKrSKMcuJZYrnL8J9wAaT");
+declare_id!("2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5");
 
 #[program]
 pub mod sb_on_demand_solana {
@@ -14,8 +14,7 @@ pub mod sb_on_demand_solana {
             .map_err(|e| ProgramError::Custom(1))?;
         let price = feed.get_value(&Clock::get()?, 30, 1, true)
             .map_err(|e| ProgramError::Custom(2))?;
-        msg!("feed: {:?}", feed);
-        drop(feed);
+        msg!("price: {:?}", price.mantissa());
         Ok(())
     }
 }

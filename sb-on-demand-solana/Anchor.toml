@@ -4,12 +4,9 @@
 seeds = false
 skip-lint = false
 
-[programs.localnet]
-sb_on_demand_solana = "84LSTTNKxiQFey1mx4b2C74GKrSKMcuJZYrnL8J9wAaT"
-
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "/Users/mgild/.config/solana/id.json"

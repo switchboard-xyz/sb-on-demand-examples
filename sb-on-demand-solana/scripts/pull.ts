@@ -50,14 +50,16 @@ export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
 async function myAnchorProgram(
   provider: anchor.Provider
 ): Promise<anchor.Program> {
-  const myPid = new PublicKey("84LSTTNKxiQFey1mx4b2C74GKrSKMcuJZYrnL8J9wAaT");
+  const myPid = new PublicKey("2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5");
   const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
   const program = new anchor.Program(idl, myPid, provider);
   return program;
 }
 
 (async () => {
-  const [wallet, payer] = await AnchorUtils.initWalletFromFile("payer.json");
+  const [wallet, payer] = await AnchorUtils.initWalletFromFile(
+    "/Users/mgild/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
+  );
   const PID = sb.SB_ON_DEMAND_PID;
   const connection = new Connection(
     "https://api.devnet.solana.com",

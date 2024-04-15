@@ -79,9 +79,7 @@ export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
         }
       }
       console.log(
-        `Current value of feed ${
-          feedKp.publicKey
-        }: ${currentValue.value.toString()} at slot ${maxSlot}, staleness: ${
+        `Current value: ${currentValue.value.toString()} at slot ${maxSlot}, staleness: ${
           maxSlot - lastSlot
         }`
       );
@@ -89,25 +87,32 @@ export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
       return Promise.resolve<void>(undefined);
     }
   );
+  const conf: any = {
+    queue,
+    jobs: [buildBinanceComJob("BTCUSDT")],
+    maxVariance: 1.0,
+    minResponses: 1,
+    numSignatures: 1,
+  };
+  conf.feedHash = await Queue.fetchFeedHash(program, conf);
+  const ix = await pullFeed.initIx(conf);
+  const tx = await InstructionUtils.asV0Tx(program, [ix]);
+  tx.sign([payer, feedKp]);
+  const sig = await connection.sendTransaction(tx, {
+    preflightCommitment: "processed",
+  });
+  await connection.confirmTransaction(sig);
+  console.log("Feed initialized: ", sig);
 
   while (true) {
     try {
-      const now = Math.floor(+Date.now() / 1000);
-      const ixs = await PullFeed.solanaFetchUpsertIxs(program, {
-        feed: feedKp.publicKey,
-        queue,
-        jobs: [buildBinanceComJob("BTCUSDT")],
-        numSignatures: 1,
-        maxVariance: 1,
-        minResponses: 1,
+      const ix = await pullFeed.solanaFetchUpdateIx(conf);
+      const tx = await InstructionUtils.asV0Tx(program, [ix]);
+      tx.sign([payer]);
+      const sig = await connection.sendTransaction(tx, {
+        preflightCommitment: "processed",
       });
-      const tx = await InstructionUtils.asV0Tx(program, ixs, []);
-      tx.sign([payer, feedKp]);
-      program.provider.connection
-        .sendTransaction(tx, {
-          preflightCommitment: "processed",
-        })
-        .catch((e) => console.log("Error: ", e));
+      console.log("Sent update signature: ", sig);
     } catch (e) {
       console.log(e);
     }

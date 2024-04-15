@@ -47,6 +47,15 @@ function buildBinanceComJob(pair: String): OracleJob {
 
 export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
 
+async function myAnchorProgram(
+  provider: anchor.Provider
+): Promise<anchor.Program> {
+  const myPid = new PublicKey("84LSTTNKxiQFey1mx4b2C74GKrSKMcuJZYrnL8J9wAaT");
+  const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
+  const program = new anchor.Program(idl, myPid, provider);
+  return program;
+}
+
 (async () => {
   const [wallet, payer] = await AnchorUtils.initWalletFromFile("payer.json");
   const PID = sb.SB_ON_DEMAND_PID;
@@ -104,10 +113,16 @@ export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
   await connection.confirmTransaction(sig);
   console.log("Feed initialized: ", sig);
 
+  const myProgram = await myAnchorProgram(provider);
   while (true) {
     try {
-      const ix = await pullFeed.solanaFetchUpdateIx(conf);
-      const tx = await InstructionUtils.asV0Tx(program, [ix]);
+      const tx = await InstructionUtils.asV0Tx(program, [
+        await pullFeed.solanaFetchUpdateIx(conf),
+        await myProgram.methods
+          .test()
+          .accounts({ feed: feedKp.publicKey })
+          .instruction(),
+      ]);
       tx.sign([payer]);
       const sig = await connection.sendTransaction(tx, {
         preflightCommitment: "processed",

@@ -90,9 +90,7 @@ async function myAnchorProgram(
         }
       }
       console.log(
-        `Current value: ${currentValue.value.toString()} at slot ${maxSlot}, staleness: ${
-          maxSlot - lastSlot
-        }`
+        `Current value: ${currentValue.value.toString()} at slot ${maxSlot}`
       );
       lastSlot = maxSlot;
       return Promise.resolve<void>(undefined);
@@ -126,13 +124,27 @@ async function myAnchorProgram(
           .instruction(),
       ]);
       tx.sign([payer]);
+      const sim = await connection.simulateTransaction(tx, {
+        commitment: "processed",
+      });
+      console.log(
+        "Simulated update: ",
+        sim.value.logs
+          .filter((x) => x.includes("Program log:"))
+          .filter((x) => !x.includes("Instruction:"))
+      );
       const sig = await connection.sendTransaction(tx, {
-        preflightCommitment: "processed",
+        skipPreflight: true,
       });
       console.log("Sent update signature: ", sig);
     } catch (e) {
       console.log(e);
     }
+    await sleep(5_000);
   }
   return;
 })();
+
+function sleep(milliseconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}

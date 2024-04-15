@@ -1,0 +1,3 @@
+[submodule "switchboard-randomness-on-demand-example"]
+	path = switchboard-randomness-on-demand-example
+	url = https://github.com/switchboard-xyz/switchboard-randomness-on-demand-example.git

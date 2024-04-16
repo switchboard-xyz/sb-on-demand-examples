@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::on_demand::accounts::pull_feed::PullFeedAccountData;
 
-declare_id!("2nw6drdFZVEnJQvDU2WQ65t9bfuXYD6eft7yBEq85R2a");
+declare_id!("CKZfzTmR4ZBF3trAQJB1FAkaiS83A5rPhGnoLkmrXKPQ");
 
 #[program]
 pub mod sb_on_demand_solana {

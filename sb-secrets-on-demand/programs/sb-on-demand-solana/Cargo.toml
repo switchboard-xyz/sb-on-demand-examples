@@ -17,4 +17,5 @@ default = []
 
 [dependencies]
 anchor-lang = "=0.29.0"
-switchboard-on-demand = "=0.1.4"
+switchboard-on-demand = "0.1.6"
+

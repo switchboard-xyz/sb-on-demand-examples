@@ -50,7 +50,7 @@ function loadDefaultKeypair() {
 async function myAnchorProgram(
     provider: anchor.Provider
   ): Promise<anchor.Program> {
-    const myPid = new PublicKey("2nw6drdFZVEnJQvDU2WQ65t9bfuXYD6eft7yBEq85R2a");
+    const myPid = new PublicKey("CKZfzTmR4ZBF3trAQJB1FAkaiS83A5rPhGnoLkmrXKPQ");
     const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
     const program = new anchor.Program(idl, myPid, provider);
     return program;
@@ -131,6 +131,7 @@ async function myAnchorProgram(
     const pullFeed = new PullFeed(sbProgram, feedKeypair.publicKey);
     // config for the feed
     const conf: any = {
+      //feed: feedKeypair.publicKey,
         queue,
         jobs: [buildOpenWeatherAPI("Aspen", "OPEN_WEATHER_API_KEY")],
         maxVariance: 1.0,
@@ -156,17 +157,17 @@ async function myAnchorProgram(
     console.log("feedHash",feedHash);
     // commented out because the feed hash is already whitelisted
 
-    // const addwhitelist = await sbSecrets.createAddMrEnclaveRequest(wallet.payer.publicKey.toBase58(), "ed25519", feedHash, [secretName]);
-    // const whitelistSignature = nacl.sign.detached(
-    //     new Uint8Array(addwhitelist.toEncodedMessage()),
-    //     wallet.payer.secretKey
-    // );
-    // const sendwhitelist = await sbSecrets.addMrEnclave(
-    //     addwhitelist, 
-    //     Buffer.from(whitelistSignature).toString("base64"));
+    const addwhitelist = await sbSecrets.createAddMrEnclaveRequest(wallet.payer.publicKey.toBase58(), "ed25519", feedHash.toString(), [secretName]);
+    const whitelistSignature = nacl.sign.detached(
+        new Uint8Array(addwhitelist.toEncodedMessage()),
+        wallet.payer.secretKey
+    );
+    const sendwhitelist = await sbSecrets.addMrEnclave(
+        addwhitelist, 
+        Buffer.from(whitelistSignature).toString("base64"));
     
-    // console.log("sendwhitelist",sendwhitelist);
-    
+    console.log("sendwhitelist",sendwhitelist);
+
     const getuserSecrets = await sbSecrets.getUserSecrets(wallet.payer.publicKey.toBase58(), "ed25519");
     console.log("getuserSecrets",getuserSecrets)
 
@@ -181,7 +182,7 @@ async function myAnchorProgram(
     console.log("Feed initialized: ", sig);
 
     const myProgram = await myAnchorProgram(provider);
-
+    
     while (true) {
         try {
           const tx = await InstructionUtils.asV0Tx(sbProgram, [

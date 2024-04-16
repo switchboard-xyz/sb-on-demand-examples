@@ -172,14 +172,14 @@ async function myAnchorProgram(
     console.log("getuserSecrets",getuserSecrets)
 
     // initialize the feed
-    const ix = await pullFeed.initIx(conf);
-    const tx = await InstructionUtils.asV0Tx(sbProgram, [ix]);
-    tx.sign([wallet.payer, feedKeypair]);
-    const sig = await connection.sendTransaction(tx, {
-        preflightCommitment: "processed",
-    });
-    await connection.confirmTransaction(sig);
-    console.log("Feed initialized: ", sig);
+    // const ix = await pullFeed.initIx(conf);
+    // const tx = await InstructionUtils.asV0Tx(sbProgram, [ix]);
+    // tx.sign([wallet.payer, feedKeypair]);
+    // const sig = await connection.sendTransaction(tx, {
+    //     preflightCommitment: "processed",
+    // });
+    // await connection.confirmTransaction(sig);
+    // console.log("Feed initialized: ", sig);
 
     const myProgram = await myAnchorProgram(provider);
     

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx ts-node src/index.ts"
+    "start": "npx ts-node scripts/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,7 +15,7 @@
     "@solana/spl-token": "^0.4.3",
     "@solana/web3.js": "^1.91.1",
     "@switchboard-xyz/common": "^2.3.17",
-    "@switchboard-xyz/on-demand": "^1.0.23",
+    "@switchboard-xyz/on-demand": "^1.0.26",
     "assert": "^2.1.0",
     "big.js": "^6.2.1",
     "bigint-buffer": "^1.1.5",

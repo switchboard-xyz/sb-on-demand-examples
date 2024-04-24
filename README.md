@@ -1,23 +1,25 @@
 # Switchboard On-Demand: Solana
 
-Documentation: https://switchboardxyz.gitbook.io/switchboard-on-demand/links-and-technical-documentation</br>
-Rust crate: https://crates.io/crates/switchboard-on-demand</br>
-npm module: https://www.npmjs.com/package/@switchboard-xyz/on-demand</br>
-Typedoc: https://switchboard-docs.web.app/</br>
+## Documentation Resources
 
-## Intro
+- **[User Guide and Technical Documentation](https://switchboardxyz.gitbook.io/switchboard-on-demand/links-and-technical-documentation)** - Detailed information on getting started, usage examples, and API references.
+- **[Rust Crate on crates.io](https://crates.io/crates/switchboard-on-demand)** - For integrating Switchboard features in Rust projects.
+- **[npm Module](https://www.npmjs.com/package/@switchboard-xyz/on-demand)** - Install Switchboard On-Demand for Node.js applications.
+- **[TypeDoc Documentation](https://switchboard-docs.web.app/)** - Comprehensive TypeDoc generated documentation.
 
-This is the example monorepo for switchboard-on-demand.
+## Introduction
 
-The core examples to review in this repo are pertaining to:
+This repository serves as a monorepo example for Switchboard On-Demand, showcasing the following key features:
 
-- On-Demand Feeds
-- On-Demand Randomness
-- On-Demand Secrets
+- **On-Demand Feeds**
+- **On-Demand Randomness**
+- **On-Demand Secrets**
 
-For testing on-demand feeds see `sb-on-demand-solana/`
+These components are essential for testing and demonstrating the capabilities of the Switchboard On-Demand solution within the Solana ecosystem.
 
-To test feed creation and usage:
+## Getting Started with Testing
+
+To start testing on-demand feeds, follow these steps:
 
 ```bash
 cd sb-on-demand-solana/

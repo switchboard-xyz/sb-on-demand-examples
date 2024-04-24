@@ -1,7 +1,6 @@
-# switchboard-randomness-on-demand-example
+# Switchboard On-Demand: Randomness 
 
-Switchboard Randomness On-Demand
-
+This example demonstrates the use of Switchboard's On-Demand Randomness functionality. 
 
 ## Getting Started
 

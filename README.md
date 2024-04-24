@@ -1,9 +1,9 @@
 # Switchboard On-Demand: Solana
 
-Documentation: https://switchboardxyz.gitbook.io/switchboard-on-demand/links-and-technical-documentation
-Rust crate: https://crates.io/crates/switchboard-on-demand
-npm module: https://www.npmjs.com/package/@switchboard-xyz/on-demand
-Typedoc: https://switchboard-docs.web.app/
+Documentation: https://switchboardxyz.gitbook.io/switchboard-on-demand/links-and-technical-documentation</br>
+Rust crate: https://crates.io/crates/switchboard-on-demand</br>
+npm module: https://www.npmjs.com/package/@switchboard-xyz/on-demand</br>
+Typedoc: https://switchboard-docs.web.app/</br>
 
 ## Intro
 

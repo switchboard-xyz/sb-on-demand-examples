@@ -1,7 +1,9 @@
 # Switchboard On-Demand: Solana
 
 <div align="center">
+
 ![Switchboard Logo](https://github.com/switchboard-xyz/switchboard/raw/main/website/static/img/icons/switchboard/avatar.png)
+
 <div align="left">
 
 

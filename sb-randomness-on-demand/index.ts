@@ -5,11 +5,16 @@ import {
   Keypair,
   Transaction,
   SystemProgram,
+  MessageV0,
+  VersionedTransaction,
 } from "@solana/web3.js";
 import {
-  SB_ON_DEMAND_PID,
-  Randomness,
+  AnchorUtils,
   InstructionUtils,
+  Queue,
+  Randomness,
+  SB_ON_DEMAND_PID,
+  sleep,
 } from "@switchboard-xyz/on-demand";
 import { getKeypairFromEnvironment } from "@solana-developers/helpers";
 import { AnchorWallet } from "@switchboard-xyz/solana.js";
@@ -20,31 +25,51 @@ import * as fs from "fs";
 import * as shell from "shelljs";
 import reader from "readline-sync";
 
-function loadDefaultKeypair() {
-  const command =
-    'solana config get | grep "Keypair Path" | awk -F " " \'{ print $3 }\'';
-  const res = shell.exec(command, { async: false }).stdout.trim();
-  const payerJson = new Uint8Array(
-    JSON.parse(fs.readFileSync(resolve(res), "utf8"))
-  );
-  return Keypair.fromSecretKey(payerJson);
-}
-
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
 const COMMITMENT = "confirmed";
 
+async function myAnchorProgram(
+  provider: anchor.Provider,
+  myPid: PublicKey
+): Promise<anchor.Program> {
+  const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
+  const program = new anchor.Program(idl, myPid, provider);
+  return program;
+}
+
 (async function () {
   dotenv.config();
   console.clear();
-  const keypair = loadDefaultKeypair();
+  const { keypair, connection, provider, wallet } = await AnchorUtils.loadEnv();
   console.log(
     "🚀 Welcome, brave soul, to the Cosmic Coin Flip Challenge! 🚀\n"
   );
+  if (fileExists("serializedIx.bin")) {
+    console.log("A pending request has been found in the ether. Resuming...");
+    const bin = fs.readFileSync("serializedIx.bin");
+    const tx = VersionedTransaction.deserialize(bin);
+    tx.message.recentBlockhash = (
+      await connection.getRecentBlockhash()
+    ).blockhash;
+    tx.sign([keypair]);
+    const sig = await connection.sendTransaction(tx);
+    await connection.confirmTransaction(sig);
+    console.log(
+      "\n💫 With bated breath, we watched as the oracle unveiled our destiny: 💫"
+    );
+    let transactionRes = await connection.getTransaction(sig, {
+      maxSupportedTransactionVersion: 0,
+    });
+    let resultLog = transactionRes?.meta?.logMessages?.filter((line) =>
+      line.includes("FLIP_RESULT")
+    )[0];
+    let result = resultLog?.split(": ")[2];
+
+    console.log(`\nDestiny reveals itself as... ${result}!`);
+    fs.unlinkSync("serializedIx.bin");
+    return;
+  }
   const userGuess = getUserGuessFromCommandLine();
   console.log(
     `You've chosen ${
@@ -61,33 +86,19 @@ const COMMITMENT = "confirmed";
     "Powered by the mystical energies of Switchboard On-Demand Randomness, this challenge transcends the mundane, touching the very fabric of the cosmos."
   );
 
-  const sbProgramId = SB_ON_DEMAND_PID;
-  const url = "https://api.devnet.solana.com";
-  let connection = new Connection(url, {
-    commitment: COMMITMENT,
-  });
-
-  const wallet = new AnchorWallet(keypair);
   const payer = wallet.payer;
-  const provider = new anchor.AnchorProvider(connection, wallet, {
-    commitment: COMMITMENT,
-    preflightCommitment: COMMITMENT,
-  });
   // Switchboard sbQueue fixed
   const sbQueue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
+  const sbProgramId = SB_ON_DEMAND_PID;
   const sbIdl = await anchor.Program.fetchIdl(sbProgramId, provider);
   const sbProgram = new anchor.Program(sbIdl!, sbProgramId, provider);
+  const queueAccount = new Queue(sbProgram, sbQueue);
 
   // setup
-  const coinFlipProgramId = new PublicKey(
-    "Hjj3P8Bt7LYrbMnSa3zxA5iZu5E2hSHAFpxz32LrAXNv"
-  );
-  const idlCoin = await anchor.Program.fetchIdl(coinFlipProgramId, provider);
-  const coinFlipProgram = new anchor.Program(
-    idlCoin!,
-    coinFlipProgramId,
-    provider
-  );
+  const path = "sb-randomness/target/deploy/sb_randomness-keypair.json";
+  const [_, myProgramKeypair] = await AnchorUtils.initWalletFromFile(path);
+  const coinFlipProgramId = myProgramKeypair.publicKey;
+  const coinFlipProgram = await myAnchorProgram(provider, coinFlipProgramId);
 
   await pauseForEffect("Now, let us begin our journey through the stars.");
 
@@ -146,7 +157,7 @@ const COMMITMENT = "confirmed";
 
   const transaction1 = new Transaction();
   // Commit transaction
-  const commitIx = await randomness.commitIx();
+  const commitIx = await randomness.commitIx(sbQueue);
 
   const coinFlipIx = await coinFlipProgram.instruction.coinFlip(
     randomness.pubkey,
@@ -169,7 +180,7 @@ const COMMITMENT = "confirmed";
     "\n✨ As the cosmic dust settles, our fate is now irrevocably bound to the whims of the universe. The Commitment Ceremony is complete. ✨"
   );
   console.log(`Transaction Signature: ${sig2}`);
-  await sleep(5000); // Pause for effect..
+  // await sleep(5000); // Pause for effect..
 
   console.log("\n🔮 Step 4: Unveiling Destiny with The Grand Reveal 🔮");
   await pauseForEffect(
@@ -178,20 +189,6 @@ const COMMITMENT = "confirmed";
 
   const transaction2 = new Transaction();
   let revealIx = undefined;
-  for (let i = 0; i < 5; ++i) {
-    try {
-      revealIx = await randomness.revealIx();
-      break;
-    } catch (error) {
-      if (i === 4) {
-        throw error;
-      }
-      console.log(
-        "Waiting for a tiny bit more for the commitment to be locked..."
-      );
-      await sleep(1000);
-    }
-  }
   const settleFlipIx = await coinFlipProgram.instruction.settleFlip(
     escrowBump,
     {
@@ -204,9 +201,30 @@ const COMMITMENT = "confirmed";
       },
     }
   );
+  const tries = 5;
+  for (let i = 0; i < tries; ++i) {
+    try {
+      revealIx = await randomness.revealIx();
+      randomness.serializeIxToFile(
+        [revealIx, settleFlipIx],
+        "serializedIx.bin"
+      );
+      break;
+    } catch (error) {
+      if (i === tries - 1) {
+        throw error;
+      }
+      console.log(
+        "Waiting for a tiny bit more for the commitment to be locked..."
+      );
+      await sleep(1000);
+    }
+  }
   // Add the settle flip instruction to
   transaction2.add(revealIx!, settleFlipIx);
-  const sig = await provider.sendAndConfirm(transaction2, [payer]);
+  const sig = await provider.sendAndConfirm(transaction2, [payer], {
+    commitment: "confirmed",
+  });
   console.log(
     "\n💫 With bated breath, we watched as the oracle unveiled our destiny: 💫"
   );
@@ -221,7 +239,10 @@ const COMMITMENT = "confirmed";
   let result = resultLog?.split(": ")[2];
 
   console.log(`\nDestiny reveals itself as... ${result}!`);
+  footer(result!, userGuess);
+})();
 
+function footer(result: string, userGuess: boolean) {
   // Conclusion based on the result
   if ((result === "Heads" && userGuess) || (result === "Tails" && !userGuess)) {
     console.log(
@@ -236,7 +257,8 @@ const COMMITMENT = "confirmed";
   console.log(
     "\nThank you for participating in the Cosmic Coin Flip Challenge. May the mysteries of the universe always intrigue and inspire you.\n"
   );
-})();
+  fs.unlinkSync("serializedIx.bin");
+}
 
 async function ensureAccountFunded(
   connection: Connection,
@@ -320,4 +342,13 @@ function getUserGuessFromCommandLine(): boolean {
 function pauseForEffect(message: any, duration = 3000) {
   console.log(message);
   return new Promise((resolve) => setTimeout(resolve, duration));
+}
+
+function fileExists(path: string): boolean {
+  try {
+    fs.accessSync(path, fs.constants.F_OK);
+  } catch {
+    return false;
+  }
+  return true;
 }

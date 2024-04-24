@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::accounts::RandomnessAccountData;
 
-declare_id!("DoXbFo8XLUBtY3w1tFykUNqF8QYiz5wHDXymyYfLxFX9");
+declare_id!("6dAoLE7gsMDArLcUo6CaTgauFDPQCA8BLxt1wDVyMSJQ");
 
 pub fn transfer<'a>(
     system_program: AccountInfo<'a>,
@@ -10,7 +10,6 @@ pub fn transfer<'a>(
     amount: u64,
     seeds: Option<&[&[&[u8]]]> // Use Option to explicitly handle the presence or absence of seeds
 ) -> Result<()> {
-    let _rent = Rent::get()?;
     let amount_needed = amount;
     if amount_needed > from.lamports() {
         msg!("Need {} lamports, but only have {}", amount_needed, from.lamports());

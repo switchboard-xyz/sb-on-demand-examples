@@ -3,8 +3,9 @@
 ![Switchboard Logo](https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png)
 
 # Switchboard On-Demand Examples
+Example repositories for switchboard's latest on-demand functionality.
 
-> Example repositories for switchboard's latest on-demand functionality.
+</div>
 
 ## Documentation Resources
 

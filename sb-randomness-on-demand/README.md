@@ -1,6 +1,12 @@
-# Switchboard On-Demand: Randomness 
+<div align="center">
 
-This example demonstrates the use of Switchboard's On-Demand Randomness functionality. 
+![Switchboard Logo](https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png)
+
+# Switchboard On-Demand: Randomness 
+This example demonstrates the use of Switchboard's On-Demand Randomness functionality.
+
+</div>
+
 
 ## Getting Started
 

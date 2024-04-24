@@ -1,5 +1,10 @@
 # Switchboard On-Demand: Solana
 
+<div align="center">
+
+![Switchboard Logo](https://github.com/switchboard-xyz/switchboard/raw/main/website/static/img/icons/switchboard/avatar.png)
+
+
 ## Documentation Resources
 
 - **[User Guide and Technical Documentation](https://switchboardxyz.gitbook.io/switchboard-on-demand/links-and-technical-documentation)** - Detailed information on getting started, usage examples, and API references.

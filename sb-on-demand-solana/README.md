@@ -1,12 +1,21 @@
 # Switchboard On-Demand: Solana Pull Feed
 
-This example demonstrates the use of Switchboard's On-Demand Feed. 
+This example demonstrates the use of Switchboard's On-Demand Feed.
 To test feed creation and usage:
 
 ## Getting Started
 
-To see the power of on-demand feeds, run the following: 
+To see the power of on-demand feeds, run the following:
 
-```typescript
-ts-node src/pull.ts
+```bash
+anchor build
+anchor deploy
+anchor idl init --filepath target/idl/sb_on_demand_solana.json 2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5
+```
+
+Once deployed, you can run the demo script included here to test populating the feed:
+
+```bash
+pnpm i
+ts-node scripts/pull.ts
 ```

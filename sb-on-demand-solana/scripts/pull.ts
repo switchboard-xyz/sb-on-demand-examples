@@ -32,6 +32,29 @@ import {
   sleep,
 } from "@switchboard-xyz/on-demand";
 
+let lastSlot: number = 0;
+async function feedUpdateCallback(x: any): Promise<void> {
+  const [slot_, resp] = x;
+  const slot = new BN(slot_ - 100);
+  const feed = resp.pubkey;
+  const currentValue = sb.toFeedValue(resp.submissions, slot);
+  if (currentValue === null) {
+    console.log("No value found");
+    return Promise.resolve<void>(undefined);
+  }
+  let maxSlot = 0;
+  for (const submission of resp.submissions) {
+    if (submission.slot.gt(maxSlot)) {
+      maxSlot = submission.slot.toNumber();
+    }
+  }
+  console.log(
+    `Current value: ${currentValue.value.toString()} at slot ${maxSlot}`
+  );
+  lastSlot = maxSlot;
+  return Promise.resolve<void>(undefined);
+}
+
 function buildBinanceComJob(pair: String): OracleJob {
   const tasks = [
     OracleJob.Task.create({
@@ -58,41 +81,15 @@ async function myAnchorProgram(
 }
 
 (async () => {
-  const { keypair, connection, provider } = await AnchorUtils.loadEnv();
-  const payer = keypair;
-  const [_, myProgramKeypair] = await AnchorUtils.initWalletFromFile(
-    "../target/deploy/sb_on_demand_solana-keypair.json"
-  );
-  const PID = sb.SB_ON_DEMAND_PID;
+  const path = "../target/deploy/sb_on_demand_solana-keypair.json";
   const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
-  const idl = (await anchor.Program.fetchIdl(PID, provider))!;
-  const program = new anchor.Program(idl, PID, provider);
-  const feedKp = Keypair.generate();
-  const pullFeed = new PullFeed(program, feedKp.publicKey);
-  let lastSlot: number = 0;
+  const [_, myProgramKeypair] = await AnchorUtils.initWalletFromFile(path);
+  const { keypair, connection, provider } = await AnchorUtils.loadEnv();
+  const program = await AnchorUtils.loadProgramFromEnv();
+  const [pullFeed, feedKp] = PullFeed.generate(program);
   const subscriptionId = await PullFeed.subscribeToAllUpdates(
     program,
-    (x: any): Promise<void> => {
-      const [slot_, resp] = x;
-      const slot = new BN(slot_ - 100);
-      const feed = resp.pubkey;
-      const currentValue = sb.toFeedValue(resp.submissions, slot);
-      if (currentValue === null) {
-        console.log("No value found");
-        return Promise.resolve<void>(undefined);
-      }
-      let maxSlot = 0;
-      for (const submission of resp.submissions) {
-        if (submission.slot.gt(maxSlot)) {
-          maxSlot = submission.slot.toNumber();
-        }
-      }
-      console.log(
-        `Current value: ${currentValue.value.toString()} at slot ${maxSlot}`
-      );
-      lastSlot = maxSlot;
-      return Promise.resolve<void>(undefined);
-    }
+    feedUpdateCallback
   );
   const conf: any = {
     queue,
@@ -102,15 +99,15 @@ async function myAnchorProgram(
     numSignatures: 1,
   };
   conf.feedHash = await Queue.fetchFeedHash(program, conf);
-  const ix = await pullFeed.initIx(conf);
-  const tx = await InstructionUtils.asV0Tx(program, [ix]);
-  tx.sign([payer, feedKp]);
-  const sig = await connection.sendTransaction(tx, {
-    preflightCommitment: "processed",
-  });
+
+  // Initialize the feed
+  const tx = await pullFeed.initTx(program, conf);
+  tx.sign([keypair, feedKp]);
+  const sig = await connection.sendTransaction(tx);
   await connection.confirmTransaction(sig);
   console.log("Feed initialized: ", sig);
 
+  // Send a price update every 5 seconds
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   while (true) {
     try {
@@ -121,15 +118,15 @@ async function myAnchorProgram(
           .accounts({ feed: feedKp.publicKey })
           .instruction(),
       ]);
-      tx.sign([payer]);
+      tx.sign([keypair]);
       const sim = await connection.simulateTransaction(tx, {
         commitment: "processed",
       });
       console.log(
         "Simulated update: ",
-        sim.value.logs
-          .filter((x) => x.includes("Program log:"))
-          .filter((x) => !x.includes("Instruction:"))
+        sim.value.logs.filter(
+          (x) => x.includes("Program log:") && !x.includes("Instruction:")
+        )
       );
       const sig = await connection.sendTransaction(tx, {
         skipPreflight: true,

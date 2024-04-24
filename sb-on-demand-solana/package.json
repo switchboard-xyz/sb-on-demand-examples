@@ -8,12 +8,11 @@
         "@solana/spl-token": "^0.4.3",
         "@solana/web3.js": "^1.91.1",
         "@switchboard-xyz/common": "^2.3.17",
-        "@switchboard-xyz/on-demand": "^1.0.26",
+        "@switchboard-xyz/on-demand": "^1.0.33",
         "assert": "^2.1.0",
         "big.js": "^6.2.1",
         "bigint-buffer": "^1.1.5",
-        "bs58": "^5.0.0",
-        "fs": "0.0.1-security"
+        "bs58": "^5.0.0"
     },
     "devDependencies": {
         "@types/bn.js": "^5.1.0",

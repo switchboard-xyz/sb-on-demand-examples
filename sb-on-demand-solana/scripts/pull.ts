@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { BN } from "@coral-xyz/anchor";
+import { BN, Wallet } from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import type { AccountInfo, AccountMeta } from "@solana/web3.js";
 import {
@@ -49,23 +49,22 @@ function buildBinanceComJob(pair: String): OracleJob {
 export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
 
 async function myAnchorProgram(
-  provider: anchor.Provider
+  provider: anchor.Provider,
+  myPid: PublicKey
 ): Promise<anchor.Program> {
-  const myPid = new PublicKey("2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5");
   const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
   const program = new anchor.Program(idl, myPid, provider);
   return program;
 }
 
 (async () => {
-  const [wallet, payer] = await AnchorUtils.initWalletFromFile("payer.json");
-  const PID = sb.SB_ON_DEMAND_PID;
-  const connection = new Connection(
-    "https://api.devnet.solana.com",
-    "confirmed"
+  const { keypair, connection, provider } = await AnchorUtils.loadEnv();
+  const payer = keypair;
+  const [_, myProgramKeypair] = await AnchorUtils.initWalletFromFile(
+    "../target/deploy/sb_on_demand_solana-keypair.json"
   );
+  const PID = sb.SB_ON_DEMAND_PID;
   const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
-  const provider = new anchor.AnchorProvider(connection, wallet, {});
   const idl = (await anchor.Program.fetchIdl(PID, provider))!;
   const program = new anchor.Program(idl, PID, provider);
   const feedKp = Keypair.generate();
@@ -112,7 +111,7 @@ async function myAnchorProgram(
   await connection.confirmTransaction(sig);
   console.log("Feed initialized: ", sig);
 
-  const myProgram = await myAnchorProgram(provider);
+  const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   while (true) {
     try {
       const tx = await InstructionUtils.asV0Tx(program, [

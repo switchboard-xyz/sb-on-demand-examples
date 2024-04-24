@@ -24,3 +24,5 @@ Once deployed, you can run the demo script included here to test populating the 
 pnpm i
 ts-node scripts/pull.ts
 ```
+
+For documenation on how Switchboard On-Demand works click [here](https://switchboardxyz.gitbook.io/switchboard-on-demand)!

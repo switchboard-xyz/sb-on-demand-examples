@@ -18,18 +18,8 @@ Example repositories for switchboard's latest on-demand functionality.
 
 This repository serves as a monorepo example for Switchboard On-Demand, showcasing the following key features:
 
-- **On-Demand Feeds**
-- **On-Demand Randomness**
-- **On-Demand Secrets**
+- **[On-Demand Feeds](https://github.com/switchboard-xyz/sb-on-demand-examples/tree/main/sb-on-demand-solana)**
+- **[On-Demand Randomness](https://github.com/switchboard-xyz/sb-on-demand-examples/tree/main/sb-randomness-on-demand)**
+- **[On-Demand Secrets](https://github.com/switchboard-xyz/sb-on-demand-examples/tree/main/sb-secrets-on-demand)**
 
 These components are essential for testing and demonstrating the capabilities of the Switchboard On-Demand solution within the Solana ecosystem.
-
-## Getting Started with Testing
-
-To start testing on-demand feeds, follow these steps:
-
-```bash
-cd sb-on-demand-solana/
-pnpm i
-ts-node src/pull.ts
-```

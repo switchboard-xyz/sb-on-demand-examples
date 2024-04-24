@@ -5,7 +5,6 @@ import {
   Keypair,
   Transaction,
   SystemProgram,
-  MessageV0,
   VersionedTransaction,
 } from "@solana/web3.js";
 import {
@@ -16,13 +15,8 @@ import {
   SB_ON_DEMAND_PID,
   sleep,
 } from "@switchboard-xyz/on-demand";
-import { getKeypairFromEnvironment } from "@solana-developers/helpers";
-import { AnchorWallet } from "@switchboard-xyz/solana.js";
 import dotenv from "dotenv";
-import resolve from "resolve-dir";
-import { exec } from "child_process";
 import * as fs from "fs";
-import * as shell from "shelljs";
 import reader from "readline-sync";
 
 const PLAYER_STATE_SEED = "playerState";
@@ -223,7 +217,7 @@ async function myAnchorProgram(
   // Add the settle flip instruction to
   transaction2.add(revealIx!, settleFlipIx);
   const sig = await provider.sendAndConfirm(transaction2, [payer], {
-    commitment: "confirmed",
+    commitment: COMMITMENT,
   });
   console.log(
     "\n💫 With bated breath, we watched as the oracle unveiled our destiny: 💫"

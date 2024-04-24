@@ -180,7 +180,7 @@ async function myAnchorProgram(
     "\n✨ As the cosmic dust settles, our fate is now irrevocably bound to the whims of the universe. The Commitment Ceremony is complete. ✨"
   );
   console.log(`Transaction Signature: ${sig2}`);
-  // await sleep(5000); // Pause for effect..
+  await sleep(5000); // Pause for effect..
 
   console.log("\n🔮 Step 4: Unveiling Destiny with The Grand Reveal 🔮");
   await pauseForEffect(

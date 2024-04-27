@@ -26,36 +26,55 @@ export async function myAnchorProgram(
   return program;
 }
 
-export function buildBinanceComJob(pair: String): OracleJob {
-  const tasks = [
-    OracleJob.Task.create({
-      httpTask: OracleJob.HttpTask.create({
-        url: `https://www.binance.com/api/v3/ticker/price?symbol=${pair}`,
-      }),
-    }),
-    OracleJob.Task.create({
-      jsonParseTask: OracleJob.JsonParseTask.create({ path: "$.price" }),
-    }),
-  ];
-  return OracleJob.create({ tasks });
+export function buildBinanceComJob(pair: string): OracleJob {
+  const jobConfig = {
+    tasks: [
+      {
+        httpTask: {
+          url: `https://www.binance.com/api/v3/ticker/price`,
+        },
+      },
+      {
+        jsonParseTask: {
+          path: '$[?(@.symbol == "BTCUSDC")].price',
+        },
+      },
+    ],
+  };
+  return OracleJob.fromObject(jobConfig);
 }
 
-export function buildCoinbaseJob(pair: String): OracleJob {
-  const tasks = [
-    OracleJob.Task.create({
-      httpTask: OracleJob.HttpTask.create({
-        url: `https://api.pro.coinbase.com/products/${pair}/ticker`,
-        headers: [
-          { key: "Accept", value: "application/json" },
-          { key: "User-Agent", value: "Mozilla/5.0" },
-        ],
-      }),
-    }),
-    OracleJob.Task.create({
-      jsonParseTask: OracleJob.JsonParseTask.create({ path: "$.price" }),
-    }),
-  ];
-  return OracleJob.create({ tasks });
+export function buildCoinbaseJob(token: String): OracleJob {
+  const jobConfig = {
+    tasks: [
+      {
+        valueTask: { value: 1 },
+      },
+      {
+        divideTask: {
+          job: {
+            tasks: [
+              {
+                httpTask: {
+                  url: `https://api.coinbase.com/v2/exchange-rates?currency=USD`,
+                  headers: [
+                    { key: "Accept", value: "application/json" },
+                    { key: "User-Agent", value: "Mozilla/5.0" },
+                  ],
+                },
+              },
+              {
+                jsonParseTask: {
+                  path: `$.data.rates.${token}`,
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+  };
+  return OracleJob.fromObject(jobConfig);
 }
 
 export async function sendAndConfirmTx(

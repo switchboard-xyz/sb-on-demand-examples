@@ -59,7 +59,7 @@ import {
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
-    jobs: [buildCoinbaseJob("BTC-USD")],
+    jobs: [buildCoinbaseJob("BTC")],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow

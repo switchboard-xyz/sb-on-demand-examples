@@ -31,12 +31,12 @@ export function buildBinanceComJob(pair: string): OracleJob {
     tasks: [
       {
         httpTask: {
-          url: `https://www.binance.com/api/v3/ticker/price`,
+          url: `https://www.binance.com/api/v3/ticker/price?symbol=${pair}`,
         },
       },
       {
         jsonParseTask: {
-          path: '$[?(@.symbol == "BTCUSDC")].price',
+          path: "$.price",
         },
       },
     ],

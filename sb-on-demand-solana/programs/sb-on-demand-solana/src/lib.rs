@@ -3,6 +3,16 @@ use switchboard_on_demand::on_demand::accounts::pull_feed::PullFeedAccountData;
 
 declare_id!("2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5");
 
+fn fmt(s: &str) -> String {
+    if s.len() < 18 {
+        // Handle error or return the original string if it's less than 18 characters
+        return s.to_string();
+    }
+    let split_index = s.len() - 18;
+    let (first_part, last_part) = s.split_at(split_index);
+    format!("{}.{}", first_part, last_part)
+}
+
 #[program]
 pub mod sb_on_demand_solana {
     use super::*;
@@ -14,7 +24,7 @@ pub mod sb_on_demand_solana {
             .map_err(|_e| ProgramError::Custom(1))?;
         let price = feed.get_value(&Clock::get()?, 30, 1, true)
             .map_err(|_e| ProgramError::Custom(2))?;
-        msg!("price: {:?}", price.mantissa());
+        msg!("price: {:?}", fmt(&price.mantissa().to_string()));
         Ok(())
     }
 }

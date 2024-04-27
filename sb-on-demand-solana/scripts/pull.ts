@@ -34,14 +34,6 @@ import {
 } from "@switchboard-xyz/on-demand";
 import { myAnchorProgram, buildCoinbaseJob, buildBinanceComJob } from "./utils";
 
-async function feedUpdateCallback([slot_, resp]: any[]): Promise<void> {
-  const slot = new BN(slot_ - 100);
-  const currentValue = sb.toFeedValue(resp.submissions, slot)?.value;
-  const vals = resp.submissions;
-  const max = vals.reduce((max, sub) => Math.max(max, +sub.slot), 0);
-  console.log(`Current value: ${currentValue} at slot ${max}`);
-}
-
 (async function main() {
   // Devnet default queue
   const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
@@ -52,22 +44,17 @@ async function feedUpdateCallback([slot_, resp]: any[]): Promise<void> {
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   // Generate the feed keypair
   const [pullFeed, feedKp] = PullFeed.generate(program);
-  // Gets all feed updates
-  const subscriptionId = await PullFeed.subscribeToAllUpdates(
-    program,
-    feedUpdateCallback
-  );
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
   };
   const conf = {
     // the feed name (max 32 bytes)
-    name: "PYUSD-USD",
+    name: "BTC-USD",
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
-    jobs: [buildCoinbaseJob("PYUSD-USD")],
+    jobs: [buildCoinbaseJob("BTC-USD")],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow
@@ -95,11 +82,11 @@ async function feedUpdateCallback([slot_, resp]: any[]): Promise<void> {
     ]);
     tx.sign([keypair]);
     const sim = await connection.simulateTransaction(tx, txOpts);
-    const simLogs = sim.value.logs.filter(
-      (x) => x.includes("Program log:") && !x.includes("Instruction:")
-    );
+    const log = sim.value.logs.filter((x) => x.includes("price:"))[0];
+    const simPrice = +log.split(" ").at(-1).replace(/"/g, "");
     const sig = await connection.sendTransaction(tx, txOpts);
-    console.log(`Price update: ${simLogs}\n\t${sig}`);
+    console.log(`${conf.name} price update:`, simPrice);
+    console.log("\tTransaction sent: ", sig);
     await sleep(interval);
   }
 })();

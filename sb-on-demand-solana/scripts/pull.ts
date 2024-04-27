@@ -55,11 +55,11 @@ import {
   };
   const conf = {
     // the feed name (max 32 bytes)
-    name: "BTC-USD",
+    name: "PYUSD-USD",
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
-    jobs: [buildBinanceComJob("BTCUSDC"), buildCoinbaseJob("BTC")],
+    jobs: [buildCoinbaseJob("PYUSD")],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow

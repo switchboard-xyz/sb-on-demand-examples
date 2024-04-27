@@ -38,6 +38,16 @@ import {
   buildBinanceComJob,
   sendAndConfirmTx,
 } from "./utils";
+const yargs = require("yargs/yargs");
+
+let argv = yargs(process.argv).options({
+  feed: {
+    type: "string",
+    describe: "An existing feed to pull from",
+    demand: false,
+    default: undefined,
+  },
+}).argv;
 
 (async function main() {
   // Devnet default queue
@@ -48,7 +58,6 @@ import {
   const program = await AnchorUtils.loadProgramFromEnv();
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   // Generate the feed keypair
-  const [pullFeed, feedKp] = PullFeed.generate(program);
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
@@ -68,10 +77,17 @@ import {
     numSignatures: 1,
   };
 
-  // Initialize the feed
-  const tx = await pullFeed.initTx(program, conf);
-  const sig = await sendAndConfirmTx(connection, tx, [keypair, feedKp]);
-  console.log("Feed initialized: ", sig);
+  // Initialize the feed if needed
+  let pullFeed: PullFeed;
+  if (argv.feed === undefined) {
+    const [pullFeed_, feedKp] = PullFeed.generate(program);
+    const tx = await pullFeed_.initTx(program, conf);
+    const sig = await sendAndConfirmTx(connection, tx, [keypair, feedKp]);
+    console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
+    pullFeed = pullFeed_;
+  } else {
+    pullFeed = new PullFeed(program, new PublicKey(argv.feed));
+  }
 
   // Send a price update with a following user instruction every N seconds
   const interval = 1_000;
@@ -80,7 +96,7 @@ import {
       await pullFeed.solanaFetchUpdateIx(conf),
       await myProgram.methods
         .test()
-        .accounts({ feed: feedKp.publicKey })
+        .accounts({ feed: pullFeed.pubkey })
         .instruction(),
     ]);
     tx.sign([keypair]);

@@ -12,7 +12,8 @@
         "assert": "^2.1.0",
         "big.js": "^6.2.1",
         "bigint-buffer": "^1.1.5",
-        "bs58": "^5.0.0"
+        "bs58": "^5.0.0",
+        "yargs": "^17.7.2"
     },
     "devDependencies": {
         "@types/bn.js": "^5.1.0",

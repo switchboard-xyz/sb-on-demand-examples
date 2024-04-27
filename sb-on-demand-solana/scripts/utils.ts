@@ -1,7 +1,21 @@
 import { AnchorUtils } from "@switchboard-xyz/on-demand";
 import { OracleJob } from "@switchboard-xyz/common";
 import * as anchor from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
+import {
+  AddressLookupTableProgram,
+  Connection,
+  Keypair,
+  MessageV0,
+  PublicKey,
+  sendAndConfirmTransaction,
+  SystemProgram,
+  Transaction,
+  TransactionInstruction,
+  TransactionMessage,
+  VersionedTransaction,
+  Commitment,
+  TransactionSignature,
+} from "@solana/web3.js";
 
 export async function myAnchorProgram(
   provider: anchor.Provider,
@@ -42,4 +56,15 @@ export function buildCoinbaseJob(pair: String): OracleJob {
     }),
   ];
   return OracleJob.create({ tasks });
+}
+
+export async function sendAndConfirmTx(
+  connection: Connection,
+  tx: VersionedTransaction,
+  signers: Array<Keypair>
+): Promise<TransactionSignature> {
+  tx.sign(signers);
+  const sig = await connection.sendTransaction(tx);
+  await connection.confirmTransaction(sig, "confirmed");
+  return sig;
 }

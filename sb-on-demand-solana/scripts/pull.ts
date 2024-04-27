@@ -32,7 +32,12 @@ import {
   RecentSlotHashes,
   sleep,
 } from "@switchboard-xyz/on-demand";
-import { myAnchorProgram, buildCoinbaseJob, buildBinanceComJob } from "./utils";
+import {
+  myAnchorProgram,
+  buildCoinbaseJob,
+  buildBinanceComJob,
+  sendAndConfirmTx,
+} from "./utils";
 
 (async function main() {
   // Devnet default queue
@@ -65,9 +70,7 @@ import { myAnchorProgram, buildCoinbaseJob, buildBinanceComJob } from "./utils";
 
   // Initialize the feed
   const tx = await pullFeed.initTx(program, conf);
-  tx.sign([keypair, feedKp]);
-  const sig = await connection.sendTransaction(tx);
-  await connection.confirmTransaction(sig);
+  const sig = await sendAndConfirmTx(connection, tx, [keypair, feedKp]);
   console.log("Feed initialized: ", sig);
 
   // Send a price update with a following user instruction every N seconds
@@ -81,6 +84,7 @@ import { myAnchorProgram, buildCoinbaseJob, buildBinanceComJob } from "./utils";
         .instruction(),
     ]);
     tx.sign([keypair]);
+    // Simulate the transaction to get the price and send the tx
     const sim = await connection.simulateTransaction(tx, txOpts);
     const log = sim.value.logs.filter((x) => x.includes("price:"))[0];
     const simPrice = +log.split(" ").at(-1).replace(/"/g, "");

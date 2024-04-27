@@ -14,6 +14,7 @@ import {
   TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
+  Commitment,
 } from "@solana/web3.js";
 import * as bs58 from "bs58";
 import Big from "big.js";
@@ -31,74 +32,49 @@ import {
   RecentSlotHashes,
   sleep,
 } from "@switchboard-xyz/on-demand";
+import { myAnchorProgram, buildCoinbaseJob, buildBinanceComJob } from "./utils";
 
-let lastSlot: number = 0;
-async function feedUpdateCallback(x: any): Promise<void> {
-  const [slot_, resp] = x;
+async function feedUpdateCallback([slot_, resp]: any[]): Promise<void> {
   const slot = new BN(slot_ - 100);
-  const feed = resp.pubkey;
-  const currentValue = sb.toFeedValue(resp.submissions, slot);
-  if (currentValue === null) {
-    console.log("No value found");
-    return Promise.resolve<void>(undefined);
-  }
-  let maxSlot = 0;
-  for (const submission of resp.submissions) {
-    if (submission.slot.gt(maxSlot)) {
-      maxSlot = submission.slot.toNumber();
-    }
-  }
-  console.log(
-    `Current value: ${currentValue.value.toString()} at slot ${maxSlot}`
-  );
-  lastSlot = maxSlot;
-  return Promise.resolve<void>(undefined);
+  const currentValue = sb.toFeedValue(resp.submissions, slot)?.value;
+  const vals = resp.submissions;
+  const max = vals.reduce((max, sub) => Math.max(max, +sub.slot), 0);
+  console.log(`Current value: ${currentValue} at slot ${max}`);
 }
 
-function buildBinanceComJob(pair: String): OracleJob {
-  const tasks = [
-    OracleJob.Task.create({
-      httpTask: OracleJob.HttpTask.create({
-        url: `https://www.binance.com/api/v3/ticker/price?symbol=${pair}`,
-      }),
-    }),
-    OracleJob.Task.create({
-      jsonParseTask: OracleJob.JsonParseTask.create({ path: "$.price" }),
-    }),
-  ];
-  return OracleJob.create({ tasks });
-}
-
-export type FeedSubmission = { value: Big; slot: BN; oracle: PublicKey };
-
-async function myAnchorProgram(
-  provider: anchor.Provider,
-  myPid: PublicKey
-): Promise<anchor.Program> {
-  const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
-  const program = new anchor.Program(idl, myPid, provider);
-  return program;
-}
-
-(async () => {
-  const path = "../target/deploy/sb_on_demand_solana-keypair.json";
+(async function main() {
+  // Devnet default queue
   const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
+  const path = "../target/deploy/sb_on_demand_solana-keypair.json";
   const [_, myProgramKeypair] = await AnchorUtils.initWalletFromFile(path);
   const { keypair, connection, provider } = await AnchorUtils.loadEnv();
   const program = await AnchorUtils.loadProgramFromEnv();
+  const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
+  // Generate the feed keypair
   const [pullFeed, feedKp] = PullFeed.generate(program);
+  // Gets all feed updates
   const subscriptionId = await PullFeed.subscribeToAllUpdates(
     program,
     feedUpdateCallback
   );
-  const conf: any = {
+  const txOpts = {
+    commitment: "processed" as Commitment,
+    skipPreflight: true,
+  };
+  const conf = {
+    // the feed name (max 32 bytes)
+    name: "PYUSD-USD",
+    // the queue of oracles to bind to
     queue,
-    jobs: [buildBinanceComJob("BTCUSDT")],
+    // the jobs for the feed to perform
+    jobs: [buildCoinbaseJob("PYUSD-USD")],
+    // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
+    // minimum number of responses of jobs to allow
     minResponses: 1,
+    // number of signatures to fetch per update
     numSignatures: 1,
   };
-  conf.feedHash = await Queue.fetchFeedHash(program, conf);
 
   // Initialize the feed
   const tx = await pullFeed.initTx(program, conf);
@@ -107,35 +83,23 @@ async function myAnchorProgram(
   await connection.confirmTransaction(sig);
   console.log("Feed initialized: ", sig);
 
-  // Send a price update every 5 seconds
-  const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
+  // Send a price update with a following user instruction every N seconds
+  const interval = 1_000;
   while (true) {
-    try {
-      const tx = await InstructionUtils.asV0Tx(program, [
-        await pullFeed.solanaFetchUpdateIx(conf),
-        await myProgram.methods
-          .test()
-          .accounts({ feed: feedKp.publicKey })
-          .instruction(),
-      ]);
-      tx.sign([keypair]);
-      const sim = await connection.simulateTransaction(tx, {
-        commitment: "processed",
-      });
-      console.log(
-        "Simulated update: ",
-        sim.value.logs.filter(
-          (x) => x.includes("Program log:") && !x.includes("Instruction:")
-        )
-      );
-      const sig = await connection.sendTransaction(tx, {
-        skipPreflight: true,
-      });
-      console.log("Sent update signature: ", sig);
-    } catch (e) {
-      console.log(e);
-    }
-    await sleep(5_000);
+    const tx = await InstructionUtils.asV0Tx(program, [
+      await pullFeed.solanaFetchUpdateIx(conf),
+      await myProgram.methods
+        .test()
+        .accounts({ feed: feedKp.publicKey })
+        .instruction(),
+    ]);
+    tx.sign([keypair]);
+    const sim = await connection.simulateTransaction(tx, txOpts);
+    const simLogs = sim.value.logs.filter(
+      (x) => x.includes("Program log:") && !x.includes("Instruction:")
+    );
+    const sig = await connection.sendTransaction(tx, txOpts);
+    console.log(`Price update: ${simLogs}\n\t${sig}`);
+    await sleep(interval);
   }
-  return;
 })();

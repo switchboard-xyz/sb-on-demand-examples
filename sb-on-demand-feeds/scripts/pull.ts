@@ -66,7 +66,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Send a price update with a following user instruction every N seconds
   const interval = 500; // ms
   while (true) {
-    // Fetch the price update instruction
+    // Fetch the price update instruction and report the selected oracles
     const [priceUpdateIx, oracles] = await pullFeed.fetchUpdateIx(conf);
 
     // Load the lookup tables

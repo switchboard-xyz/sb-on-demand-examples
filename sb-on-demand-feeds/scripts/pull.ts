@@ -48,7 +48,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     // minimum number of responses of jobs to allow
     minResponses: 1,
     // number of signatures to fetch per update
-    numSignatures: 3,
+    numSignatures: 2,
   };
 
   // Initialize the feed if needed

@@ -19,6 +19,10 @@ let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
 }).argv;
 
+async function myProgramIx(feed: PublicKey) {
+  return await myProgram.methods.test().accounts({ feed }).instruction();
+}
+
 (async function main() {
   // Devnet default queue
   const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
@@ -64,10 +68,7 @@ let argv = yargs(process.argv).options({
   while (true) {
     const tx = await InstructionUtils.asV0Tx(program, [
       await pullFeed.solanaFetchUpdateIx(conf),
-      await myProgram.methods
-        .test()
-        .accounts({ feed: pullFeed.pubkey })
-        .instruction(),
+      await myProgramIx(pullFeed.pubkey),
     ]);
     tx.sign([keypair]);
     // Simulate the transaction to get the price and send the tx

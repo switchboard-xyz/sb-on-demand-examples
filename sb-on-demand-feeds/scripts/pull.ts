@@ -57,7 +57,6 @@ let argv = yargs(process.argv).options({
   const { keypair, connection, provider } = await AnchorUtils.loadEnv();
   const program = await AnchorUtils.loadProgramFromEnv();
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
-  // Generate the feed keypair
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
@@ -80,6 +79,7 @@ let argv = yargs(process.argv).options({
   // Initialize the feed if needed
   let pullFeed: PullFeed;
   if (argv.feed === undefined) {
+    // Generate the feed keypair
     const [pullFeed_, feedKp] = PullFeed.generate(program);
     const tx = await pullFeed_.initTx(program, conf);
     const sig = await sendAndConfirmTx(connection, tx, [keypair, feedKp]);

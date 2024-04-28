@@ -1,35 +1,10 @@
-import * as anchor from "@coral-xyz/anchor";
-import { BN, Wallet } from "@coral-xyz/anchor";
-import * as spl from "@solana/spl-token";
-import type { AccountInfo, AccountMeta } from "@solana/web3.js";
-import {
-  AddressLookupTableProgram,
-  Connection,
-  Keypair,
-  MessageV0,
-  PublicKey,
-  sendAndConfirmTransaction,
-  SystemProgram,
-  Transaction,
-  TransactionInstruction,
-  TransactionMessage,
-  VersionedTransaction,
-  Commitment,
-} from "@solana/web3.js";
-import * as bs58 from "bs58";
-import Big from "big.js";
-import { OracleJob } from "@switchboard-xyz/common";
-import { toBufferLE } from "bigint-buffer";
-import * as crypto from "crypto";
-import * as fs from "fs";
-const assert = require("assert");
+import { Connection, Keypair, PublicKey, Commitment } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import {
   AnchorUtils,
   InstructionUtils,
   PullFeed,
   Queue,
-  RecentSlotHashes,
   sleep,
 } from "@switchboard-xyz/on-demand";
 import {
@@ -38,15 +13,10 @@ import {
   buildBinanceComJob,
   sendAndConfirmTx,
 } from "./utils";
-const yargs = require("yargs/yargs");
+import yargs from "yargs";
 
 let argv = yargs(process.argv).options({
-  feed: {
-    type: "string",
-    describe: "An existing feed to pull from",
-    demand: false,
-    default: undefined,
-  },
+  feed: { type: "string", describe: "An existing feed to pull from" },
 }).argv;
 
 (async function main() {

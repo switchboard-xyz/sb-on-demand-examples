@@ -1,19 +1,10 @@
-import { AnchorUtils } from "@switchboard-xyz/on-demand";
 import { OracleJob } from "@switchboard-xyz/common";
 import * as anchor from "@coral-xyz/anchor";
 import {
-  AddressLookupTableProgram,
   Connection,
   Keypair,
-  MessageV0,
   PublicKey,
-  sendAndConfirmTransaction,
-  SystemProgram,
-  Transaction,
-  TransactionInstruction,
-  TransactionMessage,
   VersionedTransaction,
-  Commitment,
   TransactionSignature,
 } from "@solana/web3.js";
 

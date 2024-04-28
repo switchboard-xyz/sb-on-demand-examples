@@ -64,11 +64,11 @@ let argv = yargs(process.argv).options({
   };
   const conf = {
     // the feed name (max 32 bytes)
-    name: "PYUSD-USD",
+    name: "BTC-USD (stables)",
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
-    jobs: [buildCoinbaseJob("PYUSD")],
+    jobs: [buildBinanceComJob("BTCUSDC")], //, buildCoinbaseJob("BTC-USD")],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow

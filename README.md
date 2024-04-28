@@ -18,7 +18,7 @@ Example repositories for switchboard's latest on-demand functionality.
 
 This repository serves as a monorepo example for Switchboard On-Demand, showcasing the following key features:
 
-- **[On-Demand Feeds](https://github.com/switchboard-xyz/sb-on-demand-examples/tree/main/sb-on-demand-solana)**
+- **[On-Demand Feeds](https://github.com/switchboard-xyz/sb-on-demand-examples/tree/main/sb-on-demand-feeds)**
 - **[On-Demand Randomness](https://github.com/switchboard-xyz/sb-on-demand-examples/tree/main/sb-randomness-on-demand)**
 - **[On-Demand Secrets- WIP](https://github.com/switchboard-xyz/sb-on-demand-examples/tree/main/sb-secrets-on-demand)**
 

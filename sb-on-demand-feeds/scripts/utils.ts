@@ -31,12 +31,12 @@ export function buildBinanceComJob(pair: string): OracleJob {
     tasks: [
       {
         httpTask: {
-          url: `https://www.binance.com/api/v3/ticker/price?symbol=${pair}`,
+          url: `https://www.binance.com/api/v3/ticker/price`,
         },
       },
       {
         jsonParseTask: {
-          path: "$.price",
+          path: `$[?(@.symbol == '${pair}')].price`,
         },
       },
     ],
@@ -44,7 +44,8 @@ export function buildBinanceComJob(pair: string): OracleJob {
   return OracleJob.fromObject(jobConfig);
 }
 
-export function buildCoinbaseJob(token: String): OracleJob {
+export function buildCoinbaseJob(pair: String): OracleJob {
+  const parts = pair.split("-");
   const jobConfig = {
     tasks: [
       {
@@ -56,7 +57,7 @@ export function buildCoinbaseJob(token: String): OracleJob {
             tasks: [
               {
                 httpTask: {
-                  url: `https://api.coinbase.com/v2/exchange-rates?currency=USD`,
+                  url: `https://api.coinbase.com/v2/exchange-rates?currency=${parts[1]}`,
                   headers: [
                     { key: "Accept", value: "application/json" },
                     { key: "User-Agent", value: "Mozilla/5.0" },
@@ -65,7 +66,7 @@ export function buildCoinbaseJob(token: String): OracleJob {
               },
               {
                 jsonParseTask: {
-                  path: `$.data.rates.${token}`,
+                  path: `$.data.rates.${parts[0]}`,
                 },
               },
             ],

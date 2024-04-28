@@ -25,12 +25,11 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 }
 
 (async function main() {
-  // Devnet default queue
+  // Devnet default queue (cli configs must be set to devnet)
+  const { keypair, connection, provider, program } = await AnchorUtils.loadEnv();
   const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
   const path = "../target/deploy/sb_on_demand_solana-keypair.json";
-  const [_, myProgramKeypair] = await AnchorUtils.initWalletFromFile(path);
-  const { keypair, connection, provider } = await AnchorUtils.loadEnv();
-  const program = await AnchorUtils.loadProgramFromEnv();
+  const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   const txOpts = {
     commitment: "processed" as Commitment,

@@ -14,13 +14,14 @@ import {
   sendAndConfirmTx,
 } from "./utils";
 import yargs from "yargs";
+import * as anchor from "@coral-xyz/anchor";
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
 }).argv;
 
-async function myProgramIx(feed: PublicKey) {
-  return await myProgram.methods.test().accounts({ feed }).instruction();
+async function myProgramIx(program: anchor.Program, feed: PublicKey) {
+  return await program.methods.test().accounts({ feed }).instruction();
 }
 
 (async function main() {
@@ -66,16 +67,19 @@ async function myProgramIx(feed: PublicKey) {
   // Send a price update with a following user instruction every N seconds
   const interval = 1_000;
   while (true) {
+    // Construct the transaction
     const tx = await InstructionUtils.asV0Tx(program, [
       await pullFeed.solanaFetchUpdateIx(conf),
-      await myProgramIx(pullFeed.pubkey),
+      await myProgramIx(myProgram, pullFeed.pubkey),
     ]);
     tx.sign([keypair]);
+
     // Simulate the transaction to get the price and send the tx
     const sim = await connection.simulateTransaction(tx, txOpts);
-    const log = sim.value.logs.filter((x) => x.includes("price:"))[0];
-    const simPrice = +log.split(" ").at(-1).replace(/"/g, "");
     const sig = await connection.sendTransaction(tx, txOpts);
+
+    // Parse the tx logs to get the price on chain
+    const simPrice = +sim.value.logs.join().match(/price:\s*"(\d+(\.\d+)?)/)[1];
     console.log(`${conf.name} price update:`, simPrice);
     console.log("\tTransaction sent: ", sig);
     await sleep(interval);

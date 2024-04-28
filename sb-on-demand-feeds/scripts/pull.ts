@@ -42,13 +42,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
-    jobs: [buildBinanceComJob("BTCUSDC")], //, buildCoinbaseJob("BTC-USD")],
+    jobs: [buildBinanceComJob("BTCUSDC"), buildCoinbaseJob("BTC-USD")],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow
     minResponses: 1,
     // number of signatures to fetch per update
-    numSignatures: 1,
+    numSignatures: 3,
   };
 
   // Initialize the feed if needed
@@ -65,13 +65,21 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   }
 
   // Send a price update with a following user instruction every N seconds
-  const interval = 1_000;
+  const interval = 500; // ms
   while (true) {
+    // Fetch the price update instruction
+    const [priceUpdateIx, oracles] = await pullFeed.fetchUpdateIx(conf);
+
+    // Load the lookup tables
+    const luts = oracles.map((x) => x.loadLookupTable());
+    luts.push(pullFeed.loadLookupTable());
+
     // Construct the transaction
-    const tx = await InstructionUtils.asV0Tx(program, [
-      await pullFeed.solanaFetchUpdateIx(conf),
-      await myProgramIx(myProgram, pullFeed.pubkey),
-    ]);
+    const tx = await InstructionUtils.asV0Tx(
+      program,
+      [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
+      await Promise.all(luts)
+    );
     tx.sign([keypair]);
 
     // Simulate the transaction to get the price and send the tx

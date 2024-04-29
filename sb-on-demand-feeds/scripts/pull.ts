@@ -47,15 +47,15 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   };
   const conf = {
     // the feed name (max 32 bytes)
-    name: "BTC Pythnet Price Feed",
+    name: "BTC Price Feed",
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
     jobs: [
       buildPythnetJob(
-        "0x418f26cfa5ce283bc2bcb04fafeb83764db848154756cf80a35b36a5d92cc4d80a"
+        "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
       ),
-      // buildSanctumFairPriceJob("jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v"),
+      buildCoinbaseJob("BTC-USD"),
     ],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
@@ -79,7 +79,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   }
 
   // Send a price update with a following user instruction every N seconds
-  const interval = 500; // ms
+  const interval = 1000; // ms
   while (true) {
     // Fetch the price update instruction and report the selected oracles
     const [priceUpdateIx, oracles] = await pullFeed.fetchUpdateIx(conf);

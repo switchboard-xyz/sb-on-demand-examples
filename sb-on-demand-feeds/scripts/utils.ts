@@ -17,6 +17,19 @@ export async function myAnchorProgram(
   return program;
 }
 
+export function buildSanctumFairPriceJob(lstMint: string): OracleJob {
+  const jobConfig = {
+    tasks: [
+      {
+        sanctumLstPriceTask: {
+          lstMint,
+        },
+      },
+    ],
+  };
+  return OracleJob.fromObject(jobConfig);
+}
+
 export function buildBinanceComJob(pair: string): OracleJob {
   const jobConfig = {
     tasks: [

@@ -12,6 +12,7 @@ import {
   buildCoinbaseJob,
   buildBinanceComJob,
   buildSanctumFairPriceJob,
+  buildPythnetJob,
   sendAndConfirmTx,
 } from "./utils";
 import yargs from "yargs";
@@ -46,12 +47,15 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   };
   const conf = {
     // the feed name (max 32 bytes)
-    name: "JupSol Fair Price",
+    name: "BTC Pythnet Price Feed",
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
     jobs: [
-      buildSanctumFairPriceJob("jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v"),
+      buildPythnetJob(
+        "0x418f26cfa5ce283bc2bcb04fafeb83764db848154756cf80a35b36a5d92cc4d80a"
+      ),
+      // buildSanctumFairPriceJob("jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v"),
     ],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,

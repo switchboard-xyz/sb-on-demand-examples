@@ -17,6 +17,20 @@ export async function myAnchorProgram(
   return program;
 }
 
+export function buildPythnetJob(pythFeed: string): OracleJob {
+  const jobConfig = OracleJob.create({
+    tasks: [
+      OracleJob.Task.create({
+        oracleTask: OracleJob.OracleTask.create({
+          pythAllowedConfidenceInterval: 1.0,
+          pythAddress: pythFeed,
+        }),
+      }),
+    ],
+  });
+  return jobConfig;
+}
+
 export function buildSanctumFairPriceJob(lstMint: string): OracleJob {
   const jobConfig = OracleJob.fromObject({
     tasks: [

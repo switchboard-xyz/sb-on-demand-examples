@@ -11,6 +11,7 @@ import {
   myAnchorProgram,
   buildCoinbaseJob,
   buildBinanceComJob,
+  buildSanctumFairPriceJob,
   sendAndConfirmTx,
 } from "./utils";
 import yargs from "yargs";
@@ -45,17 +46,19 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   };
   const conf = {
     // the feed name (max 32 bytes)
-    name: "BTC-USD (stables)",
+    name: "JupSol Fair Price",
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
-    jobs: [buildBinanceComJob("BTCUSDC"), buildCoinbaseJob("BTC-USD")],
+    jobs: [
+      buildSanctumFairPriceJob("jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v"),
+    ],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow
     minResponses: 1,
     // number of signatures to fetch per update
-    numSignatures: 2,
+    numSignatures: 3,
   };
 
   // Initialize the feed if needed

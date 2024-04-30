@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.3.22
     version: 2.3.22
   '@switchboard-xyz/on-demand':
-    specifier: ^1.0.49
-    version: 1.0.49(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.0.50
+    version: 1.0.50(fastestsmallesttextencoderdecoder@1.0.22)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -405,8 +405,8 @@ packages:
       yaml: 2.4.2
     dev: false
 
-  /@switchboard-xyz/on-demand@1.0.49(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-1PpG1nzJP9N52T6G5WS83zNXAM3ynwlw+y6W94qkcChu94cVOlc7B/fggpE6jhpw5Y2sBg/WuHtMSwZ/IFEC2Q==}
+  /@switchboard-xyz/on-demand@1.0.50(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-GgjKibw7Uhqxk3CTb5uMVfJ16ffoGJv+T1xxlEAnRBabtNhJ3A/ReLOf/t3mSbVxFWqe30Fw56cDX5b6rT0K1g==}
     dependencies:
       '@coral-xyz/anchor': 0.29.0
       '@solana/spl-token': 0.4.3(@solana/web3.js@1.91.1)(fastestsmallesttextencoderdecoder@1.0.22)
@@ -439,7 +439,7 @@ packages:
       cross-fetch: 4.0.0
       dotenv: 16.4.5
       lodash: 4.17.21
-      zod: 3.23.4
+      zod: 3.23.5
       zod-error: 1.5.0
     transitivePeerDependencies:
       - bufferutil
@@ -1892,9 +1892,9 @@ packages:
   /zod-error@1.5.0:
     resolution: {integrity: sha512-zzopKZ/skI9iXpqCEPj+iLCKl9b88E43ehcU+sbRoHuwGd9F1IDVGQ70TyO6kmfiRL1g4IXkjsXK+g1gLYl4WQ==}
     dependencies:
-      zod: 3.23.4
+      zod: 3.23.5
     dev: false
 
-  /zod@3.23.4:
-    resolution: {integrity: sha512-/AtWOKbBgjzEYYQRNfoGKHObgfAZag6qUJX1VbHo2PRBgS+wfWagEY2mizjfyAPcGesrJOcx/wcl0L9WnVrHFw==}
+  /zod@3.23.5:
+    resolution: {integrity: sha512-fkwiq0VIQTksNNA131rDOsVJcns0pfVUjHzLrNBiF/O/Xxb5lQyEXkhZWcJ7npWsYlvs+h0jFWXXy4X46Em1JA==}
     dev: false

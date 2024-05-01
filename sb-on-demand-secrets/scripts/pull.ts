@@ -50,9 +50,11 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     skipPreflight: true,
   };
 
-  const secretName = "OPEN_WEATHER_API_KEY";
+  const secretNameTask = "${OPEN_WEATHER_API_KEY}";
+  const secretNameDB = "OPEN_WEATHER_API_KEY";
   const API_KEY = process.env.OPEN_WEATHER_API_KEY;
   const secretValue = API_KEY ?? "API_KEY_NOT_FOUND";
+
   const conf = {
     // the feed name (max 32 bytes)
     name: "Test Secret",
@@ -65,12 +67,12 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
         {
           secretsTask: {
             authority: keypair.publicKey.toBase58(),
-            url: "https://api.secrets.switchboard.xyz"
+            //url: "https://api.secrets.switchboard.xyz"
           }
         },
         {
           httpTask: {
-            url: `https://api.openweathermap.org/data/2.5/weather?q=aspen,us&appid=${secretName}&units=metric`,
+            url: `https://api.openweathermap.org/data/2.5/weather?q=aspen,us&appid=${secretNameTask}&units=metric`,
           }
         },
         {
@@ -134,16 +136,16 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 
   const userSecrets = await sbSecrets.getUserSecrets(wallet.publicKey.toBase58(), "ed25519");
   console.log("User Secrets", userSecrets)
-  const existingSecret = userSecrets.find(secret => secret.secret_name === secretName);
+  const existingSecret = userSecrets.find(secret => secret.secret_name === secretNameDB);
 
   if (existingSecret) {
-    console.log(`Secret '${secretName}' already exists. No need to create.`);
+    console.log(`Secret '${secretNameDB}' already exists. No need to create.`);
   } else {
-    console.log(`Secret '${secretName}' not found. Creating now...`);
+    console.log(`Secret '${secretNameDB}' not found. Creating now...`);
     const secretRequest = sbSecrets.createSecretRequest(
       wallet.publicKey.toBase58(),
       "ed25519",
-      secretName,
+      secretNameDB,
       secretValue
     );
     const secretSignature = nacl.sign.detached(
@@ -167,7 +169,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   console.log("Feed Hash", feed_hash.toString("hex"));
 
   // now add feed hash to the whitelist of the secret
-  const addwhitelist = await sbSecrets.createAddMrEnclaveRequest(wallet.payer.publicKey.toBase58(), "ed25519", feed_hash.toString('hex'), [secretName]);
+  const addwhitelist = await sbSecrets.createAddMrEnclaveRequest(wallet.payer.publicKey.toBase58(), "ed25519", feed_hash.toString('hex'), [secretNameDB]);
   const whitelistSignature = nacl.sign.detached(
     new Uint8Array(addwhitelist.toEncodedMessage()),
     wallet.payer.secretKey

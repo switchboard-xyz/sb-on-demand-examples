@@ -92,3 +92,4 @@ export async function sendAndConfirmTx(
   await connection.confirmTransaction(sig, "confirmed");
   return sig;
 }
+

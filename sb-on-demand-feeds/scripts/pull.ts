@@ -53,9 +53,9 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     // the jobs for the feed to perform
     jobs: [
       buildPythnetJob(
-        "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
+        "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43xx"
       ),
-      buildCoinbaseJob("BTC-USD"),
+      buildCoinbaseJob("BTCxx-USD"),
     ],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
@@ -82,7 +82,14 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   const interval = 1000; // ms
   while (true) {
     // Fetch the price update instruction and report the selected oracles
-    const [priceUpdateIx, oracles] = await pullFeed.fetchUpdateIx(conf);
+    const [priceUpdateIx, oracles, values, errs] = await pullFeed.fetchUpdateIx(
+      conf
+    );
+    if (values.length === 0) {
+      console.log("No price update available");
+      console.log("\tErrors:", errs);
+      return;
+    }
 
     // Load the lookup tables
     const luts = oracles.map((x) => x.loadLookupTable());

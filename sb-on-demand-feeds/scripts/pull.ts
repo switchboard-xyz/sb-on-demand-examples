@@ -82,17 +82,19 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   const interval = 1000; // ms
   while (true) {
     // Fetch the price update instruction and report the selected oracles
-    const [priceUpdateIx, oracles, values, errs] = await pullFeed.fetchUpdateIx(
-      conf
-    );
-    if (values.length === 0) {
+    const [priceUpdateIx, oracleResponses, numSuccess] =
+      await pullFeed.fetchUpdateIx(conf);
+    if (numSuccess === 0) {
       console.log("No price update available");
-      console.log("\tErrors:", errs);
+      console.log(
+        "\tErrors:",
+        oracleResponses.map((x) => x.error)
+      );
       return;
     }
 
     // Load the lookup tables
-    const luts = oracles.map((x) => x.loadLookupTable());
+    const luts = oracleResponses.map((x) => x.oracle.loadLookupTable());
     luts.push(pullFeed.loadLookupTable());
 
     // Construct the transaction

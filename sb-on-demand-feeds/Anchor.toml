@@ -9,4 +9,4 @@ url = "https://api.apr.dev"
 
 [provider]
 cluster = "Devnet"
-wallet = "/Users/mgild/.config/solana/id.json"
+wallet = "~/.config/solana/id.json"

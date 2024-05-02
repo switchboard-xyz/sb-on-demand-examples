@@ -38,7 +38,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     console.error("Queue not found, ensure you are using devnet in your env");
     return;
   }
-  const path = "../target/deploy/sb_on_demand_solana-keypair.json";
+  const path = "target/deploy/sb_on_demand_solana-keypair.json";
   const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   const txOpts = {

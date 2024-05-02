@@ -53,9 +53,9 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     // the jobs for the feed to perform
     jobs: [
       buildPythnetJob(
-        "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43xx"
+        "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
       ),
-      buildCoinbaseJob("BTCxx-USD"),
+      buildCoinbaseJob("BTC-USD"),
     ],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,

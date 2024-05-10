@@ -110,9 +110,14 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     const sig = await connection.sendTransaction(tx, txOpts);
 
     // Parse the tx logs to get the price on chain
-    const simPrice = +sim.value.logs.join().match(/price:\s*"(\d+(\.\d+)?)/)[1];
-    console.log(`${conf.name} price update:`, simPrice);
-    console.log("\tTransaction sent: ", sig);
+    const logs = sim.value.logs.join();
+    try {
+      const simPrice = +logs.match(/price:\s*"(\d+(\.\d+)?)/)[1];
+      console.log(`${conf.name} price update:`, simPrice);
+      console.log("\tTransaction sent: ", sig);
+    } catch (err) {
+      console.error("Failed to parse logs for price:", logs);
+    }
     await sleep(interval);
   }
 })();

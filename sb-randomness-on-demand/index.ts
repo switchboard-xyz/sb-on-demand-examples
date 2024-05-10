@@ -37,6 +37,9 @@ async function myAnchorProgram(
   console.clear();
   const { keypair, connection, provider, wallet } = await AnchorUtils.loadEnv();
   console.log(
+    "NOTE: this example requires your solana cli config to be set to devnet"
+  );
+  console.log(
     "🚀 Welcome, brave soul, to the Cosmic Coin Flip Challenge! 🚀\n"
   );
   if (fileExists("serializedIx.bin")) {
@@ -151,7 +154,20 @@ async function myAnchorProgram(
 
   const transaction1 = new Transaction();
   // Commit transaction
-  const commitIx = await randomness.commitIx(sbQueue);
+  let commitIx;
+  try {
+    commitIx = await randomness.commitIx(sbQueue);
+  } catch (error) {
+    try {
+      await queueAccount.fetchFreshOracle();
+    } catch (error) {
+      console.error(
+        "Failed to find an open oracle. Please check our docs to ensure queue ${sbQueue} is an active queue."
+      );
+      throw error;
+    }
+    throw error;
+  }
 
   const coinFlipIx = await coinFlipProgram.instruction.coinFlip(
     randomness.pubkey,
@@ -333,7 +349,7 @@ function getUserGuessFromCommandLine(): boolean {
   return userGuessInput === "heads"; // Convert "heads" to true, "tails" to false
 }
 
-function pauseForEffect(message: any, duration = 3000) {
+function pauseForEffect(message: any, duration = 500) {
   console.log(message);
   return new Promise((resolve) => setTimeout(resolve, duration));
 }

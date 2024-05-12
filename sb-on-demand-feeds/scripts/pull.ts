@@ -30,7 +30,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, provider, program } =
     await AnchorUtils.loadEnv();
-  const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
+  const queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   const queueAccount = new Queue(program, queue);
   try {
     await queueAccount.loadData();

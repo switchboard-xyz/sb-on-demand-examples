@@ -30,10 +30,11 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 }
 
 (async function main() {
+  dotenv.config();
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, provider, program } =
     await AnchorUtils.loadEnv();
-  const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
+  const queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   const queueAccount = new Queue(program, queue);
   try {
     await queueAccount.loadData();
@@ -55,6 +56,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Pull in API Key from .env file
   const API_KEY = process.env.OPEN_WEATHER_API_KEY;
   const secretValue = API_KEY ?? "API_KEY_NOT_FOUND";
+  console.log("API_KEY", secretValue);
 
   console.log("\n🔒 Step 1: Creating the User profile to store secrets");
   // start of secrets.. 
@@ -107,7 +109,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 
   const conf = {
     // the feed name (max 32 bytes)
-    name: "Feed secret Test 2",
+    name: "Feed secret Test 3",
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
@@ -116,7 +118,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
           {
             secretsTask: {
               authority: keypair.publicKey.toBase58(),
-              //url: "https://api.secrets.switchboard.xyz"
+              url: "https://api.secrets.switchboard.xyz"
             }
           },
           {
@@ -178,12 +180,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 
   // Send a price update with a following user in struction every N seconds
   const interval = 1000; // ms
+  console.log("Starting metric update loop");
   while (true) {
     // Fetch the price update instruction and report the selected oracles
     const [priceUpdateIx, oracleResponses, numSuccess] =
       await pullFeed.fetchUpdateIx(conf);
     if (numSuccess === 0) {
-      console.log("No price update available");
+      console.log("No metric update available");
       console.log(
         "\tErrors:",
         oracleResponses.map((x) => x.error)
@@ -206,7 +209,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     // Simulate the transaction to get the price and send the tx
     const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
-    console.log(`${conf.name} price update:`, sim);
+    console.log(`${conf.name} update:`, sim);
     console.log("\tTransaction sent: ", sig);
     // Parse the tx logs to get the price on chain
     //const simPrice = +sim.value.logs.join().match(/price:\s*"(\d+(\.\d+)?)/)[1];

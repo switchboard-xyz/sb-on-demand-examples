@@ -82,7 +82,7 @@ async function myAnchorProgram(
 
   const payer = wallet.payer;
   // Switchboard sbQueue fixed
-  const sbQueue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
+  const sbQueue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   const sbProgramId = SB_ON_DEMAND_PID;
   const sbIdl = await anchor.Program.fetchIdl(sbProgramId, provider);
   const sbProgram = new anchor.Program(sbIdl!, sbProgramId, provider);

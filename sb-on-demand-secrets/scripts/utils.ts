@@ -17,84 +17,6 @@ export async function myAnchorProgram(
   return program;
 }
 
-export function buildPythnetJob(pythFeed: string): OracleJob {
-  const jobConfig = OracleJob.create({
-    tasks: [
-      OracleJob.Task.create({
-        oracleTask: OracleJob.OracleTask.create({
-          pythAllowedConfidenceInterval: 1.0,
-          pythAddress: pythFeed,
-        }),
-      }),
-    ],
-  });
-  return jobConfig;
-}
-
-export function buildSanctumFairPriceJob(lstMint: string): OracleJob {
-  const jobConfig = OracleJob.fromObject({
-    tasks: [
-      {
-        sanctumLstPriceTask: {
-          lstMint,
-        },
-      },
-    ],
-  });
-  return jobConfig;
-}
-
-export function buildBinanceComJob(pair: string): OracleJob {
-  const jobConfig = {
-    tasks: [
-      {
-        httpTask: {
-          url: `https://www.binance.com/api/v3/ticker/price`,
-        },
-      },
-      {
-        jsonParseTask: {
-          path: `$[?(@.symbol == '${pair}')].price`,
-        },
-      },
-    ],
-  };
-  return OracleJob.fromObject(jobConfig);
-}
-
-export function buildCoinbaseJob(pair: String): OracleJob {
-  const parts = pair.split("-");
-  const jobConfig = {
-    tasks: [
-      {
-        valueTask: { value: 1 },
-      },
-      {
-        divideTask: {
-          job: {
-            tasks: [
-              {
-                httpTask: {
-                  url: `https://api.coinbase.com/v2/exchange-rates?currency=${parts[1]}`,
-                  headers: [
-                    { key: "Accept", value: "application/json" },
-                    { key: "User-Agent", value: "Mozilla/5.0" },
-                  ],
-                },
-              },
-              {
-                jsonParseTask: {
-                  path: `$.data.rates.${parts[0]}`,
-                },
-              },
-            ],
-          },
-        },
-      },
-    ],
-  };
-  return OracleJob.fromObject(jobConfig);
-}
 
 export async function sendAndConfirmTx(
   connection: Connection,
@@ -105,4 +27,101 @@ export async function sendAndConfirmTx(
   const sig = await connection.sendTransaction(tx);
   await connection.confirmTransaction(sig, "confirmed");
   return sig;
+}
+
+
+
+export function buildSecretsJob(secretNameTask: string, keypair: Keypair): OracleJob {
+  const jobConfig = {
+    tasks: [
+      {
+        secretsTask: {
+          authority: keypair.publicKey.toBase58(),
+        }
+      },
+      {
+        httpTask: {
+          url: `https://api.openweathermap.org/data/2.5/weather?q=aspen,us&appid=${secretNameTask}&units=metric`,
+        }
+      },
+      {
+        jsonParseTask: {
+          path: "$.main.temp"
+        }
+      },
+    ],
+  };
+  return OracleJob.fromObject(jobConfig);
+}
+
+
+export async function ensureUserExists(sbSecrets, keypair, nacl) {
+  try {
+    const user = await sbSecrets.getUser(keypair.publicKey.toBase58(), "ed25519");
+    console.log("User found", user);
+    return user;  // Return the user if found
+  } catch (error) {
+    console.log("User not found, creating user");
+    const payload = await sbSecrets.createOrUpdateUserRequest(keypair.publicKey.toBase58(), "ed25519", "");
+    const signature = nacl.sign.detached(
+      new Uint8Array(payload.toEncodedMessage()),
+      keypair.secretKey
+    );
+    const user = await sbSecrets.createOrUpdateUser(
+      payload,
+      Buffer.from(signature).toString("base64")
+    );
+    console.log("User created", user);
+    return user;  // Return the new user
+  }
+}
+
+export async function ensureSecretExists(sbSecrets, keypair, nacl, secretName, secretValue) {
+  console.log("\n🔒 Checking and Creating the Secret");
+
+  // Retrieve the user's secrets
+  const userSecrets = await sbSecrets.getUserSecrets(keypair.publicKey.toBase58(), "ed25519");
+  const existingSecret = userSecrets.find(secret => secret.secret_name === secretName);
+
+  if (existingSecret) {
+    console.log(`Secret '${secretName}' already exists. No need to create.`);
+    return existingSecret;  // Return the existing secret
+  } else {
+    console.log(`Secret '${secretName}' not found. Creating now...`);
+    const secretRequest = sbSecrets.createSecretRequest(
+      keypair.publicKey.toBase58(),
+      "ed25519",
+      secretName,
+      secretValue
+    );
+    const secretSignature = nacl.sign.detached(
+      new Uint8Array(secretRequest.toEncodedMessage()),
+      keypair.secretKey
+    );
+    const secret = await sbSecrets.createSecret(
+      secretRequest,
+      Buffer.from(secretSignature).toString("base64")
+    );
+    console.log("Secret created:", secret);
+    return secret;  // Return the new secret
+  }
+}
+
+export async function whitelistFeedHash(sbSecrets, keypair, nacl, feedHash, secretName) {
+  const addWhitelist = await sbSecrets.createAddMrEnclaveRequest(
+    keypair.publicKey.toBase58(),
+    "ed25519",
+    feedHash.toString('hex'),
+    [secretName]
+  );
+  const whitelistSignature = nacl.sign.detached(
+    new Uint8Array(addWhitelist.toEncodedMessage()),
+    keypair.secretKey
+  );
+  const sendWhitelist = await sbSecrets.addMrEnclave(
+    addWhitelist,
+    Buffer.from(whitelistSignature).toString("base64")
+  );
+  console.log("Feed hash whitelisted:", sendWhitelist);
+  return sendWhitelist;
 }

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::on_demand::accounts::pull_feed::PullFeedAccountData;
 
-declare_id!("4Qt5WN3J79Fi5jwuoaav9iS5ZfnRJxcsskrLMAzNikBQ");
+declare_id!("865Nqqqu4KgN4uvncg2froKbNji4L73RRyUqYzrsvZQt");
 
 fn fmt(s: &str) -> String {
     if s.len() < 18 {
@@ -24,7 +24,7 @@ pub mod sb_on_demand_solana {
             .map_err(|_e| ProgramError::Custom(1))?;
         let price = feed.get_value(&Clock::get()?, 30, 1, true)
             .map_err(|_e| ProgramError::Custom(2))?;
-        msg!("price: {:?}", fmt(&price.mantissa().to_string()));
+        msg!("temperature: {:?}", fmt(&price.mantissa().to_string()));
         Ok(())
     }
 }

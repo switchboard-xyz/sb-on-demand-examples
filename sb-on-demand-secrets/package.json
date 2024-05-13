@@ -13,6 +13,8 @@
         "big.js": "^6.2.1",
         "bigint-buffer": "^1.1.5",
         "bs58": "^5.0.0",
+        "dotenv": "^16.4.5",
+        "tweetnacl": "^1.0.3",
         "yargs": "^17.7.2"
     },
     "devDependencies": {

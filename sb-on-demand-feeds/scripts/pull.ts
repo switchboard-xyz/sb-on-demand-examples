@@ -30,7 +30,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, provider, program } =
     await AnchorUtils.loadEnv();
-  const queue = new PublicKey("5Qv744yu7DmEbU669GmYRqL9kpQsyYsaVKdR8YiBMTaP");
+  const queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   const queueAccount = new Queue(program, queue);
   try {
     await queueAccount.loadData();
@@ -38,7 +38,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     console.error("Queue not found, ensure you are using devnet in your env");
     return;
   }
-  const path = "../target/deploy/sb_on_demand_solana-keypair.json";
+  const path = "target/deploy/sb_on_demand_solana-keypair.json";
   const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   const txOpts = {

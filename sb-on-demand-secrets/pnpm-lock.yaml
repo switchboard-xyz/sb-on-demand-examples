@@ -32,6 +32,12 @@ dependencies:
   bs58:
     specifier: ^5.0.0
     version: 5.0.0
+  dotenv:
+    specifier: ^16.4.5
+    version: 16.4.5
+  tweetnacl:
+    specifier: ^1.0.3
+    version: 1.0.3
   yargs:
     specifier: ^17.7.2
     version: 17.7.2
@@ -1684,6 +1690,10 @@ packages:
 
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
+    dev: false
+
+  /tweetnacl@1.0.3:
+    resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
     dev: false
 
   /type-detect@4.0.8:

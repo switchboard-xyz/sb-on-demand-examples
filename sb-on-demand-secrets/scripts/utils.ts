@@ -77,8 +77,6 @@ export async function ensureUserExists(sbSecrets, keypair, nacl) {
 }
 
 export async function ensureSecretExists(sbSecrets, keypair, nacl, secretName, secretValue) {
-  console.log("\n🔒 Checking and Creating the Secret");
-
   // Retrieve the user's secrets
   const userSecrets = await sbSecrets.getUserSecrets(keypair.publicKey.toBase58(), "ed25519");
   const existingSecret = userSecrets.find(secret => secret.secret_name === secretName);

@@ -131,12 +131,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
       const sim = await connection.simulateTransaction(tx, txOpts);
       const sig = await connection.sendTransaction(tx, txOpts);
       console.log("\n\tTransaction sent: ", sig);
-      // Parse the tx logs to get the price on chain
+      // Parse the tx logs to get the temperature on chain
       const simPrice = +sim.value.logs.join().match(/temperature:\s*"(\d+(\.\d+)?)/)[1];
       console.log(`\t${conf.name} Temp update:`, simPrice);
 
       await sleep(interval);
     } catch (error) {
+      console.error("Error :", error);
       await sleep(interval);
     } finally {
       await sleep(interval);

@@ -17,9 +17,11 @@ import {
 } from "./utils";
 import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
+import { sendTxUsingJito } from "@solworks/soltoolkit-sdk";
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
+  mainnet: { type: "boolean", describe: "Use mainnet queue" },
 }).argv;
 
 async function myProgramIx(program: anchor.Program, feed: PublicKey) {
@@ -30,7 +32,10 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, provider, program } =
     await AnchorUtils.loadEnv();
-  const queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
+  let queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
+  if (argv.mainnet) {
+    queue = new PublicKey("A43DyUGA7s8eXPxqEjJY6EBu1KKbNgfxF8h17VAHn13w");
+  }
   const queueAccount = new Queue(program, queue);
   try {
     await queueAccount.loadData();
@@ -68,12 +73,25 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Initialize the feed if needed
   let pullFeed: PullFeed;
   if (argv.feed === undefined) {
+    console.log("Initializing new data feed");
     // Generate the feed keypair
     const [pullFeed_, feedKp] = PullFeed.generate(program);
-    const tx = await pullFeed_.initTx(program, conf);
-    const sig = await sendAndConfirmTx(connection, tx, [keypair, feedKp]);
+    const tx = await InstructionUtils.asV0TxWithComputeIxs(
+      program,
+      [await pullFeed_.initIx(conf)],
+      1.2,
+      1_000_0000
+    );
+    tx.sign([keypair, feedKp]);
+
+    // Simulate the transaction to get the price and send the tx
+    await connection.simulateTransaction(tx, txOpts);
+    console.log("Sending initialize transaction");
+    const sig = await connection.sendTransaction(tx, txOpts);
+    await connection.confirmTransaction(sig, "processed");
     console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
     pullFeed = pullFeed_;
+    await sleep(3000);
   } else {
     pullFeed = new PullFeed(program, new PublicKey(argv.feed));
   }
@@ -98,9 +116,11 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     luts.push(pullFeed.loadLookupTable());
 
     // Construct the transaction
-    const tx = await InstructionUtils.asV0Tx(
+    const tx = await InstructionUtils.asV0TxWithComputeIxs(
       program,
       [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
+      2,
+      100_000,
       await Promise.all(luts)
     );
     tx.sign([keypair]);

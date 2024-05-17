@@ -12,9 +12,14 @@ export async function myAnchorProgram(
   provider: anchor.Provider,
   myPid: PublicKey
 ): Promise<anchor.Program> {
-  const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
-  const program = new anchor.Program(idl, myPid, provider);
-  return program;
+  try {
+    const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
+    const program = new anchor.Program(idl, myPid, provider);
+    return program;
+  } catch (err) {
+    console.error("Error fetching IDL for client program. Did you deploy?");
+    throw err;
+  }
 }
 
 export function buildPythnetJob(pythFeed: string): OracleJob {

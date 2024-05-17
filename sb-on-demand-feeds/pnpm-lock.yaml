@@ -14,6 +14,9 @@ dependencies:
   '@solana/web3.js':
     specifier: ^1.91.8
     version: 1.91.8
+  '@solworks/soltoolkit-sdk':
+    specifier: ^0.0.26
+    version: 0.0.26(fastestsmallesttextencoderdecoder@1.0.22)
   '@switchboard-xyz/common':
     specifier: ^2.3.23
     version: 2.3.23
@@ -353,6 +356,26 @@ packages:
       - utf-8-validate
     dev: false
 
+  /@solworks/soltoolkit-sdk@0.0.26(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-EC75rj247QXs8iMCIMgdjUWSbmL9mVH1qY1yvCu/hgd9J++UPqLNDqi0MEMXmdgrEfVrPTTW7SAEPVeYyUWTZg==}
+    dependencies:
+      '@solana/buffer-layout': 4.0.1
+      '@solana/spl-token': 0.3.11(@solana/web3.js@1.91.8)(fastestsmallesttextencoderdecoder@1.0.22)
+      '@solana/web3.js': 1.91.8
+      '@types/bn.js': 5.1.5
+      '@types/node': 18.19.33
+      '@types/node-fetch': 2.6.11
+      bn.js: 5.2.1
+      bs58: 5.0.0
+      decimal.js: 10.4.3
+      typescript: 4.9.5
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - fastestsmallesttextencoderdecoder
+      - utf-8-validate
+    dev: false
+
   /@switchboard-xyz/common@2.3.23:
     resolution: {integrity: sha512-oi1UESLZ1w67Tt0s9rSCh3diRGWSybQaeal7DDPVCAc1+QSaYBqTwuoPeAo5su6bNWB+aleG5b2IXZiG0yalIw==}
     engines: {node: '>=12'}
@@ -438,7 +461,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 18.19.33
+      '@types/node': 20.12.11
       form-data: 4.0.0
     dev: false
 

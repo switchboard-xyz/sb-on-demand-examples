@@ -32,7 +32,8 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, provider, program } =
     await AnchorUtils.loadEnv();
-  (connection as any)._confirmTransactionInitialTimeout = 45_000;
+  // (connection as any)._confirmTransactionInitialTimeout = 45_000;
+  console.log((connection as any)._rpcEndpoint);
   let queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   if (argv.mainnet) {
     queue = new PublicKey("A43DyUGA7s8eXPxqEjJY6EBu1KKbNgfxF8h17VAHn13w");
@@ -81,7 +82,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
       program,
       [await pullFeed_.initIx(conf)],
       1.2,
-      1_000_000
+      1_000_0000
     );
     tx.sign([keypair, feedKp]);
 
@@ -121,6 +122,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
       );
       return;
     }
+    console.log(`NUM SUCCESS: ${numSuccess}`);
 
     // Load the lookup tables
     const luts = oracleResponses.map((x) => x.oracle.loadLookupTable());
@@ -131,7 +133,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
       program,
       [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
       1.5,
-      10_000,
+      100_000,
       await Promise.all(luts)
     );
     tx.sign([keypair]);

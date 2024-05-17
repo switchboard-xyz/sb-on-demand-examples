@@ -99,9 +99,16 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Send a price update with a following user instruction every N seconds
   const interval = 1000; // ms
   while (true) {
+    let maybePriceUpdateIx;
+    try {
+      maybePriceUpdateIx = await pullFeed.fetchUpdateIx(conf);
+    } catch (err) {
+      console.error("Failed to fetch price update instruction");
+      await sleep(interval);
+      continue;
+    }
     // Fetch the price update instruction and report the selected oracles
-    const [priceUpdateIx, oracleResponses, numSuccess] =
-      await pullFeed.fetchUpdateIx(conf);
+    const [priceUpdateIx, oracleResponses, numSuccess] = maybePriceUpdateIx!;
     if (numSuccess === 0) {
       console.log("No price update available");
       console.log(

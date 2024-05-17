@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.3.23
     version: 2.3.23
   '@switchboard-xyz/on-demand':
-    specifier: ^1.0.54
-    version: 1.0.54(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.0.57
+    version: 1.0.57(fastestsmallesttextencoderdecoder@1.0.22)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -373,8 +373,8 @@ packages:
       yaml: 2.4.2
     dev: false
 
-  /@switchboard-xyz/on-demand@1.0.54(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-zuQfNf613Qf0oP9iAlSbfO1eiiXUU2+7gvRJjUuxMnODKHIaky1OxeedwFF3RNPid0+gjamqlWFO5c3tkRPUfw==}
+  /@switchboard-xyz/on-demand@1.0.57(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-5iwxQkZCwwcyUnsU+euk0wfC5i5+zdLpUvlN6IICKd4ZnePnkq+AGQl7+V993JEQgR8wM39SSxpY6VPci21h4w==}
     dependencies:
       '@coral-xyz/anchor': 0.29.0
       '@solana/spl-token': 0.4.6(@solana/web3.js@1.91.8)(fastestsmallesttextencoderdecoder@1.0.22)
@@ -382,13 +382,16 @@ packages:
       '@solworks/soltoolkit-sdk': 0.0.23(fastestsmallesttextencoderdecoder@1.0.22)
       '@switchboard-xyz/common': 2.3.23
       '@switchboard-xyz/solana.js': 3.2.5(fastestsmallesttextencoderdecoder@1.0.22)
+      axios: 1.6.8
       big.js: 6.2.1
       bs58: 5.0.0
       js-yaml: 4.1.0
+      node-cache: 5.1.2
       protobufjs: 7.3.0
       shelljs: 0.8.5
     transitivePeerDependencies:
       - bufferutil
+      - debug
       - encoding
       - fastestsmallesttextencoderdecoder
       - utf-8-validate
@@ -444,7 +447,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 18.19.33
+      '@types/node': 20.12.11
       form-data: 4.0.0
     dev: false
 
@@ -542,6 +545,16 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       possible-typed-array-names: 1.0.0
+    dev: false
+
+  /axios@1.6.8:
+    resolution: {integrity: sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==}
+    dependencies:
+      follow-redirects: 1.15.6
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
     dev: false
 
   /balanced-match@1.0.2:
@@ -730,6 +743,11 @@ packages:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
+    dev: false
+
+  /clone@2.1.2:
+    resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
+    engines: {node: '>=0.8'}
     dev: false
 
   /color-convert@2.0.1:
@@ -938,6 +956,16 @@ packages:
     resolution: {integrity: sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==}
     hasBin: true
     dev: true
+
+  /follow-redirects@1.15.6:
+    resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
 
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -1354,6 +1382,13 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /node-cache@5.1.2:
+    resolution: {integrity: sha512-t1QzWwnk4sjLWaQAS8CHgOJ+RAfmHpxFWmc36IWTiWHQfs0w5JDMBS1b1ZxQteo0vVVuWJvIUKHDkkeK7vIGCg==}
+    engines: {node: '>= 8.0.0'}
+    dependencies:
+      clone: 2.1.2
+    dev: false
+
   /node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
     engines: {node: 4.x || >=6.0.0}
@@ -1473,6 +1508,10 @@ packages:
       '@protobufjs/utf8': 1.1.0
       '@types/node': 20.12.11
       long: 5.2.3
+    dev: false
+
+  /proxy-from-env@1.1.0:
+    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
     dev: false
 
   /randombytes@2.1.0:

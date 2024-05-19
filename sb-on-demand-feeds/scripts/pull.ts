@@ -17,7 +17,6 @@ import {
 } from "./utils";
 import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
-import { sendTxUsingJito } from "@solworks/soltoolkit-sdk";
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },

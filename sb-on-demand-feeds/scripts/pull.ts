@@ -142,7 +142,8 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
       console.log(`${conf.name} price update:`, simPrice);
       console.log("\tTransaction sent: ", sig);
     } catch (err) {
-      console.error("Failed to parse logs for price:", logs);
+      console.error("Failed to parse logs for price:", sim);
+      console.error(err);
     }
     await sleep(interval);
   }

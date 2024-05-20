@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.3.23
     version: 2.3.23
   '@switchboard-xyz/on-demand':
-    specifier: ^1.1.1
-    version: 1.1.1(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.1.2
+    version: 1.1.2(fastestsmallesttextencoderdecoder@1.0.22)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -367,8 +367,8 @@ packages:
       yaml: 2.4.2
     dev: false
 
-  /@switchboard-xyz/on-demand@1.1.1(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-vzSKcJS06OR/zIY5PVzdwmOVmiHsQ+E39p8nFyG6APl4yPc63+WDQqnjNjYrFAbabY1qDCw4qdJ6J+tvCyczUA==}
+  /@switchboard-xyz/on-demand@1.1.2(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-efRnyGaLv3IQyFA5SN+CDTru5ZhKuMjv0KQftC/9Yfg9eG14x+UH7CysnNNoIbdvNkkicv5/QddSE5LTwjE8yQ==}
     dependencies:
       '@coral-xyz/anchor': 0.29.0
       '@solana/spl-token': 0.4.6(@solana/web3.js@1.91.8)(fastestsmallesttextencoderdecoder@1.0.22)
@@ -376,7 +376,7 @@ packages:
       '@solworks/soltoolkit-sdk': 0.0.23(fastestsmallesttextencoderdecoder@1.0.22)
       '@switchboard-xyz/common': 2.3.23
       '@switchboard-xyz/solana.js': 3.2.5(fastestsmallesttextencoderdecoder@1.0.22)
-      axios: 1.6.8
+      axios: 1.7.1
       big.js: 6.2.1
       bs58: 5.0.0
       js-yaml: 4.1.0
@@ -541,8 +541,8 @@ packages:
       possible-typed-array-names: 1.0.0
     dev: false
 
-  /axios@1.6.8:
-    resolution: {integrity: sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==}
+  /axios@1.7.1:
+    resolution: {integrity: sha512-+LV37nQcd1EpFalkXksWNBiA17NZ5m5/WspmHGmZmdx1qBOg/VNq/c4eRJiA9VQQHBOs+N0ZhhdU10h2TyNK7Q==}
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -1026,18 +1026,6 @@ packages:
       minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
-    dev: true
-
-  /glob@7.2.3:
-    resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    dependencies:
-      fs.realpath: 1.0.0
-      inflight: 1.0.6
-      inherits: 2.0.4
-      minimatch: 3.1.2
-      once: 1.4.0
-      path-is-absolute: 1.0.1
-    dev: false
 
   /gopd@1.0.1:
     resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
@@ -1582,7 +1570,7 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
     dependencies:
-      glob: 7.2.3
+      glob: 7.2.0
       interpret: 1.4.0
       rechoir: 0.6.2
     dev: false

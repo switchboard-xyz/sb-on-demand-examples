@@ -15,8 +15,8 @@ dependencies:
     specifier: ^1.91.8
     version: 1.91.8
   '@switchboard-xyz/on-demand':
-    specifier: ^1.0.57
-    version: 1.0.57(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.1.1
+    version: 1.1.1(fastestsmallesttextencoderdecoder@1.0.22)
   '@switchboard-xyz/solana.js':
     specifier: ^3.2.5
     version: 3.2.5(fastestsmallesttextencoderdecoder@1.0.22)
@@ -623,8 +623,8 @@ packages:
       yaml: 2.4.1
     dev: false
 
-  /@switchboard-xyz/on-demand@1.0.57(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-5iwxQkZCwwcyUnsU+euk0wfC5i5+zdLpUvlN6IICKd4ZnePnkq+AGQl7+V993JEQgR8wM39SSxpY6VPci21h4w==}
+  /@switchboard-xyz/on-demand@1.1.1(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-vzSKcJS06OR/zIY5PVzdwmOVmiHsQ+E39p8nFyG6APl4yPc63+WDQqnjNjYrFAbabY1qDCw4qdJ6J+tvCyczUA==}
     dependencies:
       '@coral-xyz/anchor': 0.29.0
       '@solana/spl-token': 0.4.6(@solana/web3.js@1.91.8)(fastestsmallesttextencoderdecoder@1.0.22)

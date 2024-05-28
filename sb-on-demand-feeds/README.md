@@ -17,6 +17,7 @@ Then, to see the power of on-demand feeds, run the following:
 anchor build
 ```
 After building, take note of your program address and insert it in your program `lib.rs` file here:
+*Note:* an easy command to view your recently built programm address - `anchor keys list`.
 ```typescript
 declare_id!(“[YOUR_PROGRAM_ADDRESS]“);
 ```

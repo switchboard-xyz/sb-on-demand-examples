@@ -21,9 +21,11 @@ Configure the `anchor.toml` file to point to your solana wallet and the Solana c
 Then, to see the power of on-demand feeds, run the following:
 
 ```bash
+cd sb-randomness
 anchor build
 ```
 After building, take note of your program address and insert it in your program `lib.rs` file here:
+*Note:* an easy command to view your recently built programm address - `anchor keys list`.
 ```typescript
 declare_id!(“[YOUR_PROGRAM_ADDRESS]“);
 ```
@@ -32,14 +34,18 @@ Rebuild your program.
 anchor build
 ```
 Deploy your program, initialise the IDL.
-Note: ensure you insert your program address in the IDL initialise command.
+*Note:* ensure you insert your program address in the IDL initialise command.
 
 ```bash
 anchor deploy
-anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDRESS
+anchor idl init --filepath target/idl/sb_randomness.json YOUR_PROGRAM_ADDRESS
 ```
-
-Once deployed, you can run the demo script included here to test populating the feed:
+Install deps:
+```bash
+cd ..
+pnpm i 
+pnpm update
+```
 
 ## Running the example
 

@@ -6,7 +6,7 @@ import {
   Queue,
   sleep,
 } from "@switchboard-xyz/on-demand";
-import { SwitchboardSecrets, FeedHash } from "@switchboard-xyz/common";
+import { SwitchboardSecrets, FeedHash, TimeoutError } from "@switchboard-xyz/common";
 import {
   myAnchorProgram,
   sendAndConfirmTx,
@@ -19,6 +19,7 @@ import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import dotenv from "dotenv";
 import nacl from "tweetnacl";
+import { set } from "@coral-xyz/anchor/dist/cjs/utils/features";
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
@@ -47,6 +48,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
+    setTimeout: 10000,
   };
 
   // secrets start
@@ -104,7 +106,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 
   // Send a price update with a following user in struction every N seconds
   console.log("\n🔒 Step 6: Run the Feed Update Loop..");
-  const interval = 1000; // ms
+  const interval = 2000; // ms
   while (true) {
     try {
       // Fetch the price update instruction and report the selected oracles

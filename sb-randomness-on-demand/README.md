@@ -14,7 +14,7 @@ Welcome to Switchboard randomness on-demand.  The easiest and most secure
 randomness solution on Solana.
 
 To read more about the adversarial assumptions that Switchboard Randomness
-On-Demand makes, please see: https://switchboardxyz.gitbook.io/switchboard-randomness-on-demand
+On-Demand makes, please see: [https://switchboardxyz.gitbook.io/switchboard-randomness-on-demand](https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness)
 
 Configure the `anchor.toml` file to point to your solana wallet and the Solana cluster of your choice - Devnet, Mainnet, etc.
 
@@ -55,4 +55,4 @@ To run this example coin-flip game:
 `pnpm start {YOUR_GUESS}`
 
 
-For a full explanation of the code, please see our gitbook tutorial [here!](https://switchboardxyz.gitbook.io/switchboard-randomness-on-demand/getting-started)
+For a full explanation of the code, please see our gitbook tutorial [here!](https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness/getting-started)

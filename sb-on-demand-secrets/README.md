@@ -43,4 +43,4 @@ pnpm update
 ts-node scripts/pull.ts
 ```
 
-For documenation on how Switchboard On-Demand Secrets works click [here](https://switchboardxyz.gitbook.io/switchboard-on-demand)!
+For documenation on how Switchboard On-Demand Secrets works click [here!](https://docs.switchboard.xyz/docs/switchboard/secrets)

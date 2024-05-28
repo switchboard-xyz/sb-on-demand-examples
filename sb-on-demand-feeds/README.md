@@ -11,7 +11,7 @@ This example demonstrates the use of Switchboard's On-Demand Feed.
 
 Configure the `anchor.toml` file to point to your solana wallet and the Solana cluster of your choice - Devnet, Mainnet, etc.
 
-The, to see the power of on-demand feeds, run the following:
+Then, to see the power of on-demand feeds, run the following:
 
 ```bash
 anchor build

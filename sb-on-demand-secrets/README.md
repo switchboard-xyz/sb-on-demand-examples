@@ -34,7 +34,8 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 
 Once deployed, you can run the demo script included here to test populating the feed:
 
-Note: in this example you will need to generate an API KEY from `https://openweathermap.org/` and create a `.env` file and insert it there under the name `OPEN_WEATHER_API_KEY`.
+*Note:* in this example you will need to generate an API KEY from `https://openweathermap.org/` and create a `.env` file and insert it there under the name `OPEN_WEATHER_API_KEY`.
+
 For example - `OPEN_WEATHER_API_KEY=XXXXXXXXXXXXXXXXX`.
 
 ```bash

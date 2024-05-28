@@ -14,7 +14,7 @@ Welcome to Switchboard randomness on-demand.  The easiest and most secure
 randomness solution on Solana.
 
 To read more about the adversarial assumptions that Switchboard Randomness
-On-Demand makes, please see: [https://switchboardxyz.gitbook.io/switchboard-randomness-on-demand](https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness)
+On-Demand makes, please see: [https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness](https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness)
 
 Configure the `anchor.toml` file to point to your solana wallet and the Solana cluster of your choice - Devnet, Mainnet, etc.
 

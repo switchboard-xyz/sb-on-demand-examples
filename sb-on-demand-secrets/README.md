@@ -2,8 +2,8 @@
 
 ![Switchboard Logo](https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-# Switchboard On-Demand: Solana Pull Feed
-This example demonstrates the use of Switchboard's On-Demand Feed.
+# Switchboard On-Demand: Solana Pull Feed x Secrets
+This example demonstrates the use of Switchboard's On-Demand Feed using Secrets.
 
 </div>
 

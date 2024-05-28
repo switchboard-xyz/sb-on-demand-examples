@@ -16,22 +16,30 @@ randomness solution on Solana.
 To read more about the adversarial assumptions that Switchboard Randomness
 On-Demand makes, please see: https://switchboardxyz.gitbook.io/switchboard-randomness-on-demand
 
-Note: please ensure you add your private key in a .env file under the name SECRET_KEY!
+Configure the `anchor.toml` file to point to your solana wallet and the Solana cluster of your choice - Devnet, Mainnet, etc.
 
-## Installation and Setup
+Then, to see the power of on-demand feeds, run the following:
 
-`pnpm i`
+```bash
+anchor build
+```
+After building, take note of your program address and insert it in your program `lib.rs` file here:
+```typescript
+declare_id!(“[YOUR_PROGRAM_ADDRESS]“);
+```
+Rebuild your program.
+```bash
+anchor build
+```
+Deploy your program, initialise the IDL.
+Note: ensure you insert your program address in the IDL initialise command.
 
-`cd sb-randomness`
+```bash
+anchor deploy
+anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDRESS
+```
 
-`anchor build && anchor deploy`
-
-Make note of your PROGRAM_ID and add it to your `program/src/lib.rs` file here:
-`declare_id!("PROGRAM_ID");`
-
-Re-run `anchor build && anchor deploy`
-
-`anchor idl init --filepath target/idl/sb_randomness.json ${PROGRAM_ID}`
+Once deployed, you can run the demo script included here to test populating the feed:
 
 ## Running the example
 

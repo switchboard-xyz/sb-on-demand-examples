@@ -6,20 +6,19 @@ import {
   Queue,
   sleep,
 } from "@switchboard-xyz/on-demand";
-import { SwitchboardSecrets, FeedHash, TimeoutError } from "@switchboard-xyz/common";
+import { SwitchboardSecrets, FeedHash } from "@switchboard-xyz/common";
 import {
   myAnchorProgram,
   sendAndConfirmTx,
   buildSecretsJob,
   ensureUserExists,
   ensureSecretExists,
-  whitelistFeedHash
+  whitelistFeedHash,
 } from "./utils";
 import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import dotenv from "dotenv";
 import nacl from "tweetnacl";
-import { set } from "@coral-xyz/anchor/dist/cjs/utils/features";
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
@@ -52,7 +51,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   };
 
   // secrets start
-  const secretNameTask = "${OPEN_WEATHER_API_KEY}"
+  const secretNameTask = "${OPEN_WEATHER_API_KEY}";
   const secretName = "OPEN_WEATHER_API_KEY";
   // Pull in API Key from .env file
   const API_KEY = process.env.OPEN_WEATHER_API_KEY;
@@ -65,7 +64,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   const user = await ensureUserExists(sbSecrets, keypair, nacl);
 
   console.log("\n🔒 Step 2: Checking and Creating the Secret");
-  const secret = await ensureSecretExists(sbSecrets, keypair, nacl, secretName, secretValue);
+  const secret = await ensureSecretExists(
+    sbSecrets,
+    keypair,
+    nacl,
+    secretName,
+    secretValue
+  );
 
   console.log("\n🔒 Step 3: Building Feed Configuration");
   // configure the feed
@@ -92,17 +97,22 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   let pullFeed: PullFeed;
   if (argv.feed === undefined) {
     // Generate the feed keypair
-    const [pullFeed_, feedKp] = PullFeed.generate(program);
-    const tx = await pullFeed_.initTx(program, conf);
-    const sig = await sendAndConfirmTx(connection, tx, [keypair, feedKp]);
-    console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
+    const [pullFeed_, tx] = await PullFeed.initTx(program, conf);
+    const sig = await sendAndConfirmTx(connection, tx, [keypair]);
+    console.log(`Feed ${pullFeed_.pubkey.toBase58()} initialized: ${sig}`);
     pullFeed = pullFeed_;
   } else {
     pullFeed = new PullFeed(program, new PublicKey(argv.feed));
   }
 
   console.log("\n🔒 Step 5: Whitelist the feed hash to the secret");
-  const whitelistConfirmation = await whitelistFeedHash(sbSecrets, keypair, nacl, feed_hash, secretName);
+  const whitelistConfirmation = await whitelistFeedHash(
+    sbSecrets,
+    keypair,
+    nacl,
+    feed_hash,
+    secretName
+  );
 
   // Send a price update with a following user in struction every N seconds
   console.log("\n🔒 Step 6: Run the Feed Update Loop..");
@@ -134,7 +144,9 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
       const sig = await connection.sendTransaction(tx, txOpts);
       console.log("\n\tTransaction sent: ", sig);
       // Parse the tx logs to get the temperature on chain
-      const simPrice = +sim.value.logs.join().match(/temperature:\s*"(\d+(\.\d+)?)/)[1];
+      const simPrice = +sim.value.logs
+        .join()
+        .match(/temperature:\s*"(\d+(\.\d+)?)/)[1];
       console.log(`\t${conf.name} Temp update:`, simPrice);
 
       await sleep(interval);

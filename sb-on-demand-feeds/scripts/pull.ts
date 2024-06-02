@@ -42,9 +42,12 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     console.error("Queue not found, ensure you are using devnet in your env");
     return;
   }
-  const path = "target/deploy/sb_on_demand_solana-keypair.json";
-  const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
-  const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
+  // const path = "target/deploy/sb_on_demand_solana-keypair.json";
+  // const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
+  const myProgram = await myAnchorProgram(
+    provider,
+    new PublicKey("4Qt5WN3J79Fi5jwuoaav9iS5ZfnRJxcsskrLMAzNikBQ")
+  );
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
@@ -96,13 +99,14 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   }
 
   // Send a price update with a following user instruction every N seconds
-  const interval = 1000; // ms
+  const interval = 0; // ms
   while (true) {
     let maybePriceUpdateIx;
     try {
       maybePriceUpdateIx = await pullFeed.fetchUpdateIx(conf);
     } catch (err) {
       console.error("Failed to fetch price update instruction");
+      console.error(err);
       await sleep(interval);
       continue;
     }

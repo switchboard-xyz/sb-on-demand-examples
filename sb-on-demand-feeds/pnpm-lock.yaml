@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.3.31
     version: 2.3.31(react-native@0.74.1)
   '@switchboard-xyz/on-demand':
-    specifier: ^1.1.10
-    version: 1.1.10(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.74.1)
+    specifier: ^1.1.11
+    version: 1.1.11(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.74.1)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -3148,8 +3148,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/on-demand@1.1.10(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.74.1):
-    resolution: {integrity: sha512-h+x8KKDB1UEBrYAQ4V5HvlOtAhI5XO2GAgUWH8kjQqhrYMBCsgjZD9XQFMovObs2qcdKZcZv6+kCT1wsvO9Dog==}
+  /@switchboard-xyz/on-demand@1.1.11(fastestsmallesttextencoderdecoder@1.0.22)(react-native@0.74.1):
+    resolution: {integrity: sha512-Z9AzJDOgaVs65Flv0L2u09KyC/um83X+90/F/wkyu+th+XgX70EHf6dpCIOUN2e63IVAWYO/ylB+KQWhyI8PlQ==}
     engines: {node: '>= 18'}
     dependencies:
       '@coral-xyz/anchor': 0.29.0

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::accounts::RandomnessAccountData;
 
-declare_id!("AMeCixV9FHVLYQ56bsiepvoDfqmQgAbd8y1uC2fPU6eS");
+declare_id!("2TKP7rWf1Wg7ec6HEugh3JfcbJeBawKWrjCF5zxEjcfM");
 
 pub fn transfer<'a>(
     system_program: AccountInfo<'a>,

@@ -1,4 +1,4 @@
-import { Connection, Keypair, PublicKey, Commitment } from "@solana/web3.js";
+import { PublicKey, Commitment } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import {
   AnchorUtils,
@@ -42,12 +42,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     console.error("Queue not found, ensure you are using devnet in your env");
     return;
   }
-  // const path = "target/deploy/sb_on_demand_solana-keypair.json";
-  // const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
-  const myProgram = await myAnchorProgram(
-    provider,
-    new PublicKey("4Qt5WN3J79Fi5jwuoaav9iS5ZfnRJxcsskrLMAzNikBQ")
-  );
+  const path = "target/deploy/sb_on_demand_solana-keypair.json";
+  const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
+  const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
+  // const myProgram = await myAnchorProgram(
+  //   provider,
+  //   new PublicKey("4Qt5WN3J79Fi5jwuoaav9iS5ZfnRJxcsskrLMAzNikBQ")
+  // );
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
@@ -76,22 +77,9 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   let pullFeed: PullFeed;
   if (argv.feed === undefined) {
     console.log("Initializing new data feed");
-    // Generate the feed keypair
-    const [pullFeed_, feedKp] = PullFeed.generate(program);
-    const tx = await InstructionUtils.asV0TxWithComputeIxs(
-      program,
-      [await pullFeed_.initIx(conf)],
-      1.2,
-      1_000_0000
-    );
-    tx.sign([keypair, feedKp]);
-
-    // Simulate the transaction to get the price and send the tx
-    await connection.simulateTransaction(tx, txOpts);
-    console.log("Sending initialize transaction");
-    const sig = await connection.sendTransaction(tx, txOpts);
-    await connection.confirmTransaction(sig, "processed");
-    console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
+    const [pullFeed_, tx] = await PullFeed.initTx(program, conf);
+    const sig = await sendAndConfirmTx(connection, tx, [keypair]);
+    console.log(`Feed ${pullFeed_.pubkey.toBase58()} initialized: ${sig}`);
     pullFeed = pullFeed_;
     await sleep(3000);
   } else {

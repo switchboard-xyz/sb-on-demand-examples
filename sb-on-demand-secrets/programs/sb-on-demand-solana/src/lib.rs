@@ -21,10 +21,16 @@ pub mod sb_on_demand_solana {
         let feed_account = ctx.accounts.feed.data.borrow();
         // Docs at: https://switchboard-on-demand-rust-docs.web.app/on_demand/accounts/pull_feed/struct.PullFeedAccountData.html#method.get_value
         let feed = PullFeedAccountData::parse(feed_account)
-            .map_err(|_e| ProgramError::Custom(1))?;
-        let price = feed.get_value(&Clock::get()?, 30, 1, true)
-            .map_err(|_e| ProgramError::Custom(2))?;
-        msg!("temperature: {:?}", fmt(&price.mantissa().to_string()));
+            .map_err(|e| {
+                msg!("Parse Error: {:?}", e);
+                ProgramError::Custom(1)}
+            )?;
+        let temperature = feed.get_value(&Clock::get()?, 30, 1, true)
+            .map_err(|e| {
+                msg!("Get Value Error: {:?}", e);
+                ProgramError::Custom(2)
+            })?;
+        msg!("temperature: {:?}", fmt(&temperature.mantissa().to_string()));
         Ok(())
     }
 }

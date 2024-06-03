@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::on_demand::accounts::pull_feed::PullFeedAccountData;
 
-declare_id!("4Qt5WN3J79Fi5jwuoaav9iS5ZfnRJxcsskrLMAzNikBQ");
+declare_id!("9NtDHXQNwUgGP42uMupfYxBRUWxrt2479AThApTUiVmz");
 
 fn fmt(s: &str) -> String {
     if s.len() < 18 {
@@ -21,9 +21,15 @@ pub mod sb_on_demand_solana {
         let feed_account = ctx.accounts.feed.data.borrow();
         // Docs at: https://switchboard-on-demand-rust-docs.web.app/on_demand/accounts/pull_feed/struct.PullFeedAccountData.html#method.get_value
         let feed = PullFeedAccountData::parse(feed_account)
-            .map_err(|_e| ProgramError::Custom(1))?;
+        .map_err(|e| {
+            msg!("Parse Error: {:?}", e);
+            ProgramError::Custom(1)}
+        )?;
         let price = feed.get_value(&Clock::get()?, 30, 1, true)
-            .map_err(|_e| ProgramError::Custom(2))?;
+        .map_err(|e| {
+            msg!("Get Value Error: {:?}", e);
+            ProgramError::Custom(2)
+        })?;
         msg!("price: {:?}", fmt(&price.mantissa().to_string()));
         Ok(())
     }

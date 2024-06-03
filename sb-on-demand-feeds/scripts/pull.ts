@@ -99,7 +99,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   }
 
   // Send a price update with a following user instruction every N seconds
-  const interval = 0; // ms
+  const interval = 3000; // ms
   while (true) {
     let maybePriceUpdateIx;
     try {

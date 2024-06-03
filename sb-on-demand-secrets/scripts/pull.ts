@@ -6,7 +6,7 @@ import {
   Queue,
   sleep,
 } from "@switchboard-xyz/on-demand";
-import { SwitchboardSecrets, FeedHash, TimeoutError } from "@switchboard-xyz/common";
+import { SwitchboardSecrets, FeedHash} from "@switchboard-xyz/common";
 import {
   myAnchorProgram,
   sendAndConfirmTx,
@@ -19,7 +19,6 @@ import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import dotenv from "dotenv";
 import nacl from "tweetnacl";
-import { set } from "@coral-xyz/anchor/dist/cjs/utils/features";
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
@@ -91,11 +90,9 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Initialize the feed if needed
   let pullFeed: PullFeed;
   if (argv.feed === undefined) {
-    // Generate the feed keypair
-    const [pullFeed_, feedKp] = PullFeed.generate(program);
-    const tx = await pullFeed_.initTx(program, conf);
-    const sig = await sendAndConfirmTx(connection, tx, [keypair, feedKp]);
-    console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
+    const [pullFeed_, tx] = await PullFeed.initTx(program, conf);
+    const sig = await sendAndConfirmTx(connection, tx, [keypair]);
+    console.log(`Feed ${pullFeed_.pubkey.toBase58()} initialized: ${sig}`);
     pullFeed = pullFeed_;
   } else {
     pullFeed = new PullFeed(program, new PublicKey(argv.feed));
@@ -104,45 +101,58 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   console.log("\n🔒 Step 5: Whitelist the feed hash to the secret");
   const whitelistConfirmation = await whitelistFeedHash(sbSecrets, keypair, nacl, feed_hash, secretName);
 
-  // Send a price update with a following user in struction every N seconds
+  // Send a temp update with a following user in struction every N seconds
   console.log("\n🔒 Step 6: Run the Feed Update Loop..");
-  const interval = 2000; // ms
+  const interval = 3000; // ms
   while (true) {
+    let maybePriceUpdateIx;
     try {
-      // Fetch the price update instruction and report the selected oracles
-      const [priceUpdateIx, oracleResponses, numSuccess] =
-        await pullFeed.fetchUpdateIx(conf);
-      if (numSuccess === 0) {
-        // re-run the loop if no oracles responded
-        continue;
-      }
-
-      // Load the lookup tables
-      const luts = oracleResponses.map((x) => x.oracle.loadLookupTable());
-      luts.push(pullFeed.loadLookupTable());
-
-      // Construct the transaction
-      const tx = await InstructionUtils.asV0Tx(
-        program,
-        [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
-        await Promise.all(luts)
-      );
-      tx.sign([keypair]);
-
-      // Simulate the transaction to get the price and send the tx
-      const sim = await connection.simulateTransaction(tx, txOpts);
-      const sig = await connection.sendTransaction(tx, txOpts);
-      console.log("\n\tTransaction sent: ", sig);
-      // Parse the tx logs to get the temperature on chain
-      const simPrice = +sim.value.logs.join().match(/temperature:\s*"(\d+(\.\d+)?)/)[1];
-      console.log(`\t${conf.name} Temp update:`, simPrice);
-
+      maybePriceUpdateIx = await pullFeed.fetchUpdateIx(conf);
+    } catch (err) {
+      console.error("Failed to fetch temperature update instruction");
+      console.error(err);
       await sleep(interval);
-    } catch (error) {
-      console.error("Error :", error);
-      await sleep(interval);
-    } finally {
-      await sleep(interval);
+      continue;
     }
+    // Fetch the price update instruction and report the selected oracles
+    const [priceUpdateIx, oracleResponses, numSuccess] = maybePriceUpdateIx!;
+    if (numSuccess === 0) {
+      console.log("No temperature update available");
+      console.log(
+        "\tErrors:",
+        oracleResponses.map((x) => x.error)
+      );
+      return;
+    }
+
+    // Load the lookup tables
+    const luts = oracleResponses.map((x) => x.oracle.loadLookupTable());
+    luts.push(pullFeed.loadLookupTable());
+
+    // Construct the transaction
+    const tx = await InstructionUtils.asV0TxWithComputeIxs(
+      program,
+      [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
+      2,
+      100_000,
+      await Promise.all(luts)
+    );
+    tx.sign([keypair]);
+
+    // Simulate the transaction to get the price and send the tx
+    const sim = await connection.simulateTransaction(tx, txOpts);
+    const sig = await connection.sendTransaction(tx, txOpts);
+
+    // Parse the tx logs to get the price on chain
+    const logs = sim.value.logs.join();
+    try {
+      const simPrice = +logs.match(/temperature:\s*"(\d+(\.\d+)?)/)[1];
+      console.log(`${conf.name} Temperature update:`, simPrice);
+      console.log("\tTransaction sent: ", sig);
+    } catch (err) {
+      console.error("Failed to parse logs for price:", sim);
+      console.error(err);
+    }
+    await sleep(interval);
   }
 })();

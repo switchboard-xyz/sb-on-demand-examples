@@ -5,6 +5,8 @@
 # Switchboard On-Demand: Solana Pull Feed x Secrets
 This example demonstrates the use of Switchboard's On-Demand Feed using Secrets.
 
+**Here we bring social metrics on-chain!!**
+
 </div>
 
 ## Getting Started
@@ -35,10 +37,15 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 
 Once deployed, you can run the demo script included here to test populating the feed:
 
-*Note:* in this example you will need to generate an API KEY from `https://openweathermap.org/` and create a `.env` file and insert it there under the name `OPEN_WEATHER_API_KEY`.
+*Note:* in this example you will need to generate an BEARER_TOKEN from `[(https://developer.x.com/en](https://developer.x.com/en)` and create an `.env` file and insert it there under the name `BEARER_TOKEN`.
+For example - `BEARER_TOKEN=XXXXXXXXXXXXXXXXX`.
 
-For example - `OPEN_WEATHER_API_KEY=XXXXXXXXXXXXXXXXX`.
+Follow this [tutorial](https://medium.com/@abhiruchichaudhari/oauth-2-0-tokens-and-twitter-api-everything-you-need-to-know-bddaf9a7f120
+) to generate a BEARER_TOKEN. 
 
+**NOTE - YOUR BEARER TOKEN ONLY LASTS MOMENTARILY, IT NEEDS TO BE UPDATED.**
+
+Once created, continue with these commands.
 ```bash
 pnpm i
 pnpm update

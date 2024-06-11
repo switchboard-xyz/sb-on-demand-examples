@@ -31,6 +31,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, provider, program } =
     await AnchorUtils.loadEnv();
+  console.log("provdier", provider);
   let queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   if (argv.mainnet) {
     queue = new PublicKey("A43DyUGA7s8eXPxqEjJY6EBu1KKbNgfxF8h17VAHn13w");
@@ -44,6 +45,20 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   }
   const path = "target/deploy/sb_on_demand_solana-keypair.json";
   const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
+
+  let idl;
+  try {
+    console.log("Fetching IDL for program:", myProgramKeypair.publicKey.toBase58());
+    idl = await anchor.Program.fetchIdl(myProgramKeypair.publicKey, provider);
+    if (!idl) {
+      throw new Error("Failed to fetch IDL. IDL is undefined.");
+    }
+    console.log("Successfully fetched IDL");
+  } catch (error) {
+    console.error("Error fetching IDL:", error);
+    return;
+  }
+
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   // const myProgram = await myAnchorProgram(
   //   provider,
@@ -77,12 +92,26 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   let pullFeed: PullFeed;
   if (argv.feed === undefined) {
     console.log("Initializing new data feed");
-    const [pullFeed_, tx] = await PullFeed.initTx(program, conf);
-    const sig = await sendAndConfirmTx(connection, tx, [keypair]);
-    console.log(`Feed ${pullFeed_.pubkey.toBase58()} initialized: ${sig}`);
+    // Generate the feed keypair
+    const [pullFeed_, feedKp] = PullFeed.generate(program);
+    const tx = await InstructionUtils.asV0TxWithComputeIxs(
+      program,
+      [await pullFeed_.initIx(conf)],
+      1.2,
+      75_000
+    );
+    tx.sign([keypair, feedKp]);
+
+    // Simulate the transaction to get the price and send the tx
+    await connection.simulateTransaction(tx, txOpts);
+    console.log("Sending initialize transaction");
+    const sig = await connection.sendTransaction(tx, txOpts);
+    await connection.confirmTransaction(sig, "processed");
+    console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
     pullFeed = pullFeed_;
     await sleep(3000);
   } else {
+    console.log("Using existing data feed with address:", argv.feed);
     pullFeed = new PullFeed(program, new PublicKey(argv.feed));
   }
 

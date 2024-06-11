@@ -90,9 +90,22 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Initialize the feed if needed
   let pullFeed: PullFeed;
   if (argv.feed === undefined) {
-    const [pullFeed_, tx] = await PullFeed.initTx(program, conf);
-    const sig = await sendAndConfirmTx(connection, tx, [keypair]);
-    console.log(`Feed ${pullFeed_.pubkey.toBase58()} initialized: ${sig}`);
+    // Generate the feed keypair
+    const [pullFeed_, feedKp] = PullFeed.generate(program);
+    const tx = await InstructionUtils.asV0TxWithComputeIxs(
+      program,
+      [await pullFeed_.initIx(conf)],
+      1.2, // The compute units to cap the tx as a multiple of the simulated units consumed (e.g. 1.25x)
+      75_000 // The price per compute unit in microlamports
+    );
+    tx.sign([keypair, feedKp]);
+
+    // Simulate the transaction to get the price and send the tx
+    await connection.simulateTransaction(tx, txOpts);
+    console.log("Sending initialize transaction");
+    const sig = await connection.sendTransaction(tx, txOpts);
+    await connection.confirmTransaction(sig, "processed");
+    console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
     pullFeed = pullFeed_;
   } else {
     pullFeed = new PullFeed(program, new PublicKey(argv.feed));

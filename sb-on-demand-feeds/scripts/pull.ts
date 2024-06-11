@@ -1,31 +1,28 @@
 import { PublicKey, Commitment } from "@solana/web3.js";
-import * as sb from "@switchboard-xyz/on-demand";
 import {
   AnchorUtils,
   InstructionUtils,
   PullFeed,
   Queue,
-  sleep,
 } from "@switchboard-xyz/on-demand";
-import {
-  myAnchorProgram,
-  buildCoinbaseJob,
-  buildBinanceComJob,
-  buildSanctumFairPriceJob,
-  buildPythnetJob,
-  sendAndConfirmTx,
-} from "./utils";
+import { myAnchorProgram, buildCoinbaseJob, buildPythnetJob } from "./utils";
 import yargs from "yargs";
-import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { CrossbarClient, decodeString, sleep } from "@switchboard-xyz/common";
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
   mainnet: { type: "boolean", describe: "Use mainnet queue" },
 }).argv;
 
-async function myProgramIx(program: anchor.Program, feed: PublicKey) {
+async function myProgramIx(program: Program, feed: PublicKey) {
   return await program.methods.test().accounts({ feed }).instruction();
 }
+
+const crossbarClient = new CrossbarClient(
+  "https://crossbar.switchboard.xyz",
+  /* verbose= */ true
+);
 
 (async function main() {
   // Devnet default queue (cli configs must be set to devnet)
@@ -49,7 +46,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   let idl;
   try {
     console.log("Fetching IDL for program:", myProgramKeypair.publicKey.toBase58());
-    idl = await anchor.Program.fetchIdl(myProgramKeypair.publicKey, provider);
+    idl = await Program.fetchIdl(myProgramKeypair.publicKey, provider);
     if (!idl) {
       throw new Error("Failed to fetch IDL. IDL is undefined.");
     }
@@ -73,13 +70,6 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     name: "BTC Price Feed",
     // the queue of oracles to bind to
     queue,
-    // the jobs for the feed to perform
-    jobs: [
-      buildPythnetJob(
-        "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
-      ),
-      buildCoinbaseJob("BTC-USD"),
-    ],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow
@@ -94,9 +84,21 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     console.log("Initializing new data feed");
     // Generate the feed keypair
     const [pullFeed_, feedKp] = PullFeed.generate(program);
+
+    const jobs = [
+      buildPythnetJob(
+        "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
+      ),
+      buildCoinbaseJob("BTC-USD"),
+    ];
+
+    const decodedFeedHash = await crossbarClient
+      .store(queue.toBase58(), jobs)
+      .then((resp) => decodeString(resp.feedHash));
+
     const tx = await InstructionUtils.asV0TxWithComputeIxs(
       program,
-      [await pullFeed_.initIx(conf)],
+      [await pullFeed_.initIx({ ...conf, feedHash: decodedFeedHash })],
       1.2,
       75_000
     );
@@ -120,7 +122,11 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   while (true) {
     let maybePriceUpdateIx;
     try {
-      maybePriceUpdateIx = await pullFeed.fetchUpdateIx(conf);
+      maybePriceUpdateIx = await pullFeed.fetchUpdateIx({
+        ...conf,
+        // A Switchboard "Crossbar" client, used to store and retrieve jobs in this example.
+        crossbarClient,
+      });
     } catch (err) {
       console.error("Failed to fetch price update instruction");
       console.error(err);

@@ -1,28 +1,28 @@
 {
-    "scripts": {
-        "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
-    },
-    "dependencies": {
-        "@coral-xyz/anchor": "^0.29.0",
-        "@solana/spl-token": "^0.4.6",
-        "@solana/web3.js": "^1.91.9",
-        "@switchboard-xyz/common": "^2.3.31",
-        "@switchboard-xyz/on-demand": "^1.1.12",
-        "assert": "^2.1.0",
-        "big.js": "^6.2.1",
-        "bigint-buffer": "^1.1.5",
-        "bs58": "^5.0.0",
-        "yargs": "^17.7.2"
-    },
-    "devDependencies": {
-        "@types/bn.js": "^5.1.5",
-        "@types/chai": "^4.3.16",
-        "@types/mocha": "^9.1.1",
-        "chai": "^4.4.1",
-        "mocha": "^9.2.2",
-        "prettier": "^2.8.8",
-        "ts-mocha": "^10.0.0",
-        "typescript": "^4.9.5"
-    }
+  "scripts": {
+    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/spl-token": "^0.4.6",
+    "@solana/web3.js": "^1.92.3",
+    "@switchboard-xyz/common": "^2.3.38",
+    "@switchboard-xyz/on-demand": "^1.1.14",
+    "assert": "^2.1.0",
+    "big.js": "^6.2.1",
+    "bigint-buffer": "^1.1.5",
+    "bs58": "^5.0.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.5",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^9.1.1",
+    "chai": "^4.4.1",
+    "mocha": "^9.2.2",
+    "prettier": "^2.8.8",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^4.9.5"
+  }
 }

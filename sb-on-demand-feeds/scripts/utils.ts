@@ -9,11 +9,11 @@ import {
 } from "@solana/web3.js";
 
 export async function myAnchorProgram(
-  provider: anchor.Provider,
+  provider: anchor.AnchorProvider,
   myPid: PublicKey
 ): Promise<anchor.Program> {
   const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
-  const program = new anchor.Program(idl, myPid, provider);
+  const program = new anchor.Program(idl, provider);
   return program;
 }
 

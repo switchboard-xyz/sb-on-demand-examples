@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::on_demand::accounts::pull_feed::PullFeedAccountData;
 
-declare_id!("9NtDHXQNwUgGP42uMupfYxBRUWxrt2479AThApTUiVmz");
+declare_id!("2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5");
 
 fn fmt(s: &str) -> String {
     if s.len() < 18 {

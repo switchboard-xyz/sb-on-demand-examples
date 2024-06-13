@@ -31,7 +31,6 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, provider, program } =
     await AnchorUtils.loadEnv();
-  console.log("provdier", provider);
   let queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   if (argv.mainnet) {
     queue = new PublicKey("A43DyUGA7s8eXPxqEjJY6EBu1KKbNgfxF8h17VAHn13w");
@@ -48,26 +47,22 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 
   let idl;
   try {
-    console.log("Fetching IDL for program:", myProgramKeypair.publicKey.toBase58());
     idl = await anchor.Program.fetchIdl(myProgramKeypair.publicKey, provider);
     if (!idl) {
       throw new Error("Failed to fetch IDL. IDL is undefined.");
     }
-    console.log("Successfully fetched IDL");
   } catch (error) {
     console.error("Error fetching IDL:", error);
     return;
   }
 
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
-  // const myProgram = await myAnchorProgram(
-  //   provider,
-  //   new PublicKey("4Qt5WN3J79Fi5jwuoaav9iS5ZfnRJxcsskrLMAzNikBQ")
-  // );
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
+    maxRetries: 0,
   };
+
   const conf = {
     // the feed name (max 32 bytes)
     name: "BTC Price Feed",
@@ -99,8 +94,8 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     const tx = await InstructionUtils.asV0TxWithComputeIxs(
       program,
       [await pullFeed_.initIx(conf)],
-      1.2,
-      75_000
+      1.0,
+      500_000
     );
     tx.sign([keypair, feedKp]);
 
@@ -148,8 +143,8 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     const tx = await InstructionUtils.asV0TxWithComputeIxs(
       program,
       [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
-      2,
-      100_000,
+      1.3,
+      200_000,
       await Promise.all(luts)
     );
     tx.sign([keypair]);

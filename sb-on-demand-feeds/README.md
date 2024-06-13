@@ -38,7 +38,7 @@ Once deployed, you can run the demo script included here to test populating the 
 ```bash
 pnpm i
 pnpm update
-ts-node scripts/pull.ts
+ts-node scripts/createFeed.ts
 ```
 
 For documenation on how Switchboard On-Demand works click [here](https://switchboardxyz.gitbook.io/switchboard-on-demand)!

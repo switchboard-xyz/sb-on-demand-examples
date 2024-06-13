@@ -75,13 +75,6 @@ const crossbarClient = new CrossbarClient(
     name: "BTC Price Feed",
     // the queue of oracles to bind to
     queue,
-    // the jobs for the feed to perform
-    // jobs: [
-    //   buildPythnetJob(
-    //     "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
-    //   ),
-    //   buildCoinbaseJob("BTC-USD"),
-    // ],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow
@@ -181,7 +174,7 @@ const crossbarClient = new CrossbarClient(
     const logs = sim.value.logs.join();
     try {
       const simPrice = +logs.match(/price:\s*"(\d+(\.\d+)?)/)[1];
-      console.log(`${conf.name} price update:`, simPrice);
+      console.log(`${conf.name} Price update:`, simPrice);
       console.log("\tTransaction sent: ", sig);
     } catch (err) {
       console.error("Failed to parse logs for price:", sim);

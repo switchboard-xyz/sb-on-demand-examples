@@ -9,10 +9,12 @@ import {
 } from "@solana/web3.js";
 
 export async function myAnchorProgram(
-  provider: anchor.AnchorProvider,
-  myPid: PublicKey
+  provider: anchor.Provider,
+  keypath: string
 ): Promise<anchor.Program> {
-  const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
+  const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
+  const pid = myProgramKeypair.publicKey;
+  const idl = (await anchor.Program.fetchIdl(pid, provider))!;
   const program = new anchor.Program(idl, provider);
   return program;
 }

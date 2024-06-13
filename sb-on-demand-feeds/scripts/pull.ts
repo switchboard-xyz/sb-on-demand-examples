@@ -86,6 +86,8 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     minResponses: 1,
     // number of signatures to fetch per update
     numSignatures: 3,
+    // IPFS hash for feed storage
+    ipfsHash: "",
   };
 
   // Initialize the feed if needed

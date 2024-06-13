@@ -88,7 +88,7 @@ async function myAnchorProgram(
   const sbQueue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   const sbProgramId = SB_ON_DEMAND_PID;
   const sbIdl = await anchor.Program.fetchIdl(sbProgramId, provider);
-  const sbProgram = new anchor.Program(sbIdl!, sbProgramId, provider);
+  const sbProgram = new anchor.Program(sbIdl!, provider);
   const queueAccount = new Queue(sbProgram, sbQueue);
 
   // setup

@@ -15,11 +15,11 @@ dependencies:
     specifier: ^1.93.0
     version: 1.93.0
   '@switchboard-xyz/common':
-    specifier: ^2.3.38
-    version: 2.3.38
+    specifier: ^2.4.0
+    version: 2.4.0
   '@switchboard-xyz/on-demand':
-    specifier: ^1.1.17
-    version: 1.1.17(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.1.18
+    version: 1.1.18(fastestsmallesttextencoderdecoder@1.0.22)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -326,7 +326,7 @@ packages:
       fast-stable-stringify: 1.0.0
       jayson: 4.1.0
       node-fetch: 2.7.0
-      rpc-websockets: 9.0.0
+      rpc-websockets: 9.0.1
       superstruct: 1.0.4
     transitivePeerDependencies:
       - bufferutil
@@ -359,8 +359,8 @@ packages:
       tslib: 2.6.3
     dev: false
 
-  /@switchboard-xyz/common@2.3.38:
-    resolution: {integrity: sha512-DOYrZJ8CmvDDajrPWZbvP/DPlaeOLgLbT3/N7py56hF8c86dVLV69M4OlSYnHZTx4xTin91T769HnvnV17LSJQ==}
+  /@switchboard-xyz/common@2.4.0:
+    resolution: {integrity: sha512-AqLdVWiMUvLSwMZKWph/8CVhTLV2kHlYqtjitRhrDT5k29ghll9Ns2qDmRI+mHDSnYotabO8lBAaX6FYV05cjw==}
     engines: {node: '>=12'}
     dependencies:
       axios: 1.7.2
@@ -377,15 +377,15 @@ packages:
       - debug
     dev: false
 
-  /@switchboard-xyz/on-demand@1.1.17(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-LuTgvkWhXm5woZkXKqDK4OkRHcXN0iX9Gzo2hKdTns+0qy9ibLsUuIls22W+I6/Cv/fWlDFNlgnLk48Gr1jHmg==}
+  /@switchboard-xyz/on-demand@1.1.18(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-62K6oQK+o9FmZ7nWfyALHYxp3eLkzI4rRB8Kyyn0BYfRyiu7tM4MMzQg4zrGD2q7LDO8GfNjZWmH6rWBwsY8aQ==}
     engines: {node: '>= 18'}
     dependencies:
       '@coral-xyz/anchor': 0.30.0
       '@solana/spl-token': 0.4.6(@solana/web3.js@1.93.0)(fastestsmallesttextencoderdecoder@1.0.22)
       '@solana/web3.js': 1.93.0
       '@solworks/soltoolkit-sdk': 0.0.23(fastestsmallesttextencoderdecoder@1.0.22)
-      '@switchboard-xyz/common': 2.3.38
+      '@switchboard-xyz/common': 2.4.0
       axios: 1.7.2
       big.js: 6.2.1
       bs58: 5.0.0
@@ -413,7 +413,7 @@ packages:
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 12.20.55
     dev: false
 
   /@types/json5@0.0.29:
@@ -429,7 +429,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 18.19.34
       form-data: 4.0.0
     dev: false
 
@@ -455,7 +455,7 @@ packages:
   /@types/ws@7.4.7:
     resolution: {integrity: sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==}
     dependencies:
-      '@types/node': 20.14.2
+      '@types/node': 12.20.55
     dev: false
 
   /@types/ws@8.5.10:
@@ -897,6 +897,10 @@ packages:
 
   /eventemitter3@4.0.7:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
+    dev: false
+
+  /eventemitter3@5.0.1:
+    resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
     dev: false
 
   /eyes@0.1.8:
@@ -1533,14 +1537,14 @@ packages:
       supports-preserve-symlinks-flag: 1.0.0
     dev: false
 
-  /rpc-websockets@9.0.0:
-    resolution: {integrity: sha512-1yf8FM6PY6Uhip2Fe+UrgPq9EhUu0qxr5mcVSEGOTWhpzffTh5IBKy5S+C68zJv0Gg0k9ey0pw7K06+EfbnN3g==}
+  /rpc-websockets@9.0.1:
+    resolution: {integrity: sha512-JCkdc/TfJBGRfmjIFK7cmqX79nwPWUd9xCM0DAydRbdLShsW3j/GV2gmPlaFa8V1+2u4V/O47fm4ZR5+F6HyDw==}
     dependencies:
       '@swc/helpers': 0.5.11
       '@types/uuid': 8.3.4
       '@types/ws': 8.5.10
       buffer: 6.0.3
-      eventemitter3: 4.0.7
+      eventemitter3: 5.0.1
       uuid: 8.3.2
       ws: 8.17.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
     optionalDependencies:

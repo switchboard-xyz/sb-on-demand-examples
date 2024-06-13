@@ -30,7 +30,6 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 async function initializeProgram() {
   const { keypair, connection, provider, program } = await AnchorUtils.loadEnv();
   const queue = argv.mainnet ? config.mainnetQueue : config.devnetQueue;
-  await new Queue(program, queue).loadData();
   const myProgramKeypair = await AnchorUtils.initKeypairFromFile("target/deploy/sb_on_demand_solana-keypair.json");
   const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   return { keypair, connection, provider, program, myProgram, queue };
@@ -44,10 +43,7 @@ async function initializeProgram() {
   const conf = { 
     numSignatures: 3 
   };
-  
-  console.log("conf", conf);
   console.log("Using existing data feed with address:", argv.feed);
-
   while (true) {
     try {
       const [priceUpdateIx, oracleResponses, numSuccess] = await pullFeed.fetchUpdateIx({ ...conf, crossbarClient }) || [];

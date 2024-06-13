@@ -72,7 +72,7 @@ const crossbarClient = new CrossbarClient(
 
   const conf = {
     // the feed name (max 32 bytes)
-    name: "BTC Price Feed",
+    name: "BTC Price Feed Alexs Copy",
     // the queue of oracles to bind to
     queue,
     // allow 1% variance between submissions and jobs
@@ -81,25 +81,53 @@ const crossbarClient = new CrossbarClient(
     minResponses: 1,
     // number of signatures to fetch per update
     numSignatures: 3,
+    // IPFS hash for feed storage
+    ipfsHash: "",
   };
 
   // Initialize the feed if needed
   let pullFeed: PullFeed;
   if (argv.feed === undefined) {
-    console.log("Initializing new data feed");
-    // Generate the feed keypair
+    // console.log("Initializing new data feed");
+    // // Generate the feed keypair
+    // const [pullFeed_, feedKp] = PullFeed.generate(program);
+
+    // // const jobs = [
+    // //   buildPythnetJob(
+    // //     "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
+    // //   ),
+    // //   buildCoinbaseJob("BTC-USD"),
+    // // ];
+    // // console.log("jobs", jobs);
+
+    // // const decodedFeedHash = await crossbarClient
+    // // .store(queue.toBase58(), jobs)
+    // // .then((resp) => decodeString(resp.feedHash));
+
+    // const tx = await InstructionUtils.asV0TxWithComputeIxs(
+    //   program,
+    //   [await pullFeed_.initIx({ ...conf, feedHash: decodedFeedHash })],
+    //   1.2,
+    //   75_000
+    // );
+    // tx.sign([keypair, feedKp]);
+    // console.log("decodedFeedHash", decodedFeedHash);
+
+    // // Simulate the transaction to get the price and send the tx
+    // await connection.simulateTransaction(tx, txOpts);
+    // console.log("Sending initialize transaction");
+    // const sig = await connection.sendTransaction(tx, txOpts);
+    // await connection.confirmTransaction(sig, "processed");
+    // console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
+    // pullFeed = pullFeed_;
+    // await sleep(3000);
+  } else {
+    console.log("Using existing data feed with address:", argv.feed);
+    pullFeed = new PullFeed(program, new PublicKey(argv.feed));
+    let feedData = await pullFeed.loadData();
+    let decodedFeedHash =feedData.feedHash;
+    console.log("decodedFeedHash", decodedFeedHash);
     const [pullFeed_, feedKp] = PullFeed.generate(program);
-
-    const jobs = [
-      buildPythnetJob(
-        "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
-      ),
-      buildCoinbaseJob("BTC-USD"),
-    ];
-
-    const decodedFeedHash = await crossbarClient
-    .store(queue.toBase58(), jobs)
-    .then((resp) => decodeString(resp.feedHash));
 
     const tx = await InstructionUtils.asV0TxWithComputeIxs(
       program,
@@ -109,7 +137,6 @@ const crossbarClient = new CrossbarClient(
     );
     tx.sign([keypair, feedKp]);
     console.log("decodedFeedHash", decodedFeedHash);
-
     // Simulate the transaction to get the price and send the tx
     await connection.simulateTransaction(tx, txOpts);
     console.log("Sending initialize transaction");
@@ -118,9 +145,7 @@ const crossbarClient = new CrossbarClient(
     console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
     pullFeed = pullFeed_;
     await sleep(3000);
-  } else {
-    console.log("Using existing data feed with address:", argv.feed);
-    pullFeed = new PullFeed(program, new PublicKey(argv.feed));
+
   }
 
   // Send a price update with a following user instruction every N seconds

@@ -1,7 +1,6 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
-import { Provider } from "@coral-xyz/anchor";
-import { PublicKey, Commitment } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { myAnchorProgram } from "./utils";
 
 const argv = yargs(process.argv).options({ feed: { type: "string" } }).argv;
@@ -11,7 +10,7 @@ const argv = yargs(process.argv).options({ feed: { type: "string" } }).argv;
   const feed = new sb.PullFeed(program, new PublicKey(argv.feed));
   const commitment = "processed";
   const demoPath = "target/deploy/sb_on_demand_solana-keypair.json";
-  const testProgram = await myAnchorProgram(provider, demoPath);
+  const testProgram = await myAnchorProgram(program.provider, demoPath);
   const readIx = testProgram.methods.test().accounts({ feed }).instruction();
   const conf = { numSignatures: 3 };
 

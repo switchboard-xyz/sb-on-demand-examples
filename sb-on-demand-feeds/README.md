@@ -40,5 +40,17 @@ pnpm i
 pnpm update
 ts-node scripts/createFeed.ts
 ```
+We also included two other scripts, *runFeed.ts* and *copyFeed.ts*
+
+`runFeed.ts` is a super simple script to run an existing feed update that you like with just the feeds public key address!
+```
+ts-node scripts/runFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
+```
+
+`copyFeed.ts` is a script that copies the job defitinion of an existing feed but creates a new feed that you own! All you need is an existing feeds public key address.
+```
+ts-node scripts/runFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
+```
+
 
 For documenation on how Switchboard On-Demand works click [here](https://switchboardxyz.gitbook.io/switchboard-on-demand)!

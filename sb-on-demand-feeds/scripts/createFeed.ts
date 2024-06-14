@@ -47,7 +47,7 @@ const crossbarClient = new CrossbarClient(
     console.error("Queue not found, ensure you are using devnet in your env");
     return;
   }
-  const myProgramPath = "../target/deploy/sb_on_demand_solana-keypair.json";
+  const myProgramPath = "target/deploy/sb_on_demand_solana-keypair.json";
   const myProgram = await myAnchorProgram(program.provider, myProgramPath);
   const myPid = myProgram.programId;
   const idl = await anchor.Program.fetchIdl(myPid, program.provider);
@@ -88,6 +88,7 @@ const crossbarClient = new CrossbarClient(
     const decodedFeedHash = await crossbarClient
       .store(queue.toBase58(), jobs)
       .then((resp) => decodeString(resp.feedHash));
+    console.log("Feed hash:", decodedFeedHash);
 
     const tx = await sb.asV0Tx({
       connection: program.provider.connection,

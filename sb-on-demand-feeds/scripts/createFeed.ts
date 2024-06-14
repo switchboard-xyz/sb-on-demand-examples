@@ -35,8 +35,7 @@ const crossbarClient = new CrossbarClient(
 
 (async function main() {
   // Devnet default queue (cli configs must be set to devnet)
-  const { keypair, connection, provider, program } =
-    await AnchorUtils.loadEnv();
+  const { keypair, connection, program } = await AnchorUtils.loadEnv();
   let queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
   if (argv.mainnet) {
     queue = new PublicKey("A43DyUGA7s8eXPxqEjJY6EBu1KKbNgfxF8h17VAHn13w");
@@ -48,21 +47,10 @@ const crossbarClient = new CrossbarClient(
     console.error("Queue not found, ensure you are using devnet in your env");
     return;
   }
-  const myProgram = await myAnchorProgram(
-    provider,
-    "../target/deploy/sb_on_demand_solana-keypair.json"
-  );
-
-  let idl;
-  try {
-    idl = await anchor.Program.fetchIdl(myProgram.programId, provider);
-    if (!idl) {
-      throw new Error("Failed to fetch IDL. IDL is undefined.");
-    }
-  } catch (error) {
-    console.error("Error fetching IDL:", error);
-    return;
-  }
+  const myProgramPath = "../target/deploy/sb_on_demand_solana-keypair.json";
+  const myProgram = await myAnchorProgram(program.provider, myProgramPath);
+  const myPid = myProgram.programId;
+  const idl = await anchor.Program.fetchIdl(myPid, program.provider);
 
   const txOpts = {
     commitment: "processed" as Commitment,
@@ -111,8 +99,8 @@ const crossbarClient = new CrossbarClient(
     });
 
     // Simulate the transaction to get the price and send the tx
-    await connection.simulateTransaction(tx, txOpts);
     console.log("Sending initialize transaction");
+    await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
     await connection.confirmTransaction(sig, "processed");
     console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
@@ -124,29 +112,17 @@ const crossbarClient = new CrossbarClient(
   }
 
   // Send a price update with a following user instruction every N seconds
-  const interval = 3000; // ms
   while (true) {
-    let maybePriceUpdateIx;
-    try {
-      maybePriceUpdateIx = await pullFeed.fetchUpdateIx({
-        ...conf,
-        // A Switchboard "Crossbar" client, used to store and retrieve jobs in this example.
-        crossbarClient,
-      });
-    } catch (err) {
-      console.error("Failed to fetch price update instruction");
-      console.error(err);
-      await sleep(interval);
-      continue;
-    }
+    const sbResponse = await pullFeed.fetchUpdateIx({
+      ...conf,
+      // A Switchboard "Crossbar" client, used to store and retrieve jobs in this example.
+      crossbarClient,
+    });
     // Fetch the price update instruction and report the selected oracles
-    const [priceUpdateIx, oracleResponses, numSuccess] = maybePriceUpdateIx!;
-    if (numSuccess === 0) {
+    const [priceUpdateIx, oracleResponses, success] = sbResponse;
+    if (!success) {
       console.log("No price update available");
-      console.log(
-        "\tErrors:",
-        oracleResponses.map((x) => x.error)
-      );
+      console.log(`\tErrors: ${oracleResponses.map((x) => x.error)}`);
       return;
     }
 
@@ -169,15 +145,9 @@ const crossbarClient = new CrossbarClient(
     const sig = await connection.sendTransaction(tx, txOpts);
 
     // Parse the tx logs to get the price on chain
-    const logs = sim.value.logs.join();
-    try {
-      const simPrice = +logs.match(/price:\s*"(\d+(\.\d+)?)/)[1];
-      console.log(`${conf.name} Price update:`, simPrice);
-      console.log("\tTransaction sent: ", sig);
-    } catch (err) {
-      console.error("Failed to parse logs for price:", sim);
-      console.error(err);
-    }
-    await sleep(interval);
+    const simPrice = +sim.value.logs.join().match(/price: "(\d+(\.\d+)?)/)[1];
+    console.log(`${conf.name} Price update: ${simPrice}`);
+    console.log("\tTransaction sent: ", sig);
+    await sleep(3000);
   }
 })();

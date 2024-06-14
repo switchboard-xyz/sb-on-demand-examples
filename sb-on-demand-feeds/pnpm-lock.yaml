@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.4.0
     version: 2.4.0
   '@switchboard-xyz/on-demand':
-    specifier: ^1.1.18
-    version: 1.1.18(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.1.19
+    version: 1.1.19(fastestsmallesttextencoderdecoder@1.0.22)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -377,8 +377,8 @@ packages:
       - debug
     dev: false
 
-  /@switchboard-xyz/on-demand@1.1.18(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-62K6oQK+o9FmZ7nWfyALHYxp3eLkzI4rRB8Kyyn0BYfRyiu7tM4MMzQg4zrGD2q7LDO8GfNjZWmH6rWBwsY8aQ==}
+  /@switchboard-xyz/on-demand@1.1.19(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-sGqt574nJre0CHCd+8x5EK6l81PaVjHS1+LlgqdVUXKV0EnZsvflvkNYfg5TGVui2F3UdVgGkoWI2S0UMmv6+Q==}
     engines: {node: '>= 18'}
     dependencies:
       '@coral-xyz/anchor': 0.30.0
@@ -429,7 +429,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 18.19.34
+      '@types/node': 20.14.2
       form-data: 4.0.0
     dev: false
 
@@ -1016,19 +1016,6 @@ packages:
       minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
-    dev: true
-
-  /glob@7.2.3:
-    resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
-    dependencies:
-      fs.realpath: 1.0.0
-      inflight: 1.0.6
-      inherits: 2.0.4
-      minimatch: 3.1.2
-      once: 1.4.0
-      path-is-absolute: 1.0.1
-    dev: false
 
   /gopd@1.0.1:
     resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
@@ -1578,7 +1565,7 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
     dependencies:
-      glob: 7.2.3
+      glob: 7.2.0
       interpret: 1.4.0
       rechoir: 0.6.2
     dev: false

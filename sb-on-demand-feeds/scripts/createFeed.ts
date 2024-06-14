@@ -19,7 +19,6 @@ import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import { CrossbarClient, decodeString } from "@switchboard-xyz/common";
 
-
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
   mainnet: { type: "boolean", describe: "Use mainnet queue" },
@@ -49,12 +48,14 @@ const crossbarClient = new CrossbarClient(
     console.error("Queue not found, ensure you are using devnet in your env");
     return;
   }
-  const path = "target/deploy/sb_on_demand_solana-keypair.json";
-  const myProgramKeypair = await AnchorUtils.initKeypairFromFile(path);
+  const myProgram = await myAnchorProgram(
+    provider,
+    "../target/deploy/sb_on_demand_solana-keypair.json"
+  );
 
   let idl;
   try {
-    idl = await anchor.Program.fetchIdl(myProgramKeypair.publicKey, provider);
+    idl = await anchor.Program.fetchIdl(myProgram.programId, provider);
     if (!idl) {
       throw new Error("Failed to fetch IDL. IDL is undefined.");
     }
@@ -63,7 +64,6 @@ const crossbarClient = new CrossbarClient(
     return;
   }
 
-  const myProgram = await myAnchorProgram(provider, myProgramKeypair.publicKey);
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
@@ -98,17 +98,17 @@ const crossbarClient = new CrossbarClient(
     ];
 
     const decodedFeedHash = await crossbarClient
-    .store(queue.toBase58(), jobs)
-    .then((resp) => decodeString(resp.feedHash));
+      .store(queue.toBase58(), jobs)
+      .then((resp) => decodeString(resp.feedHash));
 
-    const tx = await InstructionUtils.asV0TxWithComputeIxs(
-      program,
-      [await pullFeed_.initIx({ ...conf, feedHash: decodedFeedHash })],
-      1.2,
-      75_000
-    );
-    tx.sign([keypair, feedKp]);
-    console.log("decodedFeedHash", decodedFeedHash);
+    const tx = await sb.asV0Tx({
+      connection: program.provider.connection,
+      ixs: [await pullFeed_.initIx({ ...conf, feedHash: decodedFeedHash })],
+      payer: keypair.publicKey,
+      signers: [keypair, feedKp],
+      computeUnitPrice: 75_000,
+      computeUnitLimitMultiple: 1.3,
+    });
 
     // Simulate the transaction to get the price and send the tx
     await connection.simulateTransaction(tx, txOpts);
@@ -155,14 +155,14 @@ const crossbarClient = new CrossbarClient(
     luts.push(pullFeed.loadLookupTable());
 
     // Construct the transaction
-    const tx = await InstructionUtils.asV0TxWithComputeIxs(
-      program,
-      [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
-      1.3,
-      200_000,
-      await Promise.all(luts)
-    );
-    tx.sign([keypair]);
+    const tx = await sb.asV0Tx({
+      connection: program.provider.connection,
+      ixs: [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
+      computeUnitPrice: 200_000,
+      computeUnitLimitMultiple: 1.3,
+      signers: [keypair],
+      lookupTables: await Promise.all(luts),
+    });
 
     // Simulate the transaction to get the price and send the tx
     const sim = await connection.simulateTransaction(tx, txOpts);

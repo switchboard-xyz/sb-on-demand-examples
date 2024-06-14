@@ -7,6 +7,7 @@ import {
   VersionedTransaction,
   TransactionSignature,
 } from "@solana/web3.js";
+import * as sb from "@switchboard-xyz/on-demand";
 
 export async function myAnchorProgram(
   provider: anchor.Provider,

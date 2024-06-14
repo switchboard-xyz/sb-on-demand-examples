@@ -49,26 +49,18 @@ const crossbarClient = new CrossbarClient(
   }
   const myProgramPath = "target/deploy/sb_on_demand_solana-keypair.json";
   const myProgram = await myAnchorProgram(program.provider, myProgramPath);
-  const myPid = myProgram.programId;
-  const idl = await anchor.Program.fetchIdl(myPid, program.provider);
-
+  
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
     maxRetries: 0,
   };
-
   const conf = {
-    // the feed name (max 32 bytes)
-    name: "BTC Price Feed",
-    // the queue of oracles to bind to
-    queue,
-    // allow 1% variance between submissions and jobs
-    maxVariance: 1.0,
-    // minimum number of responses of jobs to allow
-    minResponses: 1,
-    // number of signatures to fetch per update
-    numSignatures: 3,
+    name: "BTC Price Feed", // the feed name (max 32 bytes)
+    queue,// the queue of oracles to bind to
+    maxVariance: 1.0,// allow 1% variance between submissions and jobs
+    minResponses: 1,// minimum number of responses of jobs to allow
+    numSignatures: 3,// number of signatures to fetch per update
   };
 
   // Initialize the feed if needed
@@ -77,14 +69,12 @@ const crossbarClient = new CrossbarClient(
     console.log("Initializing new data feed");
     // Generate the feed keypair
     const [pullFeed_, feedKp] = PullFeed.generate(program);
-
     const jobs = [
       buildPythnetJob(
         "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
       ),
       buildCoinbaseJob("BTC-USD"),
     ];
-
     const decodedFeedHash = await crossbarClient
       .store(queue.toBase58(), jobs)
       .then((resp) => decodeString(resp.feedHash));
@@ -98,12 +88,9 @@ const crossbarClient = new CrossbarClient(
       computeUnitPrice: 75_000,
       computeUnitLimitMultiple: 1.3,
     });
-
-    // Simulate the transaction to get the price and send the tx
     console.log("Sending initialize transaction");
-    await connection.simulateTransaction(tx, txOpts);
+    const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
-    await connection.confirmTransaction(sig, "processed");
     console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
     pullFeed = pullFeed_;
     await sleep(3000);
@@ -114,41 +101,23 @@ const crossbarClient = new CrossbarClient(
 
   // Send a price update with a following user instruction every N seconds
   while (true) {
-    const sbResponse = await pullFeed.fetchUpdateIx({
-      ...conf,
-      // A Switchboard "Crossbar" client, used to store and retrieve jobs in this example.
-      crossbarClient,
-    });
-    // Fetch the price update instruction and report the selected oracles
-    const [priceUpdateIx, oracleResponses, success] = sbResponse;
-    if (!success) {
-      console.log("No price update available");
-      console.log(`\tErrors: ${oracleResponses.map((x) => x.error)}`);
-      return;
-    }
+    const [pullIx, responses, success] = await pullFeed.fetchUpdateIx(conf);
+    if (!success) throw new Error(`Errors: ${responses.map((x) => x.error)}`);
 
-    // Load the lookup tables
-    const luts = oracleResponses.map((x) => x.oracle.loadLookupTable());
-    luts.push(pullFeed.loadLookupTable());
-
-    // Construct the transaction
+    const lutOwners = [...responses.map((x) => x.oracle), pullFeed.pubkey];
     const tx = await sb.asV0Tx({
-      connection: program.provider.connection,
-      ixs: [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
+      connection,
+      ixs: [pullIx, await myProgramIx(myProgram, pullFeed.pubkey)],
+      signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,
-      signers: [keypair],
-      lookupTables: await Promise.all(luts),
+      lookupTables: await sb.loadLookupTables(lutOwners),
     });
 
-    // Simulate the transaction to get the price and send the tx
     const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
-
-    // Parse the tx logs to get the price on chain
     const simPrice = +sim.value.logs.join().match(/price: "(\d+(\.\d+)?)/)[1];
-    console.log(`${conf.name} Price update: ${simPrice}`);
-    console.log("\tTransaction sent: ", sig);
-    await sleep(3000);
+    console.log(`Price update: ${simPrice}\n\tTransaction sent: ${sig}`);
+    await sb.sleep(3000);
   }
 })();

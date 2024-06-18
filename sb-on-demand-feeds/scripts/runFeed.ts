@@ -11,7 +11,9 @@ const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
   const feedAccount = new sb.PullFeed(program, feed);
   const commitment = "processed";
   const demoPath = "target/deploy/sb_on_demand_solana-keypair.json";
-  const demo = await myAnchorProgram(program.provider, demoPath);
+  const demo = await myAnchorProgram(program.provider, demoPath).catch((e) => {
+    throw new Error("Failed to load demo program. Was it deployed?");
+  });
   const myIx = await demo.methods.test().accounts({ feed }).instruction();
   const conf = { numSignatures: 3 };
 

@@ -49,7 +49,7 @@ ts-node scripts/runFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
 
 `copyFeed.ts` is a script that copies the job defitinion of an existing feed but creates a new feed that you own! All you need is an existing feeds public key address.
 ```
-ts-node scripts/runFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
+ts-node scripts/copyFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
 ```
 
 

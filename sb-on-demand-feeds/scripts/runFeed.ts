@@ -7,8 +7,7 @@ const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
 
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
-  //const feed = new PublicKey(argv.feed);
-  const feed = new PublicKey("AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15");
+  const feed = new PublicKey(argv.feed);
   const feedAccount = new sb.PullFeed(program, feed);
   const commitment = "processed";
   const demoPath = "target/deploy/sb_on_demand_solana-keypair.json";

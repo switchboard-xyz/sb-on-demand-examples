@@ -1,10 +1,8 @@
 import { PublicKey, Commitment } from "@solana/web3.js";
 import {
   AnchorUtils,
-  InstructionUtils,
   PullFeed,
   Queue,
-  sleep,
 } from "@switchboard-xyz/on-demand";
 import { SwitchboardSecrets, FeedHash} from "@switchboard-xyz/common";
 import {

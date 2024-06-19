@@ -9,7 +9,6 @@ import {
 import { SwitchboardSecrets, FeedHash} from "@switchboard-xyz/common";
 import {
   myAnchorProgram,
-  sendAndConfirmTx,
   buildSecretsJob,
   ensureUserExists,
   ensureSecretExists,
@@ -19,6 +18,8 @@ import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import dotenv from "dotenv";
 import nacl from "tweetnacl";
+import * as sb from "@switchboard-xyz/on-demand";
+
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
@@ -81,9 +82,6 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     minResponses: 1,
     // number of signatures to fetch per update
     numSignatures: 3,
-    // IPFS for feed storage
-    ipfsHash: "",
-
   };
 
   const feed_hash = FeedHash.compute(queue.toBuffer(), conf.jobs);
@@ -95,19 +93,19 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   if (argv.feed === undefined) {
     // Generate the feed keypair
     const [pullFeed_, feedKp] = PullFeed.generate(program);
-    const tx = await InstructionUtils.asV0TxWithComputeIxs(
-      program,
-      [await pullFeed_.initIx(conf)],
-      1.2, // The compute units to cap the tx as a multiple of the simulated units consumed (e.g. 1.25x)
-      75_000 // The price per compute unit in microlamports
-    );
+    const tx = await sb.asV0Tx({
+      connection: program.provider.connection,
+      ixs: [await pullFeed_.initIx({ ...conf, feedHash: feed_hash })],
+      payer: keypair.publicKey,
+      signers: [keypair, feedKp],
+      computeUnitPrice: 75_000,
+      computeUnitLimitMultiple: 1.3,
+    });;
     tx.sign([keypair, feedKp]);
 
-    // Simulate the transaction to get the price and send the tx
-    await connection.simulateTransaction(tx, txOpts);
     console.log("Sending initialize transaction");
+    const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
-    await connection.confirmTransaction(sig, "processed");
     console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
     pullFeed = pullFeed_;
   } else {
@@ -121,54 +119,23 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   console.log("\n🔒 Step 6: Run the Feed Update Loop..");
   const interval = 3000; // ms
   while (true) {
-    let maybePriceUpdateIx;
-    try {
-      maybePriceUpdateIx = await pullFeed.fetchUpdateIx(conf);
-    } catch (err) {
-      console.error("Failed to fetch temperature update instruction");
-      console.error(err);
-      await sleep(interval);
-      continue;
-    }
-    // Fetch the price update instruction and report the selected oracles
-    const [priceUpdateIx, oracleResponses, numSuccess] = maybePriceUpdateIx!;
-    if (numSuccess === 0) {
-      console.log("No temperature update available");
-      console.log(
-        "\tErrors:",
-        oracleResponses.map((x) => x.error)
-      );
-      return;
-    }
+    const [pullIx, responses, success] = await pullFeed.fetchUpdateIx(conf);
+    if (!success) throw new Error(`Errors: ${responses.map((x) => x.error)}`);
 
-    // Load the lookup tables
-    const luts = oracleResponses.map((x) => x.oracle.loadLookupTable());
-    luts.push(pullFeed.loadLookupTable());
+    const lutOwners = [...responses.map((x) => x.oracle), pullFeed.pubkey];
+    const tx = await sb.asV0Tx({
+      connection,
+      ixs: [pullIx, await myProgramIx(myProgram, pullFeed.pubkey)],
+      signers: [keypair],
+      computeUnitPrice: 200_000,
+      computeUnitLimitMultiple: 1.3,
+      lookupTables: await sb.loadLookupTables(lutOwners),
+    });
 
-    // Construct the transaction
-    const tx = await InstructionUtils.asV0TxWithComputeIxs(
-      program,
-      [priceUpdateIx, await myProgramIx(myProgram, pullFeed.pubkey)],
-      2,
-      100_000,
-      await Promise.all(luts)
-    );
-    tx.sign([keypair]);
-
-    // Simulate the transaction to get the price and send the tx
     const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
-
-    // Parse the tx logs to get the price on chain
-    const logs = sim.value.logs.join();
-    try {
-      const simPrice = +logs.match(/temperature:\s*"(\d+(\.\d+)?)/)[1];
-      console.log(`${conf.name} Temperature update:`, simPrice);
-      console.log("\tTransaction sent: ", sig);
-    } catch (err) {
-      console.error("Failed to parse logs for price:", sim);
-      console.error(err);
-    }
-    await sleep(interval);
+    const simPrice = +sim.value.logs.join().match(/temperature: "(\d+(\.\d+)?)/)[1];
+    console.log(`Temperature update of Aspen in Degrees Celcius: ${simPrice}\n\tTransaction sent: ${sig}`);
+    await sb.sleep(3000);
   }
 })();

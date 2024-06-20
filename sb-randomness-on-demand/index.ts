@@ -1,11 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
+import * as sb from "@switchboard-xyz/on-demand";
 import {
   Connection,
   PublicKey,
   Keypair,
   Transaction,
   SystemProgram,
-  VersionedTransaction,
+  VersionedTransaction, Commitment
 } from "@solana/web3.js";
 import {
   AnchorUtils,
@@ -23,12 +24,22 @@ const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
 const COMMITMENT = "confirmed";
 
-async function myAnchorProgram(
+// async function myAnchorProgram(
+//   provider: anchor.Provider,
+//   myPid: PublicKey
+// ): Promise<anchor.Program> {
+//   const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
+//   const program = new anchor.Program(idl, provider);
+//   return program;
+// }
+export async function myAnchorProgram(
   provider: anchor.Provider,
-  myPid: PublicKey
+  keypath: string
 ): Promise<anchor.Program> {
-  const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
-  const program = new anchor.Program(idl, myPid, provider);
+  const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
+  const pid = myProgramKeypair.publicKey;
+  const idl = (await anchor.Program.fetchIdl(pid, provider))!;
+  const program = new anchor.Program(idl, provider);
   return program;
 }
 
@@ -94,9 +105,14 @@ async function myAnchorProgram(
   // setup
   const path = "sb-randomness/target/deploy/sb_randomness-keypair.json";
   const [_, myProgramKeypair] = await AnchorUtils.initWalletFromFile(path);
-  const coinFlipProgramId = myProgramKeypair.publicKey;
-  const coinFlipProgram = await myAnchorProgram(provider, coinFlipProgramId);
+  const coinFlipProgramId = new PublicKey(myProgramKeypair.publicKey.toString());
+  const coinFlipProgram = await myAnchorProgram(provider, coinFlipProgramId.toString());
 
+  const txOpts = {
+    commitment: "processed" as Commitment,
+    skipPreflight: true,
+    maxRetries: 0,
+  };
   await pauseForEffect("Now, let us begin our journey through the stars.");
 
   const rngKp = Keypair.generate();
@@ -106,11 +122,21 @@ async function myAnchorProgram(
     "The Oracle whispers of futures unseen, awaiting our command to cast the die."
   );
 
-  const tx = await InstructionUtils.asV0Tx(sbProgram, [ix]);
+  // const tx = await InstructionUtils.asV0Tx(sbProgram, [ix]);
+  const tx = await sb.asV0Tx({
+    connection: sbProgram.provider.connection,
+    ixs: [ix],
+    payer: keypair.publicKey,
+    signers: [keypair, rngKp],
+    computeUnitPrice: 75_000,
+    computeUnitLimitMultiple: 1.3,
+  });
   console.log("");
-  tx.sign([payer, rngKp]);
-  const sig1 = await connection.sendTransaction(tx);
-  await connection.confirmTransaction(sig1);
+  //tx.sign([payer, rngKp]);
+  // const sig1 = await connection.sendTransaction(tx);
+  // await connection.confirmTransaction(sig1);
+  const sim = await connection.simulateTransaction(tx, txOpts);
+  const sig1 = await connection.sendTransaction(tx, txOpts);
   console.log("\n✨ Step 2: The Alignment of Celestial Forces ✨");
 
   // initialise game state
@@ -121,7 +147,7 @@ async function myAnchorProgram(
   const [playerStateAccount] = await PublicKey.findProgramAddress(
     [Buffer.from(PLAYER_STATE_SEED), payer.publicKey.toBuffer()],
     coinFlipProgramId
-  );
+  ) as [PublicKey, number];
 
   // Find the escrow account PDA
   const [escrowAccount, escrowBump] = await PublicKey.findProgramAddress(

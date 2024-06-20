@@ -24,14 +24,7 @@ const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
 const COMMITMENT = "confirmed";
 
-// async function myAnchorProgram(
-//   provider: anchor.Provider,
-//   myPid: PublicKey
-// ): Promise<anchor.Program> {
-//   const idl = (await anchor.Program.fetchIdl(myPid, provider))!;
-//   const program = new anchor.Program(idl, provider);
-//   return program;
-// }
+
 export async function myAnchorProgram(
   provider: anchor.Provider,
   keypath: string
@@ -39,6 +32,7 @@ export async function myAnchorProgram(
   const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
   const pid = myProgramKeypair.publicKey;
   const idl = (await anchor.Program.fetchIdl(pid, provider))!;
+  console.log("Program IDL", idl);
   const program = new anchor.Program(idl, provider);
   return program;
 }
@@ -337,7 +331,8 @@ async function ensurePlayerStateInitialized(
 ): Promise<void> {
   try {
     // Try to fetch the game state account
-    await program.account.playerState.fetch(playerStateAccount);
+    //await program.account.PlayerState.fetch(playerStateAccount);
+    //await program.account.playerState.fetch(playerStateAccount);
   } catch (error) {
     // Initialize the game state account
     const initTx = new Transaction().add(
@@ -387,4 +382,14 @@ function fileExists(path: string): boolean {
     return false;
   }
   return true;
+}
+
+
+interface PlayerState {
+  allowed_user: PublicKey;
+  latest_flip_result: boolean;
+  randomness_account: PublicKey;
+  current_guess: boolean;
+  wager: anchor.BN;
+  bump: number;
 }

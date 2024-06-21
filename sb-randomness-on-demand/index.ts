@@ -6,7 +6,8 @@ import {
   Keypair,
   Transaction,
   SystemProgram,
-  VersionedTransaction, Commitment
+  VersionedTransaction,
+  Commitment,
 } from "@solana/web3.js";
 import {
   AnchorUtils,
@@ -23,7 +24,6 @@ import reader from "readline-sync";
 const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
 const COMMITMENT = "confirmed";
-
 
 export async function myAnchorProgram(
   provider: anchor.Provider,
@@ -98,9 +98,8 @@ export async function myAnchorProgram(
 
   // setup
   const path = "sb-randomness/target/deploy/sb_randomness-keypair.json";
-  const [_, myProgramKeypair] = await AnchorUtils.initWalletFromFile(path);
-  const coinFlipProgramId = new PublicKey(myProgramKeypair.publicKey.toString());
-  const coinFlipProgram = await myAnchorProgram(provider, coinFlipProgramId.toString());
+  const coinFlipProgram = await myAnchorProgram(sbProgram.provider, path);
+  const coinFlipProgramId = coinFlipProgram.programId;
 
   const txOpts = {
     commitment: "processed" as Commitment,
@@ -138,10 +137,10 @@ export async function myAnchorProgram(
     "As celestial forces align, the stage is set for a quantum leap of fate."
   );
 
-  const [playerStateAccount] = await PublicKey.findProgramAddress(
+  const [playerStateAccount] = (await PublicKey.findProgramAddress(
     [Buffer.from(PLAYER_STATE_SEED), payer.publicKey.toBuffer()],
     coinFlipProgramId
-  ) as [PublicKey, number];
+  )) as [PublicKey, number];
 
   // Find the escrow account PDA
   const [escrowAccount, escrowBump] = await PublicKey.findProgramAddress(
@@ -383,7 +382,6 @@ function fileExists(path: string): boolean {
   }
   return true;
 }
-
 
 interface PlayerState {
   allowed_user: PublicKey;

@@ -128,8 +128,8 @@ let argv = yargs(process.argv).options({
 
   // commit ix
   const commitIx = await randomness.commitIx(queue);
+  
   // call coinflip program Ix
-
   const coinFlipIx = await myProgram.methods
     .coinFlip(rngKp.publicKey, userGuess)
     .accounts({
@@ -181,6 +181,7 @@ let argv = yargs(process.argv).options({
   const sig5 = await connection.sendTransaction(revealTx, txOpts);
   await connection.confirmTransaction(sig5, COMMITMENT);
   console.log("Transaction Signature revealTx", sig5);
+  
 })();
 
 function getUserGuessFromCommandLine(): boolean {

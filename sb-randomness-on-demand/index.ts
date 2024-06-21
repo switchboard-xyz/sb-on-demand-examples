@@ -56,7 +56,7 @@ export async function myAnchorProgram(
     ).blockhash;
     tx.sign([keypair]);
     const sig = await connection.sendTransaction(tx);
-    await connection.confirmTransaction(sig);
+    await connection.confirmTransaction(sig, { commitment: "confirmed" });
     console.log(
       "\n💫 With bated breath, we watched as the oracle unveiled our destiny: 💫"
     );
@@ -127,9 +127,9 @@ export async function myAnchorProgram(
   console.log("");
   //tx.sign([payer, rngKp]);
   // const sig1 = await connection.sendTransaction(tx);
-  // await connection.confirmTransaction(sig1);
   const sim = await connection.simulateTransaction(tx, txOpts);
   const sig1 = await connection.sendTransaction(tx, txOpts);
+  await connection.confirmTransaction(sig1, commitment);
   console.log("\n✨ Step 2: The Alignment of Celestial Forces ✨");
 
   // initialise game state
@@ -205,6 +205,7 @@ export async function myAnchorProgram(
   // Add the coin flip instruction to
   transaction1.add(commitIx, coinFlipIx);
   const sig2 = await provider.sendAndConfirm(transaction1, [payer]);
+  await connection.confirmTransaction(sig2, commitment);
   console.log(
     "\n✨ As the cosmic dust settles, our fate is now irrevocably bound to the whims of the universe. The Commitment Ceremony is complete. ✨"
   );
@@ -316,7 +317,8 @@ async function ensureAccountFunded(
         lamports: amountToFund,
       })
     );
-    await provider.sendAndConfirm(transferTx, [payer]);
+    const sig = await provider.sendAndConfirm(transferTx, [payer]);
+    await connection.confirmTransaction(sig, { commitment: "confirmed" });
   } else {
   }
 }
@@ -346,6 +348,7 @@ async function ensurePlayerStateInitialized(
     );
 
     const signature = await provider.sendAndConfirm(initTx, [payer]);
+    await connection.confirmTransaction(signature, { commitment: "confirmed" });
   }
 }
 

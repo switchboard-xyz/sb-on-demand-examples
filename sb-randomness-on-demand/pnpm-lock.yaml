@@ -6,7 +6,7 @@ settings:
 
 dependencies:
   '@coral-xyz/anchor':
-    specifier: ^0.30.0
+    specifier: '=0.30.0'
     version: 0.30.0
   '@solana/spl-token':
     specifier: ^0.4.6
@@ -15,7 +15,7 @@ dependencies:
     specifier: ^1.93.0
     version: 1.93.0
   '@switchboard-xyz/on-demand':
-    specifier: ^1.1.23
+    specifier: '=1.1.23'
     version: 1.1.23(fastestsmallesttextencoderdecoder@1.0.22)
   '@switchboard-xyz/solana.js':
     specifier: ^3.2.5

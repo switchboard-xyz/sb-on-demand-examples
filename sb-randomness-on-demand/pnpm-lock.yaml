@@ -15,8 +15,8 @@ dependencies:
     specifier: ^1.93.0
     version: 1.93.0
   '@switchboard-xyz/on-demand':
-    specifier: ^1.1.21
-    version: 1.1.21(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.1.22
+    version: 1.1.22(fastestsmallesttextencoderdecoder@1.0.22)
   '@switchboard-xyz/solana.js':
     specifier: ^3.2.5
     version: 3.2.5(fastestsmallesttextencoderdecoder@1.0.22)
@@ -606,7 +606,7 @@ packages:
       '@solana/spl-token': 0.3.11(@solana/web3.js@1.93.0)(fastestsmallesttextencoderdecoder@1.0.22)
       '@solana/web3.js': 1.93.0
       '@types/bn.js': 5.1.5
-      '@types/node': 18.19.37
+      '@types/node': 18.19.38
       '@types/node-fetch': 2.6.11
       bn.js: 5.2.1
       decimal.js: 10.4.3
@@ -664,8 +664,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/on-demand@1.1.21(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-Gkm5w8czndquCI2nmkKIv8aGcXd3RWeb7UNJ0/ReSvRrvuLiw78T6IebhNQepJHW2lcvUVMeiOCJojTcWIUHAg==}
+  /@switchboard-xyz/on-demand@1.1.22(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-DwuBmeQrbHsNbSEmMhyBEjn5hZRSOqrfM0S9+FVygMchX4SFdHz4HdX7xIHle30Wf+0zM7P/C2dxyylPfuaXrg==}
     engines: {node: '>= 18'}
     dependencies:
       '@coral-xyz/anchor': 0.30.0
@@ -767,8 +767,8 @@ packages:
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
     dev: false
 
-  /@types/node@18.19.37:
-    resolution: {integrity: sha512-Pi53fdVMk7Ig5IfAMltQQMgtY7xLzHaEous8IQasYsdQbYK3v90FkxI3XYQCe/Qme58pqp14lXJIsFmGP8VoZQ==}
+  /@types/node@18.19.38:
+    resolution: {integrity: sha512-SApYXUF7si4JJ+lO2o6X60OPOnA6wPpbiB09GMCkQ+JAwpa9hxUVG8p7GzA08TKQn5OhzK57rj1wFj+185YsGg==}
     dependencies:
       undici-types: 5.26.5
     dev: false

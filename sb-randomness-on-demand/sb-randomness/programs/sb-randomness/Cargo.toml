@@ -1,0 +1,25 @@
+[package]
+name = "sb-randomness"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "sb_randomness"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = "=0.30.0"
+solana-program = "=1.17"
+bytemuck = "1.15.0"
+switchboard-on-demand = "0.1.6"
+
+

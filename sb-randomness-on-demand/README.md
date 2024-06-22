@@ -16,6 +16,8 @@ randomness solution on Solana.
 To read more about the adversarial assumptions that Switchboard Randomness
 On-Demand makes, please see: [https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness](https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness)
 
+#### PLEASE ENSURE YOU USE ANCHOR VERSION 0.30.0. 
+
 Configure the `anchor.toml` file to point to your solana wallet and the Solana cluster of your choice - Devnet, Mainnet, etc.
 
 Then, to see the power of on-demand feeds, run the following:

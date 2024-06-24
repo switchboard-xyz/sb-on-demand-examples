@@ -6,13 +6,10 @@ import {
   Queue,
   sleep,
 } from "@switchboard-xyz/on-demand";
-import {
-  myAnchorProgram,
-} from "./utils";
+import { myAnchorProgram } from "./utils";
 import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import { CrossbarClient, decodeString } from "@switchboard-xyz/common";
-
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
@@ -62,6 +59,10 @@ const crossbarClient = new CrossbarClient(
     minResponses: 1,
     // number of signatures to fetch per update
     numSignatures: 3,
+    // minimum number of responses to sample
+    minSampleSize: 1,
+    // maximum staleness of responses in seconds to sample
+    maxStaleness: 60,
   };
 
   // Initialize the feed

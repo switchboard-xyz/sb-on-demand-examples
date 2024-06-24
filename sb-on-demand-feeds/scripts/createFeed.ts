@@ -49,7 +49,7 @@ const crossbarClient = new CrossbarClient(
   }
   const myProgramPath = "target/deploy/sb_on_demand_solana-keypair.json";
   const myProgram = await myAnchorProgram(program.provider, myProgramPath);
-  
+
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: true,
@@ -57,10 +57,12 @@ const crossbarClient = new CrossbarClient(
   };
   const conf = {
     name: "BTC Price Feed", // the feed name (max 32 bytes)
-    queue,// the queue of oracles to bind to
-    maxVariance: 1.0,// allow 1% variance between submissions and jobs
-    minResponses: 1,// minimum number of responses of jobs to allow
-    numSignatures: 3,// number of signatures to fetch per update
+    queue, // the queue of oracles to bind to
+    maxVariance: 1.0, // allow 1% variance between submissions and jobs
+    minResponses: 1, // minimum number of responses of jobs to allow
+    numSignatures: 3, // number of signatures to fetch per update
+    minSampleSize: 1, // minimum number of responses to sample
+    maxStaleness: 60, // maximum staleness of responses in seconds to sample
   };
 
   // Initialize the feed if needed
@@ -116,7 +118,9 @@ const crossbarClient = new CrossbarClient(
 
     const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
-    const simPrice = +sim.value.logs.join().match(/price: "(\d+(\.\d+)?)/)[1];
+    const simPrice = +sim.value.logs
+      .join()
+      .match(/price: Some\((\d+(\.\d+)?)\)/)[1];
     console.log(`Price update: ${simPrice}\n\tTransaction sent: ${sig}`);
     await sb.sleep(3000);
   }

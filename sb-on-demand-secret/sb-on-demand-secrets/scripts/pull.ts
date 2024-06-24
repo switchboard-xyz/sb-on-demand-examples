@@ -1,23 +1,18 @@
 import { PublicKey, Commitment } from "@solana/web3.js";
-import {
-  AnchorUtils,
-  PullFeed,
-  Queue,
-} from "@switchboard-xyz/on-demand";
-import { SwitchboardSecrets, FeedHash} from "@switchboard-xyz/common";
+import { AnchorUtils, PullFeed, Queue } from "@switchboard-xyz/on-demand";
+import { SwitchboardSecrets, FeedHash } from "@switchboard-xyz/common";
 import {
   myAnchorProgram,
   buildSecretsJob,
   ensureUserExists,
   ensureSecretExists,
-  whitelistFeedHash
+  whitelistFeedHash,
 } from "./utils";
 import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import dotenv from "dotenv";
 import nacl from "tweetnacl";
 import * as sb from "@switchboard-xyz/on-demand";
-
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
@@ -50,7 +45,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   };
 
   // secrets start
-  const secretNameTask = "${OPEN_WEATHER_API_KEY}"
+  const secretNameTask = "${OPEN_WEATHER_API_KEY}";
   const secretName = "OPEN_WEATHER_API_KEY";
   // Pull in API Key from .env file
   const API_KEY = process.env.OPEN_WEATHER_API_KEY;
@@ -63,7 +58,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   const user = await ensureUserExists(sbSecrets, keypair, nacl);
 
   console.log("\n🔒 Step 2: Checking and Creating the Secret");
-  const secret = await ensureSecretExists(sbSecrets, keypair, nacl, secretName, secretValue);
+  const secret = await ensureSecretExists(
+    sbSecrets,
+    keypair,
+    nacl,
+    secretName,
+    secretValue
+  );
 
   console.log("\n🔒 Step 3: Building Feed Configuration");
   // configure the feed
@@ -80,6 +81,10 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     minResponses: 1,
     // number of signatures to fetch per update
     numSignatures: 3,
+    // minimum number of samples to save a new value
+    minSampleSize: 1,
+    // maximum staleness of a sample in seconds
+    maxStaleness: 60,
   };
 
   const feed_hash = FeedHash.compute(queue.toBuffer(), conf.jobs);
@@ -98,7 +103,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
       signers: [keypair, feedKp],
       computeUnitPrice: 75_000,
       computeUnitLimitMultiple: 1.3,
-    });;
+    });
     tx.sign([keypair, feedKp]);
 
     console.log("Sending initialize transaction");
@@ -111,7 +116,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   }
 
   console.log("\n🔒 Step 5: Whitelist the feed hash to the secret");
-  const whitelistConfirmation = await whitelistFeedHash(sbSecrets, keypair, nacl, feed_hash, secretName);
+  const whitelistConfirmation = await whitelistFeedHash(
+    sbSecrets,
+    keypair,
+    nacl,
+    feed_hash,
+    secretName
+  );
 
   // Send a temp update with a following user in struction every N seconds
   console.log("\n🔒 Step 6: Run the Feed Update Loop..");
@@ -132,8 +143,12 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 
     const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
-    const simPrice = +sim.value.logs.join().match(/temperature: "(\d+(\.\d+)?)/)[1];
-    console.log(`Temperature update of Aspen in Degrees Celcius: ${simPrice}\n\tTransaction sent: ${sig}`);
+    const simPrice = +sim.value.logs
+      .join()
+      .match(/temperature: "(\d+(\.\d+)?)/)[1];
+    console.log(
+      `Temperature update of Aspen in Degrees Celcius: ${simPrice}\n\tTransaction sent: ${sig}`
+    );
     await sb.sleep(3000);
   }
 })();

@@ -17,7 +17,6 @@ export async function myAnchorProgram(
   return program;
 }
 
-
 export async function sendAndConfirmTx(
   connection: Connection,
   tx: VersionedTransaction,
@@ -29,40 +28,47 @@ export async function sendAndConfirmTx(
   return sig;
 }
 
-
-
-export function buildSecretsJob(secretNameTask: string, keypair: Keypair): OracleJob {
+export function buildSecretsJob(
+  secretNameTask: string,
+  keypair: Keypair
+): OracleJob {
   const jobConfig = {
     tasks: [
       {
         secretsTask: {
           authority: keypair.publicKey.toBase58(),
-        }
+        },
       },
       {
         httpTask: {
           url: `https://api.openweathermap.org/data/2.5/weather?q=aspen,us&appid=${secretNameTask}&units=metric`,
-        }
+        },
       },
       {
         jsonParseTask: {
-          path: "$.main.temp"
-        }
+          path: "$.main.temp",
+        },
       },
     ],
   };
   return OracleJob.fromObject(jobConfig);
 }
 
-
 export async function ensureUserExists(sbSecrets, keypair, nacl) {
   try {
-    const user = await sbSecrets.getUser(keypair.publicKey.toBase58(), "ed25519");
+    const user = await sbSecrets.getUser(
+      keypair.publicKey.toBase58(),
+      "ed25519"
+    );
     console.log("User found", user);
-    return user;  // Return the user if found
+    return user; // Return the user if found
   } catch (error) {
     console.log("User not found, creating user");
-    const payload = await sbSecrets.createOrUpdateUserRequest(keypair.publicKey.toBase58(), "ed25519", "");
+    const payload = await sbSecrets.createOrUpdateUserRequest(
+      keypair.publicKey.toBase58(),
+      "ed25519",
+      ""
+    );
     const signature = nacl.sign.detached(
       new Uint8Array(payload.toEncodedMessage()),
       keypair.secretKey
@@ -72,18 +78,29 @@ export async function ensureUserExists(sbSecrets, keypair, nacl) {
       Buffer.from(signature).toString("base64")
     );
     console.log("User created", user);
-    return user;  // Return the new user
+    return user; // Return the new user
   }
 }
 
-export async function ensureSecretExists(sbSecrets, keypair, nacl, secretName, secretValue) {
+export async function ensureSecretExists(
+  sbSecrets,
+  keypair,
+  nacl,
+  secretName,
+  secretValue
+) {
   // Retrieve the user's secrets
-  const userSecrets = await sbSecrets.getUserSecrets(keypair.publicKey.toBase58(), "ed25519");
-  const existingSecret = userSecrets.find(secret => secret.secret_name === secretName);
+  const userSecrets = await sbSecrets.getUserSecrets(
+    keypair.publicKey.toBase58(),
+    "ed25519"
+  );
+  const existingSecret = userSecrets.find(
+    (secret) => secret.secret_name === secretName
+  );
 
   if (existingSecret) {
     console.log(`Secret '${secretName}' already exists. No need to create.`);
-    return existingSecret;  // Return the existing secret
+    return existingSecret; // Return the existing secret
   } else {
     console.log(`Secret '${secretName}' not found. Creating now...`);
     const secretRequest = sbSecrets.createSecretRequest(
@@ -101,15 +118,21 @@ export async function ensureSecretExists(sbSecrets, keypair, nacl, secretName, s
       Buffer.from(secretSignature).toString("base64")
     );
     console.log("Secret created:", secret);
-    return secret;  // Return the new secret
+    return secret; // Return the new secret
   }
 }
 
-export async function whitelistFeedHash(sbSecrets, keypair, nacl, feedHash, secretName) {
+export async function whitelistFeedHash(
+  sbSecrets,
+  keypair,
+  nacl,
+  feedHash,
+  secretName
+) {
   const addWhitelist = await sbSecrets.createAddMrEnclaveRequest(
     keypair.publicKey.toBase58(),
     "ed25519",
-    feedHash.toString('hex'),
+    feedHash.toString("hex"),
     [secretName]
   );
   const whitelistSignature = nacl.sign.detached(

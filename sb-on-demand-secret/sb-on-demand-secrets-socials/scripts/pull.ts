@@ -1,22 +1,18 @@
 import { PublicKey, Commitment } from "@solana/web3.js";
-import {
-  AnchorUtils,
-  PullFeed,
-  Queue,
-} from "@switchboard-xyz/on-demand";
+import { AnchorUtils, PullFeed, Queue } from "@switchboard-xyz/on-demand";
 import { SwitchboardSecrets, FeedHash } from "@switchboard-xyz/common";
 import {
   myAnchorProgram,
   ensureUserExists,
   ensureSecretExists,
-  whitelistFeedHash, buildTwitterJob
+  whitelistFeedHash,
+  buildTwitterJob,
 } from "./utils";
 import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import dotenv from "dotenv";
 import nacl from "tweetnacl";
 import * as sb from "@switchboard-xyz/on-demand";
-
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
@@ -49,7 +45,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   };
 
   // secrets start
-  const secretNameTask = "${BEARER_TOKEN_2}"
+  const secretNameTask = "${BEARER_TOKEN_2}";
   const secretName = "BEARER_TOKEN_2";
   // Pull in API Key from .env file
   const API_KEY = process.env.BEARER_TOKEN;
@@ -62,7 +58,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   const user = await ensureUserExists(sbSecrets, keypair, nacl);
 
   console.log("\n🔒 Step 2: Checking and Creating the Secret");
-  const secret = await ensureSecretExists(sbSecrets, keypair, nacl, secretName, secretValue);
+  const secret = await ensureSecretExists(
+    sbSecrets,
+    keypair,
+    nacl,
+    secretName,
+    secretValue
+  );
 
   console.log("\n🔒 Step 3: Building Feed Configuration");
   // configure the feed
@@ -72,15 +74,17 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
     // the queue of oracles to bind to
     queue,
     // the jobs for the feed to perform
-    jobs: [
-      buildTwitterJob(secretNameTask, keypair)
-    ],
+    jobs: [buildTwitterJob(secretNameTask, keypair)],
     // allow 1% variance between submissions and jobs
     maxVariance: 1.0,
     // minimum number of responses of jobs to allow
     minResponses: 1,
     // number of signatures to fetch per update
     numSignatures: 3,
+    // minimum number of samples to save a new value
+    minSampleSize: 1,
+    // maximum staleness of a sample in seconds
+    maxStaleness: 60,
   };
 
   const feed_hash = FeedHash.compute(queue.toBuffer(), conf.jobs);
@@ -99,7 +103,7 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
       signers: [keypair, feedKp],
       computeUnitPrice: 75_000,
       computeUnitLimitMultiple: 1.3,
-    });;
+    });
     tx.sign([keypair, feedKp]);
 
     console.log("Sending initialize transaction");
@@ -112,7 +116,13 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   }
 
   console.log("\n🔒 Step 5: Whitelist the feed hash to the secret");
-  const whitelistConfirmation = await whitelistFeedHash(sbSecrets, keypair, nacl, feed_hash, secretName);
+  const whitelistConfirmation = await whitelistFeedHash(
+    sbSecrets,
+    keypair,
+    nacl,
+    feed_hash,
+    secretName
+  );
 
   console.log("\n🔒 Step 6: Run the Feed Update Loop..");
   const interval = 3000; // ms
@@ -132,8 +142,12 @@ async function myProgramIx(program: anchor.Program, feed: PublicKey) {
 
     const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
-    const simMetric = +sim.value.logs.join().match(/followers_count: "(\d+(\.\d+)?)/)[1];
-    console.log(`Number of Followers metric : ${simMetric}\n\tTransaction sent: ${sig}`);
+    const simMetric = +sim.value.logs
+      .join()
+      .match(/followers_count: "(\d+(\.\d+)?)/)[1];
+    console.log(
+      `Number of Followers metric : ${simMetric}\n\tTransaction sent: ${sig}`
+    );
     await sb.sleep(3000);
   }
 })();

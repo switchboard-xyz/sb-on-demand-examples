@@ -33,7 +33,7 @@ const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
 
     const sim = await connection.simulateTransaction(tx, { commitment });
     const sig = await connection.sendTransaction(tx);
-    const simPrice = +sim.value.logs.join().match(/price: (.*)/)[1];
+    const simPrice = sim.value.logs.join("\n").match(/price: (.*)/)[1];
     console.log(`Price update: ${simPrice}\n\tTransaction sent: ${sig}`);
     await sb.sleep(3000);
   }

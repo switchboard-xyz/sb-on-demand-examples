@@ -39,8 +39,8 @@ import { PublicKey } from "@solana/web3.js";
 
     const sim = await connection.simulateTransaction(tx, { commitment });
     const sig = await connection.sendTransaction(tx);
-    const simPrice = sim.value.logs.join("\n").match(/price: (.*)/)[1];
-    console.log(`Price update: ${simPrice}\n\tTransaction sent: ${sig}`);
+    const simPrice = sim.value.logs.join("\n").match(/price: (.*)/);
+    console.log(`Received ${simPrice}\n\tTransaction sent: ${sig}`);
     await sb.sleep(3000);
   }
 })();

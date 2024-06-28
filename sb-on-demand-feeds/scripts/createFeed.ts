@@ -93,9 +93,9 @@ const crossbarClient = new CrossbarClient(
     console.log("Sending initialize transaction");
     const sim = await connection.simulateTransaction(tx, txOpts);
     const sig = await connection.sendTransaction(tx, txOpts);
+    await connection.confirmTransaction(sig, "confirmed");
     console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
     pullFeed = pullFeed_;
-    await sleep(3000);
   } else {
     console.log("Using existing data feed with address:", argv.feed);
     pullFeed = new PullFeed(program, new PublicKey(argv.feed));

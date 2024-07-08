@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.4.0
     version: 2.4.0
   '@switchboard-xyz/on-demand':
-    specifier: ^1.1.25
-    version: 1.1.25(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.1.28
+    version: 1.1.28(fastestsmallesttextencoderdecoder@1.0.22)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -399,8 +399,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/on-demand@1.1.25(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-ZP9z18T21suKpdJnRgUtjoP2N7UgGhP/KrOIIhOZOilnrXQyZNNQCiG/OWGMGJUQ4vZmM+MA9VgVBIeigfMgAg==}
+  /@switchboard-xyz/on-demand@1.1.28(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-hJkxbXGBibKrSTZVfIref3km2pXb0QAsrpmUjJFQJt/38tzLPpELuiokjw1IYLdDcgyEdyEjRW5+HdmgEPBcoA==}
     engines: {node: '>= 18'}
     dependencies:
       '@coral-xyz/anchor': 0.30.0

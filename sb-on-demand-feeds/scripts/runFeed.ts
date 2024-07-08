@@ -18,17 +18,16 @@ const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
   const conf = { numSignatures: 3 };
 
   while (true) {
-    const [pullIx, responses, success] = await feedAccount.fetchUpdateIx(conf);
-    if (!success) throw new Error(`Errors: ${responses.map((x) => x.error)}`);
+    const [pullIx, responses, ok, luts] = await feedAccount.fetchUpdateIx(conf);
+    if (!ok) throw new Error(`Failure: ${responses.map((x) => x.error)}`);
 
-    const lutOwners = [...responses.map((x) => x.oracle), feedAccount];
     const tx = await sb.asV0Tx({
       connection,
       ixs: [pullIx, myIx],
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,
-      lookupTables: await sb.loadLookupTables(lutOwners),
+      lookupTables: luts,
     });
 
     const sim = await connection.simulateTransaction(tx, { commitment });

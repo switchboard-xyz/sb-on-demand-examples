@@ -5,6 +5,7 @@ import {
   Keypair,
   PublicKey,
   VersionedTransaction,
+  TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
@@ -22,6 +23,15 @@ export async function myAnchorProgram(
   } catch (e) {
     throw new Error("Failed to load demo program. Was it deployed?");
   }
+}
+
+export async function buildDemoIx(
+  program: anchor.Program,
+  feed_: PublicKey | string
+): Promise<TransactionInstruction> {
+  const feed = new PublicKey(feed_);
+  const myIx = await program.methods.test().accounts({ feed }).instruction();
+  return myIx;
 }
 
 export function buildPythnetJob(pythFeed: string): OracleJob {

@@ -28,9 +28,8 @@ const DEMO_PATH = "target/deploy/sb_on_demand_solana-keypair.json";
     });
 
     const sim = await connection.simulateTransaction(tx, { commitment });
-    // const sig = await connection.sendTransaction(tx);
-    const simPrice = sim.value.logs.join("\n");
-    console.log(`Price update: ${simPrice}`);
+    console.log(`Simulation Success: ${sim.value.logs.join("\n")}`);
+    console.log(`\tTransaction sent: ${await connection.sendTransaction(tx)}`);
     await sb.sleep(3000);
   }
 })();

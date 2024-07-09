@@ -4,21 +4,18 @@ import { myAnchorProgram } from "./utils";
 import { PublicKey } from "@solana/web3.js";
 
 const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
+const DEMO_PATH = "target/deploy/sb_on_demand_solana-keypair.json";
 
 (async function main() {
+  const commitment = "processed";
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const feed = new PublicKey(argv.feed);
   const feedAccount = new sb.PullFeed(program, feed);
-  const commitment = "processed";
-  const demoPath = "target/deploy/sb_on_demand_solana-keypair.json";
-  const demo = await myAnchorProgram(program.provider, demoPath).catch((e) => {
-    throw new Error("Failed to load demo program. Was it deployed?");
-  });
+  const demo = await myAnchorProgram(program.provider, DEMO_PATH);
   const myIx = await demo.methods.test().accounts({ feed }).instruction();
-  const conf = { numSignatures: 3 };
 
   while (true) {
-    const [pullIx, responses, ok, luts] = await feedAccount.fetchUpdateIx(conf);
+    const [pullIx, responses, ok, luts] = await feedAccount.fetchUpdateIx();
     if (!ok) throw new Error(`Failure: ${responses.map((x) => x.error)}`);
 
     const tx = await sb.asV0Tx({
@@ -31,9 +28,9 @@ const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
     });
 
     const sim = await connection.simulateTransaction(tx, { commitment });
-    const sig = await connection.sendTransaction(tx);
-    const simPrice = sim.value.logs.join("\n").match(/price: (.*)/)[1];
-    console.log(`Price update: ${simPrice}\n\tTransaction sent: ${sig}`);
+    // const sig = await connection.sendTransaction(tx);
+    const simPrice = sim.value.logs.join("\n");
+    console.log(`Price update: ${simPrice}`);
     await sb.sleep(3000);
   }
 })();

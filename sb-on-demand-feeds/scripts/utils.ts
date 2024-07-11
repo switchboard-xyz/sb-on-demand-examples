@@ -33,7 +33,7 @@ export async function myAnchorProgram(
   }
 }
 
-export async function buildDemoIx(
+export async function myProgramIx(
   program: anchor.Program,
   feed_: PublicKey | string
 ): Promise<TransactionInstruction> {

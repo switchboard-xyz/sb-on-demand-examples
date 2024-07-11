@@ -9,6 +9,7 @@ import {
 } from "@switchboard-xyz/on-demand";
 import {
   myAnchorProgram,
+  myProgramIx,
   buildCoinbaseJob,
   buildBinanceComJob,
   buildPythnetJob,
@@ -22,10 +23,6 @@ import { CrossbarClient, decodeString } from "@switchboard-xyz/common";
 let argv = yargs(process.argv).options({
   mainnet: { type: "boolean", describe: "Use mainnet queue" },
 }).argv;
-
-async function myProgramIx(program: anchor.Program, feed: PublicKey) {
-  return await program.methods.test().accounts({ feed }).instruction();
-}
 
 const crossbarClient = new CrossbarClient(
   "https://crossbar.switchboard.xyz",

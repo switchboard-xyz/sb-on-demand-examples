@@ -2,6 +2,7 @@ import { OracleJob } from "@switchboard-xyz/common";
 import * as anchor from "@coral-xyz/anchor";
 import {
   Connection,
+  Commitment,
   Keypair,
   PublicKey,
   VersionedTransaction,
@@ -9,6 +10,13 @@ import {
   TransactionSignature,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
+
+export const DEMO_PATH = "target/deploy/sb_on_demand_solana-keypair.json";
+export const TX_CONFIG = {
+  commitment: "processed" as Commitment,
+  skipPreflight: true,
+  maxRetries: 0,
+};
 
 export async function myAnchorProgram(
   provider: anchor.Provider,

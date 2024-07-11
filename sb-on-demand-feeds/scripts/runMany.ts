@@ -1,32 +1,21 @@
 import * as sb from "@switchboard-xyz/on-demand";
-import { myAnchorProgram } from "./utils";
+import { myAnchorProgram, TX_CONFIG, DEMO_PATH } from "./utils";
 import { PublicKey } from "@solana/web3.js";
 
 (async function main() {
-  const feed1 = new PublicKey("4JSGSjzEewwKuDiAi4pdtgYhhAzoAEVGxKWbV11R5Cvf");
-  const feed2 = new PublicKey("A1rStfT1W6vMd3jnAv1oK2YHzT2jRrvCgChtoYL78ZqH");
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
-  const commitment = "processed";
-  const demoPath = "target/deploy/sb_on_demand_solana-keypair.json";
-  const demo = await myAnchorProgram(program.provider, demoPath).catch((e) => {
-    throw new Error("Failed to load demo program. Was it deployed?");
-  });
-  const myIx1 = await demo.methods
-    .test()
-    .accounts({ feed: feed1 })
-    .instruction();
-  const myIx2 = await demo.methods
-    .test()
-    .accounts({ feed: feed2 })
-    .instruction();
-  const conf = {
-    gateway: "https://xoracle-1.switchboard.xyz",
-    feeds: [feed1, feed2],
-    numSignatures: 8,
-  };
+  // NOTE: These are published feeds on devnet. You can replace them with your own feeds.
+  const f1 = new PublicKey("4JSGSjzEewwKuDiAi4pdtgYhhAzoAEVGxKWbV11R5Cvf");
+  const f2 = new PublicKey("A1rStfT1W6vMd3jnAv1oK2YHzT2jRrvCgChtoYL78ZqH");
+  const demo = await myAnchorProgram(program.provider, DEMO_PATH);
+  const myIx1 = await demo.methods.test().accounts({ feed: f1 }).instruction();
+  const myIx2 = await demo.methods.test().accounts({ feed: f2 }).instruction();
 
   while (true) {
-    const [pullIx, luts] = await sb.PullFeed.fetchUpdateManyIx(program, conf);
+    const [pullIx, luts] = await sb.PullFeed.fetchUpdateManyIx(program, {
+      feeds: [f1, f2],
+      numSignatures: 3,
+    });
 
     const tx = await sb.asV0Tx({
       connection,
@@ -37,10 +26,9 @@ import { PublicKey } from "@solana/web3.js";
       lookupTables: luts,
     });
 
-    const sim = await connection.simulateTransaction(tx, { commitment });
-    const sig = await connection.sendTransaction(tx);
-    const simPrice = sim.value.logs.join("\n").match(/price: (.*)/);
-    console.log(`Received ${simPrice}\n\tTransaction sent: ${sig}`);
+    const sim = await connection.simulateTransaction(tx, TX_CONFIG);
+    console.log(`Success ${sim.value.logs.join("\n")}`);
+    console.log(`\tTransaction sent: ${await connection.sendTransaction(tx)}`);
     await sb.sleep(3000);
   }
 })();

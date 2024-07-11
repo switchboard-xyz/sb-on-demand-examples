@@ -1,13 +1,11 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
-import { myAnchorProgram, buildDemoIx } from "./utils";
+import { myAnchorProgram, buildDemoIx, commitment, DEMO_PATH } from "./utils";
 import { PublicKey } from "@solana/web3.js";
 
 const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
-const DEMO_PATH = "target/deploy/sb_on_demand_solana-keypair.json";
 
 (async function main() {
-  const commitment = "processed";
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const feedAccount = new sb.PullFeed(program, argv.feed);
   const demo = await myAnchorProgram(program.provider, DEMO_PATH);

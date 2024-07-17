@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::accounts::RandomnessAccountData;
 
-declare_id!("9kVUcr3z7PTRdSfByhB1ud1Xivcm8ZkuM9vkRfH6PCof");
+declare_id!("44wNsyMPUQxCDhJpKqwNu8XGjqYbThqgRPUpQCARyrUc");
 
 pub fn transfer<'a>(
     system_program: AccountInfo<'a>,
@@ -57,6 +57,10 @@ pub mod sb_randomness {
             msg!("slot: {}", clock.slot);
             return Err(ErrorCode::RandomnessAlreadyRevealed.into());
         }
+        // Track the player's commited values so you know they don't request randomness
+        // multiple times.
+        player_state.commit_slot = randomness_data.seed_slot;
+
         // ***
         // IMPORTANT: Remember, in Switchboard Randomness, it's the responsibility of the caller to reveal the randomness.
         // Therefore, the game collateral MUST be taken upon randomness request, not on reveal.
@@ -84,6 +88,9 @@ pub mod sb_randomness {
         let player_state = &mut ctx.accounts.player_state;
         // call the switchboard on-demand parse function to get the randomness data
         let randomness_data = RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow()).unwrap();
+        if randomness_data.seed_slot != player_state.commit_slot {
+            return Err(ErrorCode::RandomnessExpired.into());
+        }
         // call the switchboard on-demand get_value function to get the revealed random value
         let revealed_random_value = randomness_data.get_value(&clock)
             .map_err(|_| ErrorCode::RandomnessNotResolved)?;
@@ -139,6 +146,7 @@ pub struct PlayerState {
     current_guess: bool, // The current guess
     wager: u64, // The wager amount
     bump: u8,
+    commit_slot: u64, // The slot at which the randomness was committed
 }
 
 // === Instructions ===
@@ -194,5 +202,6 @@ pub enum ErrorCode {
     NotEnoughFundsToPlay,
     RandomnessAlreadyRevealed,
     RandomnessNotResolved,
+    RandomnessExpired,
 }
 

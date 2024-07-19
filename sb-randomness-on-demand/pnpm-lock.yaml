@@ -15,8 +15,8 @@ dependencies:
     specifier: ^1.93.0
     version: 1.93.0
   '@switchboard-xyz/on-demand':
-    specifier: ^1.2.0
-    version: 1.2.0(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.2.1
+    version: 1.2.1(fastestsmallesttextencoderdecoder@1.0.22)
   '@switchboard-xyz/solana.js':
     specifier: ^3.2.5
     version: 3.2.5(fastestsmallesttextencoderdecoder@1.0.22)
@@ -737,8 +737,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/on-demand@1.2.0(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-wNdf148mMUdrQamCpr2n8cBvwtDwXpp25+dSEqYZWorZqsvKU5yK4t1Cre3HTbvSny5mLitbn4WDuCjgefQ5Vw==}
+  /@switchboard-xyz/on-demand@1.2.1(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-rzF8u+7hClsAYjVk+MGzkGsTqLYRmeN0aOgtvTXpvYScNyQh72+ht45lkiSHJ3/vvTuGCbnEZrbc+ZY51gl4pQ==}
     engines: {node: '>= 18'}
     dependencies:
       '@coral-xyz/anchor-30': /@coral-xyz/anchor@0.30.1

@@ -1,43 +1,32 @@
-import * as anchor from "@coral-xyz/anchor";
 import * as sb from "@switchboard-xyz/on-demand";
-import { PublicKey, Keypair, Connection, Commitment } from "@solana/web3.js";
+import yargs from "yargs";
+import { myAnchorProgram, myProgramIx, TX_CONFIG, DEMO_PATH } from "./utils";
+import { PublicKey } from "@solana/web3.js";
 
-const COMMITMENT = "processed";
-const TX_CONFIG = {
-  commitment: COMMITMENT as Commitment,
-  skipPreflight: true,
-  maxRetries: 0,
-};
+const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
 
 (async function main() {
-  const pid = new PublicKey("SBondMDrcV3K4kxZR1HNVT7osZxAHVHgYXL5Ze1oMUv");
-  const url =
-    "https://switchbo-switchbo-6225.devnet.rpcpool.com/f6fb9f02-0777-498b-b8f5-67cbb1fc0d14";
-  let connection = new Connection(url, {
-    commitment: "processed",
-  });
-  const keypair = Keypair.generate();
-  const wallet = new anchor.Wallet(keypair);
-  const provider = new anchor.AnchorProvider(connection, wallet, {
-    commitment: COMMITMENT,
-    preflightCommitment: COMMITMENT,
-  });
-  const idl = (await anchor.Program.fetchIdl(pid, provider))!;
-  const program = new anchor.Program(idl, provider);
-
-  const queue = new sb.Queue(
-    program,
-    new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di")
-  );
-  console.log(await queue.fetchAllGateways());
-  const feedAccount = new sb.PullFeed(
-    program,
-    "9czpHkNbq9ufM7GXC5n4eCZ2Whrmfva8eKGLJFxaprig"
-  );
+  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
+  const feedAccount = new sb.PullFeed(program, argv.feed);
+  const demo = await myAnchorProgram(program.provider, DEMO_PATH);
 
   while (true) {
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx();
-    console.log("Price Updates:\n", responses);
+    const tx = await sb.asV0Tx({
+      connection,
+      ixs: [pullIx, await myProgramIx(demo, argv.feed)],
+      signers: [keypair],
+      computeUnitPrice: 200_000,
+      computeUnitLimitMultiple: 1.3,
+      lookupTables: luts,
+    });
+
+    const sim = await connection.simulateTransaction(tx, TX_CONFIG);
+    const updateEvent = new sb.PullFeedValueEvent(
+      sb.AnchorUtils.loggedEvents(program, sim.value.logs)[0]
+    ).toRows();
+    console.log("Submitted Price Updates:\n", updateEvent);
+    console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
     await sb.sleep(3000);
   }
 })();

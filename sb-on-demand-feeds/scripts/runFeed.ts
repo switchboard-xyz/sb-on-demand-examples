@@ -5,16 +5,40 @@ import { PublicKey } from "@solana/web3.js";
 
 const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
 
+function calculateStatistics(latencies) {
+  const sortedLatencies = [...latencies].sort((a, b) => a - b);
+  const min = sortedLatencies[0];
+  const max = sortedLatencies[sortedLatencies.length - 1];
+  const median =
+    sortedLatencies.length % 2 === 0
+      ? (sortedLatencies[sortedLatencies.length / 2 - 1] +
+          sortedLatencies[sortedLatencies.length / 2]) /
+        2
+      : sortedLatencies[Math.floor(sortedLatencies.length / 2)];
+  const sum = sortedLatencies.reduce((a, b) => a + b, 0);
+  const mean = sum / sortedLatencies.length;
+
+  return {
+    min,
+    max,
+    median,
+    mean,
+    count: latencies.length,
+  };
+}
+
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const feedAccount = new sb.PullFeed(program, argv.feed);
-  const demo = await myAnchorProgram(program.provider, DEMO_PATH);
+  // const demo = await myAnchorProgram(program.provider, DEMO_PATH);
+  const latencies = [];
 
   while (true) {
+    const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx();
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [pullIx, await myProgramIx(demo, argv.feed)],
+      ixs: [pullIx],
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,
@@ -26,6 +50,16 @@ const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
       sb.AnchorUtils.loggedEvents(program, sim.value.logs)[0]
     ).toRows();
     console.log("Submitted Price Updates:\n", updateEvent);
+    const endTime = Date.now();
+    const latency = endTime - start;
+    latencies.push(latency);
+
+    const stats = calculateStatistics(latencies);
+    console.log(`Min latency: ${stats.min} ms`);
+    console.log(`Max latency: ${stats.max} ms`);
+    console.log(`Median latency: ${stats.median} ms`);
+    console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
+    console.log(`Loop count: ${stats.count}`);
     console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
     await sb.sleep(3000);
   }

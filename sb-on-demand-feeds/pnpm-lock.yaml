@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.4.0
     version: 2.4.0
   '@switchboard-xyz/on-demand':
-    specifier: ^1.2.20
-    version: 1.2.20(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.2.35
+    version: 1.2.35(fastestsmallesttextencoderdecoder@1.0.22)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -69,6 +69,12 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.1
+    dev: false
+
+  /@brokerloop/ttlcache@3.2.3:
+    resolution: {integrity: sha512-kZWoyJGBYTv1cL5oHBYEixlJysJBf2RVnub3gbclD+dwaW9aKubbHzbZ9q1q6bONosxaOqMsoBorOrZKzBDiqg==}
+    dependencies:
+      '@soncodi/signal': 2.0.7
     dev: false
 
   /@coral-xyz/anchor-errors@0.30.1:
@@ -390,7 +396,7 @@ packages:
       '@solana/spl-token': 0.3.11(@solana/web3.js@1.95.0)(fastestsmallesttextencoderdecoder@1.0.22)
       '@solana/web3.js': 1.95.0
       '@types/bn.js': 5.1.5
-      '@types/node': 18.19.43
+      '@types/node': 18.19.45
       '@types/node-fetch': 2.6.11
       bn.js: 5.2.1
       decimal.js: 10.4.3
@@ -400,6 +406,10 @@ packages:
       - encoding
       - fastestsmallesttextencoderdecoder
       - utf-8-validate
+    dev: false
+
+  /@soncodi/signal@2.0.7:
+    resolution: {integrity: sha512-zA2oZluZmVvgZEDjF243KWD1S2J+1SH1MVynI0O1KRgDt1lU8nqk7AK3oQfW/WpwT51L5waGSU0xKF/9BTP5Cw==}
     dev: false
 
   /@swc/helpers@0.5.11:
@@ -426,12 +436,12 @@ packages:
       - debug
     dev: false
 
-  /@switchboard-xyz/common@2.4.4:
-    resolution: {integrity: sha512-Pcny+VzenXPCuCOj1W8lBm/S7bDSc1CU6T35Tt0o2bTDnzHgVGtYJ/OLqgPhqGhZ/fjMwrRiCPPIkuavK0Ik3Q==}
+  /@switchboard-xyz/common@2.4.5:
+    resolution: {integrity: sha512-6OYdLsilVW7PFjLIzK8LKnOQW0EgQHgaMzEraTx/X8bRXQnJmi2XT3I+ZoNUejvo6cwQ9NNYXWQIjSpQgYYeGQ==}
     engines: {node: '>=12'}
     dependencies:
       '@solana/web3.js': 1.95.0
-      axios: 1.7.2
+      axios: 1.7.4
       big.js: 6.2.1
       bn.js: 5.2.1
       bs58: 5.0.0
@@ -446,19 +456,19 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/on-demand@1.2.20(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-RC52eNZVGaRbPdb8GYc1H4nm4YRCToX2LMI8flWjV9cf7jOIkcjtPyLH/Spg8LJPe2Pa30wJlqaqSXfqYB47Xw==}
+  /@switchboard-xyz/on-demand@1.2.35(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-8ffND3IUotyThGX32FfRq+d0s8yreNIJW98a6xlslXs7yk67+wuYaYQsEAWz27dy0wJiInx+H564YmD5fReD2g==}
     engines: {node: '>= 18'}
     dependencies:
+      '@brokerloop/ttlcache': 3.2.3
       '@coral-xyz/anchor-30': /@coral-xyz/anchor@0.30.1
       '@solana/web3.js': 1.95.0
       '@solworks/soltoolkit-sdk': 0.0.23(fastestsmallesttextencoderdecoder@1.0.22)
-      '@switchboard-xyz/common': 2.4.4
-      axios: 1.7.2
+      '@switchboard-xyz/common': 2.4.5
+      axios: 1.7.4
       big.js: 6.2.1
       bs58: 5.0.0
       js-yaml: 4.1.0
-      node-cache: 5.1.2
       protobufjs: 7.3.2
     transitivePeerDependencies:
       - bufferutil
@@ -504,8 +514,8 @@ packages:
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
     dev: false
 
-  /@types/node@18.19.43:
-    resolution: {integrity: sha512-Mw/YlgXnyJdEwLoFv2dpuJaDFriX+Pc+0qOBJ57jC1H6cDxIj2xc5yUrdtArDVG0m+KV6622a4p2tenEqB3C/g==}
+  /@types/node@18.19.45:
+    resolution: {integrity: sha512-VZxPKNNhjKmaC1SUYowuXSRSMGyQGmQjvvA1xE4QZ0xce2kLtEhPDS+kqpCPBZYgqblCLQ2DAjSzmgCM5auvhA==}
     dependencies:
       undici-types: 5.26.5
     dev: false
@@ -608,6 +618,16 @@ packages:
 
   /axios@1.7.2:
     resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
+    dependencies:
+      follow-redirects: 1.15.6
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /axios@1.7.4:
+    resolution: {integrity: sha512-DukmaFRnY6AzAALSH4J2M3k6PkaC+MfaAGdEERRWcC9q3/TWQwLpHR8ZRLKTdQ3aBDL64EdluRDjJqKw+BPZEw==}
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -804,11 +824,6 @@ packages:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
-    dev: false
-
-  /clone@2.1.2:
-    resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
-    engines: {node: '>=0.8'}
     dev: false
 
   /color-convert@2.0.1:
@@ -1416,13 +1431,6 @@ packages:
     dependencies:
       lower-case: 2.0.2
       tslib: 2.6.3
-    dev: false
-
-  /node-cache@5.1.2:
-    resolution: {integrity: sha512-t1QzWwnk4sjLWaQAS8CHgOJ+RAfmHpxFWmc36IWTiWHQfs0w5JDMBS1b1ZxQteo0vVVuWJvIUKHDkkeK7vIGCg==}
-    engines: {node: '>= 8.0.0'}
-    dependencies:
-      clone: 2.1.2
     dev: false
 
   /node-fetch@2.7.0:

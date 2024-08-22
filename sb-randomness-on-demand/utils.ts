@@ -4,12 +4,11 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
-  Commitment
+  Commitment,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
 import reader from "readline-sync";
-
 
 const COMMITMENT = "confirmed";
 
@@ -24,33 +23,37 @@ export async function myAnchorProgram(
   return program;
 }
 
-export async function loadSbProgram(provider: anchor.Provider): Promise<anchor.Program> {
-  const sbProgramId = sb.SB_ON_DEMAND_PID;
+export async function loadSbProgram(
+  provider: anchor.Provider
+): Promise<anchor.Program> {
+  const sbProgramId = await sb.getProgramId(provider.connection);
   const sbIdl = await anchor.Program.fetchIdl(sbProgramId, provider);
   const sbProgram = new anchor.Program(sbIdl!, provider);
   return sbProgram;
 }
 
-
-export async function initializeMyProgram(provider: anchor.Provider): Promise<anchor.Program> {
-  const myProgramPath = "sb-randomness/target/deploy/sb_randomness-keypair.json";
+export async function initializeMyProgram(
+  provider: anchor.Provider
+): Promise<anchor.Program> {
+  const myProgramPath =
+    "sb-randomness/target/deploy/sb_randomness-keypair.json";
   const myProgram = await myAnchorProgram(provider, myProgramPath);
   console.log("My program", myProgram.programId.toString());
   return myProgram;
 }
 
 export async function setupQueue(program: anchor.Program): Promise<PublicKey> {
-  const queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
-  //mainet queue = "A43DyUGA7s8eXPxqEjJY6EBu1KKbNgfxF8h17VAHn13w"
-  const queueAccount = new sb.Queue(program, queue);
-  console.log("Queue account", queue.toString());
+  const queueAccount = await sb.getDefaultQueue(
+    program.provider.connection.rpcEndpoint
+  );
+  console.log("Queue account", queueAccount.pubkey.toString());
   try {
     await queueAccount.loadData();
   } catch (err) {
     console.error("Queue not found, ensure you are using devnet in your env");
     process.exit(1);
   }
-  return queue;
+  return queueAccount.pubkey;
 }
 
 export function getUserGuessFromCommandLine(): boolean {
@@ -72,7 +75,6 @@ export function getUserGuessFromCommandLine(): boolean {
 
   return userGuessInput === "heads"; // Convert "heads" to true, "tails" to false
 }
-
 
 /**
  * Creates, simulates, sends, and confirms a transaction.
@@ -126,38 +128,49 @@ export async function initializeGame(
     })
     .instruction();
 
-  const txOpts = { commitment: "processed" as Commitment, skipPreflight: true, maxRetries: 0 };
-  await handleTransaction(sbProgram, connection, [initIx], keypair, [keypair], txOpts);
+  const txOpts = {
+    commitment: "processed" as Commitment,
+    skipPreflight: true,
+    maxRetries: 0,
+  };
+  await handleTransaction(
+    sbProgram,
+    connection,
+    [initIx],
+    keypair,
+    [keypair],
+    txOpts
+  );
 }
 
 export /**
-* Creates the coin flip instruction for the given program.
-* @param myProgram - The Anchor program.
-* @param rngKpPublicKey - The public key of the randomness keypair.
-* @param userGuess - The user's guess (heads or tails).
-* @param playerStateAccount - The player's state account public key.
-* @param keypair - The keypair of the user.
-* @param escrowAccount - The escrow account public key.
-* @returns The coin flip instruction.
-*/
+ * Creates the coin flip instruction for the given program.
+ * @param myProgram - The Anchor program.
+ * @param rngKpPublicKey - The public key of the randomness keypair.
+ * @param userGuess - The user's guess (heads or tails).
+ * @param playerStateAccount - The player's state account public key.
+ * @param keypair - The keypair of the user.
+ * @param escrowAccount - The escrow account public key.
+ * @returns The coin flip instruction.
+ */
 async function createCoinFlipInstruction(
- myProgram: anchor.Program,
- rngKpPublicKey: PublicKey,
- userGuess: boolean,
- playerStateAccount: [anchor.web3.PublicKey, number],
- keypair: Keypair,
- escrowAccount: PublicKey
+  myProgram: anchor.Program,
+  rngKpPublicKey: PublicKey,
+  userGuess: boolean,
+  playerStateAccount: [anchor.web3.PublicKey, number],
+  keypair: Keypair,
+  escrowAccount: PublicKey
 ): Promise<anchor.web3.TransactionInstruction> {
- return await myProgram.methods
-   .coinFlip(rngKpPublicKey, userGuess)
-   .accounts({
-     playerState: playerStateAccount,
-     user: keypair.publicKey,
-     randomnessAccountData: rngKpPublicKey,
-     escrowAccount: escrowAccount,
-     systemProgram: SystemProgram.programId,
-   })
-   .instruction();
+  return await myProgram.methods
+    .coinFlip(rngKpPublicKey, userGuess)
+    .accounts({
+      playerState: playerStateAccount,
+      user: keypair.publicKey,
+      randomnessAccountData: rngKpPublicKey,
+      escrowAccount: escrowAccount,
+      systemProgram: SystemProgram.programId,
+    })
+    .instruction();
 }
 
 /**
@@ -189,7 +202,6 @@ export async function settleFlipInstruction(
     })
     .instruction();
 }
-
 
 export async function ensureEscrowFunded(
   connection: Connection,

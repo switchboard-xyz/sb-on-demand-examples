@@ -7,7 +7,7 @@ import { PublicKey } from "@solana/web3.js";
   // NOTE: These are published feeds on devnet. You can replace them with your own feeds.
   const f1 = new PublicKey("4JSGSjzEewwKuDiAi4pdtgYhhAzoAEVGxKWbV11R5Cvf");
   const f2 = new PublicKey("A1rStfT1W6vMd3jnAv1oK2YHzT2jRrvCgChtoYL78ZqH");
-  const demo = await myAnchorProgram(program.provider, DEMO_PATH);
+  // const demo = await myAnchorProgram(program.provider, DEMO_PATH);
 
   while (true) {
     const [pullIx, luts] = await sb.PullFeed.fetchUpdateManyIx(program, {
@@ -17,7 +17,7 @@ import { PublicKey } from "@solana/web3.js";
 
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [pullIx, await myProgramIx(demo, f1), await myProgramIx(demo, f2)],
+      ixs: [pullIx],
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,

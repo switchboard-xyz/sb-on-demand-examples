@@ -35,13 +35,7 @@ function calculateStatistics(latencies) {
 
   while (true) {
     const start = Date.now();
-    const [pullIx, responses, _ok, luts, fails] =
-      await feedAccount.fetchUpdateIx({
-        // gateway: "https://209.250.253.188.xip.switchboard-oracles.xyz/mainnet",
-        numSignatures: 7,
-      });
-    console.log("responses", responses);
-    console.log("fail", fails);
+    const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx();
     const tx = await sb.asV0Tx({
       connection,
       ixs: [pullIx],
@@ -55,11 +49,7 @@ function calculateStatistics(latencies) {
     const updateEvent = new sb.PullFeedValueEvent(
       sb.AnchorUtils.loggedEvents(program, sim.value.logs)[0]
     ).toRows();
-    console.log(
-      "Submitted Price Updates:\n",
-      program,
-      sim.value.logs.join("\n")
-    );
+    console.log("Submitted Price Updates:\n", updateEvent);
     const endTime = Date.now();
     const latency = endTime - start;
     latencies.push(latency);
@@ -70,7 +60,7 @@ function calculateStatistics(latencies) {
     console.log(`Median latency: ${stats.median} ms`);
     console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
     console.log(`Loop count: ${stats.count}`);
-    // console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
+    console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
     await sb.sleep(3000);
   }
 })();

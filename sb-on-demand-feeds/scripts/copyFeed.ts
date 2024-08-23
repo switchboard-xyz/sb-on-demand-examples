@@ -3,13 +3,12 @@ import * as sb from "@switchboard-xyz/on-demand";
 import {
   AnchorUtils,
   PullFeed,
-  Queue,
   sleep,
 } from "@switchboard-xyz/on-demand";
 import { myAnchorProgram } from "./utils";
 import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
-import { CrossbarClient, decodeString } from "@switchboard-xyz/common";
+import { CrossbarClient } from "@switchboard-xyz/common";
 
 let argv = yargs(process.argv).options({
   feed: { type: "string", describe: "An existing feed to pull from" },
@@ -30,12 +29,8 @@ const crossbarClient = new CrossbarClient(
   const { keypair, connection, program } = await AnchorUtils.loadEnv();
   const myProgramPath = "target/deploy/sb_on_demand_solana-keypair.json";
   const myProgram = await myAnchorProgram(program.provider, myProgramPath);
-  const myPid = myProgram.programId;
-  let queue = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
-  if (argv.mainnet) {
-    queue = new PublicKey("A43DyUGA7s8eXPxqEjJY6EBu1KKbNgfxF8h17VAHn13w");
-  }
-  const queueAccount = new Queue(program, queue);
+  const queueAccount = await sb.getDefaultQueue(connection.rpcEndpoint);
+  const queue = queueAccount.pubkey;
   try {
     await queueAccount.loadData();
   } catch (err) {
@@ -49,20 +44,13 @@ const crossbarClient = new CrossbarClient(
   };
   // set your configs
   const conf = {
-    // the feed name (max 32 bytes)
-    name: "BTC Price Feed",
-    // the queue of oracles to bind to
-    queue,
-    // allow 1% variance between submissions and jobs
-    maxVariance: 1.0,
-    // minimum number of responses of jobs to allow
-    minResponses: 1,
-    // number of signatures to fetch per update
-    numSignatures: 3,
-    // minimum number of responses to sample
-    minSampleSize: 1,
-    // maximum staleness of responses in seconds to sample
-    maxStaleness: 60,
+    name: "BTC Price Feed", // the feed name (max 32 bytes)
+    queue, // the queue of oracles to bind to
+    maxVariance: 1.0, // allow 1% variance between submissions and jobs
+    minResponses: 1, // minimum number of responses of jobs to allow
+    numSignatures: 3, // number of signatures to fetch per update
+    minSampleSize: 1, // minimum number of responses to sample
+    maxStaleness: 60,// maximum staleness of responses in seconds to sample
   };
 
   // Initialize the feed
@@ -90,25 +78,22 @@ const crossbarClient = new CrossbarClient(
   await sleep(3000);
 
   // Send a price update with a following user instruction every N seconds
-  const interval = 3000; // ms
   while (true) {
-    const [pullIx, responses, success] = await pullFeed.fetchUpdateIx(conf);
-    if (!success) throw new Error(`Errors: ${responses.map((x) => x.error)}`);
+    const [pullIx, responses, _ok ,luts] = await pullFeed.fetchUpdateIx(conf);
 
-    const lutOwners = [...responses.map((x) => x.oracle), pullFeed.pubkey];
     const tx = await sb.asV0Tx({
       connection,
       ixs: [pullIx, await myProgramIx(myProgram, pullFeed.pubkey)],
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,
-      lookupTables: await sb.loadLookupTables(lutOwners),
+      lookupTables: luts,
     });
 
     const sim = await connection.simulateTransaction(tx, txOpts);
-    const sig = await connection.sendTransaction(tx, txOpts);
-    const simPrice = +sim.value.logs.join().match(/price: "(\d+(\.\d+)?)/)[1];
-    console.log(`Price update: ${simPrice}\n\tTransaction sent: ${sig}`);
+    const simPrice = sim.value.logs.join("\n").match(/price: (.*)/)[1];
+    console.log(`Price update for feed "${conf.name}": ${simPrice}`);
+    console.log(`\tTx Signature: ${await connection.sendTransaction(tx)}`)
     await sb.sleep(3000);
   }
 })();

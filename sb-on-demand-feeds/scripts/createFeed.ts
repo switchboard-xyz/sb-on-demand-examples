@@ -39,17 +39,8 @@ const FEED_JOBS = [
 (async function main() {
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, program } = await AnchorUtils.loadEnv();
-  let queue = "FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di";
-  if (argv.mainnet) {
-    queue = "A43DyUGA7s8eXPxqEjJY6EBu1KKbNgfxF8h17VAHn13w";
-  }
-  const queueAccount = new Queue(program, new PublicKey(queue));
-  try {
-    await queueAccount.loadData();
-  } catch (err) {
-    console.error("Queue not found, ensure you are using devnet in your env");
-    return;
-  }
+  const queueAccount = await sb.getDefaultQueue(connection.rpcEndpoint);
+  const queue = queueAccount.pubkey;
   const myProgram = await myAnchorProgram(program.provider, DEMO_PATH);
 
   const conf: any = {
@@ -67,7 +58,7 @@ const FEED_JOBS = [
   const [pullFeed, feedKp] = PullFeed.generate(program);
   // Store the feed configs on IPFS
   conf.feedHash = decodeString(
-    (await crossbarClient.store(queue, FEED_JOBS)).feedHash
+    (await crossbarClient.store(queue.toString(), FEED_JOBS)).feedHash
   );
   const initTx = await sb.asV0Tx({
     connection,

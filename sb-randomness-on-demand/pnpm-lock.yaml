@@ -15,8 +15,8 @@ dependencies:
     specifier: ^1.93.0
     version: 1.93.0
   '@switchboard-xyz/on-demand':
-    specifier: ^1.2.34
-    version: 1.2.34(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.2.35
+    version: 1.2.35(fastestsmallesttextencoderdecoder@1.0.22)
   '@switchboard-xyz/solana.js':
     specifier: ^3.2.5
     version: 3.2.5(fastestsmallesttextencoderdecoder@1.0.22)
@@ -752,8 +752,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/on-demand@1.2.34(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-XjuOW0Qb0eC+9uEQ75So5eUr8GFbWwuNBoVXlCBAIBnPbjXGerMG3v08Bw7TTpV9ZysJ/dmbNOIJye6IAFUv3Q==}
+  /@switchboard-xyz/on-demand@1.2.35(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-8ffND3IUotyThGX32FfRq+d0s8yreNIJW98a6xlslXs7yk67+wuYaYQsEAWz27dy0wJiInx+H564YmD5fReD2g==}
     engines: {node: '>= 18'}
     dependencies:
       '@brokerloop/ttlcache': 3.2.3

@@ -42,20 +42,6 @@ export async function myProgramIx(
   return myIx;
 }
 
-export function buildPythnetJob(pythFeed: string): OracleJob {
-  const jobConfig = OracleJob.create({
-    tasks: [
-      OracleJob.Task.create({
-        oracleTask: OracleJob.OracleTask.create({
-          pythAllowedConfidenceInterval: 1.0,
-          pythAddress: pythFeed,
-        }),
-      }),
-    ],
-  });
-  return jobConfig;
-}
-
 export function buildSanctumFairPriceJob(lstMint: string): OracleJob {
   const jobConfig = OracleJob.fromObject({
     tasks: [
@@ -119,6 +105,79 @@ export function buildCoinbaseJob(pair: String): OracleJob {
     ],
   };
   return OracleJob.fromObject(jobConfig);
+}
+
+export function buildPythnetJob(id: string): OracleJob {
+  const jobConfig = OracleJob.fromObject({
+    tasks: [
+      {
+        oracleTask: {
+          pythAddress: id,
+          pythConfigs: {
+            pythAllowedConfidenceInterval: 1.0,
+          },
+        },
+      },
+    ],
+  });
+  return jobConfig;
+}
+
+export function buildChainlinkJob(id: string): OracleJob {
+  const jobConfig = OracleJob.fromObject({
+    tasks: [
+      {
+        oracleTask: {
+          chainlinkAddress: id,
+          chainlinkConfigs: {},
+        },
+      },
+    ],
+  });
+  return jobConfig;
+}
+
+export function buildSwitchboardJob(id: string): OracleJob {
+  const jobConfig = OracleJob.fromObject({
+    tasks: [
+      {
+        oracleTask: {
+          switchboardAddress: id,
+          switchboardConfigs: {
+            version: 3,
+          },
+        },
+      },
+    ],
+  });
+  return jobConfig;
+}
+
+export function buildRedstoneJob(id: string): OracleJob {
+  const jobConfig = OracleJob.fromObject({
+    tasks: [
+      {
+        oracleTask: {
+          redstoneId: id,
+        },
+      },
+    ],
+  });
+  return jobConfig;
+}
+
+export function buildEdgeJob(id: string): OracleJob {
+  const jobConfig = OracleJob.fromObject({
+    tasks: [
+      {
+        oracleTask: {
+          edgeId: id,
+          edgeConfigs: {},
+        },
+      },
+    ],
+  });
+  return jobConfig;
 }
 
 export async function sendAndConfirmTx(

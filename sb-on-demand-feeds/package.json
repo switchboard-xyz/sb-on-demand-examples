@@ -7,7 +7,7 @@
         "@coral-xyz/anchor": "^0.30.1",
         "@solana/spl-token": "^0.4.6",
         "@solana/web3.js": "^1.93.0",
-        "@switchboard-xyz/common": "^2.4.0",
+        "@switchboard-xyz/common": "^2.5.0",
         "@switchboard-xyz/on-demand": "^1.2.41",
         "assert": "^2.1.0",
         "big.js": "^6.2.1",

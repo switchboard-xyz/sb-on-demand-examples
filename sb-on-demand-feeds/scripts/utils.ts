@@ -55,7 +55,7 @@ export function buildSanctumFairPriceJob(lstMint: string): OracleJob {
   return jobConfig;
 }
 
-export function buildBinanceComJob(pair: string): OracleJob {
+export function buildBinanceJob(pair: string): OracleJob {
   const jobConfig = {
     tasks: [
       {
@@ -107,7 +107,7 @@ export function buildCoinbaseJob(pair: String): OracleJob {
   return OracleJob.fromObject(jobConfig);
 }
 
-export function buildPythnetJob(id: string): OracleJob {
+export function buildPythJob(id: string): OracleJob {
   const jobConfig = OracleJob.fromObject({
     tasks: [
       {
@@ -159,6 +159,7 @@ export function buildRedstoneJob(id: string): OracleJob {
       {
         oracleTask: {
           redstoneId: id,
+          redstoneConfigs: {},
         },
       },
     ],

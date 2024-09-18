@@ -11,8 +11,11 @@ import {
   myAnchorProgram,
   myProgramIx,
   buildCoinbaseJob,
-  buildBinanceComJob,
-  buildPythnetJob,
+  buildChainlinkJob,
+  buildBinanceJob,
+  buildPythJob,
+  buildRedstoneJob,
+  buildEdgeJob,
   DEMO_PATH,
   TX_CONFIG,
 } from "./utils";
@@ -30,10 +33,16 @@ const crossbarClient = new CrossbarClient(
 );
 
 const FEED_JOBS = [
-  buildPythnetJob(
+  // ORACLES
+  buildPythJob(
     "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
   ),
-  buildCoinbaseJob("BTC-USD"),
+  buildChainlinkJob("0x6ce185860a4963106506C203335A2910413708e9"),
+  buildRedstoneJob("BTC"),
+  buildEdgeJob("BTC/USD"),
+  // CEX
+  buildBinanceJob("BTCUSDC"),
+  buildCoinbaseJob("BTC"),
 ];
 
 (async function main() {
@@ -87,8 +96,10 @@ const FEED_JOBS = [
     });
 
     const sim = await connection.simulateTransaction(tx, TX_CONFIG);
-    const simPrice = sim.value.logs.join("\n").match(/price: (.*)/)[1];
-    console.log(`Price update for feed "${conf.name}": ${simPrice}`);
+    const updateEvent = new sb.PullFeedValueEvent(
+      sb.AnchorUtils.loggedEvents(program, sim.value.logs)[0]
+    ).toRows();
+    console.log("Submitted Price Updates:\n", updateEvent);
     console.log(`\tTx Signature: ${await connection.sendTransaction(tx)}`);
     await sb.sleep(3000);
   }

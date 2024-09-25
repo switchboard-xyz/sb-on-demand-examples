@@ -34,7 +34,7 @@ const COMMITMENT = "confirmed";
     maxRetries: 0,
   };
 
-  // create randomness account and initisliase it
+  // create randomness account and initialise it
   const rngKp = Keypair.generate();
   const [randomness, ix] = await sb.Randomness.create(sbProgram, rngKp, queue);
   console.log("\nCreated randomness account..");

@@ -20,14 +20,14 @@
     "@coral-xyz/anchor": "^0.30.1",
     "@solana/spl-token": "^0.4.8",
     "@solana/web3.js": "^1.95.3",
-    "@switchboard-xyz/on-demand": "^1.2.35",
+    "@switchboard-xyz/on-demand": "^1.2.41",
     "@switchboard-xyz/solana.js": "^3.2.5",
     "dotenv": "^16.4.5",
     "readline": "^1.3.0",
     "readline-sync": "^1.4.10",
     "resolve-dir": "^1.0.1",
     "shelljs": "^0.8.5",
-    "tsx": "^4.17.0",
+    "tsx": "^4.19.1",
     "yargs": "^17.7.2"
   }
 }

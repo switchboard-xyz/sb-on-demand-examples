@@ -107,6 +107,25 @@ export function buildCoinbaseJob(pair: String): OracleJob {
   return OracleJob.fromObject(jobConfig);
 }
 
+export function buildOkxJob(pair: String): OracleJob {
+  const parts = pair.split("-");
+  const jobConfig = {
+    tasks: [
+      {
+        httpTask: {
+          url: `https://www.okx.com/api/v5/market/index-tickers?quoteCcy=${parts[1]}`,
+        },
+      },
+      {
+        jsonParseTask: {
+          path: `$.data[?(@.instId == "${parts[0]}-${parts[1]}")].idxPx`,
+        },
+      },
+    ],
+  };
+  return OracleJob.fromObject(jobConfig);
+}
+
 export function buildPythJob(id: string): OracleJob {
   const jobConfig = OracleJob.fromObject({
     tasks: [

@@ -36,6 +36,12 @@ function calculateStatistics(latencies) {
   while (true) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx();
+    for (const response of responses) {
+      const shortErr = response.shortError();
+      if (shortErr) {
+        console.log(`Error: ${shortErr}`);
+      }
+    }
     const tx = await sb.asV0Tx({
       connection,
       ixs: [pullIx],
@@ -60,7 +66,7 @@ function calculateStatistics(latencies) {
     console.log(`Median latency: ${stats.median} ms`);
     console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
     console.log(`Loop count: ${stats.count}`);
-    console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
+    // console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
     await sb.sleep(3000);
   }
 })();

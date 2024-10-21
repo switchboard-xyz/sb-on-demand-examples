@@ -126,6 +126,24 @@ export function buildOkxJob(pair: String): OracleJob {
   return OracleJob.fromObject(jobConfig);
 }
 
+export function buildBybitJob(pair: String): OracleJob {
+  const jobConfig = {
+    tasks: [
+      {
+        httpTask: {
+          url: `https://api.bybit.com/v5/market/tickers?category=spot`,
+        },
+      },
+      {
+        jsonParseTask: {
+          path: `$.result.list[?(@.symbol == '${pair}')].lastPrice`,
+        },
+      },
+    ],
+  };
+  return OracleJob.fromObject(jobConfig);
+}
+
 export function buildPythJob(id: string): OracleJob {
   const jobConfig = OracleJob.fromObject({
     tasks: [

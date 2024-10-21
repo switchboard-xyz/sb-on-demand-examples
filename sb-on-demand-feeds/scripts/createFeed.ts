@@ -16,6 +16,7 @@ import {
   buildPythJob,
   buildRedstoneJob,
   buildEdgeJob,
+  buildBybitJob,
   DEMO_PATH,
   TX_CONFIG,
 } from "./utils";
@@ -43,6 +44,7 @@ const FEED_JOBS = [
   // CEX
   buildBinanceJob("BTCUSDC"),
   buildCoinbaseJob("BTC"),
+  buildBybitJob("BTCUSDC"),
 ];
 
 (async function main() {

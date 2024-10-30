@@ -30,12 +30,13 @@ function calculateStatistics(latencies) {
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const feedAccount = new sb.PullFeed(program, argv.feed);
-  // const demo = await myAnchorProgram(program.provider, DEMO_PATH);
+  await feedAccount.preHeatLuts();
   const latencies = [];
 
   while (true) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx();
+    const endTime = Date.now();
     for (const response of responses) {
       const shortErr = response.shortError();
       if (shortErr) {
@@ -56,7 +57,6 @@ function calculateStatistics(latencies) {
       sb.AnchorUtils.loggedEvents(program, sim.value.logs)[0]
     ).toRows();
     console.log("Submitted Price Updates:\n", updateEvent);
-    const endTime = Date.now();
     const latency = endTime - start;
     latencies.push(latency);
 

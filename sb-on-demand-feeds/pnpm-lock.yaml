@@ -18,8 +18,8 @@ dependencies:
     specifier: ^2.5.3
     version: 2.5.3
   '@switchboard-xyz/on-demand':
-    specifier: ^1.2.43
-    version: 1.2.43(fastestsmallesttextencoderdecoder@1.0.22)
+    specifier: ^1.2.48
+    version: 1.2.48(fastestsmallesttextencoderdecoder@1.0.22)
   assert:
     specifier: ^2.1.0
     version: 2.1.0
@@ -489,28 +489,6 @@ packages:
       tslib: 2.7.0
     dev: false
 
-  /@switchboard-xyz/common@2.5.0:
-    resolution: {integrity: sha512-BgQTvqOZGZxMSscy2x3GHrs2/BRhFf55t7QrqVdED1KneCP0KgcZn436GjGttc61nP2i8Yd7VoJzTNksezn2kA==}
-    engines: {node: '>=12'}
-    dependencies:
-      '@solana/web3.js': 1.95.3
-      axios: 1.7.7
-      big.js: 6.2.2
-      bn.js: 5.2.1
-      bs58: 5.0.0
-      cron-validator: 1.3.1
-      decimal.js: 10.4.3
-      js-sha256: 0.11.0
-      lodash: 4.17.21
-      protobufjs: 7.4.0
-      yaml: 2.5.1
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - utf-8-validate
-    dev: false
-
   /@switchboard-xyz/common@2.5.3:
     resolution: {integrity: sha512-u/0ICzIlfw0OJxB9ib46lB8OILLs20YZSjbxQBCibgJiMU9GdnPVwiTFWD0h95pNCMwHAgHVfTDSpGl33iXhNA==}
     engines: {node: '>=12'}
@@ -533,15 +511,15 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/on-demand@1.2.43(fastestsmallesttextencoderdecoder@1.0.22):
-    resolution: {integrity: sha512-YjkGqh2cMZHbDecnfAU/s6MCc9mgm9zcA9y8ti7w11vNBYM1RFspNzwQdmRurL8LVJWAhuJqiE2WGDgLewT1Mg==}
+  /@switchboard-xyz/on-demand@1.2.48(fastestsmallesttextencoderdecoder@1.0.22):
+    resolution: {integrity: sha512-coaWmRz4SP1jUEm+tPIrGJcEsMMX8Uq09fxvGpugN104hhCItMYjKWlnq7CxhMmMV85ddh7cj2ZiCrmgbG/8RA==}
     engines: {node: '>= 18'}
     dependencies:
       '@brokerloop/ttlcache': 3.2.3
       '@coral-xyz/anchor-30': /@coral-xyz/anchor@0.30.1
       '@solana/web3.js': 1.95.3
       '@solworks/soltoolkit-sdk': 0.0.23(fastestsmallesttextencoderdecoder@1.0.22)
-      '@switchboard-xyz/common': 2.5.0
+      '@switchboard-xyz/common': 2.5.3
       axios: 1.7.7
       big.js: 6.2.2
       bs58: 5.0.0

@@ -144,6 +144,24 @@ export function buildBybitJob(pair: String): OracleJob {
   return OracleJob.fromObject(jobConfig);
 }
 
+export function buildGateJob(pair: String): OracleJob {
+  const jobConfig = {
+    tasks: [
+      {
+        httpTask: {
+          url: `https://api.gateio.ws/api/v4/spot/tickers`,
+        },
+      },
+      {
+        jsonParseTask: {
+          path: `$[?(@.currency_pair == '${pair}')].last`,
+        },
+      },
+    ],
+  };
+  return OracleJob.fromObject(jobConfig);
+}
+
 export function buildPythJob(id: string): OracleJob {
   const jobConfig = OracleJob.fromObject({
     tasks: [

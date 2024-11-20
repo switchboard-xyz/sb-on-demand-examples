@@ -20,7 +20,7 @@ anchor build
 ```
 After building, take note of your program address and insert it in your program `lib.rs` file here:
 *Note:* an easy command to view your recently built programm address - `anchor keys list`.
-```typescript
+```rust
 declare_id!(“[YOUR_PROGRAM_ADDRESS]“);
 ```
 Rebuild your program.

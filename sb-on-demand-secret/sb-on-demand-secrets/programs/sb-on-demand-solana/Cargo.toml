@@ -18,4 +18,4 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = "=0.30.0"
-switchboard-on-demand = "0.1.6"
+switchboard-on-demand = "0.1.12"

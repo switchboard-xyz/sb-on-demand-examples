@@ -40,9 +40,9 @@ Once deployed, you can run the demo script included here to test populating the 
 For example - `OPEN_WEATHER_API_KEY=XXXXXXXXXXXXXXXXX`.
 
 ```bash
-pnpm i
-pnpm update
-ts-node scripts/pull.ts
+bun i
+bun update
+bun run scripts/pull.ts
 ```
 
 For documenation on how Switchboard On-Demand Secrets works click [here!](https://docs.switchboard.xyz/docs/switchboard/secrets)

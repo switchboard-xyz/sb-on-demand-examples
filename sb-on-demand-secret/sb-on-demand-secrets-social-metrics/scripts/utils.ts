@@ -49,25 +49,29 @@ export async function sendAndConfirmTx(
   return sig;
 }
 
-export function buildSecretsJob(
-  secretNameTask: string,
-  keypair: Keypair
-): OracleJob {
+export function buildXJob(secretNameTask: string, keypair: Keypair): OracleJob {
   const jobConfig = {
     tasks: [
       {
         secretsTask: {
           authority: keypair.publicKey.toBase58(),
-        },
+        }
       },
       {
         httpTask: {
-          url: `https://api.openweathermap.org/data/2.5/weather?q=aspen,us&appid=${secretNameTask}&units=metric`,
+          url: `https://api.twitter.com/2/users/me?user.fields=public_metrics`,
+          method: OracleJob.HttpTask.Method.METHOD_GET,
+          headers: [
+            {
+              key: "Authorization",
+              value: `Bearer ${secretNameTask}`,
+            },
+          ],
         },
-      },
+      }, 
       {
         jsonParseTask: {
-          path: "$.main.temp",
+          path: "$.data.public_metrics.followers_count",
         },
       },
     ],
@@ -173,7 +177,6 @@ export async function ensureSecretExists(
 
   return retry(fetchSecret, maxRetries);
 }
-
 export async function whitelistFeedHash(
   sbSecrets,
   keypair,

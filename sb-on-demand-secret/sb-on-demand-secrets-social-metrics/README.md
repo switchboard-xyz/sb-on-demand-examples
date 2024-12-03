@@ -3,9 +3,7 @@
 ![Switchboard Logo](https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png)
 
 # Switchboard On-Demand: Solana Pull Feed x Secrets
-This example demonstrates the use of Switchboard's On-Demand Feed using Secrets.
-
-**Here we bring social metrics on-chain!!**
+This example demonstrates the use of Switchboard's On-Demand Feed using Secrets with the use-case of submitting social-metrics on chain.
 
 </div>
 
@@ -37,19 +35,14 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 
 Once deployed, you can run the demo script included here to test populating the feed:
 
-*Note:* in this example you will need to generate an BEARER_TOKEN from `[(https://developer.x.com/en](https://developer.x.com/en)` and create an `.env` file and insert it there under the name `BEARER_TOKEN`.
-For example - `BEARER_TOKEN=XXXXXXXXXXXXXXXXX`.
+*Note:* in this example you will need to generate an API KEY from X.com and create a `.env` file and insert it there under the name `BEARER_TOKEN_X`.
 
-Follow this [tutorial](https://medium.com/@abhiruchichaudhari/oauth-2-0-tokens-and-twitter-api-everything-you-need-to-know-bddaf9a7f120
-) to generate a BEARER_TOKEN. 
+For example - `BEARER_TOKEN_X=XXXXXXXXXXXXXXXXX`.
 
-**NOTE - YOUR BEARER TOKEN ONLY LASTS MOMENTARILY, IT NEEDS TO BE UPDATED.**
-
-Once created, continue with these commands.
 ```bash
-pnpm i
-pnpm update
-ts-node scripts/pull.ts
+bun i
+bun update
+bun run scripts/pull.ts
 ```
 
 For documenation on how Switchboard On-Demand Secrets works click [here!](https://docs.switchboard.xyz/docs/switchboard/secrets)

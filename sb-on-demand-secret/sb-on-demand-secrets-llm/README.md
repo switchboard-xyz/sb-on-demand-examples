@@ -2,8 +2,8 @@
 
 ![Switchboard Logo](https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-# Switchboard On-Demand: Solana Pull Feed from an LLM Secrets
-This example demonstrates the use of Switchboard's On-Demand Feed using Secrets.
+# Switchboard On-Demand: Solana Pull Feed from an LLM using Secrets
+This example demonstrates the use of Switchboard's On-Demand Feed and its capacity to integrate with LLMs using Secrets.
 
 </div>
 

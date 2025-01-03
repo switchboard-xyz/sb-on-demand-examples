@@ -8,7 +8,7 @@
         "@solana/spl-token": "^0.4.6",
         "@solana/web3.js": "^1.93.0",
         "@switchboard-xyz/common": "^2.5.3",
-        "@switchboard-xyz/on-demand": "^1.2.48",
+        "@switchboard-xyz/on-demand": "^1.2.55",
         "assert": "^2.1.0",
         "big.js": "^6.2.1",
         "bigint-buffer": "^1.1.5",

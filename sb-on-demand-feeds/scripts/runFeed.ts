@@ -3,9 +3,10 @@ import yargs from "yargs";
 import { myAnchorProgram, myProgramIx, TX_CONFIG, DEMO_PATH } from "./utils";
 import { PublicKey } from "@solana/web3.js";
 
-const argv = yargs(process.argv).options({ feed: { required: true } }).argv;
+const argv = yargs(process.argv).options({ feed: { required: true } })
+  .argv as any;
 
-function calculateStatistics(latencies) {
+function calculateStatistics(latencies: number[]) {
   const sortedLatencies = [...latencies].sort((a, b) => a - b);
   const min = sortedLatencies[0];
   const max = sortedLatencies[sortedLatencies.length - 1];
@@ -29,9 +30,9 @@ function calculateStatistics(latencies) {
 
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
-  const feedAccount = new sb.PullFeed(program, argv.feed);
+  const feedAccount = new sb.PullFeed(program!, argv.feed!);
   await feedAccount.preHeatLuts();
-  const latencies = [];
+  const latencies: number[] = [];
 
   while (true) {
     const start = Date.now();
@@ -45,7 +46,7 @@ function calculateStatistics(latencies) {
     }
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [pullIx],
+      ixs: [pullIx!],
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,
@@ -54,7 +55,7 @@ function calculateStatistics(latencies) {
 
     const sim = await connection.simulateTransaction(tx, TX_CONFIG);
     const updateEvent = new sb.PullFeedValueEvent(
-      sb.AnchorUtils.loggedEvents(program, sim.value.logs)[0]
+      sb.AnchorUtils.loggedEvents(program!, sim.value.logs!)[0]
     ).toRows();
     console.log("Submitted Price Updates:\n", updateEvent);
     const latency = endTime - start;

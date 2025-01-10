@@ -9,7 +9,6 @@ import {
 } from "@switchboard-xyz/on-demand";
 import {
   myAnchorProgram,
-  myProgramIx,
   buildCoinbaseJob,
   buildChainlinkJob,
   buildBinanceJob,
@@ -52,7 +51,6 @@ const FEED_JOBS = [
   const { keypair, connection, program } = await AnchorUtils.loadEnv();
   const queueAccount = await sb.getDefaultQueue(connection.rpcEndpoint);
   const queue = queueAccount.pubkey;
-  const myProgram = await myAnchorProgram(program.provider, DEMO_PATH);
 
   const conf: any = {
     name: "BTC Price Feed", // the feed name (max 32 bytes)
@@ -66,7 +64,7 @@ const FEED_JOBS = [
 
   // Initialize the feed if needed
   console.log("Initializing new data feed");
-  const [pullFeed, feedKp] = PullFeed.generate(program);
+  const [pullFeed, feedKp] = PullFeed.generate(program!);
   // Store the feed configs on IPFS
   conf.feedHash = decodeString(
     (await crossbarClient.store(queue.toString(), FEED_JOBS)).feedHash
@@ -90,7 +88,7 @@ const FEED_JOBS = [
 
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [pullIx, await myProgramIx(myProgram, pullFeed.pubkey)],
+      ixs: [pullIx!],
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,
@@ -99,7 +97,7 @@ const FEED_JOBS = [
 
     const sim = await connection.simulateTransaction(tx, TX_CONFIG);
     const updateEvent = new sb.PullFeedValueEvent(
-      sb.AnchorUtils.loggedEvents(program, sim.value.logs)[0]
+      sb.AnchorUtils.loggedEvents(program!, sim.value.logs!)[0]
     ).toRows();
     console.log("Submitted Price Updates:\n", updateEvent);
     console.log(`\tTx Signature: ${await connection.sendTransaction(tx)}`);

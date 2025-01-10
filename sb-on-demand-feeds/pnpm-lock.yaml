@@ -18,14 +18,20 @@ importers:
         specifier: ^1.93.0
         version: 1.95.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@switchboard-xyz/common':
-        specifier: ^2.5.11
-        version: 2.5.11(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        specifier: link:/Users/mgild/projects/sbv3/javascript/common
+        version: link:../../sbv3/javascript/common
       '@switchboard-xyz/on-demand':
         specifier: ^1.2.56
         version: 1.2.56(bufferutil@4.0.8)(fastestsmallesttextencoderdecoder@1.0.22)(utf-8-validate@5.0.10)
+      '@switchboard-xyz/sail-sdk':
+        specifier: 0.1.7
+        version: 0.1.7
       assert:
         specifier: ^2.1.0
         version: 2.1.0
+      axios:
+        specifier: ^1.7.9
+        version: 1.7.9
       big.js:
         specifier: ^6.2.1
         version: 6.2.2
@@ -48,6 +54,9 @@ importers:
       '@types/mocha':
         specifier: ^9.1.1
         version: 9.1.1
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.10.5
       chai:
         specifier: ^4.4.1
         version: 4.5.0
@@ -258,6 +267,9 @@ packages:
     resolution: {integrity: sha512-aM3EkDhZeFmnfCQyxebZgaxOd1M7305QIeOlpgGF/QtaDTb38x0VKwWSKGdnl2IaYZh2ypqpi9WDcJqM9LRlLA==}
     engines: {node: '>= 18'}
 
+  '@switchboard-xyz/sail-sdk@0.1.7':
+    resolution: {integrity: sha512-WsdbVoFDxuEVhH5U/VBhJExuqt8xKo7HW++baoxGqKtoen554l+p0yJ2IUSUjtw41rPLtXjCQHqi07CipbF5Yg==}
+
   '@types/bn.js@5.1.6':
     resolution: {integrity: sha512-Xh8vSwUeMKeYYrj3cX4lGQgFSF/N03r+tv4AiLl1SucqV+uTQpxRcnM8AkXKHwYP9ZPXOYXRr2KPXpVlIvqh9w==}
 
@@ -282,8 +294,8 @@ packages:
   '@types/node@18.19.54':
     resolution: {integrity: sha512-+BRgt0G5gYjTvdLac9sIeE0iZcJxi4Jc4PV5EUzqi+88jmQLr+fRZdv2tCTV7IHKSGxM6SaLoOXQWWUiLUItMw==}
 
-  '@types/node@22.7.2':
-    resolution: {integrity: sha512-866lXSrpGpgyHBZUa2m9YNWqHDjjM0aBTJlNtYaGEw4rqY/dcD7deRVTbBBAJelfA7oaGDbNftXF/TL/A6RgoA==}
+  '@types/node@22.10.5':
+    resolution: {integrity: sha512-F8Q+SeGimwOo86fiovQh8qiXfFEh2/ocYv7tU5pJ3EXMSSxk1Joj5wefpFK2fHTf/N6HKGSxIDBT9f3gCxXPkQ==}
 
   '@types/uuid@8.3.4':
     resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
@@ -1007,8 +1019,8 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
-  undici-types@6.19.8:
-    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
+  undici-types@6.20.0:
+    resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
   utf-8-validate@5.0.10:
     resolution: {integrity: sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ==}
@@ -1465,15 +1477,17 @@ snapshots:
       - fastestsmallesttextencoderdecoder
       - utf-8-validate
 
+  '@switchboard-xyz/sail-sdk@0.1.7': {}
+
   '@types/bn.js@5.1.6':
     dependencies:
-      '@types/node': 22.7.2
+      '@types/node': 22.10.5
 
   '@types/chai@4.3.20': {}
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 12.20.55
+      '@types/node': 22.10.5
 
   '@types/json5@0.0.29':
     optional: true
@@ -1482,7 +1496,7 @@ snapshots:
 
   '@types/node-fetch@2.6.11':
     dependencies:
-      '@types/node': 22.7.2
+      '@types/node': 22.10.5
       form-data: 4.0.0
 
   '@types/node@12.20.55': {}
@@ -1491,19 +1505,19 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@22.7.2':
+  '@types/node@22.10.5':
     dependencies:
-      undici-types: 6.19.8
+      undici-types: 6.20.0
 
   '@types/uuid@8.3.4': {}
 
   '@types/ws@7.4.7':
     dependencies:
-      '@types/node': 12.20.55
+      '@types/node': 22.10.5
 
   '@types/ws@8.5.12':
     dependencies:
-      '@types/node': 22.7.2
+      '@types/node': 22.10.5
 
   '@ungap/promise-all-settled@1.1.2': {}
 
@@ -2091,7 +2105,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 22.7.2
+      '@types/node': 22.10.5
       long: 5.2.3
 
   proxy-from-env@1.1.0: {}
@@ -2221,7 +2235,7 @@ snapshots:
 
   undici-types@5.26.5: {}
 
-  undici-types@6.19.8: {}
+  undici-types@6.20.0: {}
 
   utf-8-validate@5.0.10:
     dependencies:

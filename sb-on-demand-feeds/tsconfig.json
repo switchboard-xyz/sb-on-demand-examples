@@ -1,11 +1,17 @@
 {
+  "ts-node": {
+    "require": ["/Users/mgild/projects/sb-on-demand-examples/sb-on-demand-feeds/set-env.ts"]
+  },
   "compilerOptions": {
-    "types": ["mocha", "chai"],
+    "types": ["mocha", "chai", "node"],
     "typeRoots": ["./node_modules/@types"],
     "lib": ["es2015"],
     "module": "commonjs",
     "target": "es6",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "lib": ["esnext", "dom"],
+    "strict": true
+
   }
 }
 

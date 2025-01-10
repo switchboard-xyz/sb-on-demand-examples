@@ -1,15 +1,18 @@
 {
     "scripts": {
         "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+        "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+        "benchmark": "NODE_NO_WARNINGS=1 ts-node scripts/benchmark.ts"
     },
     "dependencies": {
         "@coral-xyz/anchor": "^0.30.1",
         "@solana/spl-token": "^0.4.6",
         "@solana/web3.js": "^1.93.0",
-        "@switchboard-xyz/common": "^2.5.11",
+        "@switchboard-xyz/common": "link:/Users/mgild/projects/sbv3/javascript/common",
         "@switchboard-xyz/on-demand": "^1.2.56",
+        "@switchboard-xyz/sail-sdk": "0.1.7",
         "assert": "^2.1.0",
+        "axios": "^1.7.9",
         "big.js": "^6.2.1",
         "bigint-buffer": "^1.1.5",
         "bs58": "^5.0.0",
@@ -19,6 +22,7 @@
         "@types/bn.js": "^5.1.5",
         "@types/chai": "^4.3.16",
         "@types/mocha": "^9.1.1",
+        "@types/node": "^22.10.5",
         "chai": "^4.4.1",
         "mocha": "^9.2.2",
         "prettier": "^2.8.8",

@@ -16,6 +16,8 @@
         "big.js": "^6.2.1",
         "bigint-buffer": "^1.1.5",
         "bs58": "^5.0.0",
+        "path": "^0.12.7",
+        "web3": "^4.16.0",
         "yargs": "^17.7.2"
     },
     "devDependencies": {

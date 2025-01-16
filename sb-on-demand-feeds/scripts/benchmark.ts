@@ -142,7 +142,6 @@ async function fetchAndCalculateSupraTimeDifference(
     chain_type: chainType,
   };
   const resp = await client.getProof(request);
-  console.log("Supra Response: ", resp);
   const osTime = Date.now();
   const timeDifference = osTime - resp.pairTimestamp;
   return timeDifference / sbLatency;

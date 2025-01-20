@@ -1,6 +1,6 @@
 {
   "ts-node": {
-    "require": ["/Users/mgild/projects/sb-on-demand-examples/sb-on-demand-feeds/set-env.ts"]
+    "require": ["./set-env.ts"]
   },
   "compilerOptions": {
     "types": ["mocha", "chai", "node"],

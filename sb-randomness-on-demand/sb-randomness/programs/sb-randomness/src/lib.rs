@@ -8,11 +8,15 @@ pub fn transfer<'a>(
     from: AccountInfo<'a>,
     to: AccountInfo<'a>,
     amount: u64,
-    seeds: Option<&[&[&[u8]]]> // Use Option to explicitly handle the presence or absence of seeds
+    seeds: Option<&[&[&[u8]]]>, // Use Option to explicitly handle the presence or absence of seeds
 ) -> Result<()> {
     let amount_needed = amount;
     if amount_needed > from.lamports() {
-        msg!("Need {} lamports, but only have {}", amount_needed, from.lamports());
+        msg!(
+            "Need {} lamports, but only have {}",
+            amount_needed,
+            from.lamports()
+        );
         return Err(ErrorCode::NotEnoughFundsToPlay.into());
     }
 
@@ -45,12 +49,18 @@ pub mod sb_randomness {
     }
 
     // Flip the coin; only callable by the allowed user
-    pub fn coin_flip(ctx: Context<CoinFlip>, randomness_account: Pubkey, guess: bool) -> Result<()> {
+    pub fn coin_flip(
+        ctx: Context<CoinFlip>,
+        randomness_account: Pubkey,
+        guess: bool,
+    ) -> Result<()> {
         let clock = Clock::get()?;
         let player_state = &mut ctx.accounts.player_state;
         // Record the user's guess
         player_state.current_guess = guess;
-        let randomness_data = RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow()).unwrap();
+        let randomness_data =
+            RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow())
+                .unwrap();
 
         if randomness_data.seed_slot != clock.slot - 1 {
             msg!("seed_slot: {}", randomness_data.seed_slot);
@@ -67,7 +77,7 @@ pub mod sb_randomness {
         // ***
         transfer(
             ctx.accounts.system_program.to_account_info(),
-            ctx.accounts.user.to_account_info(),  // Include the user_account
+            ctx.accounts.user.to_account_info(), // Include the user_account
             ctx.accounts.escrow_account.to_account_info(),
             player_state.wager,
             None,
@@ -83,16 +93,18 @@ pub mod sb_randomness {
 
     // Settle the flip after randomness is revealed
     pub fn settle_flip(ctx: Context<SettleFlip>, escrow_bump: u8) -> Result<()> {
-
         let clock: Clock = Clock::get()?;
         let player_state = &mut ctx.accounts.player_state;
         // call the switchboard on-demand parse function to get the randomness data
-        let randomness_data = RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow()).unwrap();
+        let randomness_data =
+            RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow())
+                .unwrap();
         if randomness_data.seed_slot != player_state.commit_slot {
             return Err(ErrorCode::RandomnessExpired.into());
         }
         // call the switchboard on-demand get_value function to get the revealed random value
-        let revealed_random_value = randomness_data.get_value(&clock)
+        let revealed_random_value = randomness_data
+            .get_value(&clock)
             .map_err(|_| ErrorCode::RandomnessNotResolved)?;
 
         // Use the revealed random value to determine the flip results
@@ -115,16 +127,17 @@ pub mod sb_randomness {
         if randomness_result == player_state.current_guess {
             msg!("You win!");
             let rent = Rent::get()?;
-            let needed_lamports = player_state.wager * 2 + rent.minimum_balance(ctx.accounts.escrow_account.data_len());
+            let needed_lamports = player_state.wager * 2
+                + rent.minimum_balance(ctx.accounts.escrow_account.data_len());
             if needed_lamports > ctx.accounts.escrow_account.lamports() {
                 msg!("Not enough funds in treasury to pay out the user. Please try again later");
             } else {
                 transfer(
                     ctx.accounts.system_program.to_account_info(),
                     ctx.accounts.escrow_account.to_account_info(), // Transfer from the escrow
-                    ctx.accounts.user.to_account_info(), // Payout to the user's wallet
+                    ctx.accounts.user.to_account_info(),           // Payout to the user's wallet
                     player_state.wager * 2, // If the player wins, they get double their wager if the escrow account has enough funds
-                    seeds // Include seeds
+                    seeds,                  // Include seeds
                 )?;
             }
         } else {
@@ -141,10 +154,10 @@ pub mod sb_randomness {
 #[account]
 pub struct PlayerState {
     allowed_user: Pubkey,
-    latest_flip_result: bool, // Stores the result of the latest flip
+    latest_flip_result: bool,   // Stores the result of the latest flip
     randomness_account: Pubkey, // Reference to the Switchboard randomness account
-    current_guess: bool, // The current guess
-    wager: u64, // The wager amount
+    current_guess: bool,        // The current guess
+    wager: u64,                 // The wager amount
     bump: u8,
     commit_slot: u64, // The slot at which the randomness was committed
 }
@@ -186,7 +199,7 @@ pub struct SettleFlip<'info> {
     pub player_state: Account<'info, PlayerState>,
     /// CHECK: The account's data is validated manually within the handler.
     pub randomness_account_data: AccountInfo<'info>,
-     /// CHECK: This is a simple Solana account holding SOL.
+    /// CHECK: This is a simple Solana account holding SOL.
     #[account(mut, seeds = [b"stateEscrow".as_ref()], bump )]
     pub escrow_account: AccountInfo<'info>,
     pub user: Signer<'info>,
@@ -204,4 +217,3 @@ pub enum ErrorCode {
     RandomnessNotResolved,
     RandomnessExpired,
 }
-

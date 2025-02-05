@@ -26,9 +26,6 @@ const COMMITMENT = "confirmed";
 (async function main() {
   console.clear();
 
-  console.log({
-    ...(await sb.AnchorUtils.loadEnv()),
-  });
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
 
   console.log("\nSetup...");

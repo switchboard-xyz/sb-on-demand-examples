@@ -32,6 +32,15 @@ export async function loadSbProgram(
   return sbProgram;
 }
 
+export async function loadSVMSwitchboardProgram(
+  provider: anchor.Provider
+): Promise<anchor.Program> {
+  const svmProgramId = sb.ON_DEMAND_MAINNET_PID;
+  const svmIdl = await anchor.Program.fetchIdl(svmProgramId, provider);
+  const svmProgram = new anchor.Program(svmIdl!, provider);
+  return svmProgram;
+}
+
 export async function initializeMyProgram(
   provider: anchor.Provider
 ): Promise<anchor.Program> {
@@ -54,6 +63,15 @@ export async function setupQueue(program: anchor.Program): Promise<PublicKey> {
     process.exit(1);
   }
   return queueAccount.pubkey;
+}
+
+export async function setupSVMQueue(
+  program: anchor.Program,
+  queue: PublicKey
+): Promise<PublicKey> {
+  const queuePDA = sb.Queue.queuePDA(program, queue);
+  console.log("Queue:", queuePDA.toString());
+  return queuePDA;
 }
 
 export function getUserGuessFromCommandLine(): boolean {

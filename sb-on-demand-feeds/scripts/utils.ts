@@ -113,7 +113,7 @@ export function buildOkxJob(pair: String): OracleJob {
     tasks: [
       {
         httpTask: {
-          url: `https://www.okx.com/api/v5/market/index-tickers?quoteCcy=${parts[1]}`,
+          url: `https://www.okx.com/api/v5/market/index-tickers?quoteCcy=USD`,
         },
       },
       {

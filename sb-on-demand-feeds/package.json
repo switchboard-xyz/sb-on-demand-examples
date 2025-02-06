@@ -9,7 +9,7 @@
         "@solana/spl-token": "^0.4.9",
         "@solana/web3.js": "^1.98.0",
         "@switchboard-xyz/common": "^2.5.13",
-        "@switchboard-xyz/on-demand": "^1.2.59",
+        "@switchboard-xyz/on-demand": "^1.2.65",
         "assert": "^2.1.0",
         "axios": "^1.7.9",
         "big.js": "^6.2.2",

@@ -67,7 +67,7 @@ function calculateStatistics(latencies: number[]) {
     console.log(`Median latency: ${stats.median} ms`);
     console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
     console.log(`Loop count: ${stats.count}`);
-    console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
-    await sb.sleep(3000);
+    // console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
+    // await sb.sleep(3000);
   }
 })();

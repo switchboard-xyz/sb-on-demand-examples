@@ -36,7 +36,9 @@ function calculateStatistics(latencies: number[]) {
 
   while (true) {
     const start = Date.now();
-    const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx();
+    const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
+      numSignatures: 7,
+    });
     const endTime = Date.now();
     for (const response of responses) {
       const shortErr = response.shortError();
@@ -57,6 +59,7 @@ function calculateStatistics(latencies: number[]) {
     const updateEvent = new sb.PullFeedValueEvent(
       sb.AnchorUtils.loggedEvents(program!, sim.value.logs!)[0]
     ).toRows();
+    console.log("Simulated Price Updates:\n", JSON.stringify(sim.value.logs));
     console.log("Submitted Price Updates:\n", updateEvent);
     const latency = endTime - start;
     latencies.push(latency);

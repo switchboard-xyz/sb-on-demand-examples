@@ -29,7 +29,7 @@ const COMMITMENT = "confirmed";
   //   "https://api.devnet.solana.com",
   //   "confirmed"
   // );
-  // const keypair = await AnchorUtils.initKeypairFromFile("**INSERT_PATH**/.config/solana/id.json");
+  // const keypair = await sb.AnchorUtils.initKeypairFromFile("** YOUR PATH **/.config/solana/id.json");
   // const wallet = new NodeWallet(keypair);
   // const provider = new anchor.AnchorProvider(connection,wallet)
   // const pid = sb.ON_DEMAND_DEVNET_PID;

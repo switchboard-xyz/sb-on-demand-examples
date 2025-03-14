@@ -37,7 +37,7 @@ function calculateStatistics(latencies: number[]) {
   while (true) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
-      numSignatures: 7,
+      numSignatures: 5,
     });
     const endTime = Date.now();
     for (const response of responses) {
@@ -48,7 +48,7 @@ function calculateStatistics(latencies: number[]) {
     }
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [pullIx!],
+      ixs: [...pullIx!],
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,

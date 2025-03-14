@@ -23,7 +23,17 @@ const COMMITMENT = "confirmed";
 
 (async function main() {
   console.clear();
-  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
+  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv(); 
+  // **** if sb.anchorUtils.loadEnv() is not working, you can use the following code: ****
+  //  const connection = new anchor.web3.Connection(
+  //   "https://api.devnet.solana.com",
+  //   "confirmed"
+  // );
+  // const keypair = await AnchorUtils.initKeypairFromFile("**INSERT_PATH**/.config/solana/id.json");
+  // const wallet = new NodeWallet(keypair);
+  // const provider = new anchor.AnchorProvider(connection,wallet)
+  // const pid = sb.ON_DEMAND_DEVNET_PID;
+  // const program = await anchor.Program.at(pid, provider);
   console.log("\nSetup...");
   console.log("Program", program!.programId.toString());
   const userGuess = getUserGuessFromCommandLine();

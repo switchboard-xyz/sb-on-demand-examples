@@ -2,13 +2,9 @@ import { PublicKey, Commitment } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import {
   AnchorUtils,
-  InstructionUtils,
   PullFeed,
-  Queue,
-  sleep,
 } from "@switchboard-xyz/on-demand";
 import {
-  myAnchorProgram,
   buildCoinbaseJob,
   buildChainlinkJob,
   buildBinanceJob,
@@ -16,11 +12,10 @@ import {
   buildRedstoneJob,
   buildEdgeJob,
   buildBybitJob,
-  DEMO_PATH,
   TX_CONFIG,
+  sleep
 } from "./utils";
 import yargs from "yargs";
-import * as anchor from "@coral-xyz/anchor";
 import { CrossbarClient, decodeString } from "@switchboard-xyz/common";
 
 let argv = yargs(process.argv).options({
@@ -88,7 +83,7 @@ const FEED_JOBS = [
 
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [pullIx!],
+      ixs: [...pullIx!],
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,
@@ -101,6 +96,7 @@ const FEED_JOBS = [
     ).toRows();
     console.log("Submitted Price Updates:\n", updateEvent);
     console.log(`\tTx Signature: ${await connection.sendTransaction(tx)}`);
-    await sb.sleep(3000);
+    await sleep(3000);
   }
 })();
+

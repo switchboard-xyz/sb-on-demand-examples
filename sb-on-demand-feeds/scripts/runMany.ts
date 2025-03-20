@@ -1,14 +1,14 @@
 import * as sb from "@switchboard-xyz/on-demand";
-import { myAnchorProgram, myProgramIx, TX_CONFIG, DEMO_PATH } from "./utils";
+import { TX_CONFIG, sleep } from "./utils";
 import { PublicKey } from "@solana/web3.js";
 import { BorshInstructionCoder } from "@coral-xyz/anchor";
 
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   // NOTE: These are published feeds on devnet. You can replace them with your own feeds.
-  const f1 = new PublicKey("3uFMuqGg3GCZK1XSdBfpvSrj28uqFBzz6xTTAaFeobBP");
-  const f2 = new PublicKey("DwYF1yveo8XTF1oqfsqykj332rjSxAd7bR6Gu6i4iUET");
-
+  const f1 = new PublicKey("F8oaENnmLEqyHoiX6kqYu7WbbMGvuoB15fXfWX6SXUdZ");
+  const f2 = new PublicKey("Fmx4PXYEt3rxnabPfuQYpQjgnC6DcytFPELHaVfQHmHz");
+  console.log("Using feeds:", f1.toBase58(), f2.toBase58());
   while (true) {
     const [pullIx, luts] = await sb.PullFeed.fetchUpdateManyLightIx(program!, {
       feeds: [f1, f2],
@@ -35,6 +35,6 @@ import { BorshInstructionCoder } from "@coral-xyz/anchor";
       JSON.stringify(sim.value.logs!, null, 2)
     );
     console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
-    await sb.sleep(3000);
+    await sleep(3000);
   }
 })();

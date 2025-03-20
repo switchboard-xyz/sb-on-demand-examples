@@ -1,6 +1,6 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
-import { myAnchorProgram, myProgramIx, TX_CONFIG, DEMO_PATH } from "./utils";
+import { TX_CONFIG, sleep } from "./utils";
 import { PublicKey } from "@solana/web3.js";
 
 const argv = yargs(process.argv).options({ feed: { required: true } })
@@ -37,7 +37,7 @@ function calculateStatistics(latencies: number[]) {
   while (true) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
-      numSignatures: 5,
+      numSignatures: 2,
     });
     const endTime = Date.now();
     for (const response of responses) {
@@ -70,7 +70,7 @@ function calculateStatistics(latencies: number[]) {
     console.log(`Median latency: ${stats.median} ms`);
     console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
     console.log(`Loop count: ${stats.count}`);
-    // console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
-    // await sb.sleep(3000);
+    console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
+    await sleep(3000);
   }
 })();

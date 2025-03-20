@@ -36,21 +36,23 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 Once deployed, you can run the demo script included here to test populating the feed:
 
 ```bash
-pnpm i
-pnpm update
-ts-node scripts/createFeed.ts
+bun i
+bun update
+bun run scripts/createFeed.ts
 ```
 We also included two other scripts, *runFeed.ts* and *copyFeed.ts*
 
 `runFeed.ts` is a super simple script to run an existing feed update that you like with just the feeds public key address!
 ```
-ts-node scripts/runFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
+bun run scripts/runFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
 ```
-
 `copyFeed.ts` is a script that copies the job defitinion of an existing feed but creates a new feed that you own! All you need is an existing feeds public key address.
 ```
-ts-node scripts/copyFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
+bun run scripts/copyFeed.ts --feed AXRydnjDeWUgR5VGFFqtzYv52u2MHqFCYcsHsnEgCD15
 ```
-
+`runMany.ts` is a script demonstrating how to run an update for multiple feeds in a single transaction.
+```
+bun run scripts/runMany.ts
+```
 
 For documenation on how Switchboard On-Demand works click [here](https://switchboardxyz.gitbook.io/switchboard-on-demand)!

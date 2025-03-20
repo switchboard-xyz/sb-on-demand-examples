@@ -3,17 +3,14 @@ import * as sb from "@switchboard-xyz/on-demand";
 import {
   AnchorUtils,
   PullFeed,
-  sleep,
 } from "@switchboard-xyz/on-demand";
-import { myAnchorProgram } from "./utils";
+import { myAnchorProgram, sleep, TX_CONFIG } from "./utils";
 import yargs from "yargs";
 import * as anchor from "@coral-xyz/anchor";
 import { CrossbarClient } from "@switchboard-xyz/common";
 
-let argv = yargs(process.argv).options({
-  feed: { type: "string", describe: "An existing feed to pull from" },
-  mainnet: { type: "boolean", describe: "Use mainnet queue" },
-}).argv;
+const argv = yargs(process.argv).options({ feed: { required: true } })
+  .argv as any;
 
 async function myProgramIx(program: anchor.Program, feed: PublicKey) {
   return await program.methods.test().accounts({ feed }).instruction();
@@ -28,7 +25,7 @@ const crossbarClient = new CrossbarClient(
   // Devnet default queue (cli configs must be set to devnet)
   const { keypair, connection, program } = await AnchorUtils.loadEnv();
   const myProgramPath = "target/deploy/sb_on_demand_solana-keypair.json";
-  const myProgram = await myAnchorProgram(program.provider, myProgramPath);
+  const myProgram = await myAnchorProgram(program!.provider, myProgramPath);
   const queueAccount = await sb.getDefaultQueue(connection.rpcEndpoint);
   const queue = queueAccount.pubkey;
   try {
@@ -56,13 +53,13 @@ const crossbarClient = new CrossbarClient(
   // Initialize the feed
   let pullFeed: PullFeed;
   console.log("Copy existing data feed with address:", argv.feed);
-  pullFeed = new PullFeed(program, new PublicKey(argv.feed));
+  pullFeed = new PullFeed(program!, new PublicKey(argv.feed));
   let feedData = await pullFeed.loadData();
   let decodedFeedHash = Buffer.from(feedData.feedHash);
 
-  const [pullFeed_, feedKp] = PullFeed.generate(program);
+  const [pullFeed_, feedKp] = PullFeed.generate(program!);
   const tx = await sb.asV0Tx({
-    connection: program.provider.connection,
+    connection: program!.provider.connection,
     ixs: [await pullFeed_.initIx({ ...conf, feedHash: decodedFeedHash })],
     payer: keypair.publicKey,
     signers: [keypair, feedKp],
@@ -75,25 +72,27 @@ const crossbarClient = new CrossbarClient(
   const sig = await connection.sendTransaction(tx, txOpts);
   console.log(`Feed ${feedKp.publicKey} initialized: ${sig}`);
   pullFeed = pullFeed_;
-  await sleep(3000);
+  await sleep(5000);
 
   // Send a price update with a following user instruction every N seconds
   while (true) {
-    const [pullIx, responses, _ok ,luts] = await pullFeed.fetchUpdateIx(conf);
-
+    const [pullIx, responses, _ok, luts] = await pullFeed.fetchUpdateIx(conf);
+    
     const tx = await sb.asV0Tx({
-      connection,
-      ixs: [pullIx, await myProgramIx(myProgram, pullFeed.pubkey)],
-      signers: [keypair],
-      computeUnitPrice: 200_000,
-      computeUnitLimitMultiple: 1.3,
-      lookupTables: luts,
-    });
-
-    const sim = await connection.simulateTransaction(tx, txOpts);
-    const simPrice = sim.value.logs.join("\n").match(/price: (.*)/)[1];
-    console.log(`Price update for feed "${conf.name}": ${simPrice}`);
-    console.log(`\tTx Signature: ${await connection.sendTransaction(tx)}`)
-    await sb.sleep(3000);
+        connection,
+        ixs: [...pullIx!],
+        signers: [keypair],
+        computeUnitPrice: 200_000,
+        computeUnitLimitMultiple: 1.3,
+        lookupTables: luts,
+      });
+    
+      const sim = await connection.simulateTransaction(tx, TX_CONFIG);
+      const updateEvent = new sb.PullFeedValueEvent(
+        sb.AnchorUtils.loggedEvents(program!, sim.value.logs!)[0]
+      ).toRows();
+      console.log("Submitted Price Updates:\n", updateEvent);
+      console.log(`\tTx Signature: ${await connection.sendTransaction(tx)}`);
+      await sleep(3000);
   }
 })();

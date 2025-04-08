@@ -24,4 +24,4 @@ This repository serves as a monorepo example for Switchboard On-Demand on Solana
 
 These components are essential for testing and demonstrating the capabilities of the Switchboard On-Demand solution within the Solana ecosystem.
 
-For examples showcasing our cross-chain capabilities click [here!](https://docs.switchboard.xyz/docs/switchboard/switchboard-on-evm)
+For examples showcasing our cross-chain capabilities click [here!](https://docs.switchboard.xyz/product-documentation/data-feeds/evm)

@@ -9,7 +9,7 @@ Example repositories for switchboard's latest on-demand functionality.
 
 ## Documentation Resources
 
-- **[User Guide and Technical Documentation](https://switchboardxyz.gitbook.io/switchboard-on-demand/links-and-technical-documentation)** - Detailed information on getting started, usage examples, and API references.
+- **[User Guide and Technical Documentation](https://docs.switchboard.xyz/tooling-and-resources/technical-resources-and-documentation)** - Detailed information on getting started, usage examples, and API references.
 - **[Rust Crate on crates.io](https://crates.io/crates/switchboard-on-demand)** - For integrating Switchboard features in Rust projects.
 - **[npm Module](https://www.npmjs.com/package/@switchboard-xyz/on-demand)** - Install Switchboard On-Demand for Node.js applications.
 - **[TypeDoc Documentation](https://switchboard-docs.web.app/)** - Comprehensive TypeDoc generated documentation.

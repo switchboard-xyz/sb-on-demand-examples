@@ -95,6 +95,12 @@ pub mod sb_randomness {
     pub fn settle_flip(ctx: Context<SettleFlip>, escrow_bump: u8) -> Result<()> {
         let clock: Clock = Clock::get()?;
         let player_state = &mut ctx.accounts.player_state;
+
+        // Verify that the provided randomness account matches the stored one
+        if ctx.accounts.randomness_account_data.key() != player_state.randomness_account {
+            return Err(ErrorCode::InvalidRandomnessAccount.into());
+        }
+
         // call the switchboard on-demand parse function to get the randomness data
         let randomness_data =
             RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow())
@@ -216,4 +222,5 @@ pub enum ErrorCode {
     RandomnessAlreadyRevealed,
     RandomnessNotResolved,
     RandomnessExpired,
+    InvalidRandomnessAccount,
 }

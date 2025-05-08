@@ -31,12 +31,13 @@ function calculateStatistics(latencies: number[]) {
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const feedAccount = new sb.PullFeed(program!, argv.feed!);
-  await feedAccount.preHeatLuts();
+  const gateway = await feedAccount.fetchGatewayUrl();
   const latencies: number[] = [];
 
   while (true) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
+      gateway,
       numSignatures: 3,
     });
     const endTime = Date.now();

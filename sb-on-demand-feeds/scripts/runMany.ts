@@ -6,11 +6,17 @@ import { BorshInstructionCoder } from "@coral-xyz/anchor";
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   // NOTE: These are published feeds on devnet. You can replace them with your own feeds.
-  const f1 = new PublicKey("F8oaENnmLEqyHoiX6kqYu7WbbMGvuoB15fXfWX6SXUdZ");
-  const f2 = new PublicKey("Fmx4PXYEt3rxnabPfuQYpQjgnC6DcytFPELHaVfQHmHz");
-  console.log("Using feeds:", f1.toBase58(), f2.toBase58());
+  const f1Key = new PublicKey("F8oaENnmLEqyHoiX6kqYu7WbbMGvuoB15fXfWX6SXUdZ");
+  const f2Key = new PublicKey("Fmx4PXYEt3rxnabPfuQYpQjgnC6DcytFPELHaVfQHmHz");
+  const f1 = new sb.PullFeed(program!, f1Key);
+  const f2 = new sb.PullFeed(program!, f2Key);
+  await f1.preHeatFeed();
+  await f2.preHeatFeed();
+  const gateway = await f1.fetchGatewayUrl();
+  console.log("Using feeds:", f1.pubkey.toBase58(), f2.pubkey.toBase58());
   while (true) {
-    const [pullIx, luts] = await sb.PullFeed.fetchUpdateManyLightIx(program!, {
+    const [pullIx, luts] = await sb.PullFeed.fetchUpdateManyIx(program!, {
+      gateway,
       feeds: [f1, f2],
       numSignatures: 3,
     });

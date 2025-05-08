@@ -38,7 +38,7 @@ function calculateStatistics(latencies: number[]) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
       gateway,
-      numSignatures: 3,
+      numSignatures: 1,
     });
     const endTime = Date.now();
     for (const response of responses) {

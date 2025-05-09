@@ -21,8 +21,8 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
-        specifier: link:/Users/mgild/projects/sbv3/javascript/on-demand
-        version: link:../../sbv3/javascript/on-demand
+        specifier: ^2.8.0
+        version: 2.8.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -111,6 +111,10 @@ packages:
     resolution: {integrity: sha512-DziebCdg4JpGlEqEdGgXmjqcFoJi+JGulUXwEjsZGAscAQ7MyD/7LE/GVCP29vEQxKc7AAwjT3A2ywHp2xfoCA==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@isaacs/ttlcache@1.4.1':
+    resolution: {integrity: sha512-RQgQ4uQ+pLbqXfOmieB91ejmLwvSgv9nLx6sT6sD83s7umBypgg+OIBOBbEUiJXrfpnp9j0mRhYYdzp9uqq3lA==}
+    engines: {node: '>=12'}
 
   '@noble/curves@1.4.2':
     resolution: {integrity: sha512-TavHr8qycMChk8UwMld0ZDRvatedkzWfH8IiaeGCfymOP5i0hSCozz9vHOL0nkwk7HRMlFnAiKpS2jrUmSybcw==}
@@ -260,6 +264,14 @@ packages:
   '@switchboard-xyz/common@3.1.1':
     resolution: {integrity: sha512-quJ+F62cIB8Q58onSJa4mZMNCE03oMQhN0FfdNZKaCoUUqsCLGvY8FC9d6DyA7qDlb9EGZZoxNoYIGjYLKZ2dw==}
     engines: {node: '>=20'}
+
+  '@switchboard-xyz/common@3.2.0':
+    resolution: {integrity: sha512-qBCSMs0SBHU0HIuuc2AkL94Yg+SwcOAnSFnqOqjc5raRYBmeEAC182qnJMRn6Zs98T3tJvZp0YeAApvXtE6jkA==}
+    engines: {node: '>=20'}
+
+  '@switchboard-xyz/on-demand@2.8.0':
+    resolution: {integrity: sha512-S7rWSw09/tn3k2aJ1H8eZRCAbCO3ahbwfvvg7CU0TYv0zQAk08o9pU57D9bYBhSHtj1byHan46Q3cBWL3Xo8bA==}
+    engines: {node: '>= 18'}
 
   '@types/bn.js@5.1.6':
     resolution: {integrity: sha512-Xh8vSwUeMKeYYrj3cX4lGQgFSF/N03r+tv4AiLl1SucqV+uTQpxRcnM8AkXKHwYP9ZPXOYXRr2KPXpVlIvqh9w==}
@@ -1307,6 +1319,8 @@ snapshots:
 
   '@ethereumjs/rlp@5.0.2': {}
 
+  '@isaacs/ttlcache@1.4.1': {}
+
   '@noble/curves@1.4.2':
     dependencies:
       '@noble/hashes': 1.4.0
@@ -1533,6 +1547,41 @@ snapshots:
       js-sha256: 0.11.0
       protobufjs: 7.4.0
       yaml: 2.7.0
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - encoding
+      - typescript
+      - utf-8-validate
+
+  '@switchboard-xyz/common@3.2.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@solana/web3.js': 1.98.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      axios: 1.9.0
+      big.js: 6.2.2
+      bn.js: 5.2.1
+      bs58: 6.0.0
+      buffer: 6.0.3
+      decimal.js: 10.5.0
+      js-sha256: 0.11.0
+      protobufjs: 7.4.0
+      yaml: 2.7.0
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - encoding
+      - typescript
+      - utf-8-validate
+
+  '@switchboard-xyz/on-demand@2.8.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@coral-xyz/anchor-30': '@coral-xyz/anchor@0.30.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)'
+      '@isaacs/ttlcache': 1.4.1
+      '@switchboard-xyz/common': 3.2.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      axios: 1.9.0
+      bs58: 6.0.0
+      buffer: 6.0.3
+      js-yaml: 4.1.0
     transitivePeerDependencies:
       - bufferutil
       - debug

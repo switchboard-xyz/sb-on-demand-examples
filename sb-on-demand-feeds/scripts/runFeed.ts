@@ -38,7 +38,6 @@ function calculateStatistics(latencies: number[]) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
       gateway,
-      numSignatures: 1,
     });
     const endTime = Date.now();
     for (const response of responses) {
@@ -51,7 +50,7 @@ function calculateStatistics(latencies: number[]) {
       connection,
       ixs: [...pullIx!],
       signers: [keypair],
-      computeUnitPrice: 200_000,
+      computeUnitPrice: 20_000,
       computeUnitLimitMultiple: 1.3,
       lookupTables: luts,
     });
@@ -72,6 +71,6 @@ function calculateStatistics(latencies: number[]) {
     console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
     console.log(`Loop count: ${stats.count}`);
     console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
-    await sleep(3000);
+    await sleep(30_000);
   }
 })();

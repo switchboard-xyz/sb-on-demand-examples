@@ -19,10 +19,11 @@ pub mod sb_on_demand_solana {
             .bundle(bundle.as_slice())
             .verify()
             .unwrap();
-        let signed_slot = verified_bundle.signed_slot;
+        let signed_slot = verified_bundle.verified_slot;
         for feed_info in verified_bundle.feed_infos {
-            msg!("Feed hash: {}", feed_info.feed_hash);
+            msg!("Feed hash: {:?}", feed_info.checksum);
             msg!("Feed value: {}", feed_info.value);
+            msg!("Signed slot: {}", signed_slot);
         }
         Ok(())
     }

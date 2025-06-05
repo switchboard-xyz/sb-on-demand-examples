@@ -15,16 +15,16 @@ pub mod sb_on_demand_solana {
             .queue(&queue.to_account_info())
             .slothash_sysvar(&slothashes.to_account_info())
             .ix_sysvar(&instructions.to_account_info())
-            .clock(&Clock::get()?)
             .bundle(bundle.as_slice())
             .verify()
             .unwrap();
-        let signed_slot = verified_bundle.verified_slot;
-        for feed_info in verified_bundle.feed_infos {
-            msg!("Feed hash: {:?}", feed_info.checksum);
-            msg!("Feed value: {}", feed_info.value);
-            msg!("Signed slot: {}", signed_slot);
-        }
+        // let signed_slot = verified_bundle.verified_slot;
+        msg!("sig count: {}", verified_bundle.verification_count);
+        // for feed_info in verified_bundle.feed_infos {
+            // msg!("Feed hash: {:?}", feed_info.checksum);
+            // msg!("Feed value: {}", feed_info.value);
+            // msg!("Signed slot: {}", signed_slot);
+        // }
         Ok(())
     }
 }

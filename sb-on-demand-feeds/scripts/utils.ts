@@ -35,10 +35,14 @@ export async function myAnchorProgram(
 
 export async function myProgramIx(
   program: anchor.Program,
-  feed_: PublicKey | string
+  queue: PublicKey | string,
+  bundle: Buffer
 ): Promise<TransactionInstruction> {
-  const feed = new PublicKey(feed_);
-  const myIx = await program.methods.test().accounts({ feed }).instruction();
+  const myIx = await program.methods.test(bundle).accounts({
+    queue: new PublicKey(queue),
+    slothashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
+    instructions: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
+  }).instruction();
   return myIx;
 }
 

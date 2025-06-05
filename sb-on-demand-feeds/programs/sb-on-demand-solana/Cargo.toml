@@ -21,4 +21,4 @@ anchor-debug = []
 
 [dependencies]
 anchor-lang = "0.31.1"
-switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand", features = ["anchor"] }
+switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand", features = ["anchor", "devnet"] }

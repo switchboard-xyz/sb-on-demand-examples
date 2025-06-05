@@ -12,9 +12,9 @@ pub mod sb_on_demand_solana {
     pub fn test<'a>(ctx: Context<Ctx>, bundle: Vec<u8>) -> Result<()> {
         let Ctx { queue, slothashes, instructions } = ctx.accounts;
         let verified_bundle = BundleVerifierBuilder::default()
-            .queue(queue.to_account_info())
-            .slothash_sysvar(slothashes.to_account_info())
-            .ix_sysvar(instructions.to_account_info())
+            .queue(&queue.to_account_info())
+            .slothash_sysvar(&slothashes.to_account_info())
+            .ix_sysvar(&instructions.to_account_info())
             .clock(&Clock::get()?)
             .bundle(bundle.as_slice())
             .verify()

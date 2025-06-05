@@ -15,7 +15,10 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
 idl-build = ["anchor-lang/idl-build"]
+custom-heap = []
+custom-panic = []
+anchor-debug = []
 
 [dependencies]
-anchor-lang = "0.30.0"
-switchboard-on-demand = "0.1.12"
+anchor-lang = "0.31.1"
+switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand", features = ["anchor"] }

@@ -21,8 +21,8 @@ importers:
         specifier: ^3.3.1
         version: 3.3.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
-        specifier: ^2.10.0
-        version: 2.10.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: ^2.10.2
+        version: 2.10.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -265,8 +265,8 @@ packages:
     resolution: {integrity: sha512-Iz7yQlUxhxRuyttEWoDznw99dl/uo1DQE2MZ1DsV5iZe0UlLm39pK012AAPAr+ogc6MJpKa6OLMmA5PhUBtxsQ==}
     engines: {node: '>=20'}
 
-  '@switchboard-xyz/on-demand@2.10.0':
-    resolution: {integrity: sha512-LmHn1Wvgvf6KjyMjyTKugpOR9TAHjvuFipMrkMOMR1+HhphHpd3Wb2OPoL6CNI7U/PmStP225J1T9VgaGRagvw==}
+  '@switchboard-xyz/on-demand@2.10.2':
+    resolution: {integrity: sha512-Mx1WpjGL8954UnMTnmKJ9Y1AKVBYT42jLy0uVdLduC+G4xMIHCUCI8lksgIWeN3FOPIzQyPJ/hwQMv1WjtO0sw==}
     engines: {node: '>= 18'}
 
   '@types/bn.js@5.1.6':
@@ -1532,7 +1532,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@switchboard-xyz/on-demand@2.10.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+  '@switchboard-xyz/on-demand@2.10.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@coral-xyz/anchor-31': '@coral-xyz/anchor@0.31.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)'
       '@isaacs/ttlcache': 1.4.1

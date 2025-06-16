@@ -48,6 +48,7 @@ function calculateStatistics(latencies: number[]) {
     const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(gateway, crossbar, [
       argv.feedHash,
     ], 3);
+    console.log('done fetching update bundle');
     const endTime = Date.now();
     const latency = endTime - start;
     latencies.push(latency);

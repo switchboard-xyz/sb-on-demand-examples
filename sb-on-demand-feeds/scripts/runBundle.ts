@@ -44,10 +44,9 @@ function calculateStatistics(latencies: number[]) {
 
   while (true) {
     const start = Date.now();
-    console.log(`Fetching update for feed: ${argv.feedHash}`);
     const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(gateway, crossbar, [
       argv.feedHash,
-    ], 3);
+    ]);
     const endTime = Date.now();
     const latency = endTime - start;
     latencies.push(latency);
@@ -70,7 +69,6 @@ function calculateStatistics(latencies: number[]) {
 
     const sim = await connection.simulateTransaction(tx, TX_CONFIG);
     console.log(`Simulation result: ${JSON.stringify(sim.value, null, 2)}`);
-    console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
     await sleep(3_000);
   }
 })();

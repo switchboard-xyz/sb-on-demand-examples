@@ -168,11 +168,10 @@ Feed data in message (FeedInfo structure):
 Total per feed: 49 bytes
 
 Common message overhead:
-- 32 bytes: Recent hash (slothash)
-- ~8 bytes: Additional metadata
-Total message overhead: ~40 bytes
+- 1 byte: Slot offset
+Total message overhead: 1 byte
 
-Base total = 12 + 85 + 49 + 40 = 186 bytes
+Base total = 12 + 85 + 49 + 1 = 147 bytes
 ```
 
 #### Scaling Formula
@@ -180,16 +179,17 @@ Base total = 12 + 85 + 49 + 40 = 186 bytes
 For `n` oracles and `m` feeds:
 
 ```
-Total bytes = 1 + (n × 11) + (n × 85) + (m × 49) + 40
-            = 1 + (n × 96) + (m × 49) + 40
+Total bytes = 1 + (n × 11) + (n × 85) + (m × 49) + 1
+            = 1 + (n × 96) + (m × 49) + 1
+            = 2 + (n × 96) + (m × 49)
 ```
 
 #### Examples
 
-**1 oracle, 1 feed**: ~186 bytes
-**3 oracles, 1 feed**: 1 + (3 × 96) + 49 + 40 = 378 bytes
-**1 oracle, 5 feeds**: 1 + 96 + (5 × 49) + 40 = 382 bytes
-**3 oracles, 10 feeds**: 1 + (3 × 96) + (10 × 49) + 40 = 819 bytes
+**1 oracle, 1 feed**: ~147 bytes
+**3 oracles, 1 feed**: 2 + (3 × 96) + 49 = 339 bytes
+**1 oracle, 5 feeds**: 2 + 96 + (5 × 49) = 343 bytes
+**3 oracles, 10 feeds**: 2 + (3 × 96) + (10 × 49) = 780 bytes
 
 #### Additional Bytes Per Component
 

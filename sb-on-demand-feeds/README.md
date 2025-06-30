@@ -139,6 +139,65 @@ const tx = await asV0Tx({
 - Other programs need to read your price data
 - Building price archives or analytics
 
+### Bundle Instruction Size Mathematics
+
+Understanding the byte requirements helps optimize your transactions:
+
+#### Base Instruction Components
+
+For a bundle with **1 oracle signature** and **1 feed**:
+
+```
+Base instruction size = Fixed overhead + Oracle data + Feed data + Message
+
+Fixed overhead:
+- 1 byte: Signature count
+- 11 bytes: Signature offset data
+Total fixed: 12 bytes
+
+Oracle signature block:
+- 64 bytes: Secp256k1 signature (r, s components)
+- 1 byte: Recovery ID
+- 20 bytes: Ethereum address (hashed pubkey)
+Total per oracle: 85 bytes
+
+Feed data in message:
+- 32 bytes: Feed hash
+- 16 bytes: Feed value (i128)
+- ~8 bytes: Metadata (slot, timestamp)
+Total per feed: ~56 bytes
+
+Common message overhead:
+- 32 bytes: Recent hash (slothash)
+- ~8 bytes: Additional metadata
+Total message overhead: ~40 bytes
+
+Base total = 12 + 85 + 56 + 40 = 193 bytes
+```
+
+#### Scaling Formula
+
+For `n` oracles and `m` feeds:
+
+```
+Total bytes = 1 + (n × 11) + (n × 85) + (m × 56) + 40
+            = 1 + (n × 96) + (m × 56) + 40
+```
+
+#### Examples
+
+**1 oracle, 1 feed**: ~193 bytes
+**3 oracles, 1 feed**: 1 + (3 × 96) + 56 + 40 = 385 bytes
+**1 oracle, 5 feeds**: 1 + 96 + (5 × 56) + 40 = 417 bytes
+**3 oracles, 10 feeds**: 1 + (3 × 96) + (10 × 56) + 40 = 889 bytes
+
+#### Additional Bytes Per Component
+
+- **Per additional oracle**: +96 bytes (11 bytes offset + 85 bytes signature block)
+- **Per additional feed**: +56 bytes (in the message portion)
+
+This efficient packing allows you to verify multiple price feeds from multiple oracles in a single instruction, making it ideal for DeFi protocols that need multiple price points.
+
 ## Alternative: Account-Based Feeds
 
 For more advanced use cases, you can also create and manage feed accounts:

@@ -161,18 +161,18 @@ Oracle signature block:
 - 20 bytes: Ethereum address (hashed pubkey)
 Total per oracle: 85 bytes
 
-Feed data in message:
-- 32 bytes: Feed hash
-- 16 bytes: Feed value (i128)
-- ~8 bytes: Metadata (slot, timestamp)
-Total per feed: ~56 bytes
+Feed data in message (FeedInfo structure):
+- 32 bytes: Checksum (feed hash)
+- 16 bytes: Value (i128)
+- 1 byte: Min oracle samples
+Total per feed: 49 bytes
 
 Common message overhead:
 - 32 bytes: Recent hash (slothash)
 - ~8 bytes: Additional metadata
 Total message overhead: ~40 bytes
 
-Base total = 12 + 85 + 56 + 40 = 193 bytes
+Base total = 12 + 85 + 49 + 40 = 186 bytes
 ```
 
 #### Scaling Formula
@@ -180,21 +180,21 @@ Base total = 12 + 85 + 56 + 40 = 193 bytes
 For `n` oracles and `m` feeds:
 
 ```
-Total bytes = 1 + (n × 11) + (n × 85) + (m × 56) + 40
-            = 1 + (n × 96) + (m × 56) + 40
+Total bytes = 1 + (n × 11) + (n × 85) + (m × 49) + 40
+            = 1 + (n × 96) + (m × 49) + 40
 ```
 
 #### Examples
 
-**1 oracle, 1 feed**: ~193 bytes
-**3 oracles, 1 feed**: 1 + (3 × 96) + 56 + 40 = 385 bytes
-**1 oracle, 5 feeds**: 1 + 96 + (5 × 56) + 40 = 417 bytes
-**3 oracles, 10 feeds**: 1 + (3 × 96) + (10 × 56) + 40 = 889 bytes
+**1 oracle, 1 feed**: ~186 bytes
+**3 oracles, 1 feed**: 1 + (3 × 96) + 49 + 40 = 378 bytes
+**1 oracle, 5 feeds**: 1 + 96 + (5 × 49) + 40 = 382 bytes
+**3 oracles, 10 feeds**: 1 + (3 × 96) + (10 × 49) + 40 = 819 bytes
 
 #### Additional Bytes Per Component
 
 - **Per additional oracle**: +96 bytes (11 bytes offset + 85 bytes signature block)
-- **Per additional feed**: +56 bytes (in the message portion)
+- **Per additional feed**: +49 bytes (in the message portion)
 
 This efficient packing allows you to verify multiple price feeds from multiple oracles in a single instruction, making it ideal for DeFi protocols that need multiple price points.
 

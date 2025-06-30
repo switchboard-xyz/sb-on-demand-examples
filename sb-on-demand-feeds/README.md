@@ -148,7 +148,7 @@ Understanding the byte requirements helps optimize your transactions:
 For a bundle with **1 oracle signature** and **1 feed**:
 
 ```
-Base instruction size = Fixed overhead + Oracle data + Feed data + Message
+Base instruction size = Fixed overhead + Oracle data + Feed data + Message + Account
 
 Fixed overhead:
 - 1 byte: Signature count
@@ -171,7 +171,11 @@ Common message overhead:
 - 1 byte: Slot offset
 Total message overhead: 1 byte
 
-Base total = 12 + 85 + 49 + 1 = 147 bytes
+Account overhead:
+- 32 bytes: Switchboard lookup table account
+Total account overhead: 32 bytes
+
+Base total = 12 + 85 + 49 + 1 + 32 = 179 bytes
 ```
 
 #### Scaling Formula
@@ -179,17 +183,17 @@ Base total = 12 + 85 + 49 + 1 = 147 bytes
 For `n` oracles and `m` feeds:
 
 ```
-Total bytes = 1 + (n × 11) + (n × 85) + (m × 49) + 1
-            = 1 + (n × 96) + (m × 49) + 1
-            = 2 + (n × 96) + (m × 49)
+Total bytes = 1 + (n × 11) + (n × 85) + (m × 49) + 1 + 32
+            = 1 + (n × 96) + (m × 49) + 1 + 32
+            = 34 + (n × 96) + (m × 49)
 ```
 
 #### Examples
 
-**1 oracle, 1 feed**: ~147 bytes
-**3 oracles, 1 feed**: 2 + (3 × 96) + 49 = 339 bytes
-**1 oracle, 5 feeds**: 2 + 96 + (5 × 49) = 343 bytes
-**3 oracles, 10 feeds**: 2 + (3 × 96) + (10 × 49) = 780 bytes
+**1 oracle, 1 feed**: ~179 bytes
+**3 oracles, 1 feed**: 34 + (3 × 96) + 49 = 371 bytes
+**1 oracle, 5 feeds**: 34 + 96 + (5 × 49) = 375 bytes
+**3 oracles, 10 feeds**: 34 + (3 × 96) + (10 × 49) = 812 bytes
 
 #### Additional Bytes Per Component
 

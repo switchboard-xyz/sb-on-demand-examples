@@ -190,10 +190,10 @@ Total bytes = 1 + (n × 11) + (n × 85) + (m × 49) + 1 + 32
 
 #### Examples
 
-**1 oracle, 1 feed**: ~179 bytes
-**3 oracles, 1 feed**: 34 + (3 × 96) + 49 = 371 bytes
-**1 oracle, 5 feeds**: 34 + 96 + (5 × 49) = 375 bytes
-**3 oracles, 10 feeds**: 34 + (3 × 96) + (10 × 49) = 812 bytes
+- **1 oracle, 1 feed**: ~179 bytes
+- **3 oracles, 1 feed**: 34 + (3 × 96) + 49 = 371 bytes
+- **1 oracle, 5 feeds**: 34 + 96 + (5 × 49) = 375 bytes
+- **3 oracles, 10 feeds**: 34 + (3 × 96) + (10 × 49) = 812 bytes
 
 #### Additional Bytes Per Component
 

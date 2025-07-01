@@ -10,3 +10,9 @@ url = "https://api.apr.dev"
 [provider]
 cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
+
+[programs.devnet]
+sb_on_demand_solana = "2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5"
+
+[programs.mainnet]
+sb_on_demand_solana = "2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5"

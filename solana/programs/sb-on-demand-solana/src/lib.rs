@@ -1,7 +1,7 @@
 use faster_hex::hex_string;
 use anchor_lang::prelude::*;
 use switchboard_on_demand::prelude::{
-    BundleVerifier, QueueAccountData, SlotHashes, Instructions,
+    BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions,
 };
 
 declare_id!("2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5");

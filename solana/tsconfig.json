@@ -1,17 +1,27 @@
 {
-  "ts-node": {
-    "require": ["./set-env.ts"]
-  },
   "compilerOptions": {
-    "types": ["mocha", "chai", "node"],
-    "typeRoots": ["./node_modules/@types"],
-    // "lib": ["es2015"],
+    "target": "es2022",
     "module": "commonjs",
-    "target": "es2016",
+    "lib": ["es2022", "dom"],
+    "rootDir": "./",
+    "outDir": "./dist",
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
-    "strict": true
-
-  }
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": [
+    "scripts/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "target"
+  ]
 }
 

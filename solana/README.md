@@ -324,7 +324,7 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 ```
 
 #### "Invalid feed hash"
-- Get a valid feed hash from [Switchboard App](https://app.switchboard.xyz)
+- Get a valid feed hash from [Switchboard App]([https://app.switchboard.xyz](https://beta.ondemand.switchboard.xyz/bundle-builder))
 - Ensure you're using the correct format: `0x...` (64 characters)
 - Check you're on the right network (devnet/mainnet)
 
@@ -350,7 +350,7 @@ solana airdrop 2
 ## ❓ FAQ
 
 ### What is a feed hash?
-A feed hash uniquely identifies a price feed configuration. It's a 32-byte value (displayed as 0x...) that contains the job definitions for fetching price data. Get one from the [Switchboard App](https://app.switchboard.xyz).
+A feed hash uniquely identifies a price feed configuration. It's a 32-byte value (displayed as 0x...) that contains the job definitions for fetching price data. Get one from the [Switchboard App]([https://app.switchboard.xyz](https://beta.ondemand.switchboard.xyz/bundle-builder)).
 
 ### How many oracles should I use?
 - **Minimum**: 1 oracle (testing only)

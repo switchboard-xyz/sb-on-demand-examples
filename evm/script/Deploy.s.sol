@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// forge script script/Deploy.s.sol:DeployScript --rpc-url https://sepolia-rollup.arbitrum.io/rpc --broadcast -vv
+// forge script script/Deploy.s.sol:DeployScript --rpc-url https://rpc.hyperliquid.xyz/evm --broadcast -vv
 
 import "forge-std/Script.sol";
 import {Example} from "../src/Example.sol";
@@ -20,8 +20,9 @@ contract DeployScript is Script {
         // Get the Aggregator ID
         bytes32 aggregatorId = vm.envBytes32("AGGREGATOR_ID");
 
-        // Arbitrum Sepolia Switchboard Address
-        address switchboard = 0xA2a0425fA3C5669d384f4e6c8068dfCf64485b3b;
+        // Get Switchboard address from environment variable
+        // For networks addresses, see https://docs.switchboard.xyz/product-documentation/data-feeds/evm
+        address switchboard = vm.envAddress("SWITCHBOARD_ADDRESS");
 
         // Get Switchboard
         ISwitchboard sb = ISwitchboard(switchboard);
@@ -67,11 +68,6 @@ contract DeployScript is Script {
         vm.startBroadcast(deployerPrivateKey);
         example = new Example(
             switchboard,
-            // Arbitrum Sepolia: Carbon Intensity Great Britain (0xba2...86572)
-            // https://ondemand.switchboard.xyz/arbitrum/sepolia/feed/0xba2c99cb1c50d8c77209adc5a45f82e561c29f5b279dca507b4f1324b6586572
-
-            // Arbitrum Sepolia: UNI / USD (0x755...d4878)
-            // https://beta.ondemand.switchboard.xyz/arbitrum/sepolia/feed/0x755c0da00f939b04266f3ba3619ad6498fb936a8bfbfac27c9ecd4ab4c5d4878
             aggregatorId
         );
 

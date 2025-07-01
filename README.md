@@ -35,7 +35,7 @@ The EVM examples showcase Switchboard functionality on Ethereum and EVM-compatib
 - **[📈 Price Feeds](./evm)** - Real-time price data for DeFi applications
 
 **Supported Networks:**
-- Ethereum, Arbitrum, Optimism, Base, Polygon, BNB Chain, Avalanche
+- Ethereum, Hyperliquid, Arbitrum, Optimism, Base, Polygon, BNB Chain, Avalanche
 
 **Resources:**
 - [EVM Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/evm)

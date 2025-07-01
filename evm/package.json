@@ -9,8 +9,10 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@switchboard-xyz/on-demand": "^1.2.10",
+    "@switchboard-xyz/common": "^3.4.1",
     "@switchboard-xyz/on-demand-solidity": "^0.0.4",
-    "ethers": "^6.13.1"
+    "@types/yargs": "^17.0.33",
+    "ethers": "^6.13.1",
+    "yargs": "^18.0.0"
   }
 }

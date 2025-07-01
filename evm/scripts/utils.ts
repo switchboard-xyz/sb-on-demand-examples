@@ -69,7 +69,7 @@ export const retryWithBackoff = async (
 export const SWITCHBOARD_ADDRESSES: Record<number, string> = {
   1: "0x...", // Ethereum Mainnet (placeholder)
   42161: "0x...", // Arbitrum One (placeholder)
-  421614: "0xA2a0425fA3C5669d384f4e6c8068dfCf64485b3b", // Arbitrum Sepolia
+  999: "0x316fbe540c719970e6427ccd8590d7e0a2814c5d", // Hyperliquid
   10: "0x...", // Optimism (placeholder)
   137: "0x...", // Polygon (placeholder)
   8453: "0x...", // Base (placeholder)
@@ -95,7 +95,7 @@ export const getSwitchboardAddress = (chainId: number): string => {
  * Example aggregator IDs for different price feeds
  */
 export const EXAMPLE_FEEDS = {
-  // Arbitrum Sepolia feeds
+  // Hyperliquid feeds
   "ETH/USD": "0x...", // placeholder
   "BTC/USD": "0x...", // placeholder
   "UNI/USD": "0x755c0da00f939b04266f3ba3619ad6498fb936a8bfbfac27c9ecd4ab4c5d4878",

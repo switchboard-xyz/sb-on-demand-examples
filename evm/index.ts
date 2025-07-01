@@ -1,7 +1,7 @@
 /* Example Using Crossbar (equivalent to index.ts) */
 import * as ethers from "ethers";
 import * as fs from "fs";
-import { CrossbarClient } from "@switchboard-xyz/on-demand";
+import { CrossbarClient } from "@switchboard-xyz/common";
 
 // Parse the response as JSON
 const secret = process.env.PRIVATE_KEY as string;
@@ -11,20 +11,27 @@ if (!secret) {
 
 // Create a provider
 const provider = new ethers.JsonRpcProvider(
-  "https://sepolia-rollup.arbitrum.io/rpc"
+  "https://rpc.hyperliquid.xyz/evm"
 );
 
 // Create a signer
 const signerWithProvider = new ethers.Wallet(secret, provider);
 
-// Target contract address
+// Target contract address (your deployed Example contract)
 const exampleAddress = process.env.EXAMPLE_ADDRESS as string;
+if (!exampleAddress) {
+  throw new Error("No example contract address provided");
+}
 
 // for tokens (this is the Human-Readable ABI format)
 const abi = [
   "function getFeedData(bytes[] calldata updates) public payable",
   "function aggregatorId() public view returns (bytes32)",
   "function latestPrice() public view returns (int256)",
+  "function lastUpdateTimestamp() public view returns (uint256)",
+  "function lastOracleId() public view returns (bytes32)",
+  "function getLatestUpdate() external view returns (int128 result, uint256 timestamp, bytes32 oracleId)",
+  "event FeedData(int128 price, uint256 timestamp, bytes32 oracleId)",
 ];
 
 const crossbar = new CrossbarClient(`https://crossbar.switchboard.xyz`);
@@ -36,19 +43,54 @@ const exampleContract = new ethers.Contract(
   signerWithProvider
 );
 
+// Get the aggregator ID from the contract
+const aggregatorId = await exampleContract.aggregatorId();
+console.log("Aggregator ID:", aggregatorId);
+
 // Get the encoded updates
 const { encoded } = await crossbar.fetchEVMResults({
-  chainId: 421614,
-  aggregatorIds: [await exampleContract.aggregatorId()],
+  chainId: 999, // Use the correct chain ID for your network
+  aggregatorIds: [aggregatorId],
 });
+
+console.log("Encoded updates length:", encoded.length);
 
 // Update the contract + do some business logic
 const tx = await exampleContract.getFeedData(encoded);
 
-console.log(tx);
+console.log("Transaction hash:", tx.hash);
 
-// Log the transaction hash
-console.log("Transaction completed!");
+// Wait for transaction confirmation
+const receipt = await tx.wait();
+console.log("Transaction confirmed in block:", receipt.blockNumber);
 
-// Log the result
-console.log("Value stored in contract: ", await exampleContract.latestPrice());
+// Parse events from the transaction
+if (receipt.logs) {
+  const iface = new ethers.Interface(abi);
+  for (const log of receipt.logs) {
+    try {
+      const parsed = iface.parseLog({ topics: log.topics, data: log.data });
+      if (parsed && parsed.name === "FeedData") {
+        console.log("\n=== Feed Update Event ===");
+        console.log("Price:", parsed.args.price.toString());
+        console.log("Timestamp:", new Date(Number(parsed.args.timestamp) * 1000).toISOString());
+        console.log("Oracle ID:", parsed.args.oracleId);
+      }
+    } catch (e) {
+      // Skip logs that don't match our interface
+    }
+  }
+}
+
+// Get detailed update information
+const [result, timestamp, oracleId] = await exampleContract.getLatestUpdate();
+console.log("\n=== Latest Update Details ===");
+console.log("Result:", result.toString());
+console.log("Timestamp:", new Date(Number(timestamp) * 1000).toISOString());
+console.log("Oracle ID:", oracleId);
+
+// Also log the individual values for backwards compatibility
+console.log("\n=== Individual Contract Values ===");
+console.log("Latest Price:", await exampleContract.latestPrice());
+console.log("Last Update Timestamp:", await exampleContract.lastUpdateTimestamp());
+console.log("Last Oracle ID:", await exampleContract.lastOracleId());

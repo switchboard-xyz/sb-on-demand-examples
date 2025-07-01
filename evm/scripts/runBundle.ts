@@ -12,10 +12,7 @@
  *
  * @example
  * ```bash
- * # Fetch and verify ETH/USD price on Arbitrum Sepolia
- * PRIVATE_KEY=0x... EXAMPLE_ADDRESS=0x... bun run scripts/runBundle.ts
- *
- * # With custom aggregator ID
+ * # With an aggregator ID and private key
  * AGGREGATOR_ID=0x... PRIVATE_KEY=0x... EXAMPLE_ADDRESS=0x... bun run scripts/runBundle.ts
  * ```
  *
@@ -23,7 +20,7 @@
  */
 
 import * as ethers from "ethers";
-import { CrossbarClient } from "@switchboard-xyz/on-demand";
+import { CrossbarClient } from "@switchboard-xyz/common";
 import yargs from "yargs";
 
 /**
@@ -33,12 +30,12 @@ const argv = yargs(process.argv)
   .options({
     rpcUrl: {
       type: "string",
-      default: "https://sepolia-rollup.arbitrum.io/rpc",
+      default: "https://rpc.hyperliquid.xyz/evm",
       description: "RPC URL for the EVM network",
     },
     chainId: {
       type: "number",
-      default: 421614, // Arbitrum Sepolia
+      default: 999, // Hyperliquid
       description: "Chain ID for the EVM network",
     },
   })
@@ -111,6 +108,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     "function getFeedData(bytes[] calldata updates) public payable",
     "function aggregatorId() public view returns (bytes32)",
     "function latestPrice() public view returns (int256)",
+    "function lastUpdateTimestamp() public view returns (uint256)",
+    "function lastOracleId() public view returns (bytes32)",
+    "function getLatestUpdate() external view returns (int128 result, uint256 timestamp, bytes32 oracleId)",
+    "event FeedData(int128 price, uint256 timestamp, bytes32 oracleId)",
   ];
 
   // Initialize Crossbar client for fetching oracle bundles
@@ -177,10 +178,27 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       const receipt = await tx.wait();
       console.log(`Transaction confirmed in block ${receipt.blockNumber}`);
 
-      // Read the updated price
-      const latestPrice = await exampleContract.latestPrice();
-      const formattedPrice = ethers.formatUnits(latestPrice, 18);
+      // Parse events from the transaction
+      if (receipt.logs) {
+        const iface = new ethers.Interface(abi);
+        for (const log of receipt.logs) {
+          try {
+            const parsed = iface.parseLog({ topics: log.topics, data: log.data });
+            if (parsed && parsed.name === "FeedData") {
+              console.log(`\nFeed updated by oracle: ${parsed.args.oracleId.slice(0, 10)}...`);
+              console.log(`Update timestamp: ${new Date(Number(parsed.args.timestamp) * 1000).toISOString()}`);
+            }
+          } catch (e) {
+            // Skip logs that don't match our interface
+          }
+        }
+      }
+
+      // Read the updated price using the enhanced method
+      const [result, timestamp, oracleId] = await exampleContract.getLatestUpdate();
+      const formattedPrice = ethers.formatUnits(result, 18);
       console.log(`Latest price: $${formattedPrice}`);
+      console.log(`Data age: ${Math.floor((Date.now() / 1000) - Number(timestamp))} seconds`);
 
       // Calculate total latency (fetch + transaction)
       const totalLatency = Date.now() - start;

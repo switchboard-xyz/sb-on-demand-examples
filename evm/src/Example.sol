@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {ISwitchboard} from "@switchboard-xyz/on-demand-solidity/ISwitchboard.sol";
+import {Structs} from "@switchboard-xyz/on-demand-solidity/structs/Structs.sol";
 
 contract Example {
     ISwitchboard switchboard;
@@ -12,6 +13,12 @@ contract Example {
     // The latest price from the feed
     int256 public latestPrice;
 
+    // Latest update timestamp
+    uint256 public lastUpdateTimestamp;
+
+    // Latest oracle ID that provided the update
+    bytes32 public lastOracleId;
+
     // If the transaction fee is not paid, the update will fail.
     error InsufficientFee(uint256 expected, uint256 received);
 
@@ -19,7 +26,7 @@ contract Example {
     error InvalidResult(int128 result);
 
     // If the Switchboard update succeeds, this event will be emitted with the latest price.
-    event FeedData(int128 price);
+    event FeedData(int128 price, uint256 timestamp, bytes32 oracleId);
 
     /**
      * @param _switchboard The address of the Switchboard contract
@@ -50,18 +57,25 @@ contract Example {
 
         // Read the current value from a Switchboard feed.
         // This will fail if the feed doesn't have fresh updates ready (e.g. if the feed update failed)
-        // Get the latest feed result
-        // This is encoded as decimal * 10^18 to avoid floating point issues
-        int128 result = switchboard.latestUpdate(aggregatorId).result;
+        // Get the latest feed result - this returns a complete Update struct
+        Structs.Update memory update = switchboard.latestUpdate(aggregatorId);
 
-        // In this example, we revert if the result is negative
-        if (result < 0) {
-            revert InvalidResult(result);
-        }
+        // Store the complete update information
+        latestPrice = update.result;
+        lastUpdateTimestamp = update.timestamp;
+        lastOracleId = update.oracleId;
 
-        latestPrice = result;
+        // Emit the latest result from the feed with full update info
+        emit FeedData(update.result, update.timestamp, update.oracleId);
+    }
 
-        // Emit the latest result from the feed
-        emit FeedData(result);
+    /**
+     * Get the latest update information
+     * @return result The latest price result
+     * @return timestamp The timestamp of the update
+     * @return oracleId The oracle that provided the update
+     */
+    function getLatestUpdate() external view returns (int128 result, uint256 timestamp, bytes32 oracleId) {
+        return (int128(latestPrice), lastUpdateTimestamp, lastOracleId);
     }
 }

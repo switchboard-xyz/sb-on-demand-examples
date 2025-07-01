@@ -2,22 +2,46 @@
 
 This directory contains examples for using Switchboard On-Demand functionality on EVM-compatible chains.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
 - Node.js 16+ and npm/yarn/bun
 - [Foundry](https://book.getfoundry.sh/getting-started/installation) for Solidity development
-- An EVM wallet with testnet ETH (we'll use Arbitrum Sepolia)
+- An EVM wallet with testnet ETH (we'll use Hyperliquid)
 
 ### Installation
 
+#### 1. Install Dependencies
+
 ```bash
-# Install dependencies
+# Install Node.js dependencies
 bun install
 
-# Install Foundry dependencies
+# Install Foundry dependencies (if needed)
 forge install
+```
+
+#### 2. Set up Forge Remappings
+
+The project uses Switchboard's On-Demand Solidity SDK. For Forge to properly resolve imports, create a `remappings.txt` file (already included) with:
+
+```
+@switchboard-xyz/on-demand-solidity/=node_modules/@switchboard-xyz/on-demand-solidity/
+```
+
+This allows you to import Switchboard contracts like:
+```solidity
+import {ISwitchboard} from "@switchboard-xyz/on-demand-solidity/ISwitchboard.sol";
+import {Structs} from "@switchboard-xyz/on-demand-solidity/structs/Structs.sol";
+```
+
+#### 3. Verify Installation
+
+You can verify that Forge can find the Switchboard contracts:
+
+```bash
+forge build
 ```
 
 ### Environment Setup
@@ -25,25 +49,36 @@ forge install
 Create a `.env` file:
 
 ```bash
-# Your private key (without 0x prefix)
+# Your private key (with 0x prefix)
 PRIVATE_KEY=your_private_key_here
 
-# Aggregator ID for the price feed you want to use
-AGGREGATOR_ID=0x755c0da00f939b04266f3ba3619ad6498fb936a8bfbfac27c9ecd4ab4c5d4878
+# Aggregator ID for the price feed you want to use (bytes32 format)  
+AGGREGATOR_ID=0x354dc60a62426b6fb787b00ad0fb4d9a280f60e3ada8678cf2a6e940513100ea
+
+# Switchboard on-demand contract address (network dependent)
+# Hyperliquid: 0x316fbe540c719970e6427ccd8590d7e0a2814c5d
+# See https://docs.switchboard.xyz for other networks
+SWITCHBOARD_ADDRESS=0x316fbe540c719970e6427ccd8590d7e0a2814c5d
 
 # Contract address (will be set after deployment)
 EXAMPLE_ADDRESS=
 ```
 
-## 📋 Example: Price Feed Integration
+Then run:
+```bash
+source .env
+```
+
+
+## Example Price Feed Integration
 
 This example demonstrates how to integrate Switchboard on-demand price feeds into your smart contracts.
 
 ### 1. Deploy the Example Contract
 
 ```bash
-# Deploy to Arbitrum Sepolia
-forge script script/Deploy.s.sol:DeployScript --rpc-url https://sepolia-rollup.arbitrum.io/rpc --broadcast -vv
+# Deploy to Hyperliquid
+forge script script/Deploy.s.sol:DeployScript --rpc-url https://rpc.hyperliquid.xyz/evm --broadcast -vv
 ```
 
 The deployment script will:
@@ -51,6 +86,13 @@ The deployment script will:
 - Configure it with the Switchboard oracle address
 - Set up your chosen aggregator ID
 - Output the deployed contract address
+
+Then add `EXAMPLE_ADDRESS=0x...` with your deployed contract address to the environment file or export it. 
+
+```bash
+# add `EXAMPLE_ADDRESS=0x...` OR run `export EXAMPLE_ADDRESS=0x...`
+source .env
+```
 
 ### 2. Run the Bundle Example
 
@@ -61,7 +103,7 @@ bun run scripts/runBundle.ts
 ```
 
 This script demonstrates:
-- Fetching signed price data from Switchboard's Crossbar network
+- Fetching signed price data from Switchboard's Crossbar instance
 - Submitting the oracle update to your contract
 - Reading the updated price from the contract
 - Performance monitoring and statistics
@@ -74,50 +116,9 @@ For a one-time price update:
 bun run index.ts
 ```
 
-## 📁 Project Structure
-
-```
-evm-on-demand/
-├── src/
-│   └── Example.sol          # Example contract consuming oracle data
-├── script/
-│   └── Deploy.s.sol         # Foundry deployment script
-├── scripts/
-│   ├── runBundle.ts         # Continuous price update example
-│   └── utils.ts             # Helper utilities
-├── index.ts                 # Single update example
-├── foundry.toml            # Foundry configuration
-├── package.json            # Node dependencies
-└── tsconfig.json           # TypeScript configuration
-```
-
-## 🔧 Key Components
-
-### Smart Contract (`src/Example.sol`)
-
-The example contract demonstrates:
-- Integrating with the Switchboard ISwitchboard interface
-- Storing aggregator IDs for price feeds
-- Processing oracle updates with proper fee handling
-- Emitting events for price updates
-
-### TypeScript Client (`scripts/runBundle.ts`)
-
-Shows how to:
-- Connect to Switchboard's Crossbar network
-- Fetch encoded oracle updates
-- Submit updates to your contract
-- Monitor performance and latency
-
-## 📊 Available Price Feeds
-
-Popular feeds on Arbitrum Sepolia:
-- **UNI/USD**: `0x755c0da00f939b04266f3ba3619ad6498fb936a8bfbfac27c9ecd4ab4c5d4878`
-- **Carbon Intensity GB**: `0xba2c99cb1c50d8c77209adc5a45f82e561c29f5b279dca507b4f1324b6586572`
-
 ### Finding and Verifying Feeds
 
-1. **Bundle Builder**: Use [beta.ondemand.switchboard.xyz/bundle-builder](https://beta.ondemand.switchboard.xyz/bundle-builder) to:
+1. **Bundle Builder**: Use [beta.ondemand.switchboard.xyz/bundle-builder](https://beta.ondemand.switchboard.xyz/hyperevm/mainnet/build) to:
    - Build custom feed bundles
    - Verify feed checksums
    - Test feed updates before integration
@@ -128,20 +129,23 @@ Popular feeds on Arbitrum Sepolia:
    - Verify feed integrity and performance
 
 3. **Network-Specific Feeds**: Find feeds for your network at:
-   - Arbitrum Sepolia: [ondemand.switchboard.xyz/arbitrum/sepolia](https://ondemand.switchboard.xyz/arbitrum/sepolia)
+   - Hyperliquid: [https://beta.ondemand.switchboard.xyz/hyperevm/mainnet](https://beta.ondemand.switchboard.xyz/hyperevm/mainnet)
    - Other networks: Use the explorer to filter by chain
 
 ## 🌐 Supported Networks
 
 | Network | Chain ID | Switchboard Contract |
 |---------|----------|---------------------|
+| HyperEVM Mainnet | 999 | `0x316fbe540c719970e6427ccd8590d7e0a2814c5d` |
+| Arbitrum One | 42161 | `0xAd9b8604b6B97187CDe9E826cDeB7033C8C37198` |
 | Arbitrum Sepolia | 421614 | `0xA2a0425fA3C5669d384f4e6c8068dfCf64485b3b` |
-| Arbitrum One | 42161 | See [docs](https://docs.switchboard.xyz) |
-| Ethereum Mainnet | 1 | See [docs](https://docs.switchboard.xyz) |
-| Optimism | 10 | See [docs](https://docs.switchboard.xyz) |
-| Base | 8453 | See [docs](https://docs.switchboard.xyz) |
+| Core Mainnet | 1116 | `0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C` |
+| Core Testnet2 | 1114 | `0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C` |
+| Monad Testnet | 10143 | `0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C` |
 
-## 🛠️ Advanced Usage
+**⚠️ Important**: Always verify the current contract addresses at [docs.switchboard.xyz](https://docs.switchboard.xyz/product-documentation/data-feeds/evm/contract-addresses) as they may be updated.
+
+## Advanced Usage
 
 ### Custom Feed Integration
 
@@ -149,12 +153,6 @@ Popular feeds on Arbitrum Sepolia:
 2. Copy the aggregator ID
 3. Update your contract to use the new feed
 4. Modify the scripts to fetch your specific feed
-
-### Gas Optimization
-
-- Use multicall to update multiple feeds in one transaction
-- Implement caching to avoid unnecessary updates
-- Set appropriate staleness thresholds
 
 ### Error Handling
 

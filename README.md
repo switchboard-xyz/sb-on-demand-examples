@@ -11,6 +11,8 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 
 - **[User Guide and Technical Documentation](https://docs.switchboard.xyz/tooling-and-resources/technical-resources-and-documentation)** - Detailed information on getting started, usage examples, and API references.
 - **[TypeDoc Documentation](https://switchboard-docs.web.app/)** - Comprehensive TypeDoc generated documentation.
+- **[Bundle Builder](https://beta.ondemand.switchboard.xyz/bundle-builder)** - Build and verify custom feed bundles with checksum validation.
+- **[Explorer](https://explorer.switchboard.xyz)** - Browse feeds, verify integrity, and view historical data.
 
 ## 🌐 Examples by Chain
 
@@ -30,7 +32,7 @@ The Solana examples demonstrate Switchboard On-Demand functionality on the Solan
 
 The EVM examples showcase Switchboard functionality on Ethereum and EVM-compatible chains:
 
-- **[📈 Price Feeds](./evm-on-demand)** - Real-time price data for DeFi applications
+- **[📈 Price Feeds](./evm)** - Real-time price data for DeFi applications
 
 **Supported Networks:**
 - Ethereum, Arbitrum, Optimism, Base, Polygon, BNB Chain, Avalanche

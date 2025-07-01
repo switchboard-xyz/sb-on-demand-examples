@@ -115,7 +115,21 @@ Popular feeds on Arbitrum Sepolia:
 - **UNI/USD**: `0x755c0da00f939b04266f3ba3619ad6498fb936a8bfbfac27c9ecd4ab4c5d4878`
 - **Carbon Intensity GB**: `0xba2c99cb1c50d8c77209adc5a45f82e561c29f5b279dca507b4f1324b6586572`
 
-Find more feeds at: [https://ondemand.switchboard.xyz/arbitrum/sepolia](https://ondemand.switchboard.xyz/arbitrum/sepolia)
+### Finding and Verifying Feeds
+
+1. **Bundle Builder**: Use [beta.ondemand.switchboard.xyz/bundle-builder](https://beta.ondemand.switchboard.xyz/bundle-builder) to:
+   - Build custom feed bundles
+   - Verify feed checksums
+   - Test feed updates before integration
+
+2. **Explorer**: Visit [explorer.switchboard.xyz](https://explorer.switchboard.xyz) to:
+   - Browse all available feeds
+   - View feed configurations and history
+   - Verify feed integrity and performance
+
+3. **Network-Specific Feeds**: Find feeds for your network at:
+   - Arbitrum Sepolia: [ondemand.switchboard.xyz/arbitrum/sepolia](https://ondemand.switchboard.xyz/arbitrum/sepolia)
+   - Other networks: Use the explorer to filter by chain
 
 ## 🌐 Supported Networks
 

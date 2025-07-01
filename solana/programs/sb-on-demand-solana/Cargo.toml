@@ -1,0 +1,25 @@
+[package]
+name = "sb-on-demand-solana"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "sb_on_demand_solana"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+custom-heap = []
+custom-panic = []
+anchor-debug = []
+
+[dependencies]
+anchor-lang = "0.31.1"
+faster-hex = "0.10.0"
+switchboard-on-demand = { version = "0.4.2", features = ["anchor", "devnet"] }

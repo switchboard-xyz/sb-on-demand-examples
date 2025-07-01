@@ -1,0 +1,16 @@
+{
+  "name": "evm-on-demand-example",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@switchboard-xyz/on-demand": "^1.2.10",
+    "@switchboard-xyz/on-demand-solidity": "^0.0.4",
+    "ethers": "^6.13.1"
+  }
+}

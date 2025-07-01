@@ -1,27 +1,3 @@
-/**
- * @fileoverview Switchboard On-Demand Bundle Example
- *
- * This script demonstrates the recommended approach for fetching and using
- * Switchboard oracle price feeds using the bundle-based method. This is the
- * most efficient way to integrate Switchboard oracles, offering:
- *
- * - ~90% lower transaction costs compared to traditional feed accounts
- * - Sub-second latency for price updates
- * - No need for crank turners or feed maintenance
- * - Multiple price feeds in a single transaction
- *
- * @example
- * ```bash
- * # Fetch and verify BTC/USD price
- * bun run scripts/runBundle.ts --feedHash 0xabc123...
- *
- * # Using environment variables
- * ANCHOR_WALLET=~/.config/solana/id.json bun run scripts/runBundle.ts --feedHash 0xabc123...
- * ```
- *
- * @module runBundle
- */
-
 import * as sb from "@switchboard-xyz/on-demand";
 import { CrossbarClient } from "@switchboard-xyz/common";
 import yargs from "yargs";
@@ -33,13 +9,6 @@ import {
   DEMO_PATH,
 } from "./utils";
 
-/**
- * Command-line argument parser for the script
- *
- * @property {string} feedHash - The hexadecimal hash of the price feed to fetch
- *                               This should match one of the available feeds from
- *                               the Switchboard oracle network
- */
 const argv = yargs(process.argv)
   .options({
     feedHash: {
@@ -51,26 +20,6 @@ const argv = yargs(process.argv)
   })
   .parseSync();
 
-/**
- * Calculates statistical metrics for latency measurements
- *
- * This function computes key performance metrics to help monitor
- * the oracle response times and identify potential issues.
- *
- * @param {number[]} latencies - Array of latency measurements in milliseconds
- * @returns {Object} Statistical summary including:
- *   - min: Minimum latency observed
- *   - max: Maximum latency observed
- *   - median: Middle value when sorted
- *   - mean: Average latency
- *   - count: Total number of measurements
- *
- * @example
- * ```typescript
- * const stats = calculateStatistics([100, 150, 200, 175, 125]);
- * console.log(`Average latency: ${stats.mean}ms`);
- * ```
- */
 function calculateStatistics(latencies: number[]) {
   const sortedLatencies = [...latencies].sort((a, b) => a - b);
   const min = sortedLatencies[0];

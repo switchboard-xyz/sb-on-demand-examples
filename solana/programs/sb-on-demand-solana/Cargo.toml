@@ -1,7 +1,7 @@
 [package]
 name = "sb-on-demand-solana"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "Switchboard On-Demand Oracle Integration for Solana"
 edition = "2021"
 
 [lib]
@@ -22,4 +22,4 @@ anchor-debug = []
 [dependencies]
 anchor-lang = "0.31.1"
 faster-hex = "0.10.0"
-switchboard-on-demand = { version = "0.4.2", features = ["anchor", "devnet"] }
+switchboard-on-demand = { version = "0.4.7", features = ["anchor", "devnet"] }

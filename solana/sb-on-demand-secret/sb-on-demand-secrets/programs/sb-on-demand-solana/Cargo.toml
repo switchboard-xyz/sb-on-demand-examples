@@ -1,12 +1,12 @@
 [package]
-name = "sb-on-demand-solana"
+name = "sb-on-demand-secrets"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "Switchboard On-Demand Secrets Integration"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "sb_on_demand_solana"
+name = "sb_on_demand_secrets"
 
 [features]
 no-entrypoint = []
@@ -17,5 +17,5 @@ default = []
 idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
-anchor-lang = "=0.30.0"
-switchboard-on-demand = "0.1.12"
+anchor-lang = "0.31.1"
+switchboard-on-demand = "0.4.7"

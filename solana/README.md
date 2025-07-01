@@ -47,8 +47,8 @@ Switchboard On-Demand revolutionizes oracle data delivery on Solana:
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │                 │     │                 │     │                 │
-│  Price Sources  │────▶│     Oracles     │────▶│    Crossbar     │
-│  (CEX, DEX)     │     │                 │     │   (Gateway)     │
+│  Price Sources  │────▶│     Oracles     │────▶│    Gateway      │
+│  (CEX, DEX)     │     │                 │     │                 │
 │                 │     │                 │     │                 │
 └─────────────────┘     └─────────────────┘     └────────┬────────┘
                                                          │

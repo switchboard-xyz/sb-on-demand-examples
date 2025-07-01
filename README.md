@@ -18,9 +18,9 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 
 The Solana examples demonstrate Switchboard On-Demand functionality on the Solana blockchain:
 
-- **[📊 On-Demand Feeds](./solana-on-demand-feeds)** - Price feeds and data oracles
-- **[🎲 On-Demand Randomness](./solana-on-demand-feeds/sb-randomness-on-demand)** - Verifiable Random Function (VRF)
-- **[🔐 On-Demand Secrets](./solana-on-demand-feeds/sb-on-demand-secret)** - Secure secret management
+- **[📊 On-Demand Feeds](./solana)** - Price feeds and data oracles
+- **[🎲 On-Demand Randomness](./solana/sb-randomness-on-demand)** - Verifiable Random Function (VRF)
+- **[🔐 On-Demand Secrets](./solana/sb-on-demand-secret)** - Secure secret management
 
 **Resources:**
 - [Rust Crate](https://crates.io/crates/switchboard-on-demand)

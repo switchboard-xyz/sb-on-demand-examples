@@ -101,7 +101,7 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 
 ### Step 2: Get a Feed Checksum
 
-Create a data feed using the [Switchboard On-Demand UI](https://app.switchboard.xyz) and copy the **checksum** from your feed.
+Create a data feed using the [Switchboard On-Demand UI]([https://app.switchboard.xyz](https://beta.ondemand.switchboard.xyz/bundle-builder)) and copy the **checksum** from your feed.
 
 ### Step 3: Use Bundles
 

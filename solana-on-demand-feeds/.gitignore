@@ -1,0 +1,99 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production builds
+dist/
+build/
+target/
+*.so
+
+# Solana/Anchor
+.anchor/
+test-ledger/
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# OS files
+.DS_Store
+*.swp
+*.swo
+*~
+.project
+.idea/
+.vscode/
+*.sublime-workspace
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Keys and wallets
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!yarn.lock
+!pnpm-lock.yaml
+!program-keypairs/*.json
+id.json
+*-keypair.json
+wallet.json
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/
+
+# Package manager files
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local development
+.local/
+local/
+
+# Generated files
+*.generated.ts
+*.generated.js
+
+# Misc
+.eslintcache
+.parcel-cache

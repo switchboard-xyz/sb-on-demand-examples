@@ -99,16 +99,16 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 
 *Note:* Use `anchor keys list` to view your program address, then update it in `programs/sb-on-demand-solana/src/lib.rs:6`.
 
-### Step 2: Get a Feed Checksum
+### Step 2: Get a Feed Hash
 
 Create a data feed using the [Switchboard On-Demand UI](https://beta.ondemand.switchboard.xyz/bundle-builder) and copy the **feed hash** from your feed.
 
 ### Step 3: Use Bundles
 
-Run the bundle script with your feed checksum:
+Run the bundle script with your feed hash:
 ```bash
 bun install
-bun run scripts/runBundle.ts --feedHash YOUR_FEED_CHECKSUM
+bun run scripts/runBundle.ts --feedHash YOUR_FEED_HASH
 ```
 
 The `runBundle.ts` script fetches live data for your feed and demonstrates how to verify it on-chain using the example program in `programs/sb-on-demand-solana/`. The program shows how to:
@@ -384,23 +384,39 @@ const CUSTOM_JOBS = [
 ### Error Handling Best Practices
 ```typescript
 try {
-  const [pullIx, responses, success, luts] = await feedAccount.fetchUpdateIx();
+  // Fetch bundle with proper error handling
+  const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(
+    gateway,
+    crossbar,
+    feedHashes
+  );
 
-  // Check oracle responses
-  for (const response of responses) {
-    const error = response.error;
-    if (error) {
-      console.error(`Oracle error: ${error.message}`);
-      // Handle specific error types
-    }
-  }
+  // Create your program instruction
+  const ix = await program.methods
+    .yourMethod(bundle)
+    .accounts({
+      queue: queue.pubkey,
+      slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
+      instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+      // ... other accounts
+    })
+    .instruction();
 
-  // Only proceed if we have enough successful responses
-  if (success < minResponses) {
-    throw new Error(`Insufficient oracle responses: ${success}/${minResponses}`);
-  }
+  // Execute with retry logic
+  const tx = await asV0Tx({
+    connection,
+    ixs: [sigVerifyIx, ix],
+    signers: [wallet],
+  });
+  
+  await connection.sendTransaction(tx);
 } catch (error) {
-  // Implement retry logic or fallback behavior
+  if (error.message.includes("bundle too stale")) {
+    // Fetch fresh bundle and retry
+  } else if (error.message.includes("insufficient signatures")) {
+    // Handle oracle consensus failure
+  }
+  // Implement appropriate fallback behavior
 }
 ```
 

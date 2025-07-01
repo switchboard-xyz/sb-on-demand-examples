@@ -31,8 +31,6 @@ The Solana examples demonstrate Switchboard On-Demand functionality on the Solan
 The EVM examples showcase Switchboard functionality on Ethereum and EVM-compatible chains:
 
 - **[📈 Price Feeds](./evm-on-demand)** - Real-time price data for DeFi applications
-- **[🎰 Randomness (VRF)](./evm-on-demand)** - On-chain verifiable randomness
-- **[⚡ Functions](./evm-on-demand)** - Custom off-chain computation
 
 **Supported Networks:**
 - Ethereum, Arbitrum, Optimism, Base, Polygon, BNB Chain, Avalanche

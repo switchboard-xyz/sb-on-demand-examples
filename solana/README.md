@@ -56,11 +56,11 @@ Switchboard On-Demand revolutionizes oracle data delivery on Solana:
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
 │                        Your Transaction                         │
-│  ┌──────────────────┐         ┌──────────────────┐            │
-│  │ Secp256k1        │         │ Your Program     │            │
-│  │ Signature Verify │────────▶│ verifyBundle()   │            │
-│  │ Instruction      │         │ use prices       │            │
-│  └──────────────────┘         └──────────────────┘            │
+│  ┌──────────────────┐         ┌──────────────────┐              │
+│  │ Secp256k1        │         │ Your Program     │              │
+│  │ Signature Verify │────────▶│ verifyBundle()   │              │
+│  │ Instruction      │         │ use prices       │              │
+│  └──────────────────┘         └──────────────────┘              │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 

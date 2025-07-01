@@ -20,7 +20,7 @@ git clone https://github.com/switchboard-xyz/sb-on-demand-examples.git
 cd sb-on-demand-feeds
 bun install
 
-# Get a feed hash from https://app.switchboard.xyz
+# Get a feed hash from https://ondemand.switchboard.xyz/solana/mainnet
 # Run the example (replace with your feed hash)
 bun run scripts/runBundle.ts --feedHash 0xf93c5a12f01a9ff1c8fb1c92e75e86f1e36b2a31ba3de26d32c837e93e9b7116
 ```
@@ -31,7 +31,7 @@ That's it! You're now fetching real-time oracle prices. 🎉
 
 - **Node.js** 16+ and **Bun** (or npm/yarn)
 - **Solana CLI** with a configured wallet
-- **Anchor Framework** 0.30.1+
+- **Anchor Framework** 0.31.1+
 - A wallet with some SOL (devnet or mainnet)
 
 ## 🎯 What is Switchboard On-Demand?
@@ -101,13 +101,13 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 
 ### Step 2: Get a Feed Checksum
 
-Create a data feed using the [Switchboard On-Demand UI]([https://app.switchboard.xyz](https://beta.ondemand.switchboard.xyz/bundle-builder)) and copy the **checksum** from your feed.
+Create a data feed using the [Switchboard On-Demand UI](https://beta.ondemand.switchboard.xyz/bundle-builder) and copy the **feed hash** from your feed.
 
 ### Step 3: Use Bundles
 
 Run the bundle script with your feed checksum:
 ```bash
-bun i
+bun install
 bun run scripts/runBundle.ts --feedHash YOUR_FEED_CHECKSUM
 ```
 
@@ -149,11 +149,12 @@ const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(gateway, crossbar,
 
 ##### b) **verifyBundle Call in User Code**
 ```rust
-let verified_bundle = BundleVerifierBuilder::new()
-    .queue(&queue.to_account_info())
-    .slothash_sysvar(&slothashes.to_account_info())
-    .ix_sysvar(&instructions.to_account_info())
-    .bundle(bundle.as_slice())
+let verified_bundle = BundleVerifierBuilder::from(&bundle)
+    .queue(&queue)
+    .slothash_sysvar(&slothashes)
+    .ix_sysvar(&instructions)
+    .clock(&Clock::get()?)
+    .max_age(50) // Maximum age in slots for bundle freshness
     .verify()
     .unwrap();
 ```
@@ -277,18 +278,9 @@ Total bytes = 1 + (n × 11) + (n × 85) + (m × 49) + 1 + 32
 
 This efficient packing allows you to verify multiple price feeds from multiple oracles in a single instruction, making it ideal for DeFi protocols that need multiple price points.
 
-## Alternative: Account-Based Feeds
+## Alternative: Traditional Feed Accounts
 
-For more advanced use cases, you can also create and manage feed accounts:
-
-```bash
-bun run scripts/createFeed.ts
-```
-
-Other available scripts:
-- `runFeed.ts` - Run updates for existing feed accounts
-- `copyFeed.ts` - Copy job definitions from existing feeds
-- `runMany.ts` - Update multiple feeds in a single transaction
+While this example focuses on the more efficient bundle method, Switchboard also supports traditional on-chain feed accounts for use cases that require persistent price history.
 
 ## 🛠️ Environment Setup
 
@@ -324,8 +316,8 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 ```
 
 #### "Invalid feed hash"
-- Get a valid feed hash from [Switchboard App]([https://app.switchboard.xyz](https://beta.ondemand.switchboard.xyz/bundle-builder))
-- Ensure you're using the correct format: `0x...` (64 characters)
+- Get a valid feed hash from [Switchboard On-Demand](https://beta.ondemand.switchboard.xyz/bundle-builder)
+- Ensure you're using the correct format: `0x...` (32 bytes)
 - Check you're on the right network (devnet/mainnet)
 
 #### "Transaction too large"
@@ -350,7 +342,7 @@ solana airdrop 2
 ## ❓ FAQ
 
 ### What is a feed hash?
-A feed hash uniquely identifies a price feed configuration. It's a 32-byte value (displayed as 0x...) that contains the job definitions for fetching price data. Get one from the [Switchboard App]([https://app.switchboard.xyz](https://beta.ondemand.switchboard.xyz/bundle-builder)).
+A feed hash uniquely identifies a price feed configuration. It's a 32-byte value (displayed as 0x...) that contains the job definitions for fetching price data. Get one from the [Switchboard On-Demand UI](https://beta.ondemand.switchboard.xyz/bundle-builder).
 
 ### How many oracles should I use?
 - **Minimum**: 1 oracle (testing only)
@@ -366,11 +358,11 @@ A feed hash uniquely identifies a price feed configuration. It's a 32-byte value
 Yes! Just update your configuration:
 ```bash
 solana config set --url https://api.mainnet-beta.solana.com
-# Use mainnet feed hashes from https://app.switchboard.xyz
+# Use mainnet feed hashes from https://ondemand.switchboard.xyz/solana/mainnet
 ```
 
 ### How fresh is the price data?
-- Bundle data must be used within ~150 slots (~1 minute)
+- Bundle data must be used within your configured slot limit
 - Actual price staleness depends on the oracle configuration
 - Check `slots_stale()` in your program to verify freshness
 
@@ -393,7 +385,7 @@ const CUSTOM_JOBS = [
 ```typescript
 try {
   const [pullIx, responses, success, luts] = await feedAccount.fetchUpdateIx();
-  
+
   // Check oracle responses
   for (const response of responses) {
     const error = response.error;
@@ -402,7 +394,7 @@ try {
       // Handle specific error types
     }
   }
-  
+
   // Only proceed if we have enough successful responses
   if (success < minResponses) {
     throw new Error(`Insufficient oracle responses: ${success}/${minResponses}`);
@@ -428,25 +420,26 @@ try {
 // In your Solana program
 pub fn liquidate_position(ctx: Context<Liquidate>, bundle: Vec<u8>) -> Result<()> {
     // Verify the bundle
-    let verified_bundle = BundleVerifierBuilder::new()
-        .queue(&ctx.accounts.queue.to_account_info())
-        .slothash_sysvar(&ctx.accounts.slothashes.to_account_info())
-        .ix_sysvar(&ctx.accounts.instructions.to_account_info())
-        .bundle(bundle.as_slice())
+    let verified_bundle = BundleVerifierBuilder::from(&bundle)
+        .queue(&ctx.accounts.queue)
+        .slothash_sysvar(&ctx.accounts.slothashes)
+        .ix_sysvar(&ctx.accounts.instructions)
+        .clock(&Clock::get()?)
+        .max_age(50)
         .verify()?;
-    
+
     // Extract BTC price
     let btc_feed = verified_bundle.feed_infos
         .iter()
         .find(|f| f.feed_id() == BTC_FEED_HASH)
         .ok_or(ErrorCode::FeedNotFound)?;
-    
+
     let btc_price = btc_feed.value();
-    
+
     // Check if position is underwater
     let ltv = calculate_ltv(ctx.accounts.position, btc_price);
     require!(ltv > LIQUIDATION_THRESHOLD, ErrorCode::PositionHealthy);
-    
+
     // Execute liquidation...
 }
 ```
@@ -465,7 +458,7 @@ async function executeTrade(
     crossbar,
     feedHashes // ["BTC/USD", "ETH/USD", "SOL/USD"]
   );
-  
+
   // Create your trading instruction
   const tradeIx = await program.methods
     .openPosition(amount, leverage, bundle)
@@ -476,7 +469,7 @@ async function executeTrade(
       // ... other accounts
     })
     .instruction();
-  
+
   // Execute atomically
   const tx = await asV0Tx({
     connection,
@@ -484,7 +477,7 @@ async function executeTrade(
     signers: [wallet],
     computeUnitPrice: 50_000, // Higher priority for MEV protection
   });
-  
+
   await connection.sendTransaction(tx);
 }
 ```
@@ -498,19 +491,19 @@ pub fn price_game_item(
     item_id: u64
 ) -> Result<()> {
     let verified_bundle = verify_bundle(ctx, bundle)?;
-    
+
     // Get both USD and in-game token prices
     let usd_price = get_feed_value(&verified_bundle, USD_FEED)?;
     let game_token_price = get_feed_value(&verified_bundle, GAME_TOKEN_FEED)?;
-    
+
     // Calculate item price in game tokens
     let item_usd_value = ITEM_PRICES[item_id as usize];
     let price_in_tokens = (item_usd_value * DECIMALS) / game_token_price;
-    
+
     // Update on-chain price
     ctx.accounts.item_listing.price = price_in_tokens;
     ctx.accounts.item_listing.last_update = Clock::get()?.slot;
-    
+
     Ok(())
 }
 ```
@@ -525,13 +518,13 @@ async function mintStablecoin(collateralAmount: number) {
     "0x...", // wETH feed hash
     "0x...", // SOL feed hash
   ];
-  
+
   const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(
     gateway,
     crossbar,
     collateralFeeds
   );
-  
+
   const mintIx = await stablecoinProgram.methods
     .mint(collateralAmount, bundle)
     .accounts({
@@ -543,14 +536,14 @@ async function mintStablecoin(collateralAmount: number) {
       instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
     .instruction();
-  
+
   // Bundle verification + minting in one atomic transaction
   const tx = await asV0Tx({
     connection,
     ixs: [sigVerifyIx, mintIx],
     signers: [wallet],
   });
-  
+
   const sig = await connection.sendTransaction(tx);
 }
 ```

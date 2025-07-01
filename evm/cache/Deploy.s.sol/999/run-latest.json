@@ -1,7 +1,0 @@
-{
-  "transactions": [
-    {
-      "rpc": "https://rpc.hyperliquid.xyz/evm"
-    }
-  ]
-}

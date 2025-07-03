@@ -7,6 +7,7 @@ import {
   myAnchorProgram,
   myProgramIx,
   DEMO_PATH,
+  calculateStatistics,
 } from "./utils";
 
 const argv = yargs(process.argv)
@@ -19,28 +20,6 @@ const argv = yargs(process.argv)
     },
   })
   .parseSync();
-
-function calculateStatistics(latencies: number[]) {
-  const sortedLatencies = [...latencies].sort((a, b) => a - b);
-  const min = sortedLatencies[0];
-  const max = sortedLatencies[sortedLatencies.length - 1];
-  const median =
-    sortedLatencies.length % 2 === 0
-      ? (sortedLatencies[sortedLatencies.length / 2 - 1] +
-          sortedLatencies[sortedLatencies.length / 2]) /
-        2
-      : sortedLatencies[Math.floor(sortedLatencies.length / 2)];
-  const sum = sortedLatencies.reduce((a, b) => a + b, 0);
-  const mean = sum / sortedLatencies.length;
-
-  return {
-    min,
-    max,
-    median,
-    mean,
-    count: latencies.length,
-  };
-}
 
 /**
  * Main execution function demonstrating bundle-based oracle integration
@@ -111,7 +90,6 @@ function calculateStatistics(latencies: number[]) {
     // Display performance statistics for monitoring
     const stats = calculateStatistics(latencies);
     console.log(`Min latency: ${stats.min} ms`);
-    console.log(`Max latency: ${stats.max} ms`);
     console.log(`Median latency: ${stats.median} ms`);
     console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
     console.log(`Loop count: ${stats.count}`);

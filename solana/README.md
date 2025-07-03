@@ -297,41 +297,40 @@ bun run scripts/runSurge.ts
 ### Surge Implementation Example
 
 ```typescript
-import { Queue } from "@switchboard-xyz/on-demand";
-import { SurgeClient } from "@switchboard-xyz/on-demand/surge";
+import * as sb from "@switchboard-xyz/on-demand";
 
 // Initialize Surge client
-const surge = new SurgeClient({
+const surge = new sb.Surge({
   apiKey: process.env.SURGE_API_KEY!,
-  queue: new Queue(connection, programId, queueKey),
-  gateway: "https://surge-gateway.switchboard.xyz/devnet",
+  gatewayUrl: 'https://92.222.100.185.xip.switchboard-oracles.xyz/devnet',
+  verbose: true,
 });
 
-// Subscribe to price feeds
-await surge.subscribe([
-  { symbol: "BTC/USDT", source: "binance" },
-  { symbol: "ETH/USDT", source: "binance" },
-  { symbol: "SOL/USDT", source: "coinbase" },
+// Connect and subscribe to price feeds
+await surge.connectAndSubscribe([
+  { symbol: 'BTC/USDT', source: 'BINANCE' },
+  { symbol: 'ETH/USDT', source: 'BINANCE' },
+  { symbol: 'SOL/USDT', source: 'COINBASE' },
 ]);
 
 // Handle real-time updates
-surge.on("price", async (update) => {
-  console.log(`${update.symbol}: $${update.price.toFixed(2)}`);
-  console.log(`Latency: ${update.latency}ms`);
+surge.on('update', async (response: sb.SurgeUpdate) => {
+  const latency = Date.now() - response.data.source_ts_ms;
+  console.log(`${response.data.symbol}: $${response.data.price}`);
+  console.log(`Latency: ${latency}ms`);
 
   // Option 1: Use price directly in your app
-  await updatePriceDisplay(update.symbol, update.price);
+  await updatePriceDisplay(response.data.symbol, response.data.price);
 
   // Option 2: Convert to on-chain bundle when needed
-  if (shouldExecuteTrade(update)) {
-    const [sigVerifyIx, bundle] = await update.toBundleIx();
+  if (shouldExecuteTrade(response)) {
+    const [sigVerifyIx, bundle] = response.toBundleIx();
     await executeTrade(sigVerifyIx, bundle);
   }
 });
 
-// Handle connection events
-surge.on("connected", () => console.log("Surge connected"));
-surge.on("error", (err) => console.error("Surge error:", err));
+// Connection is established automatically in connectAndSubscribe
+console.log('🚀 Listening for price updates...');
 ```
 
 ### Surge Use Cases
@@ -339,11 +338,11 @@ surge.on("error", (err) => console.error("Surge error:", err));
 #### 1. **High-Frequency Trading Bots**
 ```typescript
 // React instantly to price movements
-surge.on("price", async (update) => {
-  const opportunity = checkArbitrage(update);
+surge.on('update', async (response: sb.SurgeUpdate) => {
+  const opportunity = checkArbitrage(response.data);
   if (opportunity && opportunity.profit > MIN_PROFIT) {
     // Execute trade within milliseconds of price change
-    const [ix, bundle] = await update.toBundleIx();
+    const [ix, bundle] = response.toBundleIx();
     await executeArbitrageTrade(ix, bundle, opportunity);
   }
 });
@@ -352,12 +351,13 @@ surge.on("price", async (update) => {
 #### 2. **Real-Time Dashboards**
 ```typescript
 // Update UI with zero latency
-surge.on("price", (update) => {
+surge.on('update', (response: sb.SurgeUpdate) => {
   // Update price displays instantly
-  dashboardPrices[update.symbol] = update.price;
+  dashboardPrices[response.data.symbol] = response.data.price;
 
   // Track performance metrics
-  metrics.avgLatency = updateMovingAverage(update.latency);
+  const latency = Date.now() - response.data.source_ts_ms;
+  metrics.avgLatency = updateMovingAverage(latency);
   metrics.updatesPerSecond++;
 });
 ```
@@ -365,10 +365,10 @@ surge.on("price", (update) => {
 #### 3. **MEV Protection**
 ```typescript
 // Submit transactions at optimal moments
-surge.on("price", async (update) => {
-  if (pendingOrder && update.price <= pendingOrder.targetPrice) {
+surge.on('update', async (response: sb.SurgeUpdate) => {
+  if (pendingOrder && response.data.price <= pendingOrder.targetPrice) {
     // Execute immediately when price hits target
-    const tx = await createLimitOrderTx(update);
+    const tx = await createLimitOrderTx(response);
     await sendTransactionWithMevProtection(tx);
   }
 });
@@ -630,11 +630,7 @@ pub fn liquidate_position(ctx: Context<Liquidate>, bundle: Vec<u8>) -> Result<()
         .verify()?;
 
     // Extract BTC price
-    let btc_feed = verified_bundle.feed_infos
-        .iter()
-        .find(|f| f.feed_id() == BTC_FEED_HASH)
-        .ok_or(ErrorCode::FeedNotFound)?;
-
+    let btc_feed = verified_bundle.feed(BTC_FEED_ID)?;
     let btc_price = btc_feed.value();
 
     // Check if position is underwater

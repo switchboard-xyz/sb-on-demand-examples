@@ -20,7 +20,13 @@ pub mod sb_on_demand_solana {
             .verify()
             .unwrap();
         let verified_slot = verified_bundle.verified_slot;
-        msg!("Price verified at slot: {verified_slot}. Never accept a bundle older than this slot!");
+        let state = &mut ctx.accounts.state;
+        if state.last_verified_slot > verified_slot {
+            msg!("Received prices are older than the last verified prices. Ignoring bundle.");
+            return Ok(());
+        }
+        state.last_verified_slot = verified_slot;
+
         for feed_info in verified_bundle.feed_infos {
             msg!("Feed hash: {}", hex_string(&feed_info.feed_id()));
             msg!("Feed value: {}", feed_info.value());
@@ -29,9 +35,26 @@ pub mod sb_on_demand_solana {
     }
 }
 
+#[account]
+#[derive(Default)]
+pub struct ProgramState {
+    pub last_verified_slot: u64,
+}
+
 #[derive(Accounts)]
 pub struct Ctx<'info> {
+    #[account(
+        init_if_needed,
+        payer = payer,
+        space = 16,
+        seeds = [b"state"],
+        bump
+    )]
+    pub state: Account<'info, ProgramState>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
     pub queue: AccountLoader<'info, QueueAccountData>,
     pub slothashes: Sysvar<'info, SlotHashes>,
     pub instructions: Sysvar<'info, Instructions>,
+    pub system_program: Program<'info, System>,
 }

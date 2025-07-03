@@ -30,7 +30,7 @@ import { TX_CONFIG, sleep, myAnchorProgram, myProgramIx, DEMO_PATH, calculateSta
     latencies.push(Date.now() - response.data.source_ts_ms);
     let [sigVerifyIx, bundle] = response.toBundleIx();
 
-    const testIx = await myProgramIx(testProgram, queue.pubkey, bundle);
+    const testIx = await myProgramIx(testProgram, queue.pubkey, bundle, keypair.publicKey);
 
     const stats = calculateStatistics(latencies);
     console.log(`Min latency: ${stats.min} ms`);

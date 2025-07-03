@@ -85,7 +85,7 @@ const argv = yargs(process.argv)
 
     // Create your program's instruction to consume the oracle data
     // This instruction will verify and use the bundle in your business logic
-    const testIx = await myProgramIx(testProgram, queue.pubkey, bundle);
+    const testIx = await myProgramIx(testProgram, queue.pubkey, bundle, keypair.publicKey);
 
     // Display performance statistics for monitoring
     const stats = calculateStatistics(latencies);

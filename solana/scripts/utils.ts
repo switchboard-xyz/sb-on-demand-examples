@@ -96,19 +96,28 @@ export async function myAnchorProgram(
  * @example
  * ```typescript
  * const bundle = await queue.fetchUpdateBundle(gateway, crossbar, [feedHash]);
- * const ix = await myProgramIx(program, queue.pubkey, bundle);
+ * const ix = await myProgramIx(program, queue.pubkey, bundle, payer.publicKey);
  * const tx = new Transaction().add(ix);
  * ```
  */
 export async function myProgramIx(
   program: anchor.Program,
   queue: PublicKey | string,
-  bundle: Buffer
+  bundle: Buffer,
+  payer: PublicKey
 ): Promise<TransactionInstruction> {
+  const [statePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("state")],
+    program.programId
+  );
+  
   const myIx = await program.methods.test(bundle).accounts({
+    state: statePda,
+    payer: payer,
     queue: new PublicKey(queue),
     slothashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
     instructions: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
+    systemProgram: anchor.web3.SystemProgram.programId,
   }).instruction();
   return myIx;
 }

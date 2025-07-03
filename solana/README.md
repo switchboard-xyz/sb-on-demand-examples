@@ -383,7 +383,6 @@ surge.on('update', async (response: sb.SurgeUpdate) => {
 | **Connection** | WebSocket | HTTP/RPC | HTTP/RPC |
 | **Cost Model** | Subscription | Per Transaction | Per Update |
 | **Complexity** | Medium | Low | Low |
-| **Offline Support** | No | Yes | Yes |
 
 ### Bundle Instruction Size Mathematics
 

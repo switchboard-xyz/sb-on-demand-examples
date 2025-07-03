@@ -19,8 +19,8 @@ pub mod sb_on_demand_solana {
             .max_age(50) // Maximum age in slots for bundle freshness
             .verify()
             .unwrap();
-        let slots_since_sign = verified_bundle.slots_stale(&Clock::get()?);
-        msg!("Slots since sign: {}", slots_since_sign);
+        let verified_slot = verified_bundle.verified_slot;
+        msg!("Price verified at slot: {verified_slot}. Never accept a bundle older than this slot!");
         for feed_info in verified_bundle.feed_infos {
             msg!("Feed hash: {}", hex_string(&feed_info.feed_id()));
             msg!("Feed value: {}", feed_info.value());

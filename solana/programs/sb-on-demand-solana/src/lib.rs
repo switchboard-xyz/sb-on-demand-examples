@@ -4,7 +4,7 @@ use switchboard_on_demand::prelude::{
     BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions,
 };
 
-declare_id!("2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5");
+declare_id!("4cjC1aDk6xRqJAP73gq7JSehRoG8Lm8fZtNh19YGzwx7");
 
 #[program]
 pub mod sb_on_demand_solana {

@@ -1,14 +1,14 @@
 /**
  * @fileoverview Utility Functions for Switchboard On-Demand SDK
- * 
+ *
  * This module provides core utilities and helper functions for interacting
  * with Switchboard oracles. It includes:
- * 
+ *
  * - Program loading and initialization helpers
  * - Oracle job builders for various data sources
  * - Transaction utilities
  * - Common configuration constants
- * 
+ *
  * @module utils
  */
 
@@ -34,7 +34,7 @@ export const DEMO_PATH = "target/deploy/sb_on_demand_solana-keypair.json";
 
 /**
  * Default transaction configuration for Switchboard interactions
- * 
+ *
  * @constant {Object}
  * @property {Commitment} commitment - Use "processed" for faster confirmations
  * @property {boolean} skipPreflight - Skip simulation for better performance
@@ -48,17 +48,17 @@ export const TX_CONFIG = {
 
 /**
  * Loads an Anchor program from a keypair file
- * 
+ *
  * This utility function handles the common pattern of loading a deployed
  * Anchor program using its keypair file and fetching its IDL.
- * 
+ *
  * @async
  * @param {anchor.Provider} provider - Anchor provider with connection and wallet
  * @param {string} keypath - Path to the program's keypair JSON file
  * @returns {Promise<anchor.Program>} Initialized Anchor program instance
- * 
+ *
  * @throws {Error} If the program hasn't been deployed or IDL can't be fetched
- * 
+ *
  * @example
  * ```typescript
  * const provider = anchor.AnchorProvider.env();
@@ -82,17 +82,17 @@ export async function myAnchorProgram(
 
 /**
  * Creates an instruction to consume Switchboard oracle data in your program
- * 
+ *
  * This function builds the instruction that will verify and use the oracle
  * bundle in your on-chain program. It includes all required accounts for
  * bundle verification.
- * 
+ *
  * @async
  * @param {anchor.Program} program - Your Anchor program instance
  * @param {PublicKey | string} queue - Switchboard queue account address
  * @param {Buffer} bundle - Signed oracle bundle containing price data
  * @returns {Promise<TransactionInstruction>} Instruction ready to add to transaction
- * 
+ *
  * @example
  * ```typescript
  * const bundle = await queue.fetchUpdateBundle(gateway, crossbar, [feedHash]);
@@ -115,13 +115,13 @@ export async function myProgramIx(
 
 /**
  * Builds an oracle job for fetching Sanctum LST fair prices
- * 
+ *
  * Sanctum provides liquid staking token (LST) price data. This job
  * fetches the fair value price for a given LST mint.
- * 
+ *
  * @param {string} lstMint - The mint address of the liquid staking token
  * @returns {OracleJob} Oracle job configuration for Sanctum price fetch
- * 
+ *
  * @example
  * ```typescript
  * const msolJob = buildSanctumFairPriceJob("mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So");
@@ -142,20 +142,20 @@ export function buildSanctumFairPriceJob(lstMint: string): OracleJob {
 
 /**
  * Builds an oracle job for fetching Binance spot prices
- * 
+ *
  * Creates a job that fetches the current spot price for a trading pair
  * from Binance's public API. The job uses JSONPath to extract the price
  * from the API response.
- * 
+ *
  * @param {string} pair - Trading pair symbol (e.g., "BTCUSDT", "ETHUSDT")
  * @returns {OracleJob} Oracle job configuration for Binance price fetch
- * 
+ *
  * @example
  * ```typescript
  * const btcJob = buildBinanceJob("BTCUSDT");
  * const ethJob = buildBinanceJob("ETHUSDT");
  * ```
- * 
+ *
  * @see https://binance-docs.github.io/apidocs/spot/en/#symbol-price-ticker
  */
 export function buildBinanceJob(pair: string): OracleJob {
@@ -178,20 +178,20 @@ export function buildBinanceJob(pair: string): OracleJob {
 
 /**
  * Builds an oracle job for fetching Coinbase exchange rates
- * 
+ *
  * Creates a job that fetches exchange rates from Coinbase's public API.
  * The job handles Coinbase's inverted rate format by dividing 1 by the
  * returned rate to get the correct price.
- * 
+ *
  * @param {String} pair - Trading pair in format "BASE-QUOTE" (e.g., "BTC-USD")
  * @returns {OracleJob} Oracle job configuration for Coinbase price fetch
- * 
+ *
  * @example
  * ```typescript
  * const btcUsdJob = buildCoinbaseJob("BTC-USD");
  * const ethUsdJob = buildCoinbaseJob("ETH-USD");
  * ```
- * 
+ *
  * @note Coinbase returns rates as QUOTE/BASE, so we invert to get BASE/QUOTE
  * @see https://docs.cloud.coinbase.com/sign-in-with-coinbase/docs/api-exchange-rates
  */
@@ -231,19 +231,19 @@ export function buildCoinbaseJob(pair: String): OracleJob {
 
 /**
  * Builds an oracle job for fetching OKX index prices
- * 
+ *
  * Creates a job that fetches index prices from OKX's market data API.
  * Index prices are composite prices calculated from multiple exchanges.
- * 
+ *
  * @param {String} pair - Trading pair in format "BASE-QUOTE" (e.g., "BTC-USD")
  * @returns {OracleJob} Oracle job configuration for OKX price fetch
- * 
+ *
  * @example
  * ```typescript
  * const btcUsdJob = buildOkxJob("BTC-USD");
  * const ethUsdJob = buildOkxJob("ETH-USD");
  * ```
- * 
+ *
  * @see https://www.okx.com/docs-v5/en/#rest-api-market-data-get-index-tickers
  */
 export function buildOkxJob(pair: String): OracleJob {
@@ -267,19 +267,19 @@ export function buildOkxJob(pair: String): OracleJob {
 
 /**
  * Builds an oracle job for fetching Bybit spot prices
- * 
+ *
  * Creates a job that fetches spot market prices from Bybit's public API.
  * Returns the last traded price for the specified trading pair.
- * 
+ *
  * @param {String} pair - Trading pair symbol (e.g., "BTCUSDT", "ETHUSDT")
  * @returns {OracleJob} Oracle job configuration for Bybit price fetch
- * 
+ *
  * @example
  * ```typescript
  * const btcJob = buildBybitJob("BTCUSDT");
  * const ethJob = buildBybitJob("ETHUSDT");
  * ```
- * 
+ *
  * @see https://bybit-exchange.github.io/docs/v5/market/tickers
  */
 export function buildBybitJob(pair: String): OracleJob {
@@ -302,19 +302,19 @@ export function buildBybitJob(pair: String): OracleJob {
 
 /**
  * Builds an oracle job for fetching Gate.io spot prices
- * 
+ *
  * Creates a job that fetches spot market prices from Gate.io's public API.
  * Returns the last traded price for the specified currency pair.
- * 
+ *
  * @param {String} pair - Currency pair in format "BASE_QUOTE" (e.g., "BTC_USDT")
  * @returns {OracleJob} Oracle job configuration for Gate.io price fetch
- * 
+ *
  * @example
  * ```typescript
  * const btcJob = buildGateJob("BTC_USDT");
  * const ethJob = buildGateJob("ETH_USDT");
  * ```
- * 
+ *
  * @note Gate.io uses underscore format for pairs (BTC_USDT not BTCUSDT)
  * @see https://www.gate.io/docs/apiv4/en/#retrieve-ticker-information
  */
@@ -338,19 +338,19 @@ export function buildGateJob(pair: String): OracleJob {
 
 /**
  * Builds an oracle job for fetching Pyth Network prices
- * 
+ *
  * Creates a job that reads price data from an on-chain Pyth price account.
  * Pyth provides high-fidelity market data from institutional sources.
- * 
+ *
  * @param {string} id - Pyth price account address
  * @returns {OracleJob} Oracle job configuration for Pyth price fetch
- * 
+ *
  * @example
  * ```typescript
  * // BTC/USD Pyth price account on mainnet
  * const btcJob = buildPythJob("GVXRSBjFk6e6J3NbVPXohDJetcTjaeeuykUpbQF8UoMU");
  * ```
- * 
+ *
  * @note The confidence interval of 1.0 means the price must be within 100% confidence
  * @see https://pyth.network/developers/price-feed-ids
  */
@@ -372,19 +372,19 @@ export function buildPythJob(id: string): OracleJob {
 
 /**
  * Builds an oracle job for fetching Chainlink prices
- * 
+ *
  * Creates a job that reads price data from an on-chain Chainlink aggregator.
  * Chainlink provides decentralized price feeds with multiple node operators.
- * 
+ *
  * @param {string} id - Chainlink aggregator account address
  * @returns {OracleJob} Oracle job configuration for Chainlink price fetch
- * 
+ *
  * @example
  * ```typescript
  * // SOL/USD Chainlink feed on devnet
  * const solJob = buildChainlinkJob("99B2bTijsU6f1GCT73HmdR7HCFFjGMBcPZY6jZ96ynrR");
  * ```
- * 
+ *
  * @see https://docs.chain.link/data-feeds/price-feeds/addresses
  */
 export function buildChainlinkJob(id: string): OracleJob {
@@ -403,20 +403,20 @@ export function buildChainlinkJob(id: string): OracleJob {
 
 /**
  * Builds an oracle job for fetching Switchboard V3 prices
- * 
+ *
  * Creates a job that reads price data from an existing Switchboard V3
  * aggregator account. This allows you to reference traditional Switchboard
  * feeds within your on-demand jobs.
- * 
+ *
  * @param {string} id - Switchboard V3 aggregator account address
  * @returns {OracleJob} Oracle job configuration for Switchboard price fetch
- * 
+ *
  * @example
  * ```typescript
  * // Reference an existing Switchboard V3 feed
  * const btcJob = buildSwitchboardJob("8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee");
  * ```
- * 
+ *
  * @note This references Switchboard V3 feeds, not on-demand feeds
  */
 export function buildSwitchboardJob(id: string): OracleJob {
@@ -437,19 +437,19 @@ export function buildSwitchboardJob(id: string): OracleJob {
 
 /**
  * Builds an oracle job for fetching Redstone prices
- * 
+ *
  * Creates a job that fetches price data from Redstone oracles.
  * Redstone provides modular oracle infrastructure with customizable data feeds.
- * 
+ *
  * @param {string} id - Redstone price feed identifier
  * @returns {OracleJob} Oracle job configuration for Redstone price fetch
- * 
+ *
  * @example
  * ```typescript
  * const btcJob = buildRedstoneJob("BTC");
  * const ethJob = buildRedstoneJob("ETH");
  * ```
- * 
+ *
  * @see https://docs.redstone.finance/
  */
 export function buildRedstoneJob(id: string): OracleJob {
@@ -468,13 +468,13 @@ export function buildRedstoneJob(id: string): OracleJob {
 
 /**
  * Builds an oracle job for fetching Edge oracle prices
- * 
+ *
  * Creates a job that fetches price data from Edge oracles.
  * Edge provides decentralized oracle services with focus on edge computing.
- * 
+ *
  * @param {string} id - Edge oracle feed identifier
  * @returns {OracleJob} Oracle job configuration for Edge price fetch
- * 
+ *
  * @example
  * ```typescript
  * const btcJob = buildEdgeJob("BTC-USD");
@@ -496,19 +496,19 @@ export function buildEdgeJob(id: string): OracleJob {
 
 /**
  * Sends and confirms a versioned transaction
- * 
+ *
  * This utility function handles the common pattern of signing, sending,
  * and confirming a transaction on Solana. It waits for confirmation
  * before returning.
- * 
+ *
  * @async
  * @param {Connection} connection - Solana RPC connection
  * @param {VersionedTransaction} tx - Transaction to send (v0 or legacy)
  * @param {Array<Keypair>} signers - Array of keypairs to sign the transaction
  * @returns {Promise<TransactionSignature>} Transaction signature
- * 
+ *
  * @throws {Error} If transaction fails to confirm
- * 
+ *
  * @example
  * ```typescript
  * const tx = new VersionedTransaction(message, [ix1, ix2]);
@@ -530,10 +530,10 @@ export async function sendAndConfirmTx(
 
 /**
  * Utility function to pause execution for a specified duration
- * 
+ *
  * @param {number} ms - Duration to sleep in milliseconds
  * @returns {Promise<void>} Promise that resolves after the specified delay
- * 
+ *
  * @example
  * ```typescript
  * // Wait 3 seconds between iterations
@@ -543,3 +543,26 @@ export async function sendAndConfirmTx(
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export function calculateStatistics(latencies: number[]) {
+  const sortedLatencies = [...latencies].sort((a, b) => a - b);
+  const min = sortedLatencies[0];
+  const max = sortedLatencies[sortedLatencies.length - 1];
+  const median =
+    sortedLatencies.length % 2 === 0
+    ? (sortedLatencies[sortedLatencies.length / 2 - 1] +
+      sortedLatencies[sortedLatencies.length / 2]) /
+        2
+        : sortedLatencies[Math.floor(sortedLatencies.length / 2)];
+        const sum = sortedLatencies.reduce((a, b) => a + b, 0);
+        const mean = sum / sortedLatencies.length;
+
+        return {
+          min,
+          max,
+          median,
+          mean,
+          count: latencies.length,
+        };
+}
+

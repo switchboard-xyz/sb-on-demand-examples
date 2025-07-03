@@ -76,7 +76,7 @@ Oracle → Bundle → Your Program (direct use)
 | Feature | Surge (WebSocket) 🌊 | Bundle Method ✨ | Traditional Feeds |
 |---------|---------------------|-----------------|-------------------|
 | **Update Latency** | <100ms | <1 second | 2-10 seconds |
-| **Transaction Cost** | Subscription + ~0.00015 SOL* | ~0.00015 SOL | ~0.002 SOL |
+| **Transaction Cost** | Subscription | ~0.00015 SOL | ~0.002 SOL |
 | **Connection Type** | WebSocket (persistent) | HTTP/RPC | HTTP/RPC |
 | **Write Locks** | None | None | Required |
 | **Setup Time** | API key required | Instant | 5-10 minutes |
@@ -286,10 +286,10 @@ bun run scripts/runSurge.ts
 # ==================== Switchboard Surge ====================
 # Gateway URL: https://92.222.100.185.xip.switchboard-oracles.xyz/devnet
 # Subscribed to: BTC/USDT (Binance)
-# 
+#
 # Price Update: $68,542.10
 # Latency: 42ms | Slot: 301234567
-# 
+#
 # Price Update: $68,541.85
 # Latency: 38ms | Slot: 301234568
 ```
@@ -318,10 +318,10 @@ await surge.subscribe([
 surge.on("price", async (update) => {
   console.log(`${update.symbol}: $${update.price.toFixed(2)}`);
   console.log(`Latency: ${update.latency}ms`);
-  
+
   // Option 1: Use price directly in your app
   await updatePriceDisplay(update.symbol, update.price);
-  
+
   // Option 2: Convert to on-chain bundle when needed
   if (shouldExecuteTrade(update)) {
     const [sigVerifyIx, bundle] = await update.toBundleIx();
@@ -355,7 +355,7 @@ surge.on("price", async (update) => {
 surge.on("price", (update) => {
   // Update price displays instantly
   dashboardPrices[update.symbol] = update.price;
-  
+
   // Track performance metrics
   metrics.avgLatency = updateMovingAverage(update.latency);
   metrics.updatesPerSecond++;
@@ -593,7 +593,7 @@ try {
     ixs: [sigVerifyIx, ix],
     signers: [wallet],
   });
-  
+
   await connection.sendTransaction(tx);
 } catch (error) {
   if (error.message.includes("bundle too stale")) {

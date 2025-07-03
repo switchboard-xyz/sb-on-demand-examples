@@ -71,16 +71,20 @@ Bundle Method (90% Lower Cost):
 Oracle → Bundle → Your Program (direct use)
 ```
 
-## 📊 Bundle vs Traditional Feeds
+## 📊 Comparison: Surge vs Bundle vs Traditional Feeds
 
-| Feature | Bundle Method ✨ | Traditional Feeds |
-|---------|-----------------|-------------------|
-| **Transaction Cost** | ~0.00015 SOL | ~0.002 SOL |
-| **Update Latency** | <1 second | 2-10 seconds |
-| **Write Locks** | None | Required |
-| **Setup Time** | Instant | 5-10 minutes |
-| **Maintenance** | None | Crank required |
-| **Parallelization** | Unlimited | Limited |
+| Feature | Surge (WebSocket) 🌊 | Bundle Method ✨ | Traditional Feeds |
+|---------|---------------------|-----------------|-------------------|
+| **Update Latency** | <100ms | <1 second | 2-10 seconds |
+| **Transaction Cost** | Subscription + ~0.00015 SOL* | ~0.00015 SOL | ~0.002 SOL |
+| **Connection Type** | WebSocket (persistent) | HTTP/RPC | HTTP/RPC |
+| **Write Locks** | None | None | Required |
+| **Setup Time** | API key required | Instant | 5-10 minutes |
+| **Maintenance** | None | None | Crank required |
+| **Parallelization** | Unlimited | Unlimited | Limited |
+| **Best Use Case** | HFT, Real-time apps | DeFi, Smart contracts | Analytics, History |
+
+*Surge requires a subscription but transactions still use the efficient bundle method
 
 ## 🏃‍♂️ Getting Started with Bundles (Recommended)
 
@@ -215,6 +219,172 @@ const tx = await asV0Tx({
 - Other programs need to read your price data
 - Building price archives or analytics
 
+## 🌊 Switchboard Surge: WebSocket Streaming (NEW!)
+
+Switchboard Surge takes real-time data delivery to the next level with **WebSocket-based price streaming** for ultra-low latency applications.
+
+### What is Switchboard Surge?
+
+Surge is a premium WebSocket streaming service that delivers price updates directly from oracles with the lowest possible latency:
+
+- **Sub-100ms Latency**: Direct oracle-to-client streaming
+- **Event-Driven Updates**: Receive prices as they change, not on a schedule
+- **No Polling Required**: Persistent WebSocket connection eliminates request overhead
+- **Bundle Compatible**: Seamlessly convert streaming updates to on-chain bundles
+
+### Surge Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  Price Sources  │────▶│  Oracle Network │────▶│  Surge Gateway  │
+│  (CEX, DEX)     │     │                 │     │   (WebSocket)   │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └────────┬────────┘
+                                                         │
+                                              ┌──────────▼──────────┐
+                                              │                     │
+                                              │  Your Application   │
+                                              │                     │
+                                              │ ┌─────────────────┐ │
+                                              │ │ WebSocket Client│ │
+                                              │ │ Event Listeners │ │
+                                              │ │ Price Handler   │ │
+                                              │ └────────┬────────┘ │
+                                              │          │          │
+                                              │          ▼          │
+                                              │   On-Chain Bundle   │
+                                              │   (when needed)     │
+                                              └─────────────────────┘
+
+Data Flow:
+1. Oracle → Surge Gateway: ~10ms
+2. Gateway → Your App: ~20-50ms
+3. Total Latency: <100ms (vs 1000ms+ for traditional feeds)
+```
+
+### Getting Started with Surge
+
+#### Step 1: Get Your API Key
+
+Contact the Switchboard team to obtain a `SURGE_API_KEY` for accessing the WebSocket gateway.
+
+#### Step 2: Set Environment Variables
+
+```bash
+# Add to your .env file
+SURGE_API_KEY=your_surge_api_key_here
+```
+
+#### Step 3: Run the Surge Example
+
+```bash
+# Stream real-time BTC/USDT prices
+bun run scripts/runSurge.ts
+
+# Example output:
+# ==================== Switchboard Surge ====================
+# Gateway URL: https://92.222.100.185.xip.switchboard-oracles.xyz/devnet
+# Subscribed to: BTC/USDT (Binance)
+# 
+# Price Update: $68,542.10
+# Latency: 42ms | Slot: 301234567
+# 
+# Price Update: $68,541.85
+# Latency: 38ms | Slot: 301234568
+```
+
+### Surge Implementation Example
+
+```typescript
+import { Queue } from "@switchboard-xyz/on-demand";
+import { SurgeClient } from "@switchboard-xyz/on-demand/surge";
+
+// Initialize Surge client
+const surge = new SurgeClient({
+  apiKey: process.env.SURGE_API_KEY!,
+  queue: new Queue(connection, programId, queueKey),
+  gateway: "https://surge-gateway.switchboard.xyz/devnet",
+});
+
+// Subscribe to price feeds
+await surge.subscribe([
+  { symbol: "BTC/USDT", source: "binance" },
+  { symbol: "ETH/USDT", source: "binance" },
+  { symbol: "SOL/USDT", source: "coinbase" },
+]);
+
+// Handle real-time updates
+surge.on("price", async (update) => {
+  console.log(`${update.symbol}: $${update.price.toFixed(2)}`);
+  console.log(`Latency: ${update.latency}ms`);
+  
+  // Option 1: Use price directly in your app
+  await updatePriceDisplay(update.symbol, update.price);
+  
+  // Option 2: Convert to on-chain bundle when needed
+  if (shouldExecuteTrade(update)) {
+    const [sigVerifyIx, bundle] = await update.toBundleIx();
+    await executeTrade(sigVerifyIx, bundle);
+  }
+});
+
+// Handle connection events
+surge.on("connected", () => console.log("Surge connected"));
+surge.on("error", (err) => console.error("Surge error:", err));
+```
+
+### Surge Use Cases
+
+#### 1. **High-Frequency Trading Bots**
+```typescript
+// React instantly to price movements
+surge.on("price", async (update) => {
+  const opportunity = checkArbitrage(update);
+  if (opportunity && opportunity.profit > MIN_PROFIT) {
+    // Execute trade within milliseconds of price change
+    const [ix, bundle] = await update.toBundleIx();
+    await executeArbitrageTrade(ix, bundle, opportunity);
+  }
+});
+```
+
+#### 2. **Real-Time Dashboards**
+```typescript
+// Update UI with zero latency
+surge.on("price", (update) => {
+  // Update price displays instantly
+  dashboardPrices[update.symbol] = update.price;
+  
+  // Track performance metrics
+  metrics.avgLatency = updateMovingAverage(update.latency);
+  metrics.updatesPerSecond++;
+});
+```
+
+#### 3. **MEV Protection**
+```typescript
+// Submit transactions at optimal moments
+surge.on("price", async (update) => {
+  if (pendingOrder && update.price <= pendingOrder.targetPrice) {
+    // Execute immediately when price hits target
+    const tx = await createLimitOrderTx(update);
+    await sendTransactionWithMevProtection(tx);
+  }
+});
+```
+
+### When to Use Each Method
+
+| Use Case | Surge 🌊 | Bundles 📦 | Traditional Feeds 📊 |
+|----------|----------|------------|---------------------|
+| **Latency** | <100ms ⚡ | <1000ms | 2-10s |
+| **Best For** | HFT, Real-time Apps | DeFi, Smart Contracts | Analytics, History |
+| **Connection** | WebSocket | HTTP/RPC | HTTP/RPC |
+| **Cost Model** | Subscription | Per Transaction | Per Update |
+| **Complexity** | Medium | Low | Low |
+| **Offline Support** | No | Yes | Yes |
+
 ### Bundle Instruction Size Mathematics
 
 Understanding the byte requirements helps optimize your transactions:
@@ -301,6 +471,7 @@ solana airdrop 2
 # Create a .env file (see .env.example)
 export ANCHOR_WALLET=~/.config/solana/id.json
 export ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
+export SURGE_API_KEY=your_surge_api_key_here  # Optional: For Surge WebSocket streaming
 ```
 
 ## 🚨 Troubleshooting
@@ -368,6 +539,20 @@ solana config set --url https://api.mainnet-beta.solana.com
 
 ### Can multiple programs read the same price?
 Yes! The bundle method has no write locks, allowing unlimited parallel reads. This is a major advantage over traditional feeds.
+
+### What is Switchboard Surge?
+Surge is a WebSocket-based streaming service that provides ultra-low latency (<100ms) price updates. It's ideal for high-frequency trading, real-time dashboards, and applications that need the absolute fastest price data. Surge streams prices directly to your application via WebSocket and can convert updates to on-chain bundles when needed.
+
+### How do I get a Surge API key?
+Contact the Switchboard team through their [Discord](https://discord.gg/switchboard) or support channels to request access to Surge. The API key is required to authenticate with the WebSocket gateway.
+
+### When should I use Surge vs regular bundles?
+- **Use Surge** when you need the absolute lowest latency (<100ms), continuous price streaming, or are building high-frequency trading systems
+- **Use regular bundles** for most DeFi applications, smart contracts, and when you don't need sub-second latency
+- **Use traditional feeds** only when you need persistent on-chain price history
+
+### Does Surge work offline?
+No, Surge requires an active WebSocket connection. For offline or intermittent connectivity scenarios, use the standard bundle method which works with regular HTTP requests.
 
 ## 📚 Advanced Usage
 

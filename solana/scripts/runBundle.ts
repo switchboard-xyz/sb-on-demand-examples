@@ -41,7 +41,7 @@ const argv = yargs(process.argv)
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
 
   // Initialize your program that will consume the oracle data
-  const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);
+  // const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);
 
   // Create Crossbar client for fetching oracle bundles
   // Crossbar is Switchboard's high-performance oracle data delivery network
@@ -85,7 +85,7 @@ const argv = yargs(process.argv)
 
     // Create your program's instruction to consume the oracle data
     // This instruction will verify and use the bundle in your business logic
-    const testIx = await myProgramIx(testProgram, queue.pubkey, bundle, keypair.publicKey);
+    // const testIx = await myProgramIx(testProgram, queue.pubkey, bundle, keypair.publicKey);
 
     // Display performance statistics for monitoring
     const stats = calculateStatistics(latencies);
@@ -98,7 +98,7 @@ const argv = yargs(process.argv)
     // V0 transactions support address lookup tables and are more efficient
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [sigVerifyIx, testIx], // Order matters: verify signatures first
+      ixs: [sigVerifyIx], // Order matters: verify signatures first
       signers: [keypair],
       computeUnitPrice: 20_000, // Priority fee in micro-lamports per compute unit
       computeUnitLimitMultiple: 1.3, // Add 30% buffer to estimated compute units
@@ -123,6 +123,6 @@ const argv = yargs(process.argv)
     // await connection.confirmTransaction(signature);
 
     // Wait before next iteration to avoid rate limits
-    await sleep(3_000);
+    // await sleep(3_000);
   }
 })();

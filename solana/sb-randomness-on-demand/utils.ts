@@ -19,6 +19,13 @@ export async function myAnchorProgram(
   const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
   const pid = myProgramKeypair.publicKey;
   const idl = (await anchor.Program.fetchIdl(pid, provider))!;
+  if (idl == null) {
+    console.error("IDL not found for the program at", pid.toString());
+    process.exit(1);
+  }
+  if (idl?.address == undefined || idl?.address == null) {
+    idl.address = pid.toString();
+  }
   const program = new anchor.Program(idl, provider);
   return program;
 }
@@ -32,14 +39,14 @@ export async function loadSbProgram(
   return sbProgram;
 }
 
-export async function loadSVMSwitchboardProgram(
-  provider: anchor.Provider
-): Promise<anchor.Program> {
-  const svmProgramId = sb.ON_DEMAND_MAINNET_PID;
-  const svmIdl = await anchor.Program.fetchIdl(svmProgramId, provider);
-  const svmProgram = new anchor.Program(svmIdl!, provider);
-  return svmProgram;
-}
+// export async function loadSVMSwitchboardProgram(
+  // provider: anchor.Provider
+// ): Promise<anchor.Program> {
+  // const svmProgramId = sb.ON_DEMAND_MAINNET_PID;
+  // const svmIdl = await anchor.Program.fetchIdl(svmProgramId, provider);
+  // const svmProgram = new anchor.Program(svmIdl!, provider);
+  // return svmProgram;
+// }
 
 export async function initializeMyProgram(
   provider: anchor.Provider

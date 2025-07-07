@@ -1,4 +1,5 @@
 [package]
+resolver = "2"
 name = "sb-randomness"
 version = "0.1.0"
 description = "Created with Anchor"
@@ -18,7 +19,7 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = "0.31.1"
-solana-program = "~1.17"
+solana-program = ">=2"
 bytemuck = "1.15.0"
 switchboard-on-demand = "0.4.7"
 

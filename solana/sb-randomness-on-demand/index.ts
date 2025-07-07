@@ -98,7 +98,7 @@ const COMMITMENT = "confirmed";
 
   // Commit to randomness Ix
   console.log("\nCommit to randomness...");
-  const oracle = new web3.PublicKey("6zNYHErDrEwFJnVESwwMBvJE8tp2AUNypnNWviVHLefz");
+  const oracle = new PublicKey("6zNYHErDrEwFJnVESwwMBvJE8tp2AUNypnNWviVHLefz");
   const commitIx = await randomness.commitIx(queue, keypair.publicKey, oracle);
 
   // Create coinFlip Ix

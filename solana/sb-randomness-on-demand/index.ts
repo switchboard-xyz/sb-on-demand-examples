@@ -135,10 +135,11 @@ const COMMITMENT = "confirmed";
     escrowAccount,
     keypair
   );
+  const closeIx = await randomness.closeIx();
 
   const revealTx = await sb.asV0Tx({
     connection: sbProgram.provider.connection,
-    ixs: [revealIx, settleFlipIx],
+    ixs: [revealIx, settleFlipIx, closeIx],
     payer: keypair.publicKey,
     signers: [keypair],
     computeUnitPrice: 75_000,

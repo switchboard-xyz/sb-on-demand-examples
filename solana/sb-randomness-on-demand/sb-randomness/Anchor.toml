@@ -5,7 +5,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-sb_randomness = "JAMFaXfnb7fMmX7YacoSWRBya7pA18fZgefv9EbjAxJY"
+sb_randomness = "44wNsyMPUQxCDhJpKqwNu8XGjqYbThqgRPUpQCARyrUc"
 
 [registry]
 url = "https://api.apr.dev"

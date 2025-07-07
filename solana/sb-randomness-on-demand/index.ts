@@ -23,7 +23,7 @@ const COMMITMENT = "confirmed";
 
 (async function main() {
   console.clear();
-  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv(); 
+  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   // **** if sb.anchorUtils.loadEnv() is not working, you can use the following code: ****
   //  const connection = new anchor.web3.Connection(
   //   "https://api.devnet.solana.com",
@@ -98,7 +98,8 @@ const COMMITMENT = "confirmed";
 
   // Commit to randomness Ix
   console.log("\nCommit to randomness...");
-  const commitIx = await randomness.commitIx(queue);
+  const oracle = new web3.PublicKey("6zNYHErDrEwFJnVESwwMBvJE8tp2AUNypnNWviVHLefz");
+  const commitIx = await randomness.commitIx(queue, keypair.publicKey, oracle);
 
   // Create coinFlip Ix
   const coinFlipIx = await createCoinFlipInstruction(

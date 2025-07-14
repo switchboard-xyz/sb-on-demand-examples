@@ -32,7 +32,7 @@
  */
 
 import * as sb from "@switchboard-xyz/on-demand";
-import { TX_CONFIG, sleep} from "./utils";
+import { TX_CONFIG, sleep} from "../utils";
 import { PublicKey } from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
 import { AnchorUtils } from "@switchboard-xyz/on-demand";

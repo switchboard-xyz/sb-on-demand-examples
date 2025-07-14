@@ -8,7 +8,7 @@ import {
   myProgramIx,
   DEMO_PATH,
   calculateStatistics,
-} from "./utils";
+} from "../utils";
 
 const argv = yargs(process.argv)
   .options({

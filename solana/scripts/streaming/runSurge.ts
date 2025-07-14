@@ -2,7 +2,7 @@ import * as sb from "@switchboard-xyz/on-demand";
 import { Connection, Keypair, SYSVAR_SLOT_HASHES_PUBKEY, SYSVAR_INSTRUCTIONS_PUBKEY } from "@solana/web3.js";
 import type { Commitment } from "@solana/web3.js";
 import { CrossbarClient } from "@switchboard-xyz/common";
-import { TX_CONFIG, sleep, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics } from "./utils";
+import { TX_CONFIG, sleep, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics } from "../utils";
 
 (async function main() {
   const crossbar = CrossbarClient.default();

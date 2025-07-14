@@ -2,7 +2,7 @@ import * as sb from "@switchboard-xyz/on-demand";
 import { Connection, Keypair } from "@solana/web3.js";
 import type { Commitment } from "@solana/web3.js";
 import { CrossbarClient } from "@switchboard-xyz/common";
-import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH } from "./utils";
+import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH } from "../utils";
 
 /**
  * Switchboard On-Demand Streaming Example

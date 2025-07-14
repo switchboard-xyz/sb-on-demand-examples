@@ -182,7 +182,7 @@ async function streamingExample() {
     // Subscribe to BTC/USDT feed from Binance
     try {
         await surge.connectAndSubscribe([
-            { symbol: 'BTC/USDT', source: 'BINANCE' },
+            { symbol: 'BTC/USD' },
         ]);
 
         console.log('🎧 Connected and subscribed to price feeds!');

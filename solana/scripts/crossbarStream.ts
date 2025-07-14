@@ -1,6 +1,6 @@
 import * as sb from "@switchboard-xyz/on-demand";
 
-async function streamPrices() {
+(async function main() {
   const apiKey = process.env.SURGE_API_KEY!;
 
   const surge = new sb.Surge({
@@ -18,17 +18,17 @@ async function streamPrices() {
     const formattedPrices = update.getFormattedPrices();
 
     symbols.forEach(symbol => {
-      console.log(`${symbol} (${sources[0]}): ${formattedPrices[symbol]}`);
+      const latency = Date.now() - update.data.seen_at_ts_ms
+      const latencyInfo = ` | Latency: ${latency}ms`;
+      console.log(`${symbol} (${sources[0]}): ${formattedPrices[symbol]}${latencyInfo}`);
     });
   });
 
   // Connect and subscribe
-  await surge.connect();
-  await surge.subscribeToAll();
-  // await surge.connectAndSubscribe([
-    // { symbol: 'BTC/USD', source: 'WEIGHTED' },
-  // ]);
+  // await surge.connect();
+  // await surge.subscribeToAll();
+  await surge.connectAndSubscribe([
+    { symbol: 'BTC/USD' }
+  ]);
   console.log('🎧 Streaming prices...\n');
-}
-
-streamPrices().catch(console.error);
+})()

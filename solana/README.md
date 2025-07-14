@@ -22,7 +22,7 @@ bun install
 
 # Get a feed hash from https://ondemand.switchboard.xyz/solana/mainnet
 # Run the example (replace with your feed hash)
-bun run scripts/runBundle.ts --feedHash 0xf93c5a12f01a9ff1c8fb1c92e75e86f1e36b2a31ba3de26d32c837e93e9b7116
+bun run scripts/feeds/runBundle.ts --feedHash 0xf93c5a12f01a9ff1c8fb1c92e75e86f1e36b2a31ba3de26d32c837e93e9b7116
 ```
 
 That's it! You're now fetching real-time oracle prices. 🎉
@@ -112,19 +112,41 @@ Create a data feed using the [Switchboard On-Demand UI](https://beta.ondemand.sw
 Run the bundle script with your feed hash:
 ```bash
 bun install
-bun run scripts/runBundle.ts --feedHash YOUR_FEED_HASH
+bun run scripts/feeds/runBundle.ts --feedHash YOUR_FEED_HASH
 ```
 
-The `runBundle.ts` script fetches live data for your feed and demonstrates how to verify it on-chain using the example program in `programs/sb-on-demand-solana/`. The program shows how to:
+The `scripts/feeds/runBundle.ts` script fetches live data for your feed and demonstrates how to verify it on-chain using the example program in `programs/sb-on-demand-solana/`. The program shows how to:
 - Verify bundle signatures
 - Extract feed values
 - Access feed metadata
+
+## 📁 Script Organization
+
+The example scripts are organized into categories based on their functionality:
+
+### `/scripts/feeds/` - Oracle Feed Operations
+- **`runBundle.ts`** - Fetch aggregated price bundles (recommended for most use cases)
+- **`runFeed.ts`** - Update individual feed accounts with detailed oracle responses
+
+### `/scripts/streaming/` - Real-time Price Streaming
+- **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
+- **`stream.ts`** - Full streaming implementation with on-chain transaction submission
+- **`crossbarStream.ts`** - Unsigned price streaming via Crossbar for UI/monitoring
+
+### `/scripts/benchmarks/` - Performance Testing
+- **`benchmark.ts`** - Compare latency across different oracle providers
+- **`benchmarkCU.ts`** - Measure compute unit consumption for various configurations
+
+### `/scripts/utils.ts` - Shared Utilities
+Common functions and configurations used across all scripts.
+
+Each directory contains its own README with detailed documentation for the scripts within.
 
 ## Understanding the Bundle Method
 
 ### What Makes Bundles Efficient?
 
-The bundle method (`runBundle.ts`) is significantly more efficient than traditional feed updates for several key reasons:
+The bundle method (`scripts/feeds/runBundle.ts`) is significantly more efficient than traditional feed updates for several key reasons:
 
 #### 1. **No Write Locks on Data Feeds**
 - Traditional feed updates require write locks on feed accounts, limiting parallelization
@@ -280,7 +302,7 @@ SURGE_API_KEY=your_surge_api_key_here
 
 ```bash
 # Stream real-time BTC/USDT prices
-bun run scripts/runSurge.ts
+bun run scripts/streaming/runSurge.ts
 
 # Example output:
 # ==================== Switchboard Surge ====================

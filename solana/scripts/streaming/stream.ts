@@ -47,9 +47,9 @@ async function streamingExample() {
 
     // Initialize Switchboard Surge streaming client
     const surge = new sb.Surge({
-        apiKey: 'sb_live_UsFU9_w6LEK4xFcD-sijDeO-KvXj3hLNaw35-7Gp4BA',
-        // gatewayUrl: 'https://92.222.100.185.xip.switchboard-oracles.xyz/devnet',
-        gatewayUrl: 'http://localhost:8082',
+        apiKey: process.env.SURGE_API_KEY!,
+        gatewayUrl: 'https://92.222.100.185.xip.switchboard-oracles.xyz/devnet',
+        //gatewayUrl: 'http://localhost:8082',
         // crossbarMode: true,  // ✅ Enable crossbar mode
         verbose: true,
     });

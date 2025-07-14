@@ -44,7 +44,6 @@ function calculateStatistics(latencies: number[]) {
       gateway: 'https://141.95.98.113.xip.switchboard-oracles.xyz/mainnet',
       numSignatures: 13,
     });
-    console.log(responses);
     const endTime = Date.now();
     for (const response of responses) {
       const shortErr = response.shortError();

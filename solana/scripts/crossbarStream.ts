@@ -25,10 +25,10 @@ import * as sb from "@switchboard-xyz/on-demand";
   });
 
   // Connect and subscribe
-  // await surge.connect();
-  // await surge.subscribeToAll();
-  await surge.connectAndSubscribe([
-    { symbol: 'BTC/USD' }
-  ]);
+  await surge.connect();
+  await surge.subscribeToAll();
+  // await surge.connectAndSubscribe([
+    // { symbol: 'BTC/USD' }
+  // ]);
   console.log('🎧 Streaming prices...\n');
 })()

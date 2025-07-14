@@ -24,10 +24,10 @@ async function streamPrices() {
 
   // Connect and subscribe
   await surge.connect();
-  // await surge.subscribeToAll(['WEIGHTED']);
-  await surge.connectAndSubscribe([
-    { symbol: 'BTC/USD', source: 'WEIGHTED' },
-  ]);
+  await surge.subscribeToAll();
+  // await surge.connectAndSubscribe([
+    // { symbol: 'BTC/USD', source: 'WEIGHTED' },
+  // ]);
   console.log('🎧 Streaming prices...\n');
 }
 

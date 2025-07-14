@@ -330,9 +330,9 @@ const surge = new sb.Surge({
 
 // Connect and subscribe to price feeds
 await surge.connectAndSubscribe([
-  { symbol: 'BTC/USDT', source: 'BINANCE' },
-  { symbol: 'ETH/USDT', source: 'BINANCE' },
-  { symbol: 'SOL/USDT', source: 'COINBASE' },
+  { symbol: 'BTC/USD' },
+  { symbol: 'ETH/USD' },
+  { symbol: 'SOL/USD' },
 ]);
 
 // Handle real-time updates

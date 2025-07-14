@@ -309,10 +309,10 @@ bun run scripts/streaming/runSurge.ts
 # Gateway URL: https://92.222.100.185.xip.switchboard-oracles.xyz/devnet
 # Subscribed to: BTC/USDT (Binance)
 #
-# Price Update: $68,542.10
+# Price Update: $128,542.10
 # Latency: 42ms | Slot: 301234567
 #
-# Price Update: $68,541.85
+# Price Update: $128,541.85
 # Latency: 38ms | Slot: 301234568
 ```
 

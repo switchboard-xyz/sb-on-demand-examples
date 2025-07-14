@@ -22,7 +22,7 @@ import { TX_CONFIG, sleep, myAnchorProgram, myProgramIx, DEMO_PATH, calculateSta
   });
 
   await surge.connectAndSubscribe([
-    { symbol: 'BTC/USDT', source: 'BINANCE' },
+    { symbol: 'BTC/USD', source: 'WEIGHTED' },
   ]);
 
   // Listen for price updates

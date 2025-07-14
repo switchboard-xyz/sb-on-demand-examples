@@ -5,8 +5,8 @@ async function streamPrices() {
 
   const surge = new sb.Surge({
     apiKey: apiKey,
-    // crossbarUrl: 'http://localhost:8080',
-    crossbarUrl: 'https://staging.crossbar.switchboard.xyz',
+    crossbarUrl: 'http://localhost:8080',
+    // crossbarUrl: 'https://staging.crossbar.switchboard.xyz',
     crossbarMode: true,
     verbose: true,
   });
@@ -26,7 +26,7 @@ async function streamPrices() {
   await surge.connect();
   // await surge.subscribeToAll(['WEIGHTED']);
   await surge.connectAndSubscribe([
-    { symbol: 'BTC/FDUSD', source: 'BINANCE' },
+    { symbol: 'BTC/USD', source: 'WEIGHTED' },
   ]);
   console.log('🎧 Streaming prices...\n');
 }

@@ -18,7 +18,7 @@ async function streamingExample() {
     console.log('📋 Configuration:');
     console.log('   - Transaction interval: 5 seconds');
     console.log('   - Total runtime: 30 seconds');
-    console.log('   - Feed: BTC/USDT from Binance\n');
+    console.log('   - Feed: BTC/USD\n');
 
     // Initialize Solana connection and programs
     const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
@@ -49,7 +49,7 @@ async function streamingExample() {
     const surge = new sb.Surge({
         apiKey: process.env.SURGE_API_KEY!,
         gatewayUrl: 'https://92.222.100.185.xip.switchboard-oracles.xyz/devnet',
-        //gatewayUrl: 'http://localhost:8082',
+        // gatewayUrl: 'http://localhost:8082',
         // crossbarMode: true,  // ✅ Enable crossbar mode
         verbose: true,
     });
@@ -113,7 +113,7 @@ async function streamingExample() {
             : `\x1b[32mExchange To Update Processing Time: ${latencyMetrics.exchangeToOracleUpdate}ms\x1b[0m`; // Green for oracle processing time
 
         const timeDiffText = timeSinceLastUpdate > 0 ? ` | \x1b[94m+${timeSinceLastUpdate}ms\x1b[0m` : '';
-        console.log(`Update #${priceUpdateCount} | BTC/USDT: ${currentPrice} | ${statusText}${timeDiffText}`);
+        console.log(`Update #${priceUpdateCount} | BTC/USD: ${currentPrice} | ${statusText}${timeDiffText}`);
 
         // Throttling: Check if enough time has passed since last transaction
         if (timeSinceLastTx < TRANSACTION_INTERVAL) {
@@ -133,7 +133,7 @@ async function streamingExample() {
             latencies.push(processingLatency);
 
             // Create our program instruction
-            const testIx = await myProgramIx(testProgram, queue.pubkey, bundle);
+            const testIx = await myProgramIx(testProgram, queue.pubkey, bundle, keypair.publicKey);
 
             // Build the transaction
             const tx = await sb.asV0Tx({
@@ -166,7 +166,7 @@ async function streamingExample() {
                     console.log(`✅ Transaction CONFIRMED | OracleProcessing: ${processingLatency}ms`);
                 }
             } else {
-                console.error(`❌ Simulation failed: ${sim.value.err}`);
+                console.error(`❌ Simulation failed: ${sim.value.err.toString()}`);
             }
 
         } catch (error) {

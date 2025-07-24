@@ -26,7 +26,7 @@ import { TX_CONFIG, sleep, myAnchorProgram, myProgramIx, DEMO_PATH, calculateSta
   ]);
 
   // Listen for price updates
-  surge.on('update', async (response: sb.SurgeUpdate) => {
+  surge.on('signedPriceUpdate', async (response: sb.SurgeUpdate) => {
     latencies.push(Date.now() - response.data.source_ts_ms);
     let [sigVerifyIx, bundle] = response.toBundleIx();
 

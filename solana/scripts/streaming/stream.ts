@@ -186,11 +186,6 @@ async function streamingExample() {
         ]);
 
         console.log('🎧 Connected and subscribed to price feeds!');
-        console.log('📡 Listening for price updates...\n');
-        // await surge.connect();
-        // await surge.subscribeToAll(['WEIGHTED']);
-
-        console.log('🎧 Connected and subscribed to all price feeds!');
     } catch (error) {
         console.error('❌ Failed to connect and subscribe:', error);
         process.exit(1);

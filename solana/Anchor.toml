@@ -8,11 +8,6 @@ skip-lint = false
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "https://switchbo-switchbo-6225.devnet.rpcpool.com/f6fb9f02-0777-498b-b8f5-67cbb1fc0d14"
 wallet = "~/.config/solana/id.json"
 
-[programs.devnet]
-sb_on_demand_solana = "2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5"
-
-[programs.mainnet]
-sb_on_demand_solana = "2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5"

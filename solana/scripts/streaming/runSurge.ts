@@ -9,6 +9,7 @@ import { TX_CONFIG, sleep, myAnchorProgram, myProgramIx, DEMO_PATH, calculateSta
   const apiKey = process.env.SURGE_API_KEY!;
 
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
+  console.log(`DEMO_PATH: ${DEMO_PATH}`);
   const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);
   const queue = await sb.Queue.loadDefault(program!);
   const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
@@ -22,7 +23,7 @@ import { TX_CONFIG, sleep, myAnchorProgram, myProgramIx, DEMO_PATH, calculateSta
   });
 
   await surge.connectAndSubscribe([
-    { symbol: 'BTC/USD', source: 'WEIGHTED' },
+    { symbol: 'BTC/USD' },
   ]);
 
   // Listen for price updates

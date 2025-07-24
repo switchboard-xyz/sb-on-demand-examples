@@ -70,6 +70,7 @@ export async function myAnchorProgram(
   keypath: string
 ): Promise<anchor.Program> {
   try {
+    console.log(`Loading program from ${keypath}`);
     const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
     const pid = myProgramKeypair.publicKey;
     const idl = (await anchor.Program.fetchIdl(pid, provider))!;
@@ -110,7 +111,7 @@ export async function myProgramIx(
     [Buffer.from("state")],
     program.programId
   );
-  
+
   const myIx = await program.methods.test(bundle).accounts({
     state: statePda,
     payer: payer,

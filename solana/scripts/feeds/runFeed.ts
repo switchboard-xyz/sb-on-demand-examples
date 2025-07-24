@@ -29,6 +29,17 @@ function calculateStatistics(latencies: number[]) {
         };
 }
 
+function safeStringify(obj: any) {
+  const seen = new WeakSet();
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) return "[Circular]";
+      seen.add(value);
+    }
+    return value;
+  }, 2);
+}
+
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const queue = await sb.Queue.loadDefault(program!);
@@ -42,8 +53,9 @@ function calculateStatistics(latencies: number[]) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
       gateway: 'https://141.95.98.113.xip.switchboard-oracles.xyz/mainnet',
-      numSignatures: 13,
+      numSignatures: 6,
     });
+    // console.log(`RESPONSES: ${safeStringify(responses)}`);
     const endTime = Date.now();
     for (const response of responses) {
       const shortErr = response.shortError();
@@ -75,7 +87,7 @@ function calculateStatistics(latencies: number[]) {
     console.log(`Median latency: ${stats.median} ms`);
     console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
     console.log(`Loop count: ${stats.count}`);
-    console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
+    // console.log(`Transaction sent: ${await connection.sendTransaction(tx)}`);
     await sleep(3000);
   }
 })();

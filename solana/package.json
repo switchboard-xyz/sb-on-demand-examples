@@ -40,7 +40,7 @@
     "@solana/spl-token": "^0.4.13",
     "@solana/web3.js": "^1.98.0",
     "@switchboard-xyz/common": "^3.4.1",
-    "@switchboard-xyz/on-demand": "2.13.1",
+    "@switchboard-xyz/on-demand": "2.13.2",
     "assert": "^2.1.0",
     "axios": "^1.8.4",
     "big.js": "^6.2.2",

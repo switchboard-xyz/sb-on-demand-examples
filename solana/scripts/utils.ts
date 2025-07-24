@@ -110,7 +110,7 @@ export async function myProgramIx(
     [Buffer.from("state")],
     program.programId
   );
-  
+
   const myIx = await program.methods.test(bundle).accounts({
     state: statePda,
     payer: payer,

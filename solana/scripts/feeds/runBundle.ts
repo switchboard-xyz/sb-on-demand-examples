@@ -9,17 +9,9 @@ import {
   DEMO_PATH,
   calculateStatistics,
 } from "../utils";
+import { PublicKey } from "@solana/web3.js";
+import axios, { AxiosError } from "axios";
 
-const argv = yargs(process.argv)
-  .options({
-    feedHash: {
-      type: "string",
-      required: true,
-      description: "The hexadecimal hash of the price feed (e.g., BTC/USD)",
-      example: "0x1234567890abcdef...",
-    },
-  })
-  .parseSync();
 
 /**
  * Main execution function demonstrating bundle-based oracle integration
@@ -40,12 +32,9 @@ const argv = yargs(process.argv)
   // Expects ANCHOR_WALLET environment variable or ~/.config/solana/id.json
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
 
-  // Initialize your program that will consume the oracle data
-  const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);
-
   // Create Crossbar client for fetching oracle bundles
   // Crossbar is Switchboard's high-performance oracle data delivery network
-  const crossbar = CrossbarClient.default();
+  const crossbar = new CrossbarClient("http://localhost:8000");
 
   // Load the default Switchboard queue for your network (mainnet/devnet)
   // The queue contains the list of authorized oracle signers
@@ -53,76 +42,125 @@ const argv = yargs(process.argv)
 
   // Fetch the gateway URL for this queue from Crossbar
   // This endpoint will provide signed oracle bundles
-  const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
+  // const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
 
   // Load the address lookup table for transaction size optimization
   // This significantly reduces transaction size by using indices instead of full addresses
-  const lut = await queue.loadLookupTable();
+  // const lut = await queue.loadLookupTable();
 
   // Track latency measurements for performance monitoring
   const latencies: number[] = [];
 
   // Main execution loop - continuously fetches and processes oracle updates
   while (true) {
-    // Measure bundle fetch latency for performance monitoring
-    const start = Date.now();
+    try {
+      console.log("\n===== Starting new Sui simulate attempt =====");
+      console.log(`Timestamp: ${new Date().toISOString()}`);
+      console.log(`Crossbar URL: ${crossbar.crossbarUrl}`);
+      console.log(`Sui Aggregator Address: 0x0c9a07f75b227e167320781402ba6398a544574704a6f50ad62ccdba3bfbe1eb`);
 
-    // Fetch the oracle bundle and signature verification instruction
-    // This single call:
-    // 1. Requests the latest price data from oracle operators
-    // 2. Receives signed bundle with oracle signatures
-    // 3. Creates the Ed25519 signature verification instruction
-    const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(
-      gateway, // Gateway URL for this oracle queue
-      crossbar, // Crossbar client instance
-      [argv.feedHash] // Array of feed hashes to fetch (can request multiple)
-    );
+      // Test connectivity first
+      console.log("\nTesting connectivity to Crossbar...");
+      try {
+        const healthCheck = await axios.get(`${crossbar.crossbarUrl}/health`, {
+          timeout: 5000,
+          validateStatus: () => true // Accept any status code
+        });
+        console.log(`Health check response: ${healthCheck.status} ${healthCheck.statusText}`);
+        if (healthCheck.data) {
+          console.log(`Health check data:`, JSON.stringify(healthCheck.data, null, 2));
+        }
+      } catch (healthErr) {
+        console.error("Health check failed:", healthErr instanceof Error ? healthErr.message : String(healthErr));
+        if (axios.isAxiosError(healthErr) && healthErr.code) {
+          console.error(`Error code: ${healthErr.code}`);
+        }
+      }
 
-    // Calculate and track fetch latency
-    const endTime = Date.now();
-    const latency = endTime - start;
-    latencies.push(latency);
+      // Attempt the actual simulate
+      console.log("\nAttempting to simulate Sui feeds...");
+      const startTime = Date.now();
+      const suiAggregatorAddress = "ByTpJ7pxD86SJqCcpewN7HdNkePrStCED1Gd4h2SJYCa";
+      const resp = await crossbar.simulateSolanaFeeds("mainnet", [suiAggregatorAddress]);
+      const fetchTime = Date.now() - startTime;
 
-    // Create your program's instruction to consume the oracle data
-    // This instruction will verify and use the bundle in your business logic
-    const testIx = await myProgramIx(testProgram, queue.pubkey, bundle, keypair.publicKey);
+      console.log(`✅ Sui simulate successful in ${fetchTime}ms`);
+      console.log(`Response ${JSON.stringify(resp, null, 2)}`);
 
-    // Display performance statistics for monitoring
-    const stats = calculateStatistics(latencies);
-    console.log(`Min latency: ${stats.min} ms`);
-    console.log(`Median latency: ${stats.median} ms`);
-    console.log(`Mean latency: ${stats.mean.toFixed(2)} ms`);
-    console.log(`Loop count: ${stats.count}`);
+      // Add a delay before next iteration
+      await sleep(5000);
 
-    // Construct a versioned transaction (v0) for optimal performance
-    // V0 transactions support address lookup tables and are more efficient
-    const tx = await sb.asV0Tx({
-      connection,
-      ixs: [sigVerifyIx, testIx], // Order matters: verify signatures first
-      signers: [keypair],
-      computeUnitPrice: 20_000, // Priority fee in micro-lamports per compute unit
-      computeUnitLimitMultiple: 1.3, // Add 30% buffer to estimated compute units
-      lookupTables: [lut], // Include lookup table for size optimization
-    });
+    } catch (error) {
+      console.error("\n❌ Fetch failed!");
+      console.error(`Error timestamp: ${new Date().toISOString()}`);
 
-    // Simulate the transaction to verify it will succeed
-    // This helps catch errors before spending transaction fees
-    const sim = await connection.simulateTransaction(tx, TX_CONFIG);
-    console.log(`Simulation result: ${JSON.stringify(sim.value, null, 2)}`);
+      if (axios.isAxiosError(error)) {
+        const axiosErr = error as AxiosError;
+        console.error("\n=== Axios Error Details ===");
+        console.error(`Message: ${axiosErr.message}`);
+        console.error(`Code: ${axiosErr.code}`);
+        console.error(`Syscall: ${(axiosErr as any).syscall}`);
+        console.error(`Errno: ${(axiosErr as any).errno}`);
 
-    // In production, you would:
-    // 1. Check simulation results for errors
-    // 2. Send the transaction if simulation succeeds
-    // 3. Handle any transaction errors appropriately
-    // Example:
-    // if (sim.value.err) {
-    //   console.error('Simulation failed:', sim.value.err);
-    //   continue;
-    // }
-    // const signature = await connection.sendTransaction(tx, TX_CONFIG);
-    // await connection.confirmTransaction(signature);
+        if (axiosErr.config) {
+          console.error("\n=== Request Configuration ===");
+          console.error(`URL: ${axiosErr.config.url}`);
+          console.error(`Method: ${axiosErr.config.method?.toUpperCase()}`);
+          console.error(`Timeout: ${axiosErr.config.timeout || 'none'}`);
+          console.error(`Headers:`, JSON.stringify(axiosErr.config.headers, null, 2));
+        }
 
-    // Wait before next iteration to avoid rate limits
-    // await sleep(3_000);
+        if (axiosErr.response) {
+          console.error("\n=== Response Details ===");
+          console.error(`Status: ${axiosErr.response.status}`);
+          console.error(`Status Text: ${axiosErr.response.statusText}`);
+          console.error(`Headers:`, JSON.stringify(axiosErr.response.headers, null, 2));
+          console.error(`Data:`, axiosErr.response.data);
+        } else {
+          console.error("\n⚠️  No response received - connection failed");
+
+          // ECONNRESET specific debugging
+          if (axiosErr.code === 'ECONNRESET') {
+            console.error("\n=== ECONNRESET Troubleshooting ===");
+            console.error("Possible causes:");
+            console.error("1. Server closed the connection unexpectedly");
+            console.error("2. Network issues or firewall blocking");
+            console.error("3. Server crash or restart during request");
+            console.error("4. Timeout on server side");
+            console.error("5. Proxy or load balancer issues");
+
+            // Check if server is running
+            console.error("\nChecking if server is accessible...");
+            try {
+              const testReq = await axios.get(crossbar.crossbarUrl, {
+                timeout: 2000,
+                validateStatus: () => true
+              });
+              console.error(`Server responded with status: ${testReq.status}`);
+            } catch (testErr) {
+              console.error("Server appears to be down or unreachable");
+            }
+          }
+        }
+
+        // Network diagnostics
+        if (axiosErr.code === 'ECONNRESET' || axiosErr.code === 'ECONNREFUSED') {
+          console.error("\n=== Network Diagnostics ===");
+          console.error(`Local endpoint: ${axiosErr.config?.url}`);
+          console.error("Ensure the Crossbar server is running on localhost:8000");
+        }
+      } else if (error instanceof Error) {
+        console.error("\n=== Generic Error ===");
+        console.error(`Type: ${error.constructor.name}`);
+        console.error(`Message: ${error.message}`);
+        console.error(`Stack trace:\n${error.stack}`);
+      } else {
+        console.error("\n=== Unknown Error ===");
+        console.error("Error object:", error);
+      }
+
+      // Wait before retrying
+      await sleep(1000);
+    }
   }
 })();

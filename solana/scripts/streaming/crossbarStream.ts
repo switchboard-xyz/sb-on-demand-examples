@@ -6,7 +6,7 @@ import * as sb from "@switchboard-xyz/on-demand";
   const surge = new sb.Surge({
     apiKey: apiKey,
     // crossbarUrl: 'http://localhost:8080',
-    crossbarUrl: 'https://staging.crossbar.switchboard.xyz',
+    crossbarUrl: process.env.CROSSBAR_URL || 'https://staging.crossbar.switchboard.xyz',
     crossbarMode: true,
     verbose: true,
   });
@@ -32,7 +32,7 @@ import * as sb from "@switchboard-xyz/on-demand";
   // await surge.subscribeToAll();
   await surge.connectAndSubscribe([
     { symbol: 'BTC/USD' },
-    { symbol: 'ETH/USD' },
-  ]);
+    // { symbol: 'ETH/USD' },
+  ], 10);
   console.log('🎧 Streaming prices...\n');
 })()

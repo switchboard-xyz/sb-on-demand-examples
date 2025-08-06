@@ -90,7 +90,6 @@ export async function myAnchorProgram(
  * @async
  * @param {anchor.Program} program - Your Anchor program instance
  * @param {PublicKey | string} queue - Switchboard queue account address
- * @param {Buffer} bundle - Signed oracle bundle containing price data
  * @returns {Promise<TransactionInstruction>} Instruction ready to add to transaction
  *
  * @example
@@ -103,7 +102,6 @@ export async function myAnchorProgram(
 export async function myProgramIx(
   program: anchor.Program,
   queue: PublicKey | string,
-  bundle: Buffer,
   payer: PublicKey
 ): Promise<TransactionInstruction> {
   const [statePda] = PublicKey.findProgramAddressSync(
@@ -111,7 +109,7 @@ export async function myProgramIx(
     program.programId
   );
 
-  const myIx = await program.methods.test(bundle).accounts({
+  const myIx = await program.methods.test().accounts({
     state: statePda,
     payer: payer,
     queue: new PublicKey(queue),

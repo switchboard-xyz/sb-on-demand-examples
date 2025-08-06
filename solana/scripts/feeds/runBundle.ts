@@ -45,7 +45,7 @@ const argv = yargs(process.argv)
 
   // Create Crossbar client for fetching oracle bundles
   // Crossbar is Switchboard's high-performance oracle data delivery network
-  const crossbar = CrossbarClient.default();
+  const crossbar = new CrossbarClient("http://localhost:8080");
 
   // Load the default Switchboard queue for your network (mainnet/devnet)
   // The queue contains the list of authorized oracle signers
@@ -53,7 +53,7 @@ const argv = yargs(process.argv)
 
   // Fetch the gateway URL for this queue from Crossbar
   // This endpoint will provide signed oracle bundles
-  const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
+  const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
 
   // Load the address lookup table for transaction size optimization
   // This significantly reduces transaction size by using indices instead of full addresses
@@ -72,9 +72,9 @@ const argv = yargs(process.argv)
     // 1. Requests the latest price data from oracle operators
     // 2. Receives signed bundle with oracle signatures
     // 3. Creates the Ed25519 signature verification instruction
-    const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(
+    const sbIx = await queue.fetchUpdateBundleIx(
       gateway, // Gateway URL for this oracle queue
-      crossbar, // Crossbar client instance
+      crossbar as any, // Crossbar client instance
       [argv.feedHash] // Array of feed hashes to fetch (can request multiple)
     );
 
@@ -85,7 +85,7 @@ const argv = yargs(process.argv)
 
     // Create your program's instruction to consume the oracle data
     // This instruction will verify and use the bundle in your business logic
-    const testIx = await myProgramIx(testProgram, queue.pubkey, bundle, keypair.publicKey);
+    const testIx = await myProgramIx(testProgram, queue.pubkey, keypair.publicKey);
 
     // Display performance statistics for monitoring
     const stats = calculateStatistics(latencies);
@@ -98,7 +98,7 @@ const argv = yargs(process.argv)
     // V0 transactions support address lookup tables and are more efficient
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [sigVerifyIx, testIx], // Order matters: verify signatures first
+      ixs: [sbIx, testIx], // Include both the signature verification and your program instruction
       signers: [keypair],
       computeUnitPrice: 20_000, // Priority fee in micro-lamports per compute unit
       computeUnitLimitMultiple: 1.3, // Add 30% buffer to estimated compute units

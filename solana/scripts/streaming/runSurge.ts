@@ -17,7 +17,7 @@ import { TX_CONFIG, sleep, myAnchorProgram, myProgramIx, DEMO_PATH, calculateSta
 
   const surge = new sb.Surge({
     apiKey,
-    gatewayUrl: 'https://92.222.100.185.xip.switchboard-oracles.xyz/devnet',
+    gatewayUrl: gateway.gatewayUrl,
     verbose: true,
   });
 

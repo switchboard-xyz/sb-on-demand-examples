@@ -45,7 +45,7 @@ const argv = yargs(process.argv)
 
   // Create Crossbar client for fetching oracle bundles
   // Crossbar is Switchboard's high-performance oracle data delivery network
-  const crossbar = new CrossbarClient("http://localhost:8080");
+  const crossbar = new CrossbarClient('https://crossbar.switchboardlabs.xyz');
 
   // Load the default Switchboard queue for your network (mainnet/devnet)
   // The queue contains the list of authorized oracle signers
@@ -53,7 +53,7 @@ const argv = yargs(process.argv)
 
   // Fetch the gateway URL for this queue from Crossbar
   // This endpoint will provide signed oracle bundles
-  const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
+  const gateway = new sb.Gateway(program!, "https://141.95.126.206.xip.switchboard-oracles.xyz/devnet")
 
   // Load the address lookup table for transaction size optimization
   // This significantly reduces transaction size by using indices instead of full addresses

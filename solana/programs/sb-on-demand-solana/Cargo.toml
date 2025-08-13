@@ -20,6 +20,6 @@ custom-panic = []
 anchor-debug = []
 
 [dependencies]
-anchor-lang = "0.31.1"
+anchor-lang = { version = "0.31.1", features = ["init-if-needed"] }
 faster-hex = "0.10.0"
-switchboard-on-demand = { version = "0.4.7", features = ["anchor", "devnet"] }
+switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand", features = ["anchor", "devnet"] }

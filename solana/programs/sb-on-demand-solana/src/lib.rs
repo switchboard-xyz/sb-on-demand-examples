@@ -10,8 +10,8 @@ declare_id!("DMZyhztu9nMWirY231QeAuhiVKry4zeGMrjTGRSktjM1");
 pub mod sb_on_demand_solana {
     use super::*;
 
-    pub fn test<'a>(ctx: Context<Ctx>, bundle: Vec<u8>) -> Result<()> {
-        let verified_bundle = BundleVerifierBuilder::from(&bundle)
+    pub fn test<'a>(ctx: Context<Ctx>) -> Result<()> {
+        let verified_bundle = BundleVerifierBuilder::new()
             .queue(&ctx.accounts.queue)
             .slothash_sysvar(&ctx.accounts.slothashes)
             .ix_sysvar(&ctx.accounts.instructions)
@@ -27,7 +27,7 @@ pub mod sb_on_demand_solana {
         }
         state.last_verified_slot = verified_slot;
 
-        for feed_info in verified_bundle.feed_infos {
+        for feed_info in verified_bundle.feeds() {
             msg!("Feed hash: {}", hex_string(&feed_info.feed_id()));
             msg!("Feed value: {}", feed_info.value());
         }

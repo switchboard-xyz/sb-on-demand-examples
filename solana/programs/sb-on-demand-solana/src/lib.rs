@@ -11,6 +11,7 @@ pub mod sb_on_demand_solana {
     use super::*;
 
     pub fn test<'a>(ctx: Context<Ctx>) -> Result<()> {
+        msg!("Testing on queue: {}", ctx.accounts.queue.key());
         let verified_bundle = BundleVerifierBuilder::new()
             .queue(&ctx.accounts.queue)
             .slothash_sysvar(&ctx.accounts.slothashes)

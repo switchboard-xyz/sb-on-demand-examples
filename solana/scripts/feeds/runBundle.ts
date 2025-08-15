@@ -39,6 +39,7 @@ const argv = yargs(process.argv)
   // Load Solana environment configuration from standard locations
   // Expects ANCHOR_WALLET environment variable or ~/.config/solana/id.json
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
+  console.log("RPC:", connection.rpcEndpoint);
 
   // Initialize your program that will consume the oracle data
   const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);

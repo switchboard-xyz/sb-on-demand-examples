@@ -1,17 +1,19 @@
 use faster_hex::hex_string;
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program;
 use switchboard_on_demand::prelude::{
     BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions,
 };
 
-declare_id!("DMZyhztu9nMWirY231QeAuhiVKry4zeGMrjTGRSktjM1");
+declare_id!("2peDtg8dVTwnoUmh45zstq7C7sFo5hdt4KHnAAPGNNdy");
 
 #[program]
 pub mod sb_on_demand_solana {
     use super::*;
 
     pub fn test<'a>(ctx: Context<Ctx>) -> Result<()> {
-        msg!("Testing on queue: {}", ctx.accounts.queue.key());
+        // log compute units
+        solana_program::log::sol_log_compute_units();
         let verified_bundle = BundleVerifierBuilder::new()
             .queue(&ctx.accounts.queue)
             .slothash_sysvar(&ctx.accounts.slothashes)
@@ -20,18 +22,19 @@ pub mod sb_on_demand_solana {
             .max_age(50) // Maximum age in slots for bundle freshness
             .verify()
             .unwrap();
-        let verified_slot = verified_bundle.slot();
-        let state = &mut ctx.accounts.state;
-        if state.last_verified_slot > verified_slot {
-            msg!("Received prices are older than the last verified prices. Ignoring bundle.");
-            return Ok(());
-        }
-        state.last_verified_slot = verified_slot;
-
-        for feed_info in verified_bundle.feeds() {
-            msg!("Feed hash: {}", hex_string(feed_info.feed_id()));
-            msg!("Feed value: {}", feed_info.value());
-        }
+        solana_program::log::sol_log_compute_units();
+        // let verified_slot = verified_bundle.slot();
+        // let state = &mut ctx.accounts.state;
+        // if state.last_verified_slot > verified_slot {
+            // msg!("Received prices are older than the last verified prices. Ignoring bundle.");
+            // return Ok(());
+        // }
+        // state.last_verified_slot = verified_slot;
+//
+        // for feed_info in verified_bundle.feeds() {
+            // msg!("Feed hash: {}", hex_string(feed_info.feed_id()));
+            // msg!("Feed value: {}", feed_info.value());
+        // }
         Ok(())
     }
 }

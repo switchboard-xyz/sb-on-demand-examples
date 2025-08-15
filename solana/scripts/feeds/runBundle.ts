@@ -53,7 +53,9 @@ const argv = yargs(process.argv)
 
   // Fetch the gateway URL for this queue from Crossbar
   // This endpoint will provide signed oracle bundles
-  const gateway = new sb.Gateway(program!, "https://141.95.126.206.xip.switchboard-oracles.xyz/devnet")
+  const gateway = new sb.Gateway(program!, "http://localhost:8082");
+  // const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
+
 
   // Load the address lookup table for transaction size optimization
   // This significantly reduces transaction size by using indices instead of full addresses
@@ -63,9 +65,12 @@ const argv = yargs(process.argv)
   const latencies: number[] = [];
 
   // Main execution loop - continuously fetches and processes oracle updates
-  while (true) {
+  // while (true) {
     // Measure bundle fetch latency for performance monitoring
     const start = Date.now();
+
+    // Debug: Log the input feedHash
+    console.log("Input feedHash:", argv.feedHash);
 
     // Fetch the oracle bundle and signature verification instruction
     // This single call:
@@ -124,5 +129,5 @@ const argv = yargs(process.argv)
 
     // Wait before next iteration to avoid rate limits
     // await sleep(3_000);
-  }
+  // }
 })();

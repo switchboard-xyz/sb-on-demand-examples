@@ -19,7 +19,7 @@ pub mod sb_on_demand_solana {
             .max_age(50) // Maximum age in slots for bundle freshness
             .verify()
             .unwrap();
-        let verified_slot = verified_bundle.verified_slot;
+        let verified_slot = verified_bundle.slot();
         let state = &mut ctx.accounts.state;
         if state.last_verified_slot > verified_slot {
             msg!("Received prices are older than the last verified prices. Ignoring bundle.");
@@ -28,7 +28,7 @@ pub mod sb_on_demand_solana {
         state.last_verified_slot = verified_slot;
 
         for feed_info in verified_bundle.feeds() {
-            msg!("Feed hash: {}", hex_string(&feed_info.feed_id()));
+            msg!("Feed hash: {}", hex_string(feed_info.feed_id()));
             msg!("Feed value: {}", feed_info.value());
         }
         Ok(())

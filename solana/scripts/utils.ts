@@ -69,11 +69,18 @@ export async function myAnchorProgram(
   provider: anchor.Provider,
   keypath: string
 ): Promise<anchor.Program> {
+  const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
+  const pid = myProgramKeypair.publicKey;
+  let idl: anchor.Idl | null = null;
   try {
-    const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
-    const pid = myProgramKeypair.publicKey;
-    const idl = (await anchor.Program.fetchIdl(pid, provider))!;
-    const program = new anchor.Program(idl, provider);
+    idl = (await anchor.Program.fetchIdl(pid, provider))!;
+  } catch (e) {
+    throw new Error(
+      `Failed to fetch IDL for program ${pid.toBase58()}. Was it deployed?`
+    );
+  }
+  try {
+    const program = new anchor.Program(idl!, provider);
     return program;
   } catch (e) {
     throw new Error("Failed to load demo program. Was it deployed?");

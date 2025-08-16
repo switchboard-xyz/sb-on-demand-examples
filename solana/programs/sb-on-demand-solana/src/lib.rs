@@ -1,11 +1,10 @@
-use faster_hex::hex_string;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program;
-use switchboard_on_demand::prelude::{
-    BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions,
+use switchboard_on_demand::{
+    BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions, get_ed25519_instruction
 };
 
-declare_id!("2peDtg8dVTwnoUmh45zstq7C7sFo5hdt4KHnAAPGNNdy");
+declare_id!("FtWLzRRcYZfeTnbQTeFpE1ceaH4UqpECvaKughrPttvS");
 
 #[program]
 pub mod sb_on_demand_solana {
@@ -13,14 +12,14 @@ pub mod sb_on_demand_solana {
 
     pub fn test<'a>(ctx: Context<Ctx>) -> Result<()> {
         // log compute units
-        solana_program::log::sol_log_compute_units();
-        let verified_bundle = BundleVerifierBuilder::new()
+        let ix = get_ed25519_instruction(&ctx.accounts.instructions)?;
+        let _bundle = BundleVerifierBuilder::new()
             .queue(&ctx.accounts.queue)
             .slothash_sysvar(&ctx.accounts.slothashes)
             .ix_sysvar(&ctx.accounts.instructions)
             .clock(&Clock::get()?)
-            .max_age(50) // Maximum age in slots for bundle freshness
-            .verify()
+            .max_age(50)
+            .verify(&ix.data)
             .unwrap();
         solana_program::log::sol_log_compute_units();
         // let verified_slot = verified_bundle.slot();

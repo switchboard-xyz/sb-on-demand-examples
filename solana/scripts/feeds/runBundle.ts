@@ -104,7 +104,7 @@ const argv = yargs(process.argv)
     // V0 transactions support address lookup tables and are more efficient
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [sbIx, testIx], // Include both the signature verification and your program instruction
+      ixs: [sbIx, testIx], // Combine the bundle verification and program instructions
       signers: [keypair],
       computeUnitPrice: 20_000, // Priority fee in micro-lamports per compute unit
       computeUnitLimitMultiple: 1.3, // Add 30% buffer to estimated compute units

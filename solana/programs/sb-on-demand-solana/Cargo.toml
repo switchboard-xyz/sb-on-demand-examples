@@ -22,4 +22,4 @@ anchor-debug = []
 [dependencies]
 anchor-lang = { version = "=0.31.1", features = ["init-if-needed"] }
 faster-hex = "0.10.0"
-switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand", features = ["anchor", "devnet"], default-features = false }
+switchboard-on-demand = { version = "0.5.0", features = ["anchor", "devnet"] }

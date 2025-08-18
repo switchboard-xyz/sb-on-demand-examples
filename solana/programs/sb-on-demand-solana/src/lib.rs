@@ -1,39 +1,39 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program;
+use anchor_lang::solana_program::{self, sysvar::slot_hashes::SlotHashes};
 use switchboard_on_demand::{
-    BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions, get_ed25519_instruction
+    BundleVerifierBuilder, QueueAccountData, get_ed25519_instruction
 };
 
-declare_id!("FtWLzRRcYZfeTnbQTeFpE1ceaH4UqpECvaKughrPttvS");
+declare_id!("6z3ymNRkYMRvazLV8fhy2jhBCFro1942Ann4neXMcCcR");
 
 #[program]
 pub mod sb_on_demand_solana {
     use super::*;
 
     pub fn test<'a>(ctx: Context<Ctx>) -> Result<()> {
-        // log compute units
-        let ix = get_ed25519_instruction(&ctx.accounts.instructions)?;
-        let _bundle = BundleVerifierBuilder::new()
+        let clock = Clock::get()?;
+        let state = &mut ctx.accounts.state;
+        let ix = get_ed25519_instruction(ctx.accounts.instructions.as_ref())?;
+        let staleness = clock.slot - state.last_verified_slot;
+        solana_program::log::sol_log_compute_units();
+        let bundle = BundleVerifierBuilder::new()
             .queue(&ctx.accounts.queue)
             .slothash_sysvar(&ctx.accounts.slothashes)
-            .ix_sysvar(&ctx.accounts.instructions)
-            .clock(&Clock::get()?)
-            .max_age(50)
+            .clock(&clock)
+            .max_age(staleness.max(50))
             .verify(&ix.data)
             .unwrap();
         solana_program::log::sol_log_compute_units();
-        // let verified_slot = verified_bundle.slot();
-        // let state = &mut ctx.accounts.state;
-        // if state.last_verified_slot > verified_slot {
-            // msg!("Received prices are older than the last verified prices. Ignoring bundle.");
-            // return Ok(());
-        // }
-        // state.last_verified_slot = verified_slot;
-//
-        // for feed_info in verified_bundle.feeds() {
-            // msg!("Feed hash: {}", hex_string(feed_info.feed_id()));
-            // msg!("Feed value: {}", feed_info.value());
-        // }
+        let verified_slot = bundle.slot();
+        if state.last_verified_slot > verified_slot {
+            msg!("Received prices are older than the last verified prices. Ignoring bundle.");
+            return Ok(());
+        }
+        state.last_verified_slot = verified_slot;
+        for feed_info in bundle.feeds() {
+            msg!("Feed hash: {}", feed_info.hex_id());
+            msg!("Feed value: {}", feed_info.value());
+        }
         Ok(())
     }
 }
@@ -58,6 +58,8 @@ pub struct Ctx<'info> {
     pub payer: Signer<'info>,
     pub queue: AccountLoader<'info, QueueAccountData>,
     pub slothashes: Sysvar<'info, SlotHashes>,
-    pub instructions: Sysvar<'info, Instructions>,
+    /// CHECK: Instructions sysvar
+    #[account(address = solana_program::sysvar::instructions::ID)]
+    pub instructions: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }

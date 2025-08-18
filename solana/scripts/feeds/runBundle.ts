@@ -54,8 +54,8 @@ const argv = yargs(process.argv)
 
   // Fetch the gateway URL for this queue from Crossbar
   // This endpoint will provide signed oracle bundles
-  const gateway = new sb.Gateway(program!, "http://localhost:8082");
-  // const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
+  // const gateway = new sb.Gateway(program!, "http://localhost:8082");
+  const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
 
 
   // Load the address lookup table for transaction size optimization

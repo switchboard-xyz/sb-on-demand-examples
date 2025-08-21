@@ -127,18 +127,6 @@ const argv = yargs(process.argv)
         console.error('❌ Simulation failed:', sim.value.err);
         return;
       }
-
-      // If simulation succeeds, send the transaction
-      console.log('✅ Simulation succeeded, sending transaction...');
-      const signature = await connection.sendTransaction(tx, TX_CONFIG);
-      console.log(`📤 Transaction sent: ${signature}`);
-      
-      const confirmation = await connection.confirmTransaction(signature, TX_CONFIG.commitment);
-      if (confirmation.value.err) {
-        console.error('❌ Transaction failed:', confirmation.value.err);
-      } else {
-        console.log('✅ Transaction confirmed successfully!');
-      }
     } catch (error) {
       console.error('💥 Transaction error:', error);
     }

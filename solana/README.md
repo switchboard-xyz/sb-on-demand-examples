@@ -17,12 +17,12 @@
 ```bash
 # Clone and install
 git clone https://github.com/switchboard-xyz/sb-on-demand-examples.git
-cd sb-on-demand-feeds
+cd solana
 bun install
 
-# Get a feed hash from https://ondemand.switchboard.xyz/solana/mainnet
+# Get a feed hash from https://explorer.switchboardlabs.xyz/
 # Run the example (replace with your feed hash)
-bun run scripts/feeds/runBundle.ts --feedHash 0xf93c5a12f01a9ff1c8fb1c92e75e86f1e36b2a31ba3de26d32c837e93e9b7116
+bun run  scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 ```
 
 That's it! You're now fetching real-time oracle prices. 🎉

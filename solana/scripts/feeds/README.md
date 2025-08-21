@@ -23,20 +23,24 @@ This directory contains scripts demonstrating different approaches to fetching a
 
 **Usage**:
 ```bash
-# Default (BTC/USD feed)
-npx ts-node scripts/feeds/runBundle.ts
+# Using bun (recommended)
+bun run scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 
-# With specific feed hash
-npx ts-node scripts/feeds/runBundle.ts 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
+# Using npm script
+npm start --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+
+# Using ts-node directly
+npx ts-node scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 ```
 
 **Key features**:
 - **Bundle mechanism**: Aggregates multiple oracle responses
-- **Feed hash input**: Specify feeds using hexadecimal identifiers
+- **Feed hash input**: Required --feedHash parameter with hexadecimal identifiers
 - **Signature verification**: Ed25519 signature validation
 - **Performance tracking**: Latency statistics (min, median, mean)
 - **V0 transactions**: Optimized with address lookup tables
-- **Simulation mode**: Currently simulates only (production code commented)
+- **Continuous loop**: Runs continuously fetching updates every 3 seconds
+- **Transaction submission**: Actually sends transactions to the network
 
 **Architecture**:
 ```
@@ -47,10 +51,15 @@ Oracle Nodes      Aggregated Data      Ed25519 Check      Simulation
 
 **Sample output**:
 ```
-Fetching update for feed: 0xef0d8b6f...
-Fetch latency: 245ms
-Simulation successful: true
-Stats - Min: 212ms, Median: 245ms, Mean: 234ms
+RPC: https://api.devnet.solana.com
+Input feedHash: f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+Min latency: 245 ms
+Median latency: 267 ms
+Mean latency: 256.50 ms
+Loop count: 1
+✅ Simulation succeeded, sending transaction...
+📤 Transaction sent: 3xY2z9K8vQ4u7Lm6Np5Rt8Sw1Df2Gh9J...
+✅ Transaction confirmed successfully!
 ```
 
 ### 2. runFeed.ts - Individual Feed Updates  
@@ -59,11 +68,14 @@ Stats - Min: 212ms, Median: 245ms, Mean: 234ms
 
 **Usage**:
 ```bash
-# With feed public key
+# Using bun (recommended)
+bun run scripts/feeds/runFeed.ts GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
+
+# Using ts-node directly
 npx ts-node scripts/feeds/runFeed.ts GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 
 # Interactive mode (prompts for feed)
-npx ts-node scripts/feeds/runFeed.ts
+bun run scripts/feeds/runFeed.ts
 ```
 
 **Key features**:

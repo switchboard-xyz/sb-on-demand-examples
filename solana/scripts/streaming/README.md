@@ -47,6 +47,13 @@ export SURGE_API_KEY="your-api-key-here"
 
 **Usage**:
 ```bash
+# Using bun (recommended)
+bun run scripts/streaming/crossbarStream.ts
+
+# Using npm script
+npm run stream:crossbar
+
+# Using ts-node directly  
 npx ts-node scripts/streaming/crossbarStream.ts
 ```
 
@@ -66,27 +73,39 @@ const surge = new sb.Surge({
 });
 ```
 
-### 2. runSurge.ts - Surge API with Transaction Simulation
+### 2. runSurge.ts - Surge Streaming Demo
 
-**Purpose**: Stream signed price data with latency tracking and transaction simulation.
+**Purpose**: Demonstration of streaming with real-time price updates and single simulation.
 
 **Usage**:
 ```bash
+# Using bun (recommended)
+bun run scripts/streaming/runSurge.ts
+
+# Using npm script
+npm run stream:surge
+
+# Using ts-node directly
 npx ts-node scripts/streaming/runSurge.ts
 ```
 
 **Features**:
-- Connects to Surge API for BTC/USD prices
-- Tracks detailed latency statistics (min, max, median, mean)
-- Creates signature verification instructions
-- Simulates transactions without submitting to network
-- Perfect for testing and performance monitoring
+- Connects to Surge API for BTC/USD price streaming
+- Shows real-time price updates with raw values
+- Tracks detailed latency statistics (min, max, median, mean)  
+- Runs a single simulation after 10 seconds
+- Displays program logs showing feed values
+- Clean demo flow with automatic exit
 
 **Output Example**:
 ```
-Received BTC/USD price: $45123.45
-Latency Stats - Min: 45ms, Max: 120ms, Median: 67ms, Mean: 72ms
-Transaction simulation successful
+🚀 Starting Surge streaming demo...
+📡 Listening for price updates (will simulate after 10 seconds)...
+📊 Update #1 | Price: 6771234500000 | Latency: 42ms | Avg: 42.0ms
+📊 Update #2 | Price: 6771245600000 | Latency: 38ms | Avg: 40.0ms
+⏰ 10 seconds elapsed - running simulation with latest data...
+✅ Simulation succeeded!
+📈 Final stats: 15 updates, 43.2ms avg latency
 ```
 
 ### 3. stream.ts - Full Streaming with On-chain Submission
@@ -95,6 +114,13 @@ Transaction simulation successful
 
 **Usage**:
 ```bash
+# Using bun (recommended)
+bun run scripts/streaming/stream.ts
+
+# Using npm script
+npm run stream
+
+# Using ts-node directly
 npx ts-node scripts/streaming/stream.ts
 ```
 
@@ -127,7 +153,7 @@ npx ts-node scripts/streaming/stream.ts
 | Script | Use Case | Transaction | Latency | Best For |
 |--------|----------|-------------|---------|----------|
 | `crossbarStream.ts` | Frontend displays | None (unsigned) | 50-150ms | UIs, dashboards, monitoring |
-| `runSurge.ts` | Testing & monitoring | Simulated only | 50-200ms | Performance testing, debugging |
+| `runSurge.ts` | Demo & customer presentations | Single simulation after 10s | 50-200ms | Demonstrations, testing |
 | `stream.ts` | Production integration | Submitted on-chain | 100-300ms | Live trading systems |
 
 ## Event Handling

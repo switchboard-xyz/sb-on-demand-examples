@@ -14,9 +14,9 @@ scripts/
 
 ## 🚀 Quick Start
 
-### Using npm scripts (recommended):
+### Using npm scripts:
 ```bash
-# Fetch price bundles
+# Fetch price bundles (default BTC/USD)
 npm start
 
 # Stream prices with Surge WebSocket
@@ -29,10 +29,25 @@ npm run stream:crossbar
 npm run benchmark
 ```
 
-### Direct execution:
+### Using bun (recommended):
+```bash
+# Fetch price bundles with specific feed
+bun run scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+
+# Stream prices with Surge
+bun run scripts/streaming/runSurge.ts
+
+# Run Crossbar streaming
+bun run scripts/streaming/crossbarStream.ts
+
+# Performance benchmarks
+bun run scripts/benchmarks/benchmark.ts
+```
+
+### Direct execution with ts-node:
 ```bash
 # Run any script directly
-npx ts-node scripts/feeds/runBundle.ts
+npx ts-node scripts/feeds/runBundle.ts --feedHash FEED_HASH
 ```
 
 ## 📂 Categories
@@ -48,7 +63,7 @@ Scripts for fetching and updating oracle price data.
 ### 2. Streaming (`/streaming/`)
 Real-time price streaming implementations.
 
-- **`runSurge.ts`** - WebSocket streaming with <100ms latency
+- **`runSurge.ts`** - Demo streaming with single simulation after 10 seconds
 - **`stream.ts`** - Full streaming with on-chain transactions
 - **`crossbarStream.ts`** - Unsigned prices for UI/monitoring
 
@@ -86,7 +101,8 @@ export SURGE_API_KEY=your_api_key_here
 |------|----------------|-----|
 | Fetch prices for DeFi | `feeds/runBundle.ts` | Lowest cost, signed data |
 | Real-time UI updates | `streaming/crossbarStream.ts` | Unsigned, lowest latency |
-| HFT/Trading bots | `streaming/runSurge.ts` | WebSocket, <100ms |
+| Demo streaming integration | `streaming/runSurge.ts` | Clean demo with simulation |
+| Production streaming | `streaming/stream.ts` | Full on-chain integration |
 | Test performance | `benchmarks/benchmark.ts` | Compare oracle providers |
 | Optimize gas costs | `benchmarks/benchmarkCU.ts` | Measure compute units |
 
@@ -94,15 +110,24 @@ export SURGE_API_KEY=your_api_key_here
 
 ### Bundle Fetching
 ```
-Fetching update for feed: 0xef0d8b6f...
-Fetch latency: 245ms
-Price: $45,123.45
+🔧 Initializing bundle fetching demo...
+🌐 RPC: https://api.devnet.solana.com
+👤 Wallet: 7THdgryC8PL7GD6nPjWGxikfZisXdTsgPaXBz1Lzmtxh
+Input feedHash: f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+Min latency: 245 ms
+Median latency: 267 ms
+Mean latency: 256.50 ms
+✅ Simulation succeeded, sending transaction...
 ```
 
 ### Surge Streaming
 ```
-BTC/USDT: $45,124.10
-Latency: 42ms | Slot: 301234567
+🚀 Starting Surge streaming demo...
+📡 Listening for price updates (will simulate after 10 seconds)...
+📊 Update #1 | Price: 6771234500000 | Latency: 42ms | Avg: 42.0ms
+📊 Update #2 | Price: 6771245600000 | Latency: 38ms | Avg: 40.0ms
+⏰ 10 seconds elapsed - running simulation with latest data...
+✅ Simulation succeeded!
 ```
 
 ### Benchmark Results

@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::{self, sysvar::slot_hashes::SlotHashes};
+use anchor_lang::solana_program;
 use switchboard_on_demand::{
-    BundleVerifierBuilder, QueueAccountData, get_ed25519_instruction
+    BundleVerifierBuilder, QueueAccountData, get_ed25519_instruction, SlotHashes
 };
 
-declare_id!("6z3ymNRkYMRvazLV8fhy2jhBCFro1942Ann4neXMcCcR");
+declare_id!("7THdgryC8PL7GD6nPjWGxikfZisXdTsgPaXBz1Lzmtxh");
 
 #[program]
 pub mod sb_on_demand_solana {
@@ -22,9 +22,13 @@ pub mod sb_on_demand_solana {
             .clock(&clock)
             .max_age(staleness.max(50))
             .verify(&ix.data)
-            .unwrap();
+            .map_err(|e| {
+                msg!("DEBUG: Bundle verification failed: {:?}", e);
+                anchor_lang::error::Error::from(anchor_lang::error::ErrorCode::ConstraintRaw)
+            })?;
         solana_program::log::sol_log_compute_units();
         let verified_slot = bundle.slot();
+        msg!("DEBUG: Bundle verified slot: {}", verified_slot);
         if state.last_verified_slot > verified_slot {
             msg!("Received prices are older than the last verified prices. Ignoring bundle.");
             return Ok(());

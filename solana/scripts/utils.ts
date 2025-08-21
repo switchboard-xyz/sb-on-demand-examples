@@ -22,6 +22,8 @@ import {
   VersionedTransaction,
   TransactionInstruction,
   TransactionSignature,
+  SYSVAR_SLOT_HASHES_PUBKEY,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 
@@ -36,12 +38,12 @@ export const DEMO_PATH = "target/deploy/sb_on_demand_solana-keypair.json";
  * Default transaction configuration for Switchboard interactions
  *
  * @constant {Object}
- * @property {Commitment} commitment - Use "processed" for faster confirmations
+ * @property {Commitment} commitment - Use "confirmed" for better slot hash stability with Ed25519
  * @property {boolean} skipPreflight - Skip simulation for better performance
  * @property {number} maxRetries - Disable automatic retries for more control
  */
 export const TX_CONFIG = {
-  commitment: "processed" as Commitment,
+  commitment: "confirmed" as Commitment,
   skipPreflight: true,
   maxRetries: 0,
 };
@@ -120,8 +122,8 @@ export async function myProgramIx(
     state: statePda,
     payer: payer,
     queue: new PublicKey(queue),
-    slothashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
-    instructions: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
+    slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
+    instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
     systemProgram: anchor.web3.SystemProgram.programId,
   }).instruction();
   return myIx;

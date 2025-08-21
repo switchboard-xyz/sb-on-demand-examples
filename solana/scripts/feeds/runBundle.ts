@@ -113,20 +113,33 @@ const argv = yargs(process.argv)
 
     // Simulate the transaction to verify it will succeed
     // This helps catch errors before spending transaction fees
-    const sim = await connection.simulateTransaction(tx, TX_CONFIG);
-    console.log(`Simulation result: ${JSON.stringify(sim.value, null, 2)}`);
+    try {
+      // const sim = await connection.simulateTransaction(tx, {
+      //   ...TX_CONFIG,
+      //   commitment: "confirmed" // Use confirmed for simulation too
+      // });
+      // console.log(`Simulation result: ${JSON.stringify(sim.value, null, 2)}`);
 
-    // In production, you would:
-    // 1. Check simulation results for errors
-    // 2. Send the transaction if simulation succeeds
-    // 3. Handle any transaction errors appropriately
-    // Example:
-    // if (sim.value.err) {
-    //   console.error('Simulation failed:', sim.value.err);
-    //   continue;
-    // }
-    // const signature = await connection.sendTransaction(tx, TX_CONFIG);
-    // await connection.confirmTransaction(signature);
+      // // Check simulation results for errors
+      // if (sim.value.err) {
+      //   console.error('❌ Simulation failed:', sim.value.err);
+      //   return;
+      // }
+
+      // If simulation succeeds, send the transaction
+      console.log('✅ Simulation succeeded, sending transaction...');
+      const signature = await connection.sendTransaction(tx, TX_CONFIG);
+      console.log(`📤 Transaction sent: ${signature}`);
+      
+      const confirmation = await connection.confirmTransaction(signature, TX_CONFIG.commitment);
+      if (confirmation.value.err) {
+        console.error('❌ Transaction failed:', confirmation.value.err);
+      } else {
+        console.log('✅ Transaction confirmed successfully!');
+      }
+    } catch (error) {
+      console.error('💥 Transaction error:', error);
+    }
 
     // Wait before next iteration to avoid rate limits
     // await sleep(3_000);

@@ -66,7 +66,7 @@ const argv = yargs(process.argv)
   const latencies: number[] = [];
 
   // Main execution loop - continuously fetches and processes oracle updates
-  // while (true) {
+  while (true) {
     // Measure bundle fetch latency for performance monitoring
     const start = Date.now();
 
@@ -114,17 +114,17 @@ const argv = yargs(process.argv)
     // Simulate the transaction to verify it will succeed
     // This helps catch errors before spending transaction fees
     try {
-      // const sim = await connection.simulateTransaction(tx, {
-      //   ...TX_CONFIG,
-      //   commitment: "confirmed" // Use confirmed for simulation too
-      // });
-      // console.log(`Simulation result: ${JSON.stringify(sim.value, null, 2)}`);
+      const sim = await connection.simulateTransaction(tx, {
+        ...TX_CONFIG,
+        commitment: "confirmed" // Use confirmed for simulation too
+      });
+      console.log(`Simulation result: ${JSON.stringify(sim.value, null, 2)}`);
 
-      // // Check simulation results for errors
-      // if (sim.value.err) {
-      //   console.error('❌ Simulation failed:', sim.value.err);
-      //   return;
-      // }
+      // Check simulation results for errors
+      if (sim.value.err) {
+        console.error('❌ Simulation failed:', sim.value.err);
+        return;
+      }
 
       // If simulation succeeds, send the transaction
       console.log('✅ Simulation succeeded, sending transaction...');
@@ -142,6 +142,6 @@ const argv = yargs(process.argv)
     }
 
     // Wait before next iteration to avoid rate limits
-    // await sleep(3_000);
-  // }
+    await sleep(3_000);
+  }
 })();

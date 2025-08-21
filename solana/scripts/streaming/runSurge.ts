@@ -4,7 +4,7 @@ import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics
 
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
-  
+
   const crossbar = CrossbarClient.default();
   const apiKey = process.env.SURGE_API_KEY!;
 
@@ -34,9 +34,11 @@ import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics
 
   // Listen for price updates
   surge.on('signedPriceUpdate', async (response: sb.SurgeUpdate) => {
-    const latency = Date.now() - response.data.source_ts_ms;
-    latencies.push(latency);
-    
+    latencies.push(Date.now() - response.data.source_ts_ms);
+    let sigVerifyIx = response.toIx();
+
+    const testIx = await myProgramIx(testProgram, queue.pubkey, keypair.publicKey);
+
     const stats = calculateStatistics(latencies);
     const formattedPrices = response.getFormattedPrices();
     const currentPrice = Object.values(formattedPrices)[0] || 'N/A';
@@ -70,7 +72,7 @@ import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics
       }
 
       console.log('✅ Simulation succeeded!');
-      
+
       // Display program logs that show feed values
       if (sim.value.logs) {
         console.log('\n📋 Program logs:');
@@ -80,7 +82,7 @@ import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics
           }
         });
       }
-      
+
       console.log(`\n📈 Final stats: ${stats.count} updates, ${stats.mean.toFixed(1)}ms avg latency`);
       process.exit(0);
     } catch (error) {

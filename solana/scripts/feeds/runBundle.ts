@@ -46,7 +46,9 @@ const argv = yargs(process.argv)
 
   // Create Crossbar client for fetching oracle bundles
   // Crossbar is Switchboard's high-performance oracle data delivery network
+  // For local development, create a dummy crossbar instance
   const crossbar = new CrossbarClient('https://crossbar.switchboardlabs.xyz');
+  // const crossbar = new CrossbarClient('http://localhost:8000'); // Local development (won't be used)
 
   // Load the default Switchboard queue for your network (mainnet/devnet)
   // The queue contains the list of authorized oracle signers
@@ -54,7 +56,7 @@ const argv = yargs(process.argv)
 
   // Fetch the gateway URL for this queue from Crossbar
   // This endpoint will provide signed oracle bundles
-  // const gateway = new sb.Gateway(program!, "http://localhost:8082");
+  // const gateway = new sb.Gateway(program!, "http://localhost:8082"); // Local development
   const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
 
 
@@ -80,7 +82,7 @@ const argv = yargs(process.argv)
     // 3. Creates the Ed25519 signature verification instruction
     const sbIx = await queue.fetchUpdateBundleIx(
       gateway, // Gateway URL for this oracle queue
-      crossbar as any, // Crossbar client instance
+      crossbar as any, // Crossbar client instance (for local development)
       [argv.feedHash] // Array of feed hashes to fetch (can request multiple)
     );
 

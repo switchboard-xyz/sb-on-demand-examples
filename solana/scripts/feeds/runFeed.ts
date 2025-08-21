@@ -62,11 +62,7 @@ function calculateStatistics(latencies: number[]) {
     });
 
     const sim = await connection.simulateTransaction(tx, TX_CONFIG);
-    const updateEvent = new sb.PullFeedValueEvent(
-      sb.AnchorUtils.loggedEvents(program!, sim.value.logs!)[0]
-    ).toRows();
-    console.log("Simulated Price Updates:\n", JSON.stringify(sim.value.logs));
-    console.log("Submitted Price Updates:\n", updateEvent);
+    console.log("Simulated Price Updates:\n", JSON.stringify(sim, null, 2));
     const latency = endTime - start;
     latencies.push(latency);
 

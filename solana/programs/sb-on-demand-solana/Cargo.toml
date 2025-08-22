@@ -21,5 +21,6 @@ anchor-debug = []
 
 [dependencies]
 anchor-lang = { version = "=0.31.1", features = ["init-if-needed"] }
+solana-program = { version = "2,<3" }
 faster-hex = "0.10.0"
 switchboard-on-demand = { version= "0.5.1", features = ["anchor", "devnet"] }

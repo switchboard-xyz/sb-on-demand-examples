@@ -582,3 +582,6 @@ export function calculateStatistics(latencies: number[]) {
         };
 }
 
+// Re-export error handling utilities for convenience
+export { SwitchboardErrorHandler, EnhancedSwitchboardError, SwitchboardErrorType } from './errorHandler';
+

@@ -18,7 +18,8 @@ import * as sb from "@switchboard-xyz/on-demand";
     // Uncomment the line below to see the full update object
     // console.log(`\nReceived unsigned price update for ${JSON.stringify(update)}`);
 
-    update.rawResponse.feed_values.forEach((feedValue: any) => {
+    const rawResponse = update.getRawResponse();
+    rawResponse.feed_values.forEach((feedValue: any) => {
       const symbol = feedValue.symbol;
       const latency = Date.now() - feedValue.seen_at_ts_ms;
       console.log(`\nReceived unsigned price update for ${symbol}:`);

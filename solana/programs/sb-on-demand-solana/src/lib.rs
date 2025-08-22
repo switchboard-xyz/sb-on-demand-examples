@@ -15,6 +15,7 @@ pub mod sb_on_demand_solana {
         let state = &mut ctx.accounts.state;
         let ix = get_ed25519_instruction(ctx.accounts.instructions.as_ref())?;
         let staleness = clock.slot - state.last_verified_slot;
+        msg!("DEBUG: Pre-verification compute units");
         solana_program::log::sol_log_compute_units();
         let bundle = BundleVerifierBuilder::new()
             .queue(&ctx.accounts.queue)
@@ -27,6 +28,7 @@ pub mod sb_on_demand_solana {
                 anchor_lang::error::Error::from(anchor_lang::error::ErrorCode::ConstraintRaw)
             })?;
         solana_program::log::sol_log_compute_units();
+        msg!("DEBUG: Post-verification compute units ^");
         let verified_slot = bundle.slot();
         msg!("DEBUG: Bundle verified slot: {}", verified_slot);
         if state.last_verified_slot > verified_slot {

@@ -30,7 +30,7 @@ import * as sb from "@switchboard-xyz/on-demand";
 
   // Connect and subscribe
   await surge.connectAndSubscribe([
-    { symbol: 'DOGE/USD' },
+    { symbol: 'BTC/USD' },
     { symbol: 'ETH/USD' },
   ]);
   console.log('🎧 Streaming prices...\n');

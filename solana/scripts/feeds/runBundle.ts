@@ -48,7 +48,6 @@ const argv = yargs(process.argv)
   // Crossbar is Switchboard's high-performance oracle data delivery network
   // For local development, create a dummy crossbar instance
   const crossbar = new CrossbarClient('https://crossbar.switchboardlabs.xyz');
-  // const crossbar = new CrossbarClient('http://localhost:8000'); // Local development (won't be used)
 
   // Load the default Switchboard queue for your network (mainnet/devnet)
   // The queue contains the list of authorized oracle signers

@@ -118,7 +118,7 @@ export async function myProgramIx(
     program.programId
   );
 
-  const myIx = await program.methods.test().accounts({
+  const myIx = await program.methods.update().accounts({
     state: statePda,
     payer: payer,
     queue: new PublicKey(queue),
@@ -582,6 +582,4 @@ export function calculateStatistics(latencies: number[]) {
         };
 }
 
-// Re-export error handling utilities for convenience
-export { SwitchboardErrorHandler, EnhancedSwitchboardError, SwitchboardErrorType } from './errorHandler';
 

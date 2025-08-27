@@ -89,7 +89,9 @@ import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
       console.log(`Running test with ${numFeeds} feed(s) and ${numSignatures} signature(s)...`);
       
       // Select subset of feeds for this test iteration
-      const selectedFeeds = feeds.slice(0, numFeeds);
+      const selectedFeeds = feeds.slice(0, numFeeds).map(pubkey => 
+        new sb.PullFeed(program, pubkey)
+      );
       
       // Measure oracle fetch time
       const timestart = Date.now();
@@ -99,6 +101,7 @@ import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
         const [pullIx, luts] = await sb.PullFeed.fetchUpdateManyIx(program, {
           feeds: selectedFeeds,
           numSignatures: numSignatures,
+          gateway: "https://api.switchboard.xyz",
         });
         const timeEnd = Date.now();
         console.log(`Time to fetch update: ${timeEnd - timestart}ms`);

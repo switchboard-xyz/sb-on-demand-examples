@@ -217,7 +217,7 @@ async function fetchAndCalculateSwitchboardTimeDifference(
   feedAccount: sb.PullFeed
 ) {
   const start = Date.now();
-  const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx();
+  const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({ gateway: "https://api.switchboard.xyz" });
   const endTime = Date.now();
   const timeDifference = endTime - start;
   return timeDifference;
@@ -278,7 +278,7 @@ async function fetchAndCalculateSupraTimeDifference(
   
   // Pre-heat caches for consistent measurements
   await feedAccount.preHeatLuts();
-  await feedAccount.fetchUpdateIx();
+  await feedAccount.fetchUpdateIx({ gateway: "https://api.switchboard.xyz" });
   
   let samples = 0;
   

@@ -5,20 +5,6 @@ use solana_program_memory::sol_memcpy;
 
 declare_id!("AKWdag9NuxYbomfhNpJFDB5zooYumBYKVtZrcJ4w8R32");
 
-#[inline(always)]
-pub fn remaining_cus() -> u64 {
-    #[cfg(target_os = "solana")]
-    unsafe {
-        extern "C" {
-            #[link_name = "sol_remaining_compute_units"]
-            fn sol_remaining_compute_units() -> u64;
-        }
-        sol_remaining_compute_units()
-    }
-    #[cfg(not(target_os = "solana"))]
-    { u64::MAX } // stub for off-chain/tests
-}
-
 #[program]
 pub mod sb_on_demand_solana {
     use super::*;

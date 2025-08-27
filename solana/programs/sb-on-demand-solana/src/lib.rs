@@ -116,13 +116,10 @@ fn deserialize_instruction_0(data: &[u8]) -> &[u8] {
     const HEADER_SIZE: usize = 44;
     const U16_SIZE: usize = 2;
     const START: usize = HEADER_SIZE + U16_SIZE;
-    const DEFAULT_DATA_LEN: usize = 207;
-    const DEFAULT_END: usize = START + DEFAULT_DATA_LEN;
 
-    // let data_len = unsafe {
-        // std::ptr::read_unaligned(data.as_ptr().add(HEADER_SIZE) as *const u16)
-    // }.to_le() as usize;
-    // solana_program::msg!("DEBUG: start offset {}", data_len);
+    let data_len = unsafe {
+        std::ptr::read_unaligned(data.as_ptr().add(HEADER_SIZE) as *const u16)
+    }.to_le() as usize;
 
-    &data[START..DEFAULT_END]
+    &data[START..START + data_len]
 }

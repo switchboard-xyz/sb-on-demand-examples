@@ -40,7 +40,7 @@ pub mod sb_on_demand_solana {
         // Access state directly
         solana_program::log::sol_log_compute_units();
         // Extract the oracle precompile signature instruction
-        let ix_data = &instructions.data.borrow();
+        let ix_data = &instructions.as_ref().data.borrow();
         let bundle = Instructions::parse_instruction_0_data(&ix_data);
         sol_memcpy(&mut state.oracle_report, bundle, bundle.len());
         solana_program::log::sol_log_compute_units();
@@ -80,9 +80,7 @@ pub struct UpdateCtx<'info> {
         payer = payer,
     )]
     pub state: Account<'info, ProgramState>,
-    /// CHECK: Instructions sysvar
-    #[account(address = solana_program::sysvar::instructions::ID)]
-    pub instructions: UncheckedAccount<'info>,
+    pub instructions: Sysvar<'info, Instructions>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,

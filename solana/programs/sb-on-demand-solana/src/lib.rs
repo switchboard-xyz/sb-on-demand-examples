@@ -31,8 +31,7 @@ pub mod sb_on_demand_solana {
         msg!("DEBUG: Post-verification compute units ^");
 
         for feed_info in bundle.feeds() {
-            msg!("Feed ID: {}", feed_info.hex_id());
-            msg!("Feed value: {}", feed_info.value());
+            msg!("Feed ID: {}, value: {}", feed_info.hex_id(), feed_info.value());
         }
         state.last_verified_slot = bundle.slot();
         state.report_len = ix.data.len() as u64;
@@ -52,11 +51,7 @@ impl ProgramState {
 }
 impl Default for ProgramState {
     fn default() -> Self {
-        Self {
-            last_verified_slot: 0,
-            report_len: 0,
-            oracle_report: [0u8; 256],
-        }
+        unsafe { std::mem::zeroed() }
     }
 }
 

@@ -21,6 +21,7 @@ anchor-debug = []
 
 [dependencies]
 anchor-lang = { version = "=0.31.1", features = ["init-if-needed"] }
-solana-program = { version = "2,<3" }
 faster-hex = "0.10.0"
-switchboard-on-demand = { version= "0.5.1", features = ["anchor", "devnet"] }
+solana-program-ed25519-dalek-bump = "1.16.3"
+solana-program-memory = "3.0.0"
+switchboard-on-demand = { version = "0.5.2", features = ["anchor", "devnet"] }

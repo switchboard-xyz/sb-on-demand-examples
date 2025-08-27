@@ -1,53 +1,63 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program;
-use switchboard_on_demand::{
-    BundleVerifierBuilder, QueueAccountData, get_ed25519_instruction, SlotHashes
-};
+use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes};
+use anchor_lang::solana_program::sysvar::instructions::load_instruction_at_checked;
 
-declare_id!("6z3ymNRkYMRvazLV8fhy2jhBCFro1942Ann4neXMcCcR");
+declare_id!("AKWdag9NuxYbomfhNpJFDB5zooYumBYKVtZrcJ4w8R32");
+
+#[inline(always)]
+fn sol_memcpy(dest: &mut [u8], src: &[u8], len: usize) {
+    unsafe { solana_program_memory::sol_memcpy(dest, src, len); }
+}
 
 #[program]
 pub mod sb_on_demand_solana {
     use super::*;
 
     pub fn test<'a>(ctx: Context<Ctx>) -> Result<()> {
-        let clock = Clock::get()?;
-        let state = &mut ctx.accounts.state;
-        let ix = get_ed25519_instruction(ctx.accounts.instructions.as_ref())?;
-        let staleness = clock.slot - state.last_verified_slot;
-        msg!("DEBUG: Pre-verification compute units");
+        let Ctx { state, queue, slothashes, instructions, .. } = ctx.accounts;
+        let ix = load_instruction_at_checked(0, instructions.as_ref())?;
+        let staleness = Clock::get()?.slot - state.last_verified_slot;
+
+        msg!("DEBUG: Pre-verification compute units v");
         solana_program::log::sol_log_compute_units();
         let bundle = BundleVerifierBuilder::new()
-            .queue(&ctx.accounts.queue)
-            .slothash_sysvar(&ctx.accounts.slothashes)
-            .clock(&clock)
+            .queue(&queue)
+            .slothash_sysvar(&slothashes)
             .max_age(staleness.max(50))
             .verify(&ix.data)
-            .map_err(|e| {
-                msg!("DEBUG: Bundle verification failed: {:?}", e);
-                anchor_lang::error::Error::from(anchor_lang::error::ErrorCode::ConstraintRaw)
-            })?;
+            .unwrap();
         solana_program::log::sol_log_compute_units();
         msg!("DEBUG: Post-verification compute units ^");
-        let verified_slot = bundle.slot();
-        msg!("DEBUG: Bundle verified slot: {}", verified_slot);
-        if state.last_verified_slot > verified_slot {
-            msg!("Received prices are older than the last verified prices. Ignoring bundle.");
-            return Ok(());
-        }
-        state.last_verified_slot = verified_slot;
+
         for feed_info in bundle.feeds() {
-            msg!("Feed hash: {}", feed_info.hex_id());
+            msg!("Feed ID: {}", feed_info.hex_id());
             msg!("Feed value: {}", feed_info.value());
         }
+        state.last_verified_slot = bundle.slot();
+        state.report_len = ix.data.len() as u64;
+        sol_memcpy(&mut state.oracle_report, &ix.data, ix.data.len());
         Ok(())
     }
 }
 
 #[account]
-#[derive(Default)]
 pub struct ProgramState {
     pub last_verified_slot: u64,
+    pub report_len: u64,
+    pub oracle_report: [u8; 256],
+}
+impl ProgramState {
+    pub const LEN: usize = 8 + 8 + 8 + 256;
+}
+impl Default for ProgramState {
+    fn default() -> Self {
+        Self {
+            last_verified_slot: 0,
+            report_len: 0,
+            oracle_report: [0u8; 256],
+        }
+    }
 }
 
 #[derive(Accounts)]
@@ -55,7 +65,7 @@ pub struct Ctx<'info> {
     #[account(
         init_if_needed,
         payer = payer,
-        space = 16,
+        space = ProgramState::LEN,
         seeds = [b"state"],
         bump
     )]

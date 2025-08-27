@@ -34,15 +34,13 @@ import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics
 
   // Listen for price updates
   surge.on('signedPriceUpdate', async (response: sb.SurgeUpdate) => {
-    latencies.push(Date.now() - response.data.source_ts_ms);
-    let sigVerifyIx = response.toIx();
-
-    const testIx = await myProgramIx(testProgram, queue.pubkey, keypair.publicKey);
+    const currentLatency = Date.now() - response.data.source_ts_ms;
+    latencies.push(currentLatency);
 
     const stats = calculateStatistics(latencies);
     const formattedPrices = response.getFormattedPrices();
     const currentPrice = Object.values(formattedPrices)[0] || 'N/A';
-    console.log(`📊 Update #${stats.count} | Price: ${currentPrice} | Latency: ${latency}ms | Avg: ${stats.mean.toFixed(1)}ms`);
+    console.log(`📊 Update #${stats.count} | Price: ${currentPrice} | Latency: ${currentLatency}ms | Avg: ${stats.mean.toFixed(1)}ms`);
 
     // Only run simulation once after 10 seconds
     if (!hasRunSimulation) return;

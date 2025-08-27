@@ -26,6 +26,7 @@
     "stream": "ts-node scripts/streaming/stream.ts",
     "stream:surge": "ts-node scripts/streaming/runSurge.ts",
     "stream:crossbar": "ts-node scripts/streaming/crossbarStream.ts",
+    "test:pullfeed": "ts-node scripts/testPullFeedTransaction.ts",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "build": "anchor build",

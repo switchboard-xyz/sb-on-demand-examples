@@ -28,6 +28,7 @@ solana-program = "2.2"
 switchboard-on-demand = { version = "0.5.3", features = ["anchor", "devnet"] }
 base64ct = "=1.5.0"
 solana-program-stubs = { version = "0.1.1", features = ["sol_app_stubs", "loader_stubs"] }
+bytemuck = { version = "1.23.2", features = ["min_const_generics"] }
 
 [profile.release]
 opt-level = 3

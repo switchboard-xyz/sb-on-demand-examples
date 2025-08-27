@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::instructions::load_instruction_at_checked;
-use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes};
+use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions};
 use solana_program_memory::sol_memcpy;
 
 declare_id!("AKWdag9NuxYbomfhNpJFDB5zooYumBYKVtZrcJ4w8R32");
@@ -11,6 +11,7 @@ pub mod sb_on_demand_solana {
 
     pub fn verify<'a>(ctx: Context<VerifyCtx>) -> Result<()> {
         let VerifyCtx { state, queue, slothashes, .. } = ctx.accounts;
+        // Access state directly
         let staleness = Clock::get()?.slot - state.last_verified_slot;
 
         // Use saved report from state
@@ -36,11 +37,12 @@ pub mod sb_on_demand_solana {
 
     pub fn switchboard_oracle_update<'a>(ctx: Context<UpdateCtx>) -> Result<()> {
         let UpdateCtx { state, instructions, .. } = ctx.accounts;
+        // Access state directly
         solana_program::log::sol_log_compute_units();
         // Extract the oracle precompile signature instruction
         let ix_data = &instructions.data.borrow();
-        let report = deserialize_instruction_0(ix_data);
-        sol_memcpy(&mut state.oracle_report, report, report.len());
+        let bundle = Instructions::parse_instruction_0_data(&ix_data);
+        sol_memcpy(&mut state.oracle_report, bundle, bundle.len());
         solana_program::log::sol_log_compute_units();
         Ok(())
     }
@@ -54,11 +56,6 @@ pub struct ProgramState {
 }
 impl ProgramState {
     pub const LEN: usize = 8 + 8 + 8 + 256;
-}
-impl Default for ProgramState {
-    fn default() -> Self {
-        unsafe { std::mem::zeroed() }
-    }
 }
 
 #[derive(Accounts)]
@@ -89,36 +86,4 @@ pub struct UpdateCtx<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
-}
-
-
-#[inline(always)]
-fn deserialize_instruction(index: usize, data: &[u8]) -> &[u8] {
-    use solana_program_ed25519_dalek_bump::serialize_utils::read_u16;
-    let mut current = 0;
-    let num_instructions = read_u16(&mut current, data).unwrap();
-    assert!(index < num_instructions as usize);
-
-    // index into the instruction byte-offset table.
-    current += index * 2;
-    let start = read_u16(&mut current, data).unwrap();
-
-    current = start as usize;
-    current += 34;
-    let data_len = read_u16(&mut current, data).unwrap();
-    // return slice of the data
-    &data[current..current + data_len as usize]
-}
-
-#[inline(always)]
-fn deserialize_instruction_0(data: &[u8]) -> &[u8] {
-    const HEADER_SIZE: usize = 44;
-    const U16_SIZE: usize = 2;
-    const START: usize = HEADER_SIZE + U16_SIZE;
-
-    let data_len = unsafe {
-        std::ptr::read_unaligned(data.as_ptr().add(HEADER_SIZE) as *const u16)
-    }.to_le() as usize;
-
-    unsafe { std::slice::from_raw_parts(data.as_ptr().add(START), data_len) }
 }

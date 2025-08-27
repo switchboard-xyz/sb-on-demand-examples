@@ -25,6 +25,18 @@ faster-hex = "0.10.0"
 solana-program-ed25519-dalek-bump = "1.16.3"
 solana-program-memory = "2.2"
 solana-program = "2.2"
-switchboard-on-demand = { version = "0.5.2", features = ["anchor", "devnet"] }
+switchboard-on-demand = { version = "0.5.3", features = ["anchor", "devnet"] }
 base64ct = "=1.5.0"
 solana-program-stubs = { version = "0.1.1", features = ["sol_app_stubs", "loader_stubs"] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false
+
+[profile.release.build-override]
+opt-level = 3
+codegen-units = 1

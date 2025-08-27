@@ -118,7 +118,7 @@ export async function myProgramIx(
     program.programId
   );
 
-  const myIx = await program.methods.update().accounts({
+  const myIx = await program.methods.switchboardOracleUpdate().accounts({
     state: statePda,
     payer: payer,
     queue: new PublicKey(queue),

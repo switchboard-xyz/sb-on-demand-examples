@@ -34,7 +34,7 @@ pub mod sb_on_demand_solana {
         Ok(())
     }
 
-    pub fn update<'a>(ctx: Context<UpdateCtx>) -> Result<()> {
+    pub fn switchboard_oracle_update<'a>(ctx: Context<UpdateCtx>) -> Result<()> {
         let UpdateCtx { state, instructions, .. } = ctx.accounts;
         solana_program::log::sol_log_compute_units();
         // Extract the oracle precompile signature instruction

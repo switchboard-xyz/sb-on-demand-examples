@@ -39,8 +39,8 @@ pub mod sb_on_demand_solana {
         solana_program::log::sol_log_compute_units();
         // Extract the oracle precompile signature instruction
         let ix_data = &instructions.data.borrow();
-        let ix_data = deserialize_instruction_0(ix_data);
-        sol_memcpy(&mut state.oracle_report, ix_data, ix_data.len());
+        let report = deserialize_instruction_0(ix_data);
+        sol_memcpy(&mut state.oracle_report, report, report.len());
         solana_program::log::sol_log_compute_units();
         Ok(())
     }
@@ -103,7 +103,6 @@ fn deserialize_instruction(index: usize, data: &[u8]) -> &[u8] {
     current += index * 2;
     let start = read_u16(&mut current, data).unwrap();
 
-    solana_program::msg!("DEBUG: start offset {}", start);
     current = start as usize;
     current += 34;
     let data_len = read_u16(&mut current, data).unwrap();
@@ -121,5 +120,5 @@ fn deserialize_instruction_0(data: &[u8]) -> &[u8] {
         std::ptr::read_unaligned(data.as_ptr().add(HEADER_SIZE) as *const u16)
     }.to_le() as usize;
 
-    &data[START..START + data_len]
+    unsafe { std::slice::from_raw_parts(data.as_ptr().add(START), data_len) }
 }

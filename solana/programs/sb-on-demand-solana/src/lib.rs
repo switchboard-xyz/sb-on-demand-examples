@@ -1,12 +1,22 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::instructions::load_instruction_at_checked;
 use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes};
+use solana_program_memory::sol_memcpy;
 
 declare_id!("AKWdag9NuxYbomfhNpJFDB5zooYumBYKVtZrcJ4w8R32");
 
 #[inline(always)]
-fn sol_memcpy(dest: &mut [u8], src: &[u8], len: usize) {
-    unsafe { solana_program_memory::sol_memcpy(dest, src, len); }
+pub fn remaining_cus() -> u64 {
+    #[cfg(target_os = "solana")]
+    unsafe {
+        extern "C" {
+            #[link_name = "sol_remaining_compute_units"]
+            fn sol_remaining_compute_units() -> u64;
+        }
+        sol_remaining_compute_units()
+    }
+    #[cfg(not(target_os = "solana"))]
+    { u64::MAX } // stub for off-chain/tests
 }
 
 #[program]

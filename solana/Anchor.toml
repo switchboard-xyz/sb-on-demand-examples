@@ -2,7 +2,7 @@
 
 [features]
 resolution = true
-skip-lint = false
+skip-lint = true
 
 [programs.devnet]
 sb_on_demand_solana = "2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5"

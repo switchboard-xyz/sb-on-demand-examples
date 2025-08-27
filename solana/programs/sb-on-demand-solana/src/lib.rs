@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program;
-use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes};
 use anchor_lang::solana_program::sysvar::instructions::load_instruction_at_checked;
+use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes};
 
 declare_id!("AKWdag9NuxYbomfhNpJFDB5zooYumBYKVtZrcJ4w8R32");
 
@@ -16,6 +15,7 @@ pub mod sb_on_demand_solana {
 
     pub fn test<'a>(ctx: Context<Ctx>) -> Result<()> {
         let Ctx { state, queue, slothashes, instructions, .. } = ctx.accounts;
+        // Extract the oracle precompile signature instruction
         let ix = load_instruction_at_checked(0, instructions.as_ref())?;
         let staleness = Clock::get()?.slot - state.last_verified_slot;
 

@@ -24,10 +24,8 @@ anchor-lang = { version = "=0.31.1", features = ["init-if-needed"] }
 faster-hex = "0.10.0"
 solana-program-ed25519-dalek-bump = "1.16.3"
 solana-program-memory = "2.2"
-solana-program = "2.2"
-switchboard-on-demand = { version = "0.5.3", features = ["anchor", "devnet"] }
+switchboard-on-demand = { version = "0.5.4", features = ["anchor", "devnet"] }
 base64ct = "=1.5.0"
-solana-program-stubs = { version = "0.1.1", features = ["sol_app_stubs", "loader_stubs"] }
 bytemuck = { version = "1.23.2", features = ["min_const_generics"] }
 
 [profile.release]

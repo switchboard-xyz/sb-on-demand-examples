@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::sysvar::instructions::load_instruction_at_checked;
 use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions};
 use solana_program_memory::sol_memcpy;
 
@@ -9,7 +8,7 @@ declare_id!("AKWdag9NuxYbomfhNpJFDB5zooYumBYKVtZrcJ4w8R32");
 pub mod sb_on_demand_solana {
     use super::*;
 
-    pub fn verify<'a>(ctx: Context<VerifyCtx>) -> Result<()> {
+    pub fn verify(ctx: Context<VerifyCtx>) -> Result<()> {
         let VerifyCtx { state, queue, slothashes, .. } = ctx.accounts;
         // Access state directly
         let staleness = Clock::get()?.slot - state.last_verified_slot;
@@ -17,16 +16,14 @@ pub mod sb_on_demand_solana {
         // Use saved report from state
         let report_data = &state.oracle_report[..state.report_len as usize];
 
-        msg!("DEBUG: Pre-verification compute units v");
-        solana_program::log::sol_log_compute_units();
+        anchor_lang::solana_program::log::sol_log_compute_units();
         let bundle = BundleVerifierBuilder::new()
             .queue(&queue)
             .slothash_sysvar(&slothashes)
             .max_age(staleness.max(50))
             .verify(report_data)
             .unwrap();
-        solana_program::log::sol_log_compute_units();
-        msg!("DEBUG: Post-verification compute units ^");
+        anchor_lang::solana_program::log::sol_log_compute_units();
 
         for feed_info in bundle.feeds() {
             msg!("Feed ID: {}, value: {}", feed_info.hex_id(), feed_info.value());
@@ -35,15 +32,14 @@ pub mod sb_on_demand_solana {
         Ok(())
     }
 
-    pub fn switchboard_oracle_update<'a>(ctx: Context<UpdateCtx>) -> Result<()> {
-        let UpdateCtx { state, instructions, .. } = ctx.accounts;
-        // Access state directly
-        solana_program::log::sol_log_compute_units();
-        // Extract the oracle precompile signature instruction
-        let ix_data = &instructions.as_ref().data.borrow();
-        let bundle = Instructions::parse_instruction_0_data(&ix_data);
-        sol_memcpy(&mut state.oracle_report, bundle, bundle.len());
-        solana_program::log::sol_log_compute_units();
+    pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
+        anchor_lang::solana_program::log::sol_log_compute_units();
+
+        let oracle_report = Instructions::parse_instruction_0_data(&ctx.accounts.instructions);
+        ctx.accounts.state.report_len = oracle_report.len() as u64;
+        sol_memcpy(&mut ctx.accounts.state.oracle_report, &oracle_report, oracle_report.len());
+
+        anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }
 }
@@ -80,7 +76,9 @@ pub struct UpdateCtx<'info> {
         payer = payer,
     )]
     pub state: Account<'info, ProgramState>,
-    pub instructions: Sysvar<'info, Instructions>,
+    /// CHECK: solana_program::sysvar::instructions::ID
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::ID)]
+    pub instructions: AccountInfo<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,

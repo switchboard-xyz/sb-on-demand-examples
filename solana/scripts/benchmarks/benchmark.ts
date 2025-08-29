@@ -1,29 +1,29 @@
 /**
  * @fileoverview Oracle Latency Benchmark Tool
- * 
+ *
  * This script compares the latency of Switchboard On-Demand oracles against
  * other major oracle providers (Pyth, Redstone, Supra). It measures the time
  * from when price data is published to when it's available for use.
- * 
+ *
  * The benchmark helps demonstrate Switchboard's performance advantages:
  * - Sub-second latency for price updates
  * - Direct oracle-to-consumer model
  * - No intermediate crank or relay requirements
- * 
+ *
  * Results show how many times slower other oracles are compared to Switchboard.
- * 
+ *
  * @example
  * ```bash
  * # Run the latency benchmark
  * bun run scripts/benchmark.ts
- * 
+ *
  * # Output shows comparative latencies:
  * # Switchboard Latency: 245 ms
  * # Pyth Average: 4.52x Switchboard
  * # Redstone Average: 3.21x Switchboard
  * # Supra Average: 2.87x Switchboard
  * ```
- * 
+ *
  * @module benchmark
  */
 
@@ -38,7 +38,7 @@ const OracleProofABI = require(supraAbiFilePath);
 
 /**
  * Oracle API endpoints for comparison
- * 
+ *
  * These URLs fetch the latest price data from each oracle provider:
  * - Pyth: BTC/USD price feed via Hermes API
  * - Redstone: Primary production data feed
@@ -50,7 +50,7 @@ const redstoneUrl =
 
 /**
  * Calculates the arithmetic mean of an array of numbers
- * 
+ *
  * @param {number[]} numbers - Array of numeric values
  * @returns {number} The average value
  * @throws {Error} If the array is empty
@@ -65,7 +65,7 @@ function getAverage(numbers: number[]): number {
 
 /**
  * Client for interacting with Supra oracle network
- * 
+ *
  * Supra uses a proof-based system where price data is fetched
  * along with cryptographic proofs that must be verified on-chain.
  * This client handles the proof fetching and parsing.
@@ -73,7 +73,7 @@ function getAverage(numbers: number[]): number {
 class SupraClient {
   client: any;
   web3: Web3;
-  
+
   /**
    * @param {string} baseURL - Supra RPC endpoint URL
    */
@@ -88,7 +88,7 @@ class SupraClient {
 
   /**
    * Fetches price proof from Supra oracle
-   * 
+   *
    * @param {Object} request - Request containing pair indexes and chain type
    * @returns {Promise<Object>} Parsed price data with timestamp
    */
@@ -103,10 +103,10 @@ class SupraClient {
 
   /**
    * Parses Supra proof data to extract price information
-   * 
+   *
    * The proof contains committee-signed price data that needs
    * to be decoded from the ABI-encoded format.
-   * 
+   *
    * @param {Object} response - Raw response containing proof bytes
    * @returns {Promise<Object>} Parsed data with price and timestamp
    */
@@ -163,11 +163,11 @@ class SupraClient {
 
 /**
  * Measures Pyth oracle latency relative to Switchboard
- * 
+ *
  * Fetches the latest Pyth price and calculates how old the data is
  * compared to Switchboard's latency. Pyth publish times are in seconds,
  * so we multiply by 1000 to convert to milliseconds.
- * 
+ *
  * @param {number} sbLatency - Switchboard's latency in milliseconds
  * @returns {Promise<number>} Multiple of how much slower Pyth is
  */
@@ -185,10 +185,10 @@ async function fetchAndCalculatePythTimeDifference(
 
 /**
  * Measures Redstone oracle latency relative to Switchboard
- * 
+ *
  * Fetches the latest Redstone price and calculates data staleness.
  * Redstone provides timestamps in milliseconds directly.
- * 
+ *
  * @param {number} sbLatency - Switchboard's latency in milliseconds
  * @returns {Promise<number>} Multiple of how much slower Redstone is
  */
@@ -206,10 +206,10 @@ async function fetchAndCalculateRedstoneTimeDifference(
 
 /**
  * Measures Switchboard oracle latency
- * 
+ *
  * Times how long it takes to fetch fresh price data from Switchboard
  * oracles. This includes network round-trip and signature collection.
- * 
+ *
  * @param {sb.PullFeed} feedAccount - Switchboard feed instance
  * @returns {Promise<number>} Latency in milliseconds
  */
@@ -217,7 +217,9 @@ async function fetchAndCalculateSwitchboardTimeDifference(
   feedAccount: sb.PullFeed
 ) {
   const start = Date.now();
-  const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({ gateway: "https://api.switchboard.xyz" });
+  const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
+    gateway: "https://api.switchboard.xyz",
+  });
   const endTime = Date.now();
   const timeDifference = endTime - start;
   return timeDifference;
@@ -225,10 +227,10 @@ async function fetchAndCalculateSwitchboardTimeDifference(
 
 /**
  * Measures Supra oracle latency relative to Switchboard
- * 
+ *
  * Fetches price proof from Supra and calculates data age.
  * Pair index 0 corresponds to BTC/USD on Supra.
- * 
+ *
  * @param {number} sbLatency - Switchboard's latency in milliseconds
  * @returns {Promise<number>} Multiple of how much slower Supra is
  */
@@ -253,62 +255,62 @@ async function fetchAndCalculateSupraTimeDifference(
 
 /**
  * Main benchmark execution
- * 
+ *
  * Continuously measures and compares oracle latencies:
  * 1. Fetches fresh data from Switchboard (baseline)
  * 2. Fetches data from other oracles and measures staleness
  * 3. Calculates relative performance (how many times slower)
  * 4. Maintains running averages for accurate comparison
- * 
+ *
  * The benchmark demonstrates Switchboard's superior latency
  * due to its direct oracle-to-consumer architecture.
  */
 (async () => {
   // Example BTC/USD feed on Switchboard
   const feed = "7QJ6e57t3yM8HYVg6bAnJiCiZ3wQQ5CSVsa6GA16nJuK";
-  
+
   // Load Solana environment
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const feedAccount = new sb.PullFeed(program!, feed);
-  
+
   // Track latency multiples for running averages
   const pythLatencies: number[] = [];
   const rsLatencies: number[] = [];
   const supraLatencies: number[] = [];
-  
+
   // Pre-heat caches for consistent measurements
   await feedAccount.preHeatLuts();
   await feedAccount.fetchUpdateIx({ gateway: "https://api.switchboard.xyz" });
-  
+
   let samples = 0;
-  
+
   // Main benchmark loop
   while (true) {
     // Measure Switchboard baseline latency
     const sbLatency = await fetchAndCalculateSwitchboardTimeDifference(
       feedAccount
     );
-    
+
     // Measure other oracles relative to Switchboard
     const pythMultiple = await fetchAndCalculatePythTimeDifference(sbLatency);
     pythLatencies.push(pythMultiple);
     const pythAverage = getAverage(pythLatencies);
-    
+
     const rsMultiple = await fetchAndCalculateRedstoneTimeDifference(sbLatency);
     rsLatencies.push(rsMultiple);
     const rsAverage = getAverage(rsLatencies);
-    
+
     const supraMultiple = await fetchAndCalculateSupraTimeDifference(sbLatency);
     supraLatencies.push(supraMultiple);
     const supraAverage = getAverage(supraLatencies);
-    
+
     // Display results
     console.log(`${"=".repeat(10)} Samples (${++samples}) ${"=".repeat(10)}`);
     console.log(`Switchboard Latency: ${sbLatency} ms`);
     console.log(`Pyth Average: ${pythAverage.toFixed(2)}x Switchboard`);
     console.log(`Redstone Average: ${rsAverage.toFixed(2)}x Switchboard`);
     console.log(`Supra Average: ${supraAverage.toFixed(2)}x Switchboard`);
-    
+
     // Continuous loop - uncomment sleep for periodic sampling
     // await sb.sleep(3000);
   }

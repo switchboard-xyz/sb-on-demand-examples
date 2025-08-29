@@ -6,7 +6,7 @@ import {
   PublicKey,
   VersionedTransaction,
   TransactionSignature,
-  Commitment
+  Commitment,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import { sha256 } from "js-sha256";
@@ -93,9 +93,9 @@ export async function ensureUserSecretProfileExists(sbSecrets, keypair) {
     // Hash the payload before signing for added security
     const payloadHash = sha256.create().update(request.toString()).hex();
     const signature = nacl.sign.detached(
-        Buffer.from(payloadHash),
-        keypair.secretKey
-      );
+      Buffer.from(payloadHash),
+      keypair.secretKey
+    );
 
     const user = await sbSecrets.createOrUpdateUser(
       request,
@@ -111,7 +111,7 @@ export async function ensureSecretExists(
   keypair,
   secretName,
   secretValue,
-  options = { maxRetries: 5, retryDelayMs: 1000 } 
+  options = { maxRetries: 5, retryDelayMs: 1000 }
 ) {
   const { maxRetries, retryDelayMs } = options;
 
@@ -157,7 +157,9 @@ export async function ensureSecretExists(
     for (let attempt = 1; attempt <= attempts; attempt++) {
       const result = await fn();
       if (result) {
-        console.log(`Secret '${secretName}' successfully created and verified.`);
+        console.log(
+          `Secret '${secretName}' successfully created and verified.`
+        );
         console.log("Verified Secret:", result); // Log the verified secret
         return result;
       }
@@ -202,12 +204,20 @@ export async function whitelistFeedHash(
 
   // Step 1: Check if the feed hash is already whitelisted
   if (await isFeedHashInWhitelist()) {
-    console.log(`Feed hash '${feedHash.toString("hex")}' is already whitelisted to Secret: '${secretName}.`);
+    console.log(
+      `Feed hash '${feedHash.toString(
+        "hex"
+      )}' is already whitelisted to Secret: '${secretName}.`
+    );
     return { success: true, message: "Already whitelisted" };
   }
 
   // Step 2: Add the feed hash to the whitelist
-  console.log(`Feed hash '${feedHash.toString("hex")}' not whitelisted to Secret: '${secretName}. Adding now...`);
+  console.log(
+    `Feed hash '${feedHash.toString(
+      "hex"
+    )}' not whitelisted to Secret: '${secretName}. Adding now...`
+  );
   const request = await sbSecrets.createAddMrEnclaveRequest(
     keypair.publicKey.toBase58(),
     "ed25519",
@@ -229,7 +239,11 @@ export async function whitelistFeedHash(
   // Step 3: Retry to confirm the feed hash was whitelisted
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     if (await isFeedHashInWhitelist()) {
-      console.log(`Feed hash '${feedHash.toString("hex")}' successfully whitelisted to Secret: '${secretName}.`);
+      console.log(
+        `Feed hash '${feedHash.toString(
+          "hex"
+        )}' successfully whitelisted to Secret: '${secretName}.`
+      );
       return { success: true, message: "Whitelisted successfully" };
     }
 
@@ -243,6 +257,8 @@ export async function whitelistFeedHash(
 
   // If we exhaust all retries, throw an error
   throw new Error(
-    `Failed to confirm whitelisting of feed hash '${feedHash.toString("hex")}' to secret: '${secretName}, after ${maxRetries} attempts.`
+    `Failed to confirm whitelisting of feed hash '${feedHash.toString(
+      "hex"
+    )}' to secret: '${secretName}, after ${maxRetries} attempts.`
   );
 }

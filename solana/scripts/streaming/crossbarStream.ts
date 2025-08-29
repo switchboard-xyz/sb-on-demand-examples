@@ -5,13 +5,13 @@ import * as sb from "@switchboard-xyz/on-demand";
 
   const surge = new sb.Surge({
     apiKey: apiKey,
-    crossbarUrl: 'https://crossbar.switchboardlabs.xyz',
+    crossbarUrl: "https://crossbar.switchboardlabs.xyz",
     crossbarMode: true,
     verbose: true,
   });
 
   // Listen for unsigned price updates
-  surge.on('unsignedPriceUpdate', (update: sb.UnsignedPriceUpdate) => {
+  surge.on("unsignedPriceUpdate", (update: sb.UnsignedPriceUpdate) => {
     const symbols = update.getSymbols();
     const sources = update.getSources();
     const formattedPrices = update.getFormattedPrices();
@@ -24,14 +24,16 @@ import * as sb from "@switchboard-xyz/on-demand";
       const latency = Date.now() - feedValue.seen_at_ts_ms;
       console.log(`\nReceived unsigned price update for ${symbol}:`);
       const latencyInfo = ` | Latency: ${latency}ms`;
-      console.log(`${symbol} (${sources[0]}): ${formattedPrices[symbol]}${latencyInfo}`);
+      console.log(
+        `${symbol} (${sources[0]}): ${formattedPrices[symbol]}${latencyInfo}`
+      );
     });
   });
 
   // Connect and subscribe
   await surge.connectAndSubscribe([
-    { symbol: 'BTC/USD' },
-    { symbol: 'ETH/USD' },
+    { symbol: "BTC/USD" },
+    { symbol: "ETH/USD" },
   ]);
-  console.log('🎧 Streaming prices...\n');
-})()
+  console.log("🎧 Streaming prices...\n");
+})();

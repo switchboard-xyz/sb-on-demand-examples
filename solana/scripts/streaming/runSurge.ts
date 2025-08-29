@@ -1,6 +1,12 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { CrossbarClient } from "@switchboard-xyz/common";
-import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics } from "../utils";
+import {
+  TX_CONFIG,
+  myAnchorProgram,
+  myProgramIx,
+  DEMO_PATH,
+  calculateStatistics,
+} from "../utils";
 
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
@@ -22,32 +28,42 @@ import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics
     verbose: false,
   });
 
-  await surge.connectAndSubscribe([
-    { symbol: 'BTC/USD' },
-  ]);
+  await surge.connectAndSubscribe([{ symbol: "BTC/USD" }]);
 
   // Run simulation after 10 seconds
   setTimeout(async () => {
     hasRunSimulation = true;
-    console.log("\n⏰ 10 seconds elapsed - running simulation with latest data...");
+    console.log(
+      "\n⏰ 10 seconds elapsed - running simulation with latest data..."
+    );
   }, 10_000);
 
   // Listen for price updates
-  surge.on('signedPriceUpdate', async (response: sb.SurgeUpdate) => {
+  surge.on("signedPriceUpdate", async (response: sb.SurgeUpdate) => {
     const currentLatency = Date.now() - response.data.source_ts_ms;
     latencies.push(currentLatency);
 
     const stats = calculateStatistics(latencies);
     const formattedPrices = response.getFormattedPrices();
-    const currentPrice = Object.values(formattedPrices)[0] || 'N/A';
-    console.log(`📊 Update #${stats.count} | Price: ${currentPrice} | Latency: ${currentLatency}ms | Avg: ${stats.mean.toFixed(1)}ms`);
+    const currentPrice = Object.values(formattedPrices)[0] || "N/A";
+    console.log(
+      `📊 Update #${
+        stats.count
+      } | Price: ${currentPrice} | Latency: ${currentLatency}ms | Avg: ${stats.mean.toFixed(
+        1
+      )}ms`
+    );
 
     // Only run simulation once after 10 seconds
     if (!hasRunSimulation) return;
 
     const result = response.toBundleIx();
     const sigVerifyIx = Array.isArray(result) ? result[0] : result;
-    const testIx = await myProgramIx(testProgram, queue.pubkey, keypair.publicKey);
+    const testIx = await myProgramIx(
+      testProgram,
+      queue.pubkey,
+      keypair.publicKey
+    );
 
     const tx = await sb.asV0Tx({
       connection,
@@ -61,33 +77,43 @@ import { TX_CONFIG, myAnchorProgram, myProgramIx, DEMO_PATH, calculateStatistics
     try {
       const sim = await connection.simulateTransaction(tx, {
         ...TX_CONFIG,
-        commitment: "confirmed"
+        commitment: "confirmed",
       });
 
       if (sim.value.err) {
-        console.error('❌ Simulation failed:', sim.value.err);
+        console.error("❌ Simulation failed:", sim.value.err);
         return;
       }
 
-      console.log('✅ Simulation succeeded!');
+      console.log("✅ Simulation succeeded!");
 
       // Display program logs that show feed values
       if (sim.value.logs) {
-        console.log('\n📋 Program logs:');
+        console.log("\n📋 Program logs:");
         sim.value.logs.forEach((log: string) => {
-          if (log.includes('Feed hash:') || log.includes('Feed value:') || log.includes('Bundle verified slot:')) {
+          if (
+            log.includes("Feed hash:") ||
+            log.includes("Feed value:") ||
+            log.includes("Bundle verified slot:")
+          ) {
             console.log(`   ${log}`);
           }
         });
       }
 
-      console.log(`\n📈 Final stats: ${stats.count} updates, ${stats.mean.toFixed(1)}ms avg latency`);
+      console.log(
+        `\n📈 Final stats: ${stats.count} updates, ${stats.mean.toFixed(
+          1
+        )}ms avg latency`
+      );
       process.exit(0);
     } catch (error) {
-      console.error('💥 Transaction error:', error);
+      console.error("💥 Transaction error:", error);
       process.exit(1);
     }
   });
 
-  console.log('📡 Listening for price updates (will simulate after 10 seconds)...');
+  console.log(
+    "📡 Listening for price updates (will simulate after 10 seconds)..."
+  );
 })();

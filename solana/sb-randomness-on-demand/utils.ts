@@ -40,12 +40,12 @@ export async function loadSbProgram(
 }
 
 // export async function loadSVMSwitchboardProgram(
-  // provider: anchor.Provider
+// provider: anchor.Provider
 // ): Promise<anchor.Program> {
-  // const svmProgramId = sb.ON_DEMAND_MAINNET_PID;
-  // const svmIdl = await anchor.Program.fetchIdl(svmProgramId, provider);
-  // const svmProgram = new anchor.Program(svmIdl!, provider);
-  // return svmProgram;
+// const svmProgramId = sb.ON_DEMAND_MAINNET_PID;
+// const svmIdl = await anchor.Program.fetchIdl(svmProgramId, provider);
+// const svmProgram = new anchor.Program(svmIdl!, provider);
+// return svmProgram;
 // }
 
 export async function initializeMyProgram(
@@ -236,8 +236,9 @@ export async function ensureEscrowFunded(
   txOpts: any
 ): Promise<void> {
   const accountBalance = await connection.getBalance(escrowAccount);
-  const minRentExemption =
-    await connection.getMinimumBalanceForRentExemption(0);
+  const minRentExemption = await connection.getMinimumBalanceForRentExemption(
+    0
+  );
 
   const requiredBalance = minRentExemption;
   if (accountBalance < requiredBalance) {

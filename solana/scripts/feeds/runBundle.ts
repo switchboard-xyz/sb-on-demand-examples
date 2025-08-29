@@ -5,7 +5,8 @@ import {
   TX_CONFIG,
   sleep,
   myAnchorProgram,
-  myProgramIx,
+  oracleUpdateIx,
+  verifyIx,
   DEMO_PATH,
   calculateStatistics,
 } from "../utils";
@@ -47,7 +48,7 @@ const argv = yargs(process.argv)
   // Create Crossbar client for fetching oracle bundles
   // Crossbar is Switchboard's high-performance oracle data delivery network
   // For local development, create a dummy crossbar instance
-  const crossbar = new CrossbarClient('https://crossbar.switchboardlabs.xyz');
+  const crossbar = new CrossbarClient("https://crossbar.switchboardlabs.xyz");
 
   // Load the default Switchboard queue for your network (mainnet/devnet)
   // The queue contains the list of authorized oracle signers
@@ -57,7 +58,6 @@ const argv = yargs(process.argv)
   // This endpoint will provide signed oracle bundles
   // const gateway = new sb.Gateway(program!, "http://localhost:8082"); // Local development
   const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
-
 
   // Load the address lookup table for transaction size optimization
   // This significantly reduces transaction size by using indices instead of full addresses
@@ -92,7 +92,16 @@ const argv = yargs(process.argv)
 
     // Create your program's instruction to consume the oracle data
     // This instruction will verify and use the bundle in your business logic
-    const testIx = await myProgramIx(testProgram, queue.pubkey, keypair.publicKey);
+    const updateIx = await oracleUpdateIx(
+      testProgram,
+      queue.pubkey,
+      keypair.publicKey
+    );
+    const verifyInstruction = await verifyIx(
+      testProgram,
+      queue.pubkey,
+      keypair.publicKey
+    );
 
     // Display performance statistics for monitoring
     const stats = calculateStatistics(latencies);
@@ -105,7 +114,7 @@ const argv = yargs(process.argv)
     // V0 transactions support address lookup tables and are more efficient
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [sbIx, testIx], // Combine the bundle verification and program instructions
+      ixs: [sbIx, updateIx, verifyInstruction], // Include all necessary instructions
       signers: [keypair],
       computeUnitPrice: 20_000, // Priority fee in micro-lamports per compute unit
       computeUnitLimitMultiple: 1.3, // Add 30% buffer to estimated compute units
@@ -117,17 +126,17 @@ const argv = yargs(process.argv)
     try {
       const sim = await connection.simulateTransaction(tx, {
         ...TX_CONFIG,
-        commitment: "confirmed" // Use confirmed for simulation too
+        commitment: "confirmed", // Use confirmed for simulation too
       });
       console.log(`Simulation result: ${JSON.stringify(sim.value, null, 2)}`);
 
       // Check simulation results for errors
       if (sim.value.err) {
-        console.error('❌ Simulation failed:', sim.value.err);
+        console.error("❌ Simulation failed:", sim.value.err);
         return;
       }
     } catch (error) {
-      console.error('💥 Transaction error:', error);
+      console.error("💥 Transaction error:", error);
     }
 
     // Wait before next iteration to avoid rate limits

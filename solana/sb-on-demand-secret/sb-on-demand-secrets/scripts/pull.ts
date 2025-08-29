@@ -1,13 +1,17 @@
 import { PublicKey } from "@solana/web3.js";
-import { SwitchboardSecrets, CrossbarClient, decodeString } from "@switchboard-xyz/common";
+import {
+  SwitchboardSecrets,
+  CrossbarClient,
+  decodeString,
+} from "@switchboard-xyz/common";
 import {
   myAnchorProgram,
   buildSecretsJob,
   ensureUserSecretProfileExists,
   ensureSecretExists,
   whitelistFeedHash,
-  DEMO_PATH, 
-  TX_CONFIG, 
+  DEMO_PATH,
+  TX_CONFIG,
   myProgramIx,
 } from "./utils";
 import dotenv from "dotenv";
@@ -34,7 +38,9 @@ const crossbarClient = new CrossbarClient(
     // Pull in API Key from .env file
     const API_KEY = process.env.OPEN_WEATHER_API_KEY;
     const secretValue = API_KEY ?? "API_KEY_NOT_FOUND";
-    console.log("\n🔒 Step 1: Checking the User profile exists or creating it to store secrets");
+    console.log(
+      "\n🔒 Step 1: Checking the User profile exists or creating it to store secrets"
+    );
 
     // start of secrets
     const sbSecrets = new SwitchboardSecrets();
@@ -49,9 +55,7 @@ const crossbarClient = new CrossbarClient(
     );
 
     console.log("\n🔒 Step 3: Building Feed Configuration");
-    const secretFeedJob = [
-      buildSecretsJob(secretNameExpansionTask, keypair),
-    ];
+    const secretFeedJob = [buildSecretsJob(secretNameExpansionTask, keypair)];
     const conf: any = {
       name: "Weather Temperature(C) in Aspen, CO.", // the feed name (max 32 bytes)
       queue: new PublicKey(queue), // the queue of oracles to bind to
@@ -72,12 +76,7 @@ const crossbarClient = new CrossbarClient(
     );
 
     // Whitelist the feed hash
-    await whitelistFeedHash(
-      sbSecrets,
-      keypair,
-      conf.feedHash,
-      secretName
-    );
+    await whitelistFeedHash(sbSecrets, keypair, conf.feedHash, secretName);
 
     // Initialize the Secret Feed
     const initTx = await sb.asV0Tx({
@@ -112,9 +111,8 @@ const crossbarClient = new CrossbarClient(
     console.log(`\tTx Signature: ${await connection.sendTransaction(tx)}`);
   } catch (error) {
     console.error("Error during execution:", error);
-    process.exit(1); 
+    process.exit(1);
   }
 
-  process.exit(0); 
+  process.exit(0);
 })();
-

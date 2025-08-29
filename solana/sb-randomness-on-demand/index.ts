@@ -16,7 +16,6 @@ import { settleFlipInstruction } from "./utils";
 import { ensureEscrowFunded } from "./utils";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 
-
 const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
 const COMMITMENT = "confirmed";

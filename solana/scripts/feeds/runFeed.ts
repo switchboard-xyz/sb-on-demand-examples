@@ -13,20 +13,20 @@ function calculateStatistics(latencies: number[]) {
   const max = sortedLatencies[sortedLatencies.length - 1];
   const median =
     sortedLatencies.length % 2 === 0
-    ? (sortedLatencies[sortedLatencies.length / 2 - 1] +
-      sortedLatencies[sortedLatencies.length / 2]) /
+      ? (sortedLatencies[sortedLatencies.length / 2 - 1] +
+          sortedLatencies[sortedLatencies.length / 2]) /
         2
-        : sortedLatencies[Math.floor(sortedLatencies.length / 2)];
-        const sum = sortedLatencies.reduce((a, b) => a + b, 0);
-        const mean = sum / sortedLatencies.length;
+      : sortedLatencies[Math.floor(sortedLatencies.length / 2)];
+  const sum = sortedLatencies.reduce((a, b) => a + b, 0);
+  const mean = sum / sortedLatencies.length;
 
-        return {
-          min,
-          max,
-          median,
-          mean,
-          count: latencies.length,
-        };
+  return {
+    min,
+    max,
+    median,
+    mean,
+    count: latencies.length,
+  };
 }
 
 (async function main() {

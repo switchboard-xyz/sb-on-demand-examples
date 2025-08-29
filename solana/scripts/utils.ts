@@ -108,7 +108,7 @@ export async function myAnchorProgram(
  * const tx = new Transaction().add(ix);
  * ```
  */
-export async function myProgramIx(
+export async function oracleUpdateIx(
   program: anchor.Program,
   queue: PublicKey | string,
   payer: PublicKey
@@ -118,14 +118,41 @@ export async function myProgramIx(
     program.programId
   );
 
-  const myIx = await program.methods.switchboardOracleUpdate().accounts({
-    state: statePda,
-    payer: payer,
-    queue: new PublicKey(queue),
-    slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
-    instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-    systemProgram: anchor.web3.SystemProgram.programId,
-  }).instruction();
+  const myIx = await program.methods
+    .switchboardOracleUpdate()
+    .accounts({
+      state: statePda,
+      payer: payer,
+      queue: new PublicKey(queue),
+      slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
+      instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .instruction();
+  return myIx;
+}
+
+export async function verifyIx(
+  program: anchor.Program,
+  queue: PublicKey | string,
+  payer: PublicKey
+): Promise<TransactionInstruction> {
+  const [statePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("state")],
+    program.programId
+  );
+
+  const myIx = await program.methods
+    .verify()
+    .accounts({
+      state: statePda,
+      payer: payer,
+      queue: new PublicKey(queue),
+      slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
+      instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .instruction();
   return myIx;
 }
 
@@ -543,7 +570,6 @@ export async function sendAndConfirmTx(
   return sig;
 }
 
-
 /**
  * Utility function to pause execution for a specified duration
  *
@@ -557,7 +583,7 @@ export async function sendAndConfirmTx(
  * ```
  */
 export function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function calculateStatistics(latencies: number[]) {
@@ -566,20 +592,18 @@ export function calculateStatistics(latencies: number[]) {
   const max = sortedLatencies[sortedLatencies.length - 1];
   const median =
     sortedLatencies.length % 2 === 0
-    ? (sortedLatencies[sortedLatencies.length / 2 - 1] +
-      sortedLatencies[sortedLatencies.length / 2]) /
+      ? (sortedLatencies[sortedLatencies.length / 2 - 1] +
+          sortedLatencies[sortedLatencies.length / 2]) /
         2
-        : sortedLatencies[Math.floor(sortedLatencies.length / 2)];
-        const sum = sortedLatencies.reduce((a, b) => a + b, 0);
-        const mean = sum / sortedLatencies.length;
+      : sortedLatencies[Math.floor(sortedLatencies.length / 2)];
+  const sum = sortedLatencies.reduce((a, b) => a + b, 0);
+  const mean = sum / sortedLatencies.length;
 
-        return {
-          min,
-          max,
-          median,
-          mean,
-          count: latencies.length,
-        };
+  return {
+    min,
+    max,
+    median,
+    mean,
+    count: latencies.length,
+  };
 }
-
-

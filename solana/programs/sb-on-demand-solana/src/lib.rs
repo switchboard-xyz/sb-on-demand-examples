@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions};
 
-declare_id!("AKWdag9NuxYbomfhNpJFDB5zooYumBYKVtZrcJ4w8R32");
+declare_id!("BqAzuTwrCXEytibnGmXPNtLMEvrEc8e6KFYCGiPhMScB");
 
 #[program]
 pub mod sb_on_demand_solana {
@@ -33,9 +33,8 @@ pub mod sb_on_demand_solana {
 
     pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
         let UpdateCtx { state, instructions, .. } = ctx.accounts;
-        let ix_data = &instructions.data.borrow();
         anchor_lang::solana_program::log::sol_log_compute_units();
-        state.report_len = Instructions::write_instruction_0_data(ix_data, &mut state.oracle_report);
+        state.report_len = Instructions::write_ix_0_from_account_info(instructions, &mut state.oracle_report);
         anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }

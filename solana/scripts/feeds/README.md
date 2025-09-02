@@ -62,7 +62,7 @@ Loop count: 1
 ✅ Transaction confirmed successfully!
 ```
 
-### 2. runFeed.ts - Individual Feed Updates  
+### 2. runFeed.ts - Individual Feed Updates (Legacy)
 
 **Purpose**: Update specific pull feed accounts with detailed oracle response visibility.
 

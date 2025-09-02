@@ -56,7 +56,7 @@ npx ts-node scripts/feeds/runBundle.ts --feedHash FEED_HASH
 Scripts for fetching and updating oracle price data.
 
 - **`runBundle.ts`** - Fetch aggregated price bundles (90% cost reduction)
-- **`runFeed.ts`** - Update individual feed accounts
+- **`runFeed.ts`** - (Legacy) Update individual feed accounts
 
 [📖 Detailed Feeds Documentation](./feeds/README.md)
 

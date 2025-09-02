@@ -33,10 +33,9 @@ pub mod sb_on_demand_solana {
 
     pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
         let UpdateCtx { state, instructions, .. } = ctx.accounts;
+        let ix_data = &instructions.data.borrow();
         anchor_lang::solana_program::log::sol_log_compute_units();
-        state.report_len = Instructions::write_instruction_0_data(
-            &instructions,
-            &mut state.oracle_report);
+        state.report_len = Instructions::write_instruction_0_data(ix_data, &mut state.oracle_report);
         anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }

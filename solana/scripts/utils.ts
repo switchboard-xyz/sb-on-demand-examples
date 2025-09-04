@@ -127,6 +127,7 @@ export async function oracleUpdateIx(
       slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
       instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
       systemProgram: anchor.web3.SystemProgram.programId,
+      clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
     })
     .instruction();
   return myIx;
@@ -151,6 +152,7 @@ export async function verifyIx(
       slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
       instructions: SYSVAR_INSTRUCTIONS_PUBKEY,
       systemProgram: anchor.web3.SystemProgram.programId,
+      clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
     })
     .instruction();
   return myIx;

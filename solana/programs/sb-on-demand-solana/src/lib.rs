@@ -32,7 +32,7 @@ pub mod sb_on_demand_solana {
     }
 
     pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
-        let UpdateCtx { state, instructions, payer, .. } = ctx.accounts;
+        let UpdateCtx { state, instructions, clock, payer, .. } = ctx.accounts;
         let ProgramState { oracle_report, cranker, .. } = &mut **state;
 
         // assign cranker
@@ -40,9 +40,7 @@ pub mod sb_on_demand_solana {
             *cranker = *payer.key;
         }
         anchor_lang::solana_program::log::sol_log_compute_units();
-        switchboard_on_demand::assert_pubkey_eq(&cranker, payer.key);
-        anchor_lang::solana_program::log::sol_log_compute_units();
-        Instructions::write_ix_0_delimited(instructions, oracle_report);
+        Instructions::write_ix_0_delimited(instructions, clock, oracle_report);
         anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }
@@ -79,6 +77,8 @@ pub struct UpdateCtx<'info> {
     /// CHECK: solana_program::sysvar::instructions::ID
     #[account(address = anchor_lang::solana_program::sysvar::instructions::ID)]
     pub instructions: AccountInfo<'info>,
+    /// CHECK: solana_program::sysvar::clock::ID
+    pub clock: AccountInfo<'info>,
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,

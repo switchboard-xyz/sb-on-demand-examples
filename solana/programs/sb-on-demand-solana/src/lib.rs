@@ -40,7 +40,7 @@ pub mod sb_on_demand_solana {
             *cranker = *payer.key;
         }
         anchor_lang::solana_program::log::sol_log_compute_units();
-        Instructions::write_ix_0_delimited(instructions, clock, oracle_report);
+        Instructions::write_ix_0(instructions, clock, oracle_report);
         anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }

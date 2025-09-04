@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes, Instructions};
 
-declare_id!("BqAzuTwrCXEytibnGmXPNtLMEvrEc8e6KFYCGiPhMScB");
+declare_id!("7HQEwXPhQC2iRvSZfchKHC373MAwE5exwZZfaxZ784Gk");
+const DEFAULT_PUBKEY: Pubkey = Pubkey::new_from_array([0u8; 32]);
 
 #[program]
 pub mod sb_on_demand_solana {
@@ -10,16 +11,16 @@ pub mod sb_on_demand_solana {
     pub fn verify(ctx: Context<VerifyCtx>) -> Result<()> {
         let VerifyCtx { state, queue, slothashes, .. } = ctx.accounts;
         // Access state directly
-        let staleness = Clock::get()?.slot - state.last_verified_slot;
+        // let staleness = Clock::get()?.slot - state.last_verified_slot;
 
         // Use saved report from state
-        let report_data = &state.oracle_report[..state.report_len as usize];
+        let report_data = &state.oracle_report;
 
         anchor_lang::solana_program::log::sol_log_compute_units();
         let bundle = BundleVerifierBuilder::new()
             .queue(&queue)
             .slothash_sysvar(&slothashes)
-            .max_age(staleness.max(50))
+            .max_age(50)
             .verify(report_data)
             .unwrap();
         anchor_lang::solana_program::log::sol_log_compute_units();
@@ -27,38 +28,42 @@ pub mod sb_on_demand_solana {
         for feed_info in bundle.feeds() {
             msg!("Feed ID: {}, value: {}", feed_info.hex_id(), feed_info.value());
         }
-        state.last_verified_slot = bundle.slot();
         Ok(())
     }
 
     pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
-        let UpdateCtx { state, instructions, .. } = ctx.accounts;
-        let ProgramState { oracle_report, report_len, .. } = &mut **state;
-        Instructions::write_ix_0_from_account_info(instructions, oracle_report, report_len);
+        let UpdateCtx { state, instructions, payer, .. } = ctx.accounts;
+        let ProgramState { oracle_report, cranker, .. } = &mut **state;
+
+        // assign cranker
+        if switchboard_on_demand::check_pubkey_eq(&cranker, &DEFAULT_PUBKEY) {
+            *cranker = *payer.key;
+        }
+        anchor_lang::solana_program::log::sol_log_compute_units();
+        switchboard_on_demand::assert_pubkey_eq(&cranker, payer.key);
+        anchor_lang::solana_program::log::sol_log_compute_units();
+        Instructions::write_ix_0_delimited(instructions, oracle_report);
+        anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }
 }
 
 #[account]
 pub struct ProgramState {
-    pub last_verified_slot: u64,
-    pub report_len: u16,
+    pub cranker: Pubkey,
     pub oracle_report: [u8; 256],
 }
 impl ProgramState {
-    pub const LEN: usize = 8 + 8 + 8 + 256;
+    pub const LEN: usize = 312;
 }
 
 #[derive(Accounts)]
 pub struct VerifyCtx<'info> {
-    #[account(
-        mut,
-        seeds = [b"state"],
-        bump
-    )]
+    #[account(mut, seeds = [b"state"], bump)]
     pub state: Account<'info, ProgramState>,
     pub queue: AccountLoader<'info, QueueAccountData>,
     pub slothashes: Sysvar<'info, SlotHashes>,
+    pub payer: Signer<'info>,
 }
 
 #[derive(Accounts)]

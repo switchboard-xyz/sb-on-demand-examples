@@ -129,6 +129,9 @@ const argv = yargs(process.argv)
         commitment: "confirmed", // Use confirmed for simulation too
       });
       console.log(`Simulation result: ${JSON.stringify(sim.value, null, 2)}`);
+      const sig = await connection.sendTransaction(tx);
+      await connection.confirmTransaction(sig, "confirmed");
+      console.log("✅ Transaction submitted:", sig);
 
       // Check simulation results for errors
       if (sim.value.err) {

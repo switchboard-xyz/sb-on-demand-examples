@@ -18,8 +18,8 @@ importers:
         specifier: ^1.98.0
         version: 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/common':
-        specifier: 4.0.0
-        version: 4.0.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: 4.1.0
+        version: 4.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
         specifier: 2.14.4
         version: 2.14.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
@@ -258,8 +258,8 @@ packages:
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
 
-  '@switchboard-xyz/common@4.0.0':
-    resolution: {integrity: sha512-MuFHQjYAYof/fSjN9hO1150mNpnelrPNFRrtZ165XVrRP/vYIfOrPQ8MA57noVsjVQ2jFAsX/xVX8uSE6VgmoQ==}
+  '@switchboard-xyz/common@4.1.0':
+    resolution: {integrity: sha512-I9UoRIL+D4BdNHlSNA7bOBCWD29yhzMBNRktDAWNKSpTeMEMGo4aBAJowDrsIogJNInhtX4jI42sy9YeJBB8Uw==}
     engines: {node: '>=20'}
 
   '@switchboard-xyz/on-demand@2.14.4':
@@ -1483,7 +1483,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@switchboard-xyz/common@4.0.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+  '@switchboard-xyz/common@4.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       axios: 1.11.0
@@ -1507,7 +1507,7 @@ snapshots:
     dependencies:
       '@coral-xyz/anchor-31': '@coral-xyz/anchor@0.31.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)'
       '@isaacs/ttlcache': 1.4.1
-      '@switchboard-xyz/common': 4.0.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      '@switchboard-xyz/common': 4.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       axios: 1.11.0
       bs58: 6.0.0
       buffer: 6.0.3

@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
-use switchboard_on_demand::{BundleVerifierBuilder, QueueAccountData, SlotHashes, Bundle};
+use switchboard_on_demand::{QuoteVerifierBuilder, QueueAccountData, SlotHashes, OracleQuote, Instructions};
+use switchboard_on_demand::check_pubkey_eq;
 
-declare_id!("7HQEwXPhQC2iRvSZfchKHC373MAwE5exwZZfaxZ784Gk");
-const DEFAULT_PUBKEY: Pubkey = Pubkey::new_from_array([0u8; 32]);
+declare_id!("G4h79qXBmJmXSCfWeQq3FFZqGMwhcwgPsSPMvodhCzkq");
 
 #[program]
 pub mod sb_on_demand_solana {
@@ -12,11 +12,11 @@ pub mod sb_on_demand_solana {
         let VerifyCtx { queue, slothashes, oracle, .. } = ctx.accounts;
 
         anchor_lang::solana_program::log::sol_log_compute_units();
-        let bundle = BundleVerifierBuilder::new()
+        let bundle = QuoteVerifierBuilder::new()
             .queue(&queue)
             .slothash_sysvar(&slothashes)
             .max_age(50)
-            .verify_account(&oracle)
+            .verify_account(oracle.as_ref())
             .unwrap();
         anchor_lang::solana_program::log::sol_log_compute_units();
 
@@ -29,13 +29,12 @@ pub mod sb_on_demand_solana {
 
     pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
         let UpdateCtx { state, instructions, clock, payer, oracle, .. } = ctx.accounts;
+        let cranker = state.cranker.get_or_insert(payer.key());
 
-        // assign cranker
-        if switchboard_on_demand::check_pubkey_eq(&state.cranker, &DEFAULT_PUBKEY) {
-            state.cranker = *payer.key;
-        }
+        // Only allow the cranker to call this function
+        require!(check_pubkey_eq(&cranker, payer.key), ErrorCode::ConstraintSigner);
         anchor_lang::solana_program::log::sol_log_compute_units();
-        Bundle::write_ix_0_to_account_info(instructions, clock, oracle);
+        OracleQuote::write_ix_0_to_account_info(instructions.as_ref(), clock, oracle.as_ref());
         anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }
@@ -43,7 +42,7 @@ pub mod sb_on_demand_solana {
 
 #[account]
 pub struct ProgramState {
-    pub cranker: Pubkey,
+    pub cranker: Option<Pubkey>,
 }
 impl ProgramState {
     pub const LEN: usize = 312;
@@ -53,7 +52,7 @@ impl ProgramState {
 pub struct VerifyCtx<'info> {
     #[account(mut, seeds = [b"state"], bump)]
     pub state: Account<'info, ProgramState>,
-    /// CHECK: explicit account key
+    /// CHECK: internal
     #[account(seeds = [b"oracle"], bump)]
     pub oracle: AccountInfo<'info>,
     pub queue: AccountLoader<'info, QueueAccountData>,
@@ -71,12 +70,11 @@ pub struct UpdateCtx<'info> {
         payer = payer,
     )]
     pub state: Account<'info, ProgramState>,
-    /// CHECK: explicit account key
+    /// CHECK: internal
     #[account(init_if_needed, seeds = [b"oracle"], bump, space = 1024, payer = payer)]
     pub oracle: AccountInfo<'info>,
-    /// CHECK: solana_program::sysvar::instructions::ID
-    #[account(address = anchor_lang::solana_program::sysvar::instructions::ID)]
-    pub instructions: AccountInfo<'info>,
+    /// CHECK: internal
+    pub instructions: Sysvar<'info, Instructions>,
     /// CHECK: solana_program::sysvar::clock::ID
     pub clock: AccountInfo<'info>,
     #[account(mut)]

@@ -117,11 +117,16 @@ export async function oracleUpdateIx(
     [Buffer.from("state")],
     program.programId
   );
+  const [oraclePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("oracle")],
+    program.programId
+  );
 
   const myIx = await program.methods
     .switchboardOracleUpdate()
     .accounts({
       state: statePda,
+      oracle: oraclePda,
       payer: payer,
       queue: new PublicKey(queue),
       slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
@@ -142,11 +147,16 @@ export async function verifyIx(
     [Buffer.from("state")],
     program.programId
   );
+  const [oraclePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("oracle")],
+    program.programId
+  );
 
   const myIx = await program.methods
     .verify()
     .accounts({
       state: statePda,
+      oracle: oraclePda,
       payer: payer,
       queue: new PublicKey(queue),
       slothashes: SYSVAR_SLOT_HASHES_PUBKEY,

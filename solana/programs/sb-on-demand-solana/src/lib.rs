@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use switchboard_on_demand::{QuoteVerifierBuilder, QueueAccountData, SlotHashes, OracleQuote, Instructions};
+use switchboard_on_demand::{QuoteVerifier, QueueAccountData, SlotHashes, OracleQuote, Instructions};
 use switchboard_on_demand::check_pubkey_eq;
 
 declare_id!("G4h79qXBmJmXSCfWeQq3FFZqGMwhcwgPsSPMvodhCzkq");
@@ -9,36 +9,40 @@ pub mod sb_on_demand_solana {
     use super::*;
 
     pub fn verify(ctx: Context<VerifyCtx>) -> Result<()> {
-        let clock = Clock::get()?;
-        let VerifyCtx { queue, slothashes, oracle, instructions, clock, .. } =
+        let VerifyCtx { queue, slothashes, oracle, instructions, .. } =
             ctx.accounts;
 
         anchor_lang::solana_program::log::sol_log_compute_units();
-        let quote = QuoteVerifierBuilder::new()
+        // let quote = QuoteVerifier::new()
+            // .queue(queue.as_ref())
+            // .slothash_sysvar(&slothashes)
+            // .ix_sysvar(instructions.as_ref())
+            // .verify_account(oracle)
+            // .unwrap();
+        let quote = QuoteVerifier::new()
+            .ix_sysvar(instructions.as_ref())
             .queue(queue.as_ref())
             .slothash_sysvar(&slothashes)
-            .ix_sysvar(instructions.as_ref())
-            .verify_account(oracle)
+            .load_and_verify(0)
             .unwrap();
         anchor_lang::solana_program::log::sol_log_compute_units();
 
-        // anchor_lang::solana_program::msg!("Verified bundle slot: {}", bundle.slot());
-        // for feed_info in bundle.feeds() {
-            // msg!("Feed ID: {}, value: {}", feed_info.hex_id(), feed_info.value());
-        // }
+        anchor_lang::solana_program::msg!("Verified bundle slot: {}", quote.slot());
+        for feed_info in quote.feeds() {
+            msg!("Feed ID: {}, value: {}", feed_info.hex_id(), feed_info.value());
+        }
         Ok(())
     }
 
     pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
-        let clock = Clock::get()?;
         let UpdateCtx { state, instructions, clock, payer, oracle, .. } = ctx.accounts;
         let cranker = state.cranker.get_or_insert(payer.key());
 
         // Only allow the cranker to call this function
         require!(check_pubkey_eq(&cranker, payer.key), ErrorCode::ConstraintSigner);
+
         anchor_lang::solana_program::log::sol_log_compute_units();
-        let (pid, quote) = Instructions::extract_ix_data(instructions.as_ref(), 0).unwrap();
-        OracleQuote::write_to_account(clock, quote, oracle);
+        OracleQuote::write_to_account_from_ix(instructions.as_ref(), clock, oracle, 0);
         anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }

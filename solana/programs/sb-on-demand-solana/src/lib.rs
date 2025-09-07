@@ -37,7 +37,7 @@ pub mod sb_on_demand_solana {
         // Only allow the cranker to call this function
         require!(check_pubkey_eq(&cranker, payer.key), ErrorCode::ConstraintSigner);
         anchor_lang::solana_program::log::sol_log_compute_units();
-        let (pid, quote) = Instructions::extract_ix_data(instructions.as_ref(), 0);
+        let (pid, quote) = Instructions::extract_ix_data(instructions.as_ref(), 0).unwrap();
         OracleQuote::write_to_account(clock, quote, oracle);
         anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())

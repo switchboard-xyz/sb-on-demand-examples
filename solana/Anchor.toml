@@ -8,7 +8,7 @@ skip-lint = true
 sb_on_demand_solana = "2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5"
 
 [programs.mainnet]
-sb_on_demand_solana = "G4h79qXBmJmXSCfWeQq3FFZqGMwhcwgPsSPMvodhCzkq"
+sb_on_demand_solana = "GXiCkAx51V9FPfH68Pz7AT7ZCK4xrrWQmXgvHtMtvfqU"
 
 [registry]
 url = "https://api.apr.dev"

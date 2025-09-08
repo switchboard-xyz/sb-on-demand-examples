@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program;
 use switchboard_on_demand::{
     QuoteVerifier, QueueAccountData, SlotHashes, OracleQuote, Instructions,
     check_pubkey_eq, get_slot
@@ -16,14 +17,16 @@ pub mod sb_on_demand_solana {
     pub fn verify(ctx: Context<VerifyCtx>) -> Result<()> {
         let VerifyCtx { queue, oracle, sysvars, .. } = ctx.accounts;
 
+        solana_program::log::sol_log_compute_units();
         let quote = QuoteVerifier::new()
             .slothash_sysvar(&sysvars.slothashes)
             .ix_sysvar(&sysvars.instructions)
             .clock_slot(get_slot(&sysvars.clock))
             .queue(&queue)
-            .max_age(50) // max age in slots
+            .max_age(20) // max age in slots
             .verify_account(&oracle)
             .unwrap();
+        solana_program::log::sol_log_compute_units();
 
         msg!("Verified slot: {}", quote.slot());
         for feed_info in quote.feeds() {
@@ -39,7 +42,9 @@ pub mod sb_on_demand_solana {
         // Only allow the cranker to call this function
         require!(check_pubkey_eq(&cranker, payer.key), ErrorCode::ConstraintSigner);
 
+        solana_program::log::sol_log_compute_units();
         OracleQuote::write_from_ix(&sysvars.instructions, &oracle, slot, 0);
+        solana_program::log::sol_log_compute_units();
         Ok(())
     }
 }

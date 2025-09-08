@@ -1,11 +1,13 @@
 use anchor_lang::prelude::*;
+use switchboard_on_demand::clock::parse_clock;
 use switchboard_on_demand::{
     QuoteVerifier, QueueAccountData, SlotHashes, OracleQuote, Instructions,
     check_pubkey_eq,
 };
 
-declare_id!("GXiCkAx51V9FPfH68Pz7AT7ZCK4xrrWQmXgvHtMtvfqU");
+declare_id!("13fJ81pBEvmS6Pxqu3UbKutBzbdX6qhYNkt3GJGEBhpf");
 // Defines SwitchboardQuote anchor wrapper
+// REQUIRES: bytemuck
 switchboard_on_demand::switchboard_anchor_bindings!();
 
 #[program]
@@ -14,19 +16,16 @@ pub mod sb_on_demand_solana {
 
     pub fn verify(ctx: Context<VerifyCtx>) -> Result<()> {
         let VerifyCtx { queue, oracle, sysvars, .. } = ctx.accounts;
-        let clock = switchboard_on_demand::clock::parse_clock(&sysvars.clock);
 
-        anchor_lang::solana_program::log::sol_log_compute_units();
         let quote = QuoteVerifier::new()
             .slothash_sysvar(&sysvars.slothashes)
             .ix_sysvar(&sysvars.instructions)
-            .clock(clock)
+            .clock(parse_clock(&sysvars.clock))
             .queue(&queue)
             .verify_account(&oracle)
             .unwrap();
-        anchor_lang::solana_program::log::sol_log_compute_units();
 
-        anchor_lang::solana_program::msg!("Verified slot: {}", quote.slot());
+        msg!("Verified slot: {}", quote.slot());
         for feed_info in quote.feeds() {
             msg!("Feed ID: {}, value: {}", feed_info.hex_id(), feed_info.value());
         }
@@ -36,14 +35,12 @@ pub mod sb_on_demand_solana {
     pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
         let UpdateCtx { state, oracle, sysvars, payer, .. } = ctx.accounts;
         let cranker = state.cranker.get_or_insert(payer.key());
-        let clock = switchboard_on_demand::clock::parse_clock(&sysvars.clock);
+        let clock = parse_clock(&sysvars.clock);
 
         // Only allow the cranker to call this function
         require!(check_pubkey_eq(&cranker, payer.key), ErrorCode::ConstraintSigner);
 
-        anchor_lang::solana_program::log::sol_log_compute_units();
         OracleQuote::write_from_ix(&sysvars.instructions, &oracle, clock, 0);
-        anchor_lang::solana_program::log::sol_log_compute_units();
         Ok(())
     }
 }
@@ -51,9 +48,6 @@ pub mod sb_on_demand_solana {
 #[account]
 pub struct ProgramState {
     pub cranker: Option<Pubkey>,
-}
-impl ProgramState {
-    pub const LEN: usize = 312;
 }
 
 #[derive(Accounts)]
@@ -67,7 +61,7 @@ pub struct VerifyCtx<'info> {
 
 #[derive(Accounts)]
 pub struct UpdateCtx<'info> {
-    #[account(init_if_needed, seeds = [b"state"], bump, space = ProgramState::LEN, payer = payer)]
+    #[account(init_if_needed, seeds = [b"state"], bump, space = 41, payer = payer)]
     pub state:          Account<'info, ProgramState>,
     #[account(init_if_needed, seeds = [b"oracle"], bump, space = SwitchboardQuote::LEN, payer = payer)]
     pub oracle:         AccountLoader<'info, SwitchboardQuote>,

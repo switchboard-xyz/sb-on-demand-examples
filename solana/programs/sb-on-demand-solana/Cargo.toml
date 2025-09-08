@@ -22,7 +22,8 @@ anchor-debug = []
 [dependencies]
 anchor-lang = { version = "=0.31.1", features = ["init-if-needed"] }
 bytemuck = "1.23.2"
-switchboard-on-demand = { version = "0.7.2", features = ["anchor", "devnet"] }
+switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand", features = ["anchor", "devnet"] }
+# version = "0.7.2", features = ["anchor", "devnet"] }
 
 [profile.release]
 opt-level = 3

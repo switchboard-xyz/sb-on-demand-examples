@@ -1,8 +1,7 @@
 use anchor_lang::prelude::*;
-use switchboard_on_demand::clock::parse_clock;
 use switchboard_on_demand::{
     QuoteVerifier, QueueAccountData, SlotHashes, OracleQuote, Instructions,
-    check_pubkey_eq,
+    check_pubkey_eq, get_slot
 };
 
 declare_id!("13fJ81pBEvmS6Pxqu3UbKutBzbdX6qhYNkt3GJGEBhpf");
@@ -20,8 +19,9 @@ pub mod sb_on_demand_solana {
         let quote = QuoteVerifier::new()
             .slothash_sysvar(&sysvars.slothashes)
             .ix_sysvar(&sysvars.instructions)
-            .clock(parse_clock(&sysvars.clock))
+            .clock_slot(get_slot(&sysvars.clock))
             .queue(&queue)
+            .max_age(50) // max age in slots
             .verify_account(&oracle)
             .unwrap();
 
@@ -35,12 +35,11 @@ pub mod sb_on_demand_solana {
     pub fn switchboard_oracle_update(ctx: Context<UpdateCtx>) -> Result<()> {
         let UpdateCtx { state, oracle, sysvars, payer, .. } = ctx.accounts;
         let cranker = state.cranker.get_or_insert(payer.key());
-        let clock = parse_clock(&sysvars.clock);
-
+        let slot = get_slot(&sysvars.clock);
         // Only allow the cranker to call this function
         require!(check_pubkey_eq(&cranker, payer.key), ErrorCode::ConstraintSigner);
 
-        OracleQuote::write_from_ix(&sysvars.instructions, &oracle, clock, 0);
+        OracleQuote::write_from_ix(&sysvars.instructions, &oracle, slot, 0);
         Ok(())
     }
 }

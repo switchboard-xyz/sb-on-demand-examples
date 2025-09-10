@@ -23,10 +23,10 @@ const argv = yargs(process.argv)
   .parseSync();
 
 /**
- * Main execution function demonstrating bundle-based oracle integration
+ * Main execution function demonstrating quote-based oracle integration
  *
  * This function implements a continuous loop that:
- * 1. Fetches the latest oracle bundle from Switchboard's Crossbar network
+ * 1. Fetches the latest oracle quote from Switchboard's Crossbar network
  * 2. Creates verification and program instructions
  * 3. Submits transactions to consume the oracle data
  * 4. Tracks performance metrics for monitoring
@@ -45,7 +45,7 @@ const argv = yargs(process.argv)
   // Initialize your program that will consume the oracle data
   const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);
 
-  // Create Crossbar client for fetching oracle bundles
+  // Create Crossbar client for fetching oracle quotes
   // Crossbar is Switchboard's high-performance oracle data delivery network
   // For local development, create a dummy crossbar instance
   const crossbar = new CrossbarClient("https://crossbar.switchboardlabs.xyz");
@@ -55,7 +55,7 @@ const argv = yargs(process.argv)
   const queue = await sb.Queue.loadDefault(program!);
 
   // Fetch the gateway URL for this queue from Crossbar
-  // This endpoint will provide signed oracle bundles
+  // This endpoint will provide signed oracle quotes
   // const gateway = new sb.Gateway(program!, "http://localhost:8082"); // Local development
   const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
 
@@ -68,16 +68,16 @@ const argv = yargs(process.argv)
 
   // Main execution loop - continuously fetches and processes oracle updates
   while (true) {
-    // Measure bundle fetch latency for performance monitoring
+    // Measure quote fetch latency for performance monitoring
     const start = Date.now();
 
     // Debug: Log the input feedHash
     console.log("Input feedHash:", argv.feedHash);
 
-    // Fetch the oracle bundle and signature verification instruction
+    // Fetch the oracle quote and signature verification instruction
     // This single call:
     // 1. Requests the latest price data from oracle operators
-    // 2. Receives signed bundle with oracle signatures
+    // 2. Receives signed quote with oracle signatures
     // 3. Creates the Ed25519 signature verification instruction
     const sbIx = await queue.fetchUpdateBundleIx(
       gateway, // Gateway URL for this oracle queue
@@ -91,7 +91,7 @@ const argv = yargs(process.argv)
     latencies.push(latency);
 
     // Create your program's instruction to consume the oracle data
-    // This instruction will verify and use the bundle in your business logic
+    // This instruction will verify and use the quote in your business logic
     const updateIx = await oracleUpdateIx(
       testProgram,
       queue.pubkey,

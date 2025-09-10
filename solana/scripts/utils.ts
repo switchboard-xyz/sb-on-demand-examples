@@ -93,8 +93,8 @@ export async function myAnchorProgram(
  * Creates an instruction to consume Switchboard oracle data in your program
  *
  * This function builds the instruction that will verify and use the oracle
- * bundle in your on-chain program. It includes all required accounts for
- * bundle verification.
+ * quote in your on-chain program. It includes all required accounts for
+ * quote verification.
  *
  * @async
  * @param {anchor.Program} program - Your Anchor program instance
@@ -103,8 +103,8 @@ export async function myAnchorProgram(
  *
  * @example
  * ```typescript
- * const bundle = await queue.fetchUpdateBundle(gateway, crossbar, [feedHash]);
- * const ix = await myProgramIx(program, queue.pubkey, bundle, payer.publicKey);
+ * const quote = await queue.fetchUpdateQuote(gateway, crossbar, [feedHash]);
+ * const ix = await myProgramIx(program, queue.pubkey, quote, payer.publicKey);
  * const tx = new Transaction().add(ix);
  * ```
  */

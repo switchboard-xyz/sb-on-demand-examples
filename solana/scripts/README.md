@@ -16,7 +16,7 @@ scripts/
 
 ### Using npm scripts:
 ```bash
-# Fetch price bundles (default BTC/USD)
+# Fetch price quotes (default BTC/USD)
 npm start
 
 # Stream prices with Surge WebSocket
@@ -31,8 +31,8 @@ npm run benchmark
 
 ### Using bun (recommended):
 ```bash
-# Fetch price bundles with specific feed
-bun run scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+# Fetch price quotes with specific feed
+bun run scripts/feeds/runUpdate.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 
 # Stream prices with Surge
 bun run scripts/streaming/runSurge.ts
@@ -47,7 +47,7 @@ bun run scripts/benchmarks/benchmark.ts
 ### Direct execution with ts-node:
 ```bash
 # Run any script directly
-npx ts-node scripts/feeds/runBundle.ts --feedHash FEED_HASH
+npx ts-node scripts/feeds/runUpdate.ts --feedHash FEED_HASH
 ```
 
 ## 📂 Categories
@@ -55,8 +55,8 @@ npx ts-node scripts/feeds/runBundle.ts --feedHash FEED_HASH
 ### 1. Feeds (`/feeds/`)
 Scripts for fetching and updating oracle price data.
 
-- **`runBundle.ts`** - Fetch aggregated price bundles (90% cost reduction)
-- **`runFeed.ts`** - (Legacy) Update individual feed accounts
+- **`runUpdate.ts`** - Fetch aggregated price quotes (90% cost reduction)
+- **`legacy/runFeed.ts`** - (Legacy) Update individual feed accounts
 
 [📖 Detailed Feeds Documentation](./feeds/README.md)
 
@@ -99,7 +99,7 @@ export SURGE_API_KEY=your_api_key_here
 
 | Need | Use This Script | Why |
 |------|----------------|-----|
-| Fetch prices for DeFi | `feeds/runBundle.ts` | Lowest cost, signed data |
+| Fetch prices for DeFi | `feeds/runUpdate.ts` | Lowest cost, signed data |
 | Real-time UI updates | `streaming/crossbarStream.ts` | Unsigned, lowest latency |
 | Demo streaming integration | `streaming/runSurge.ts` | Clean demo with simulation |
 | Production streaming | `streaming/stream.ts` | Full on-chain integration |
@@ -108,9 +108,9 @@ export SURGE_API_KEY=your_api_key_here
 
 ## 📊 Example Outputs
 
-### Bundle Fetching
+### Quote Fetching
 ```
-🔧 Initializing bundle fetching demo...
+🔧 Initializing quote fetching demo...
 🌐 RPC: https://api.devnet.solana.com
 👤 Wallet: 7THdgryC8PL7GD6nPjWGxikfZisXdTsgPaXBz1Lzmtxh
 Input feedHash: f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
@@ -147,7 +147,7 @@ Redstone Average: 3.21x Switchboard
 2. **Error Handling**: Scripts include retry logic and error handling
    ```typescript
    try {
-     const result = await fetchBundle();
+     const result = await fetchUpdate();
    } catch (error) {
      console.error("Failed to fetch:", error);
    }

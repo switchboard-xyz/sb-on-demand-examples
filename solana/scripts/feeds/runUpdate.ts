@@ -13,10 +13,10 @@ import {
 
 const argv = yargs(process.argv)
   .options({
-    feedHash: {
+    feedId: {
       type: "string",
       required: true,
-      description: "The hexadecimal hash of the price feed (e.g., BTC/USD)",
+      description: "The hexadecimal ID of the price feed (e.g., BTC/USD)",
       example: "0x1234567890abcdef...",
     },
   })
@@ -71,8 +71,8 @@ const argv = yargs(process.argv)
     // Measure quote fetch latency for performance monitoring
     const start = Date.now();
 
-    // Debug: Log the input feedHash
-    console.log("Input feedHash:", argv.feedHash);
+    // Debug: Log the input feedId
+    console.log("Input feedId:", argv.feedId);
 
     // Fetch the oracle quote and signature verification instruction
     // This single call:
@@ -82,7 +82,7 @@ const argv = yargs(process.argv)
     const sbIx = await queue.fetchUpdateBundleIx(
       gateway, // Gateway URL for this oracle queue
       crossbar as any, // Crossbar client instance (for local development)
-      [argv.feedHash] // Array of feed hashes to fetch (can request multiple)
+      [argv.feedId] // Array of feed IDs to fetch (can request multiple)
     );
 
     // Calculate and track fetch latency

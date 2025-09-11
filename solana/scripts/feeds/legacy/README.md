@@ -45,6 +45,72 @@ bun run scripts/feeds/legacy/runFeed.ts
 - More complex error handling required
 - Slower update cycles
 
+### runJob.ts - Oracle Consensus Job Runner
+
+**Status**: Oracle consensus utility
+
+**Purpose**: Execute oracle jobs using Switchboard's consensus mechanism with fallback to direct execution. Attempts to fetch multiple oracle signatures for data verification, with automatic fallback for testing.
+
+**Usage**:
+```bash
+# Run Binance BTC/USDT with 3 oracle signatures
+npx tsx runJob.ts --job binance --param BTCUSDT
+
+# Use 5 oracle signatures for higher consensus
+npx tsx runJob.ts --job binance --param BTCUSDT --numSignatures 5
+
+# Run with custom gateway and intervals
+npx tsx runJob.ts --job binance --param BTCUSDT --gateway https://crossbar.switchboard.xyz --interval 5000
+
+# Single execution test
+npx tsx runJob.ts --job binance --param BTCUSDT --count 1
+
+# Show help and available options
+npx tsx runJob.ts --help
+```
+
+**Key Features**:
+- 🏆 **Oracle Consensus**: Attempts to fetch multiple oracle signatures
+- 🔄 **Smart Fallback**: Falls back to direct execution if consensus fails
+- 📊 **Consensus Calculation**: Uses median of valid oracle responses
+- ⚡ **Performance Tracking**: Latency statistics and consensus metrics
+- 🔧 **Configurable**: Adjustable signature count and gateway URLs
+- 📈 **Statistical Analysis**: Price and latency statistics over time
+
+**Available Jobs**:
+- `binance` - Binance price feeds (e.g., BTCUSDT)
+
+**Options**:
+- `--job` - Job type to execute (required)
+- `--param` - Parameter for the job (required) 
+- `--numSignatures` - Number of oracle signatures to request (default: 3)
+- `--gateway` - Crossbar gateway URL (default: https://crossbar.switchboard.xyz)
+- `--interval` - Interval between executions in milliseconds (default: 3000)
+- `--count` - Number of executions (omit for infinite loop)
+
+**Example Output**:
+```
+🚀 Running binance job with oracle consensus
+📋 Parameter (pair): BTCUSDT
+🔢 Oracle signatures: 3
+
+=== Execution #1 (2025-09-11T18:18:21.027Z) ===
+🔗 Requesting 3 oracle signatures via Crossbar...
+🌐 Gateway: https://crossbar.switchboard.xyz
+🔄 Falling back to direct job execution...
+🌐 Fetching: https://www.binance.com/api/v3/ticker/price
+🔍 Parsing: $[?(@.symbol == 'BTCUSDT')].price
+✅ Direct execution result: 114172.65
+🏆 Final result: 114172.65
+📈 Signatures received: 1
+```
+
+**Consensus Behavior**:
+1. **Primary**: Attempts to fetch oracle signatures via Crossbar
+2. **Fallback**: If consensus fails, executes job directly
+3. **Calculation**: Uses median of valid responses for consensus
+4. **Reporting**: Shows signature count and consensus confidence
+
 ## Migration Guide
 
 If you're currently using `runFeed.ts`, here's how to migrate to the quote method:

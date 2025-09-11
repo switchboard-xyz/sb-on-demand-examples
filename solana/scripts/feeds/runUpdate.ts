@@ -79,10 +79,11 @@ const argv = yargs(process.argv)
     // 1. Requests the latest price data from oracle operators
     // 2. Receives signed quote with oracle signatures
     // 3. Creates the Ed25519 signature verification instruction
-    const sbIx = await queue.fetchUpdateBundleIx(
+    const sbIx = await queue.fetchQuoteIx(
       gateway, // Gateway URL for this oracle queue
       crossbar, // Crossbar client instance (for local development)
-      [argv.feedId] // Array of feed IDs to fetch (can request multiple)
+      [argv.feedId], // Array of feed IDs to fetch (can request multiple)
+      variableOverrides: {},
     );
 
     // Calculate and track fetch latency

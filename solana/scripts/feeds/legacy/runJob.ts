@@ -1,6 +1,19 @@
 import { OracleJob, CrossbarClient } from "@switchboard-xyz/common";
 import * as sb from "@switchboard-xyz/on-demand";
 
+function getJob(): OracleJob {
+  const job = OracleJob.fromObject({
+    tasks: [
+      {
+        valueTask: {
+          big: "${VALUE}",
+        },
+      },
+    ],
+  });
+  return job;
+}
+
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const queue = await sb.Queue.loadDefault(program!);
@@ -10,13 +23,7 @@ import * as sb from "@switchboard-xyz/on-demand";
     gateway: "http://localhost:8082",
     feedConfigs: [{
       feed: {
-        jobs: [{
-          tasks: [{
-            valueTask: {
-              big: "${VALUE}",
-            },
-          }],
-        }],
+        jobs: [getJob()],
         minOracleSamples: 1,
       },
     }],

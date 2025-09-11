@@ -81,7 +81,7 @@ const argv = yargs(process.argv)
     // 3. Creates the Ed25519 signature verification instruction
     const sbIx = await queue.fetchUpdateBundleIx(
       gateway, // Gateway URL for this oracle queue
-      crossbar as any, // Crossbar client instance (for local development)
+      crossbar, // Crossbar client instance (for local development)
       [argv.feedId] // Array of feed IDs to fetch (can request multiple)
     );
 

@@ -1,7 +1,6 @@
 import { OracleJob, CrossbarClient } from "@switchboard-xyz/common";
 import * as sb from "@switchboard-xyz/on-demand";
 
-
 (async function main() {
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const queue = await sb.Queue.loadDefault(program!);
@@ -11,7 +10,6 @@ import * as sb from "@switchboard-xyz/on-demand";
     gateway: "http://localhost:8082",
     feedConfigs: [{
       feed: {
-        name: "binance",
         jobs: [{
           tasks: [{
             valueTask: {
@@ -20,7 +18,6 @@ import * as sb from "@switchboard-xyz/on-demand";
           }],
         }],
         minOracleSamples: 1,
-        maxJobRangePct: 1000000000,
       },
     }],
     numSignatures: 1,
@@ -29,5 +26,5 @@ import * as sb from "@switchboard-xyz/on-demand";
       "VALUE": "99999",
     },
   });
-  console.log("res", res);
+  console.log(res);
 })();

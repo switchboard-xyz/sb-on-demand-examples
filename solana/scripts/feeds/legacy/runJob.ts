@@ -18,7 +18,7 @@ import { sleep, calculateStatistics } from "../../utils";
         jobs: [{
           tasks: [{
             valueTask: {
-              value: 1,
+              big: "${VALUE}",
             },
           }],
         }],
@@ -29,6 +29,7 @@ import { sleep, calculateStatistics } from "../../utils";
     numSignatures: 1,
     useEd25519: true,
     variableOverrides: {
+      "VALUE": "99999",
     },
   });
   console.log("res", res);

@@ -39,25 +39,11 @@ const argv = yargs(process.argv)
 (async function main() {
   // Load Solana environment configuration from standard locations
   // Expects ANCHOR_WALLET environment variable or ~/.config/solana/id.json
-  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
+  const { program, keypair, connection, crossbar, queue, gateway } = await sb.AnchorUtils.loadEnv();
   console.log("RPC:", connection.rpcEndpoint);
 
   // Initialize your program that will consume the oracle data
   const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);
-
-  // Create Crossbar client for fetching oracle quotes
-  // Crossbar is Switchboard's high-performance oracle data delivery network
-  // For local development, create a dummy crossbar instance
-  const crossbar = new CrossbarClient("https://crossbar.switchboardlabs.xyz");
-
-  // Load the default Switchboard queue for your network (mainnet/devnet)
-  // The queue contains the list of authorized oracle signers
-  const queue = await sb.Queue.loadDefault(program!);
-
-  // Fetch the gateway URL for this queue from Crossbar
-  // This endpoint will provide signed oracle quotes
-  // const gateway = new sb.Gateway(program!, "http://localhost:8082"); // Local development
-  const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
 
   // Load the address lookup table for transaction size optimization
   // This significantly reduces transaction size by using indices instead of full addresses
@@ -83,7 +69,9 @@ const argv = yargs(process.argv)
       gateway, // Gateway URL for this oracle queue
       crossbar, // Crossbar client instance (for local development)
       [argv.feedId], // Array of feed IDs to fetch (can request multiple)
-      variableOverrides: {},
+      {
+        variableOverrides: {},
+      }
     );
 
     // Calculate and track fetch latency

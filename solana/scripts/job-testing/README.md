@@ -1,306 +1,338 @@
 # Job Testing Scripts
 
-This directory contains scripts for testing and experimenting with Switchboard oracle jobs. These tools are designed for developers who want to test job configurations, variable overrides, and oracle responses before integrating into production applications.
+This directory contains scripts for testing and experimenting with Switchboard oracle jobs. These tools are designed for developers who want to test job configurations and oracle responses before integrating into production applications.
 
 ## 📋 Scripts Overview
 
-### `runJobWithVariables.ts` - Variable Override Testing ⭐
-**Purpose**: Test oracle jobs with dynamic variable substitution
+### `runJob.ts` - Oracle Job Definition Testing ⭐
 
-**Key Features**:
-- Test job definitions with custom variable overrides
-- Validate API key substitution and environment-specific parameters
-- Simulate transactions before sending to reduce costs
-- Comprehensive error handling and debugging output
-
-**Usage**:
-```bash
-# Basic job execution with no variables
-bun run scripts/job-testing/runJobWithVariables.ts --feed YOUR_FEED_PUBKEY
-
-# Test with API key override
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED_PUBKEY \
-  --variables '{"API_KEY": "your-test-key-123"}'
-
-# Multiple variable overrides
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED_PUBKEY \
-  --variables '{"API_KEY": "key123", "SYMBOL": "BTCUSD", "ENDPOINT": "https://api.example.com"}' \
-  --numSignatures 3 \
-  --simulate false
-```
-
-**Parameters**:
-- `--feed` (required): Feed public key to test
-- `--variables` (optional): JSON string of variable overrides
-- `--gateway` (optional): Gateway URL (default: internal crossbar)
-- `--numSignatures` (optional): Number of oracle signatures to request (default: 3)
-- `--simulate` (optional): Whether to simulate (true) or send transaction (false, default: true)
-
-**Variable Examples**:
-- API Keys: `'{"API_KEY": "your-secret-key"}'`
-- Symbols: `'{"SYMBOL": "BTCUSD", "BASE": "BTC", "QUOTE": "USD"}'`
-- Endpoints: `'{"BASE_URL": "https://api.prod.example.com", "VERSION": "v2"}'`
-- Environment: `'{"ENV": "production", "TIMEOUT": "30000", "REGION": "us-east-1"}'`
-
-### `runJob.ts` - Legacy Job Definition Testing
-**Purpose**: Test custom oracle job definitions with raw job configuration
+**Purpose**: Test custom oracle job definitions with variable substitution
 
 **Key Features**:
 - Define custom Oracle jobs with specific data sources
-- Test API integrations (Polygon.io example included)
-- Fetch signatures with custom variable overrides
+- Test API integrations with variable overrides
+- Fetch signatures directly from oracle consensus
 - Low-level oracle response debugging
 
 **Usage**:
 ```bash
 # Run with environment variables
-POLYGON_API_KEY=your_key bun run scripts/job-testing/runJob.ts
+POLYGON_API_KEY=your_api_key bun run scripts/job-testing/runJob.ts
+
+# Set multiple environment variables
+POLYGON_API_KEY=your_key VALUE=12345 bun run scripts/job-testing/runJob.ts
 ```
 
-**Job Examples**:
-- **Value Job**: Simple value tasks for testing
-- **Polygon API Job**: Stock price fetching from Polygon.io
-- **Custom HTTP Jobs**: Template for API integrations
+## 🧪 Job Examples Included
 
-## 🧪 Testing Workflow
-
-### 1. **Job Definition Testing**
-Use these scripts to validate your oracle job definitions before deploying:
-
-```bash
-# Test a simple job configuration
-bun run scripts/job-testing/runJob.ts
-
-# Test with production-like variables
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --variables '{"API_KEY": "test-key", "ENV": "staging"}'
-```
-
-### 2. **Variable Override Validation**
-Ensure your job variables work correctly across different environments:
-
-```bash
-# Development environment
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --variables '{"ENV": "dev", "API_KEY": "dev-key-123"}'
-
-# Production environment
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --variables '{"ENV": "prod", "API_KEY": "prod-key-456"}' \
-  --simulate false
-```
-
-### 3. **Oracle Consensus Testing**
-Test different oracle signature requirements:
-
-```bash
-# Single oracle (testing only)
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --numSignatures 1
-
-# Production consensus (recommended)
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --numSignatures 3
-```
-
-## 🔍 Understanding Variable Substitution
-
-Oracle jobs use `${VARIABLE_NAME}` syntax for dynamic parameters. Common patterns:
-
-### API Authentication
-```json
+### 1. **Value Job**
+Simple job that returns a static value using variable substitution:
+```typescript
 {
-  "httpTask": {
-    "url": "https://api.example.com/data?key=${API_KEY}",
-    "headers": [
-      {
-        "key": "Authorization", 
-        "value": "Bearer ${AUTH_TOKEN}"
-      }
-    ]
-  }
+  tasks: [{
+    valueTask: {
+      big: "${VALUE}",  // Uses VALUE environment variable
+    },
+  }],
 }
 ```
 
-### Dynamic Endpoints
-```json
+### 2. **Polygon API Job**  
+Real-world example fetching stock prices from Polygon.io:
+```typescript
 {
-  "httpTask": {
-    "url": "${BASE_URL}/${VERSION}/price/${SYMBOL}",
-    "method": "GET"
-  }
-}
-```
-
-### Environment Configuration
-```json
-{
-  "httpTask": {
-    "url": "https://${ENV}.api.example.com/data",
-    "timeout": "${TIMEOUT}"
-  }
-}
-```
-
-## 📊 Output Interpretation
-
-### Successful Response Example
-```
-🚀 Starting Switchboard job execution with variable overrides...
-📋 Using variable overrides: {"API_KEY": "***"}
-⚙️ Initializing Switchboard environment...
-🔥 Pre-heating lookup tables...
-📡 Fetching job signatures with 3 signatures...
-⚡ Fetch completed in 245ms
-✅ All oracle responses successful!
-📦 Building transaction...
-🧪 Simulating transaction...
-✅ Simulation successful!
-💰 Compute units used: 145,234
-
-📈 Execution Summary:
-- Feed: AbCd...XyZ
-- Gateway: https://internal-crossbar.prod.mrgn.app
-- Variables used: 1
-- Fetch time: 245ms
-- Mode: Simulation
-- Variable overrides:
-  - API_KEY: your-test-key-123
-```
-
-### Error Response Example
-```
-❌ Error in response: Invalid API key
-❌ Simulation failed:
-{
-  "InstructionError": [
-    0,
+  tasks: [
     {
-      "Custom": 6001
+      httpTask: {
+        url: "https://api.polygon.io/v2/last/trade/AAPL?apiKey=${POLYGON_API_KEY}",
+        method: "GET",
+      }
+    },
+    {
+      jsonParseTask: {
+        path: "$.results.p",  // Extract price from response
+      }
     }
   ]
 }
 ```
 
+## 🔧 Understanding Variable Substitution
+
+Oracle jobs use `${VARIABLE_NAME}` syntax for dynamic parameters. The script demonstrates:
+
+- **API Authentication**: `${POLYGON_API_KEY}` 
+- **Dynamic Values**: `${VALUE}`
+- **Environment Variables**: Loaded automatically from process.env
+
+### Common Variable Patterns
+
+```typescript
+// API endpoints
+"url": "https://api.example.com/v1/price?key=${API_KEY}&symbol=${SYMBOL}"
+
+// Authentication headers  
+"headers": [{"key": "Authorization", "value": "Bearer ${AUTH_TOKEN}"}]
+
+// Dynamic values
+"big": "${PRICE_MULTIPLIER}"
+```
+
+## 🚀 Getting Started
+
+### 1. **Basic Testing**
+```bash
+# Test the value job with a simple number
+VALUE=100 bun run scripts/job-testing/runJob.ts
+```
+
+### 2. **API Integration Testing**
+```bash
+# Test Polygon API integration
+POLYGON_API_KEY=your_polygon_key bun run scripts/job-testing/runJob.ts
+```
+
+### 3. **Custom Job Development**
+Edit `runJob.ts` to add your own job definitions:
+
+```typescript
+function getCustomJob(): OracleJob {
+  const job = OracleJob.fromObject({
+    tasks: [
+      {
+        httpTask: {
+          url: "${BASE_URL}/api/${VERSION}/data?key=${API_KEY}",
+          method: "GET",
+        }
+      },
+      {
+        jsonParseTask: {
+          path: "${JSON_PATH}",
+        }
+      }
+    ]
+  });
+  return job;
+}
+
+// Then use it in main():
+const res = await queue.fetchSignaturesConsensus({
+  gateway: "http://localhost:8082",
+  feedConfigs: [{
+    feed: {
+      jobs: [getCustomJob()], // Use your custom job
+    },
+  }],
+  numSignatures: 1,
+  useEd25519: true,
+  variableOverrides: {
+    "BASE_URL": process.env.BASE_URL!,
+    "VERSION": process.env.VERSION!,
+    "API_KEY": process.env.API_KEY!,
+    "JSON_PATH": process.env.JSON_PATH!,
+  },
+});
+```
+
+## 📊 Understanding the Output
+
+### Successful Response
+```bash
+POLYGON_API_KEY=your_key bun run scripts/job-testing/runJob.ts
+[
+  {
+    "value": 150.25,      // The parsed price value
+    "timestamp": 1234567, // When the data was fetched  
+    "oracle": "oracle_pubkey_here"
+  }
+]
+```
+
+### Environment Variable Missing
+```bash
+bun run scripts/job-testing/runJob.ts
+Error: Cannot read property 'POLYGON_API_KEY' of undefined
+```
+
 ## 🚨 Troubleshooting
 
-### Common Issues
-
-#### 1. **Invalid Variables**
-```
-Error parsing variables JSON: Unexpected token
-Expected format: '{"API_KEY": "value", "SYMBOL": "BTCUSD"}'
-```
-**Solution**: Ensure proper JSON format with quoted strings
-
-#### 2. **Missing API Keys**
-```
-❌ Error in response: Unauthorized
-```
-**Solution**: Verify API keys are correct and have proper permissions
-
-#### 3. **Stale Bundle**
-```
-❌ Simulation failed: bundle too stale
-```
-**Solution**: Bundles expire after ~150 slots. Re-run the command to fetch fresh data
-
-#### 4. **Network Issues**
-```
-❌ Error running job with variables: fetch failed
-```
-**Solution**: Check network connectivity and gateway URL
-
-### Debug Mode
-Add verbose logging by modifying the gateway URL or using different configurations:
-
+### 1. **Missing Environment Variables**
 ```bash
-# Use local gateway for debugging
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --gateway "http://localhost:8082" \
-  --variables '{"DEBUG": "true"}'
+# Check what variables your job needs
+grep '\${' scripts/job-testing/runJob.ts
+
+# Set required variables
+POLYGON_API_KEY=your_key VALUE=123 bun run scripts/job-testing/runJob.ts
 ```
 
-## 📝 Development Tips
+### 2. **API Authentication Errors**
+- Verify API keys are correct and active
+- Check if API endpoints are accessible
+- Ensure proper permissions for the API key
 
-### 1. **Start with Simulation**
-Always test with `--simulate true` (default) before sending real transactions:
+### 3. **Network Issues**
+- Check network connectivity to API endpoints
+- Verify URLs are correct and accessible
+- Consider using a local gateway for testing: `gateway: "http://localhost:8082"`
 
+### 4. **JSON Parsing Errors**
+- Verify the JSON path in `jsonParseTask` matches the API response structure
+- Test API endpoints manually to understand response format
+- Use tools like `curl` to inspect raw API responses
+
+## 🔍 Debugging Tips
+
+### 1. **Inspect API Responses**
+Test your API endpoints manually:
 ```bash
-# Safe testing (default)
-bun run scripts/job-testing/runJobWithVariables.ts --feed YOUR_FEED
-
-# Only after validation
-bun run scripts/job-testing/runJobWithVariables.ts --feed YOUR_FEED --simulate false
+# Test Polygon API
+curl "https://api.polygon.io/v2/last/trade/AAPL?apiKey=YOUR_KEY"
 ```
 
-### 2. **Use Environment Variables**
-Store sensitive data in environment variables:
-
-```bash
-# .env file
-API_KEY=your-secret-key
-POLYGON_API_KEY=your-polygon-key
-
-# Script usage
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --variables '{"API_KEY": "'$API_KEY'"}'
+### 2. **Add Logging**
+Modify `runJob.ts` to add debug output:
+```typescript
+console.log("Variable overrides:", {
+  "POLYGON_API_KEY": process.env.POLYGON_API_KEY ? "***" : "MISSING",
+});
+console.log("Full response:", JSON.stringify(res, null, 2));
 ```
 
-### 3. **Incremental Testing**
-Test variable substitution incrementally:
-
-```bash
-# Step 1: No variables
-bun run scripts/job-testing/runJobWithVariables.ts --feed YOUR_FEED
-
-# Step 2: Single variable
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --variables '{"API_KEY": "test-key"}'
-
-# Step 3: Multiple variables
-bun run scripts/job-testing/runJobWithVariables.ts \
-  --feed YOUR_FEED \
-  --variables '{"API_KEY": "test-key", "SYMBOL": "BTCUSD"}'
+### 3. **Test Individual Tasks**
+Break complex jobs into individual tasks to isolate issues:
+```typescript
+// Test just the HTTP task
+const simpleJob = OracleJob.fromObject({
+  tasks: [{
+    httpTask: {
+      url: "https://api.polygon.io/v2/last/trade/AAPL?apiKey=${POLYGON_API_KEY}",
+      method: "GET",
+    }
+  }]
+});
 ```
 
-### 4. **Performance Testing**
-Measure and optimize oracle response times:
+## 🛠️ Development Workflow
 
+### 1. **Start Simple**
 ```bash
-# Test with different signature counts
-for sigs in 1 3 5; do
-  echo "Testing with $sigs signatures:"
-  bun run scripts/job-testing/runJobWithVariables.ts \
-    --feed YOUR_FEED \
-    --numSignatures $sigs \
-    | grep "Fetch completed"
-done
+# Begin with the value job
+VALUE=100 bun run scripts/job-testing/runJob.ts
+```
+
+### 2. **Test API Connectivity**
+```bash
+# Test with real API
+API_KEY=your_key bun run scripts/job-testing/runJob.ts
+```
+
+### 3. **Validate JSON Parsing**
+```bash
+# Ensure JSON paths work correctly
+curl "your_api_endpoint" | jq ".results.p"  # Test JSON path manually
+```
+
+### 4. **Production Testing**
+Once working locally, test with production gateway:
+```typescript
+// In runJob.ts, change gateway to:
+gateway: "https://crossbar.switchboard.xyz"
+```
+
+## 📚 Job Definition Resources
+
+### Oracle Job Types
+- **HttpTask**: Fetch data from HTTP endpoints
+- **JsonParseTask**: Extract values from JSON responses  
+- **ValueTask**: Return static or calculated values
+- **MultiplyTask**: Apply mathematical operations
+- **ConditionalTask**: Implement conditional logic
+
+### Example Job Patterns
+
+#### **Cryptocurrency Price**
+```typescript
+{
+  tasks: [
+    {
+      httpTask: {
+        url: "https://api.coinbase.com/v2/exchange-rates?currency=${SYMBOL}",
+      }
+    },
+    {
+      jsonParseTask: {
+        path: "$.data.rates.USD",
+      }
+    },
+    {
+      multiplyTask: {
+        scalar: "${PRICE_MULTIPLIER}"
+      }
+    }
+  ]
+}
+```
+
+#### **Weather Data**
+```typescript
+{
+  tasks: [
+    {
+      httpTask: {
+        url: "https://api.weather.com/v1/current?key=${WEATHER_API_KEY}&location=${LOCATION}",
+      }
+    },
+    {
+      jsonParseTask: {
+        path: "$.current.temperature",
+      }
+    }
+  ]
+}
+```
+
+#### **Custom API with Authentication**
+```typescript
+{
+  tasks: [
+    {
+      httpTask: {
+        url: "${BASE_URL}/api/data",
+        method: "GET",
+        headers: [
+          {
+            key: "Authorization",
+            value: "Bearer ${AUTH_TOKEN}"
+          },
+          {
+            key: "X-API-Version", 
+            value: "${API_VERSION}"
+          }
+        ]
+      }
+    },
+    {
+      jsonParseTask: {
+        path: "${JSON_PATH}",
+      }
+    }
+  ]
+}
 ```
 
 ## 🔗 Related Scripts
 
-- **Main Feed Scripts**: See `/scripts/feeds/` for production feed operations
-- **Streaming Scripts**: See `/scripts/streaming/` for real-time data streaming
+- **Production Feed Scripts**: See `/scripts/feeds/` for optimized bundle operations
+- **Streaming Scripts**: See `/scripts/streaming/` for real-time data streaming  
 - **Benchmarks**: See `/scripts/benchmarks/` for performance testing
 
-## 📚 Additional Resources
+## 📖 Additional Resources
 
 - [Switchboard Job Documentation](https://docs.switchboard.xyz/reference/jobs)
+- [Oracle Task Types](https://docs.switchboard.xyz/reference/tasks)
 - [Variable Substitution Guide](https://docs.switchboard.xyz/guides/variables)
-- [Oracle Job Examples](https://github.com/switchboard-xyz/switchboard-v2/tree/main/examples)
 - [Discord Support](https://discord.gg/switchboard)
 
 ---
 
-**Note**: These testing scripts are designed for development and validation. For production applications, use the optimized scripts in `/scripts/feeds/` and `/scripts/streaming/`.
+**Note**: This testing script is designed for development and validation. For production applications, use the optimized scripts in `/scripts/feeds/` and `/scripts/streaming/`.

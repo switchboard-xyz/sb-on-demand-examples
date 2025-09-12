@@ -21,8 +21,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
-        specifier: 2.16.1
-        version: 2.16.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: 2.16.2
+        version: 2.16.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -262,8 +262,12 @@ packages:
     resolution: {integrity: sha512-I9UoRIL+D4BdNHlSNA7bOBCWD29yhzMBNRktDAWNKSpTeMEMGo4aBAJowDrsIogJNInhtX4jI42sy9YeJBB8Uw==}
     engines: {node: '>=20'}
 
-  '@switchboard-xyz/on-demand@2.16.1':
-    resolution: {integrity: sha512-KMZNnqpTATq4QXRQtKQCfk8R2g2089E1+/5rkft3+O5ijixmrEjnrIkJa7ecor15fViNq2Hwgpup6qsLvuOAuw==}
+  '@switchboard-xyz/common@4.1.1':
+    resolution: {integrity: sha512-H5esycuUKAzS1SGqV6DZuBME7ZaGLHJc1jP7tgLGjZ2rZSoCRPthPLvHnQAAV3A18uomTyM8aSARyYYEAZnsFA==}
+    engines: {node: '>=20'}
+
+  '@switchboard-xyz/on-demand@2.16.2':
+    resolution: {integrity: sha512-ixZX1+ARSFWtT+xUOtseRmxh7A5gVB+YZh0FXi/FT2+NLYRiK2u6RzyX159pz13ArD4q6qCYnQt9U+/Nmaj3Dg==}
     engines: {node: '>= 18'}
 
   '@types/bn.js@5.2.0':
@@ -1503,11 +1507,31 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@switchboard-xyz/on-demand@2.16.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+  '@switchboard-xyz/common@4.1.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      axios: 1.11.0
+      big.js: 6.2.2
+      bn.js: 5.2.2
+      bs58: 6.0.0
+      buffer: 6.0.3
+      decimal.js: 10.6.0
+      js-sha256: 0.11.1
+      protobufjs: 7.5.4
+      yaml: 2.8.1
+      zod: 4.0.0-beta.20250505T195954
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - encoding
+      - typescript
+      - utf-8-validate
+
+  '@switchboard-xyz/on-demand@2.16.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@coral-xyz/anchor-31': '@coral-xyz/anchor@0.31.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)'
       '@isaacs/ttlcache': 1.4.1
-      '@switchboard-xyz/common': 4.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      '@switchboard-xyz/common': 4.1.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       axios: 1.11.0
       bs58: 6.0.0
       buffer: 6.0.3

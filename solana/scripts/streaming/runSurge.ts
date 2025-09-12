@@ -3,7 +3,7 @@ import { CrossbarClient } from "@switchboard-xyz/common";
 import {
   TX_CONFIG,
   myAnchorProgram,
-  myProgramIx,
+  oracleUpdateIx,
   DEMO_PATH,
   calculateStatistics,
 } from "../utils";
@@ -11,13 +11,10 @@ import {
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
 
-  const crossbar = CrossbarClient.default();
   const apiKey = process.env.SURGE_API_KEY!;
 
-  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
+  const { keypair, connection, program, crossbar, gateway, queue } = await sb.AnchorUtils.loadEnv();
   const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);
-  const queue = await sb.Queue.loadDefault(program!);
-  const gateway = await queue.fetchGatewayByLatestVersion(crossbar);
   const lut = await queue.loadLookupTable();
   const latencies: number[] = [];
   let hasRunSimulation = false;
@@ -59,7 +56,7 @@ import {
 
     const result = response.toBundleIx();
     const sigVerifyIx = Array.isArray(result) ? result[0] : result;
-    const testIx = await myProgramIx(
+    const testIx = await oracleUpdateIx(
       testProgram,
       queue.pubkey,
       keypair.publicKey

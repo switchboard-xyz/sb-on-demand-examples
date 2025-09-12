@@ -1,19 +1,6 @@
 import { OracleJob, CrossbarClient } from "@switchboard-xyz/common";
 import * as sb from "@switchboard-xyz/on-demand";
 
-function getValueJob(): OracleJob {
-  const job = OracleJob.fromObject({
-    tasks: [
-      {
-        valueTask: {
-          big: "${VALUE}",
-        },
-      },
-    ],
-  });
-  return job;
-}
-
 function getPolygonJob(): OracleJob {
   const job = OracleJob.fromObject({
     tasks: [
@@ -41,7 +28,7 @@ function getPolygonJob(): OracleJob {
   const crossbar = new CrossbarClient("http://crossbar.switchboard.xyz");
   const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
   const res = await queue.fetchSignaturesConsensus({
-    gateway: "http://localhost:8082",
+    gateway: gateway.gatewayUrl,
     feedConfigs: [{
       feed: {
         jobs: [getPolygonJob()],

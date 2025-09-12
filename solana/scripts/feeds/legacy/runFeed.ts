@@ -1,7 +1,7 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { CrossbarClient } from "@switchboard-xyz/common";
 import yargs from "yargs";
-import { TX_CONFIG, sleep } from "../utils";
+import { TX_CONFIG, sleep } from "../../utils";
 import { PublicKey } from "@solana/web3.js";
 
 const argv = yargs(process.argv).options({ feed: { required: true } })

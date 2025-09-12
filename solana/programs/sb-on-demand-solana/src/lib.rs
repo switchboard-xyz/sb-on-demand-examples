@@ -40,6 +40,8 @@ pub mod sb_on_demand_solana {
         let cranker = state.cranker.get_or_insert(payer.key());
         let slot = get_slot(&sysvars.clock);
         // Only allow the cranker to call this function
+        //
+        // This is ONLY required if you do not verify in the same instruction
         require!(check_pubkey_eq(&cranker, payer.key), ErrorCode::ConstraintSigner);
 
         solana_program::log::sol_log_compute_units();

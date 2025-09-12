@@ -23,19 +23,15 @@ function getPolygonJob(): OracleJob {
 }
 
 (async function main() {
-  const { program } = await sb.AnchorUtils.loadEnv();
-  const queue = await sb.Queue.loadDefault(program!);
-  const crossbar = new CrossbarClient("http://crossbar.switchboard.xyz");
-  const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
+  const { crossbar, queue, gateway } = await sb.AnchorUtils.loadEnv();
   const res = await queue.fetchSignaturesConsensus({
-    gateway: gateway.gatewayUrl,
+    gateway,
+    useEd25519: true,
     feedConfigs: [{
       feed: {
         jobs: [getPolygonJob()],
       },
     }],
-    numSignatures: 1,
-    useEd25519: true,
     variableOverrides: {
       "POLYGON_API_KEY": process.env.POLYGON_API_KEY!,
     },

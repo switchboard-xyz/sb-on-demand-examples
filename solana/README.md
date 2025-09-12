@@ -133,6 +133,11 @@ The example scripts are organized into categories based on their functionality:
 - **`stream.ts`** - Full streaming implementation with on-chain transaction submission
 - **`crossbarStream.ts`** - Unsigned price streaming via Crossbar for UI/monitoring
 
+### `/scripts/job-testing/` - Job Testing & Development ⭐
+- **`runJobWithVariables.ts`** - Test oracle jobs with variable overrides and custom parameters
+- **`runJob.ts`** - Test custom job definitions and API integrations
+- **[Complete Testing Guide](scripts/job-testing/README.md)** - Comprehensive documentation for job testing workflows
+
 ### `/scripts/benchmarks/` - Performance Testing
 - **`benchmark.ts`** - Compare latency across different oracle providers
 - **`benchmarkCU.ts`** - Measure compute unit consumption for various configurations

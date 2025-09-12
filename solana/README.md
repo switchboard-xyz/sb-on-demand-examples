@@ -20,10 +20,12 @@ git clone https://github.com/switchboard-xyz/sb-on-demand-examples.git
 cd solana
 bun install
 
-# Get a feed hash from https://explorer.switchboardlabs.xyz/
-# Run the example (replace with your feed hash)
-bun run  scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+# Get a feed ID from https://explorer.switchboardlabs.xyz/
+# Run the JavaScript client example (replace with your feed ID)
+bun run scripts/feeds/runUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 ```
+
+> 💡 **New to client-side integration?** The `scripts/` directory contains all the JavaScript/TypeScript code you need!
 
 That's it! You're now fetching real-time oracle prices. 🎉
 
@@ -103,30 +105,40 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 
 *Note:* Use `anchor keys list` to view your program address, then update it in `programs/sb-on-demand-solana/src/lib.rs:6`.
 
-### Step 2: Get a Feed Hash
+### Step 2: Get a Feed ID
 
-Create a data feed using the [Switchboard On-Demand UI](https://beta.ondemand.switchboard.xyz/bundle-builder) and copy the **feed hash** from your feed.
+Create a data feed using the [Switchboard Feed Builder](https://explorer.switchboardlabs.xyz/feed-builder) and copy the **feed ID** from your feed.
 
 ### Step 3: Use Bundles
 
-Run the bundle script with your feed hash:
+Run the update script with your feed ID:
 ```bash
 bun install
-bun run scripts/feeds/runBundle.ts --feedHash YOUR_FEED_HASH
+bun run scripts/feeds/runUpdate.ts --feedId YOUR_FEED_ID
 ```
 
-The `scripts/feeds/runBundle.ts` script fetches live data for your feed and demonstrates how to verify it on-chain using the example program in `programs/sb-on-demand-solana/`. The program shows how to:
+The `scripts/feeds/runUpdate.ts` script fetches live data for your feed and demonstrates how to verify it on-chain using the example program in `programs/sb-on-demand-solana/`. The program shows how to:
 - Verify bundle signatures
 - Extract feed values
 - Access feed metadata
+
+## 🔧 JavaScript/TypeScript Client Code
+
+**Looking for client-side code?** All JavaScript/TypeScript examples are located in the **`/scripts/`** directory. This includes:
+
+- **Complete working examples** for all Switchboard On-Demand features
+- **Production-ready client code** for integration into your applications  
+- **Utilities and helpers** for common operations
+- **Testing and benchmarking tools**
+
+Simply navigate to `./scripts/` to find all client-side implementation examples.
 
 ## 📁 Script Organization
 
 The example scripts are organized into categories based on their functionality:
 
 ### `/scripts/feeds/` - Oracle Feed Operations
-- **`runBundle.ts`** - Fetch aggregated price bundles (recommended for most use cases)
-- **`runFeed.ts`** - Update individual feed accounts with detailed oracle responses
+- **`runUpdate.ts`** - Fetch and verify oracle price data (recommended for most use cases)
 
 ### `/scripts/streaming/` - Real-time Price Streaming
 - **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
@@ -512,7 +524,7 @@ anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDR
 ```
 
 #### "Invalid feed hash"
-- Get a valid feed hash from [Switchboard On-Demand](https://beta.ondemand.switchboard.xyz/bundle-builder)
+- Get a valid feed hash from [Switchboard Feed Builder](https://explorer.switchboardlabs.xyz/feed-builder)
 - Ensure you're using the correct format: `0x...` (32 bytes)
 - Check you're on the right network (devnet/mainnet)
 
@@ -538,7 +550,7 @@ solana airdrop 2
 ## ❓ FAQ
 
 ### What is a feed hash?
-A feed hash uniquely identifies a price feed configuration. It's a 32-byte value (displayed as 0x...) that contains the job definitions for fetching price data. Get one from the [Switchboard On-Demand UI](https://beta.ondemand.switchboard.xyz/bundle-builder).
+A feed hash uniquely identifies a price feed configuration. It's a 32-byte value (displayed as 0x...) that contains the job definitions for fetching price data. Get one from the [Switchboard Feed Builder](https://explorer.switchboardlabs.xyz/feed-builder).
 
 ### How many oracles should I use?
 - **Minimum**: 1 oracle (testing only)
@@ -554,7 +566,7 @@ A feed hash uniquely identifies a price feed configuration. It's a 32-byte value
 Yes! Just update your configuration:
 ```bash
 solana config set --url https://api.mainnet-beta.solana.com
-# Use mainnet feed hashes from https://ondemand.switchboard.xyz/solana/mainnet
+# Use mainnet feed hashes from https://explorer.switchboardlabs.xyz/
 ```
 
 ### How fresh is the price data?

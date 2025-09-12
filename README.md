@@ -11,7 +11,7 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 
 - **[User Guide and Technical Documentation](https://docs.switchboard.xyz/tooling-and-resources/technical-resources-and-documentation)** - Detailed information on getting started, usage examples, and API references.
 - **[TypeDoc Documentation](https://switchboard-docs.web.app/)** - Comprehensive TypeDoc generated documentation.
-- **[Bundle Builder](https://beta.ondemand.switchboard.xyz/bundle-builder)** - Build and verify custom feed bundles with checksum validation.
+- **[Feed Builder](https://explorer.switchboardlabs.xyz/feed-builder)** - Build and verify custom price feeds with checksum validation.
 - **[Explorer](https://explorer.switchboard.xyz)** - Browse feeds, verify integrity, and view historical data.
 
 ## 🌐 Examples by Chain
@@ -23,6 +23,11 @@ The Solana examples demonstrate Switchboard On-Demand functionality on the Solan
 - **[📊 On-Demand Feeds](./solana)** - Price feeds and data oracles
 - **[🎲 On-Demand Randomness](./solana/sb-randomness-on-demand)** - Verifiable Random Function (VRF)
 - **[🔐 On-Demand Secrets](./solana/sb-on-demand-secret)** - Secure secret management
+
+**JavaScript/TypeScript Client Code:**
+- **[📁 Client Examples](./solana/scripts/)** - Complete JavaScript/TypeScript examples for integrating Switchboard On-Demand
+  - Feed operations, streaming, job testing, benchmarks, and utilities
+  - Ready-to-run scripts for bundles, Surge WebSocket streaming, and more
 
 **Resources:**
 - [Rust Crate](https://crates.io/crates/switchboard-on-demand)

@@ -21,8 +21,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
-        specifier: 2.14.4
-        version: 2.14.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: link:/Users/mgild/projects/sbv3/javascript/on-demand
+        version: link:../../sbv3/javascript/on-demand
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -111,10 +111,6 @@ packages:
     resolution: {integrity: sha512-DziebCdg4JpGlEqEdGgXmjqcFoJi+JGulUXwEjsZGAscAQ7MyD/7LE/GVCP29vEQxKc7AAwjT3A2ywHp2xfoCA==}
     engines: {node: '>=18'}
     hasBin: true
-
-  '@isaacs/ttlcache@1.4.1':
-    resolution: {integrity: sha512-RQgQ4uQ+pLbqXfOmieB91ejmLwvSgv9nLx6sT6sD83s7umBypgg+OIBOBbEUiJXrfpnp9j0mRhYYdzp9uqq3lA==}
-    engines: {node: '>=12'}
 
   '@noble/curves@1.4.2':
     resolution: {integrity: sha512-TavHr8qycMChk8UwMld0ZDRvatedkzWfH8IiaeGCfymOP5i0hSCozz9vHOL0nkwk7HRMlFnAiKpS2jrUmSybcw==}
@@ -261,10 +257,6 @@ packages:
   '@switchboard-xyz/common@4.1.0':
     resolution: {integrity: sha512-I9UoRIL+D4BdNHlSNA7bOBCWD29yhzMBNRktDAWNKSpTeMEMGo4aBAJowDrsIogJNInhtX4jI42sy9YeJBB8Uw==}
     engines: {node: '>=20'}
-
-  '@switchboard-xyz/on-demand@2.14.4':
-    resolution: {integrity: sha512-+YL0+BUlJXEtX4MHS+1+0CpzS2z5z7moM58FqXixBu8Zm6L/KVZ4K29LHhRUW8sLZ4Lmet/JOLNMVCYDI+F8HQ==}
-    engines: {node: '>= 18'}
 
   '@types/bn.js@5.2.0':
     resolution: {integrity: sha512-DLbJ1BPqxvQhIGbeu8VbUC1DiAiahHtAYvA0ZEAa4P31F7IaArc8z3C3BRQdWX4mtLQuABG4yzp76ZrS02Ui1Q==}
@@ -1288,8 +1280,6 @@ snapshots:
 
   '@ethereumjs/rlp@5.0.2': {}
 
-  '@isaacs/ttlcache@1.4.1': {}
-
   '@noble/curves@1.4.2':
     dependencies:
       '@noble/hashes': 1.4.0
@@ -1496,24 +1486,6 @@ snapshots:
       protobufjs: 7.5.4
       yaml: 2.8.1
       zod: 4.0.0-beta.20250505T195954
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - typescript
-      - utf-8-validate
-
-  '@switchboard-xyz/on-demand@2.14.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@coral-xyz/anchor-31': '@coral-xyz/anchor@0.31.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)'
-      '@isaacs/ttlcache': 1.4.1
-      '@switchboard-xyz/common': 4.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
-      axios: 1.11.0
-      bs58: 6.0.0
-      buffer: 6.0.3
-      isomorphic-ws: 5.0.0(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      js-yaml: 4.1.0
-      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - debug

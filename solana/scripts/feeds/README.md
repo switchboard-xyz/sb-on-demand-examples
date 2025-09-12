@@ -4,8 +4,8 @@
 
 This directory contains scripts demonstrating different approaches to fetching and submitting oracle price data on Solana:
 
-1. **`runBundle.ts`** - Bundle-based oracle fetching for efficient multi-feed updates
-2. **`runFeed.ts`** - Individual feed updates with granular control
+1. **`runUpdate.ts`** - Quote-based oracle fetching for efficient multi-feed updates
+2. **`legacy/runFeed.ts`** - (Legacy) Individual feed updates with granular control
 
 ## Prerequisites
 
@@ -17,24 +17,24 @@ This directory contains scripts demonstrating different approaches to fetching a
 
 ## Script Details
 
-### 1. runBundle.ts - Bundle-Based Oracle Updates
+### 1. runUpdate.ts - Quote-Based Oracle Updates
 
-**Purpose**: Fetch aggregated oracle data bundles containing multiple price feeds in a single efficient transaction.
+**Purpose**: Fetch aggregated oracle data quotes containing multiple price feeds in a single efficient transaction.
 
 **Usage**:
 ```bash
 # Using bun (recommended)
-bun run scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+bun run scripts/feeds/runUpdate.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 
 # Using npm script
 npm start --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 
 # Using ts-node directly
-npx ts-node scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+npx ts-node scripts/feeds/runUpdate.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 ```
 
 **Key features**:
-- **Bundle mechanism**: Aggregates multiple oracle responses
+- **Quote mechanism**: Aggregates multiple oracle responses
 - **Feed hash input**: Required --feedHash parameter with hexadecimal identifiers
 - **Signature verification**: Ed25519 signature validation
 - **Performance tracking**: Latency statistics (min, median, mean)
@@ -44,7 +44,7 @@ npx ts-node scripts/feeds/runBundle.ts --feedHash f01cc150052ba08171863e5920bdce
 
 **Architecture**:
 ```
-Crossbar Network → Bundle Fetch → Signature Verification → Transaction
+Crossbar Network → Quote Fetch → Signature Verification → Transaction
      ↓                   ↓                    ↓                  ↓
 Oracle Nodes      Aggregated Data      Ed25519 Check      Simulation
 ```
@@ -62,20 +62,20 @@ Loop count: 1
 ✅ Transaction confirmed successfully!
 ```
 
-### 2. runFeed.ts - Individual Feed Updates (Legacy)
+### 2. legacy/runFeed.ts - Individual Feed Updates (Legacy)
 
 **Purpose**: Update specific pull feed accounts with detailed oracle response visibility.
 
 **Usage**:
 ```bash
 # Using bun (recommended)
-bun run scripts/feeds/runFeed.ts GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
+bun run scripts/feeds/legacy/runFeed.ts GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 
 # Using ts-node directly
-npx ts-node scripts/feeds/runFeed.ts GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
+npx ts-node scripts/feeds/legacy/runFeed.ts GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 
 # Interactive mode (prompts for feed)
-bun run scripts/feeds/runFeed.ts
+bun run scripts/feeds/legacy/runFeed.ts
 ```
 
 **Key features**:
@@ -103,16 +103,16 @@ Transaction sent: 3xY2z...
 Latency - Min: 189ms, Median: 234ms, Mean: 267ms, Max: 412ms
 ```
 
-## Choosing Between Bundle and Feed Scripts
+## Choosing Between Quote and Feed Scripts
 
-### Use runBundle.ts when:
+### Use runUpdate.ts when:
 - Fetching multiple price feeds together
 - Optimizing for transaction efficiency
 - Building aggregator services
 - Minimizing network calls
 - Testing oracle performance
 
-### Use runFeed.ts when:
+### Use legacy/runFeed.ts when:
 - Updating specific individual feeds
 - Need detailed oracle response data
 - Require event parsing for price updates
@@ -135,7 +135,7 @@ export COMPUTE_UNIT_LIMIT=150000
 
 ### Feed identifiers:
 
-**Bundle script (uses feed hash)**:
+**Quote script (uses feed hash)**:
 ```typescript
 // BTC/USD mainnet feed hash
 const feedHash = "0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f"
@@ -149,7 +149,7 @@ const feedKey = new PublicKey("GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR")
 
 ## Performance Considerations
 
-### Bundle fetching:
+### Quote fetching:
 - **Latency**: Typically 200-400ms
 - **Efficiency**: Single transaction for multiple feeds
 - **Cost**: Lower per-feed when batching
@@ -163,9 +163,9 @@ const feedKey = new PublicKey("GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR")
 
 ## Advanced Usage
 
-### Customizing bundle fetches:
+### Customizing quote fetches:
 ```typescript
-// Fetch multiple feeds in one bundle
+// Fetch multiple feeds in one quote
 const feedHashes = [
   "0xef0d8b6f...", // BTC/USD
   "0x1234abcd...", // ETH/USD
@@ -204,7 +204,7 @@ if (errors.length > 0) {
    - Try reducing numSignatures requirement
 
 3. **"Transaction too large"**
-   - Reduce number of feeds in bundle
+   - Reduce number of feeds in quote
    - Use fewer signatures
 
 4. **"Simulation failed"**
@@ -225,7 +225,7 @@ solana airdrop 2
 ### Performance testing:
 ```bash
 # Run for extended period
-timeout 300 npx ts-node scripts/feeds/runBundle.ts
+timeout 300 npx ts-node scripts/feeds/runUpdate.ts
 ```
 
 ### Debugging:
@@ -238,10 +238,10 @@ process.env.DEBUG = "switchboard:*"
 
 ### Basic integration:
 ```typescript
-import { fetchBundleData } from "./runBundle";
+import { fetchQuoteData } from "./runUpdate";
 
 // In your application
-const priceData = await fetchBundleData(feedHash);
+const priceData = await fetchQuoteData(feedHash);
 console.log(`BTC Price: $${priceData.price}`);
 ```
 
@@ -264,7 +264,7 @@ const config = {
 
 ## Notes
 
-- Bundle mechanism reduces costs by ~90% for multi-feed updates
+- Quote mechanism reduces costs by ~90% for multi-feed updates
 - Feed updates provide more granular control and visibility
 - Both methods support the same underlying oracle network
 - Transaction fees vary based on network congestion

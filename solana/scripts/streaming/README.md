@@ -213,14 +213,14 @@ surge.on('disconnect', () => {
 ## Notes
 
 - This streams **unsigned** price data - suitable for display but not for on-chain use
-- For signed price data that can be verified on-chain, use the bundle method instead
+- For signed price data that can be verified on-chain, use the quote method instead
 - The Crossbar service is optimized for frontend applications requiring fast updates
 - API keys can be obtained from the Switchboard team
 
 ## Related Examples
 
-- `../feeds/runBundle.ts`: Fetch signed price bundles for on-chain verification
-- `../feeds/runFeed.ts`: Direct feed queries without streaming
+- `../feeds/runUpdate.ts`: Fetch signed price quotes for on-chain verification
+- `../feeds/legacy/runFeed.ts`: (Legacy) Direct feed queries without streaming
 - `../benchmarks/benchmark.ts`: Performance comparison tools
 
 ## Support

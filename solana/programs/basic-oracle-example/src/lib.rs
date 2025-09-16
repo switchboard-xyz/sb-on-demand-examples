@@ -6,8 +6,6 @@ use switchboard_on_demand::quote_account::SwitchboardQuote;
 use switchboard_on_demand::SwitchboardQuoteExt;
 
 declare_id!("C4KQQeJVJ1X4uP2XeRGJT77s6A9ooas8rZiW1XB2C2r8");
-// Defines SwitchboardQuote anchor wrapper
-// Anchor bindings for SwitchboardQuote are now built into the crate
 
 /// Basic Oracle Example Program
 ///

@@ -4,7 +4,8 @@ use switchboard_on_demand::{
 };
 
 declare_id!("FNnhcuzFqg8CSVHRauPh8rFaqSrJzsQ8wL66GFL8VJZQ");
-// Defines SwitchboardQuote anchor wrapper
+// Defines SwitchboardQuote anchor wrapper. This allows oracle accounts
+// to be owned by your program.
 switchboard_on_demand::switchboard_anchor_bindings!();
 
 /// Advanced Oracle Example Program
@@ -16,23 +17,24 @@ switchboard_on_demand::switchboard_anchor_bindings!();
 pub mod advanced_oracle_example {
     use super::*;
 
-    /// Parse oracle data and print feed IDs and values
-    ///
-    /// This instruction demonstrates how to:
-    /// - Verify oracle data from the quote program
-    /// - Parse multiple feeds from a single oracle account
-    /// - Extract feed IDs and values for business logic
-    /// - Log structured data for monitoring and debugging
-    pub fn parse_oracle_data(ctx: Context<ParseOracleData>) -> Result<()> {
-        let ParseOracleData { oracle_account, queue, sysvars, .. } = ctx.accounts;
+    pub fn crank(ctx: Context<CrankAccounts>) -> Result<()> {
+        let CrankAccounts { oracle, queue, sysvars, .. } = ctx.accounts;
+        let slot = get_slot(&sysvars.clock);
+        OracleQuote::write_from_ix(&sysvars.instructions, &oracle, slot, 0);
+        Ok(())
+    }
+
+    pub fn read(ctx: Context<ReadAccounts>) -> Result<()> {
+        let ReadAccounts { oracle, queue, sysvars, .. } = ctx.accounts;
+        let slot = get_slot(&sysvars.clock);
 
         // Verify the oracle quote data
         let quote = QuoteVerifier::new()
             .slothash_sysvar(&sysvars.slothashes)
             .ix_sysvar(&sysvars.instructions)
-            .clock_slot(get_slot(&sysvars.clock))
+            .clock_slot(slot)
             .queue(&queue)
-            .max_age(30) // Allow quotes up to 30 slots old
+            .max_age(30)
             .verify_account(&oracle_account)?;
 
         msg!("🎉 Successfully verified oracle data!");
@@ -46,7 +48,6 @@ pub mod advanced_oracle_example {
         for (index, feed_info) in quote.feeds().iter().enumerate() {
             msg!("📋 Feed #{}: {}", index + 1, feed_info.hex_id());
             msg!("💰 Value: {}", feed_info.value());
-            msg!("---");
         }
 
         msg!("✅ Parsing complete!");
@@ -54,26 +55,29 @@ pub mod advanced_oracle_example {
     }
 }
 
-/// Parse oracle data context
 #[derive(Accounts)]
-pub struct ParseOracleData<'info> {
-    /// Canonical oracle account containing verified quote data
-    /// - Created and owned by the quote program (orac1eyNhmmA877ttBwvCD6jgQ5Cd71FJU6JJfGjAvR)
-    /// - Derived from feed hashes using PullFeed.getCanonicalPubkey()
-    /// - Updated by the quote program's verified_update instruction
-    /// - Contains verified, up-to-date oracle data
-    /// - Validated to be the canonical account for the contained feeds
+pub struct CrankAccounts<'info> {
     #[account(
-        constraint = oracle_account.canonical_key(&oracle_account.owner) == oracle_account.key() @ ErrorCode::InvalidOracleAccount
+        init_if_needed,
+        address = oracle.canonical_key(&crate::ID)
+        payer = payer,
+        space = SwitchboardQuote::LEN,
     )]
-    pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
-
-    /// The Switchboard queue (automatically selected based on network)
+    pub oracle:         InterfaceAccount<'info, SwitchboardQuote>,
     #[account(address = switchboard_on_demand::default_queue())]
-    pub queue: AccountLoader<'info, QueueAccountData>,
+    pub queue:          AccountLoader<'info, QueueAccountData>,
+    pub payer:          Signer<'info>,
+    pub system_program: Program<'info, System>,
+    pub sysvars:        Sysvars<'info>,
+}
 
-    /// System variables required for oracle verification
-    pub sysvars: Sysvars<'info>,
+#[derive(Accounts)]
+pub struct ReadAccounts<'info> {
+    #[account(address = oracle.canonical_key(&crate::ID))]
+    pub oracle:         InterfaceAccount<'info, SwitchboardQuote>,
+    #[account(address = switchboard_on_demand::default_queue())]
+    pub queue:          AccountLoader<'info, QueueAccountData>,
+    pub sysvars:        Sysvars<'info>,
 }
 
 /// System variables required for oracle verification

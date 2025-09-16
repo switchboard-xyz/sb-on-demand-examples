@@ -630,23 +630,25 @@ export function calculateStatistics(latencies: number[]) {
  * @param {anchor.Program} program - Basic oracle example program instance
  * @param {PublicKey} oracleAccount - The canonical oracle account (derived from feed hashes)
  * @param {PublicKey} queue - The Switchboard queue public key
+ * @param {PublicKey} payer - The payer account
  * @returns {Promise<TransactionInstruction>} Instruction to read oracle data
  */
 export async function basicReadOracleIx(
   program: anchor.Program,
   oracleAccount: PublicKey,
-  queue: PublicKey
+  queue: PublicKey,
+  payer: PublicKey
 ): Promise<TransactionInstruction> {
   return await program.methods
     .readOracleData()
     .accounts({
-      oracleAccount: oracleAccount,
-      queue: queue,
-      sysvars: {
-        clock: SYSVAR_CLOCK_PUBKEY,
-        slothashes: sb.SPL_SYSVAR_SLOT_HASHES_ID,
-        instructions: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
-      },
+      queue: queue,                                    // accounts[1]
+      oracleAccount: oracleAccount,                   // accounts[2]
+      ixSysvar: sb.SPL_SYSVAR_INSTRUCTIONS_ID,       // accounts[3]
+      slotSysvar: sb.SPL_SYSVAR_SLOT_HASHES_ID,      // accounts[4]
+      clockSysvar: SYSVAR_CLOCK_PUBKEY,              // accounts[5]
+      payer: payer,                                   // accounts[6]
+      systemProgram: anchor.web3.SystemProgram.programId, // accounts[7]
     })
     .instruction();
 }

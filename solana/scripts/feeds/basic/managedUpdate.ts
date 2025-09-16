@@ -65,10 +65,10 @@ const argv = yargs(process.argv)
   // This returns both the Ed25519 signature verification instruction
   // and the quote program instruction that stores the verified data
   const instructions = await queue.fetchManagedUpdateIxs(
-    gateway,
     crossbar,
     [argv.feedId],
     {
+      gateway: gateway,
       numSignatures: 1, // Use single signature for fastest updates
       variableOverrides: {},
       instructionIdx: 0, // Ed25519 instruction index

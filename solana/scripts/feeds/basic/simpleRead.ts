@@ -40,7 +40,7 @@ const argv = yargs(process.argv)
   const queue = await sb.Queue.loadDefault(program!);
 
   // Get the canonical oracle account for this feed
-  const oracleAccount = OracleQuote.getCanonicalPubkey([argv.feedId]);
+  const [oracleAccount] = OracleQuote.getCanonicalPubkey([argv.feedId]);
   console.log("Oracle Account:", oracleAccount.toBase58());
 
   // Get managed update instructions
@@ -58,16 +58,37 @@ const argv = yargs(process.argv)
   const basicProgram = await loadBasicProgram(program!.provider);
 
   // Create instruction to read the oracle data
-  const readOracleIx = await basicReadOracleIx(basicProgram, oracleAccount, queue.pubkey);
+  const readOracleIx = await basicReadOracleIx(basicProgram, oracleAccount, queue.pubkey, keypair.publicKey);
 
   // Send transaction
   const tx = await sb.asV0Tx({
     connection,
-    ixs: [...instructions, readOracleIx],
+    ixs: [...instructions],
     signers: [keypair],
   });
 
   try {
+    // Simulate transaction first to get logs
+    console.log("🔍 Simulating transaction to get logs...");
+    const simulationResult = await connection.simulateTransaction(tx, {
+      sigVerify: false,
+      commitment: "confirmed",
+    });
+
+    if (simulationResult.value.logs) {
+      console.log("📋 Simulation Logs:");
+      simulationResult.value.logs.forEach((log, index) => {
+        console.log(`  ${index + 1}: ${log}`);
+      });
+    }
+
+    if (simulationResult.value.err) {
+      console.error("❌ Simulation Error:", simulationResult.value.err);
+      return;
+    }
+
+    console.log("✅ Simulation successful, sending transaction...");
+
     const sig = await connection.sendTransaction(tx, TX_CONFIG);
     await connection.confirmTransaction(sig, "confirmed");
     console.log("🎉 Success! Transaction:", sig);

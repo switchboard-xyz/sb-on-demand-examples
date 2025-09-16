@@ -5,8 +5,7 @@ import {
   TX_CONFIG,
   sleep,
   loadAdvancedProgram,
-  initializeAdvancedProgram,
-  processOracleDataIx,
+  advancedProcessOracleIx,
   calculateStatistics,
 } from "../../utils";
 
@@ -57,21 +56,8 @@ const argv = yargs(process.argv)
   // Load the advanced oracle example program
   const advancedProgram = await loadAdvancedProgram(program!.provider);
 
-  // Initialize the advanced program state (if needed)
-  try {
-    const initIx = await initializeAdvancedProgram(advancedProgram, keypair.publicKey);
-    const initTx = await sb.asV0Tx({
-      connection,
-      ixs: [initIx],
-      signers: [keypair],
-    });
-    const initSig = await connection.sendTransaction(initTx, TX_CONFIG);
-    await connection.confirmTransaction(initSig, "confirmed");
-    console.log("📋 Program initialized:", initSig);
-  } catch (error) {
-    // Program might already be initialized
-    console.log("📋 Program already initialized or initialization failed:", (error as Error).message);
-  }
+  // No initialization needed for the simplified advanced program
+  console.log("👍 Advanced program loaded and ready");
 
   // Load the address lookup table for transaction size optimization
   // This significantly reduces transaction size by using indices instead of full addresses
@@ -112,18 +98,17 @@ const argv = yargs(process.argv)
     const latency = endTime - start;
     latencies.push(latency);
 
-    // Create the advanced program instruction to process oracle data
-    const processOracleIx = await processOracleDataIx(
+    // Create the advanced program instruction to parse oracle data
+    const parseOracleIx = await advancedProcessOracleIx(
       advancedProgram,
       oracleAccount,
-      queue.pubkey,
-      keypair.publicKey
+      queue.pubkey
     );
 
-    console.log("✨ Generated instructions:", instructions.length);
+    console.log("✨ Generated instructions:", instructions.length + 1);
     console.log("  - Ed25519 signature verification");
     console.log("  - Quote program verified_update");
-    console.log("  - Advanced program process_oracle_data");
+    console.log("  - Advanced program parse_oracle_data");
 
     // Display performance statistics for monitoring
     const stats = calculateStatistics(latencies);
@@ -135,7 +120,7 @@ const argv = yargs(process.argv)
       connection,
       ixs: [
         ...instructions,    // Managed update instructions
-        processOracleIx,   // Advanced program instruction to process the data
+        parseOracleIx,     // Advanced program instruction to parse the data
       ],
       signers: [keypair],
       computeUnitPrice: 20_000, // Priority fee in micro-lamports per compute unit

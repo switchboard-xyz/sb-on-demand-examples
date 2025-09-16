@@ -666,20 +666,13 @@ export async function advancedProcessOracleIx(
   program: anchor.Program,
   oracleAccount: PublicKey,
   queue: PublicKey,
-  authority: PublicKey
+  authority?: PublicKey // Made optional since we don't need it anymore
 ): Promise<TransactionInstruction> {
-  const [statePda] = PublicKey.findProgramAddressSync(
-    [Buffer.from("state")],
-    program.programId
-  );
-
   return await program.methods
-    .processOracleData()
+    .parseOracleData()
     .accounts({
-      state: statePda,
       oracleAccount: oracleAccount,
       queue: queue,
-      authority: authority,
       sysvars: {
         clock: sb.web3.SYSVAR_CLOCK_PUBKEY,
         slothashes: sb.SPL_SYSVAR_SLOT_HASHES_ID,
@@ -689,35 +682,6 @@ export async function advancedProcessOracleIx(
     .instruction();
 }
 
-/**
- * Creates an instruction to initialize the advanced program
- *
- * This must be called once before using the advanced program features.
- *
- * @param {anchor.Program} program - Advanced oracle example program instance
- * @param {PublicKey} authority - The program authority
- * @param {PublicKey} payer - The transaction payer
- * @returns {Promise<TransactionInstruction>} Instruction to initialize program state
- */
-export async function initializeAdvancedProgramIx(
-  program: anchor.Program,
-  authority: PublicKey,
-  payer: PublicKey
-): Promise<TransactionInstruction> {
-  const [statePda] = PublicKey.findProgramAddressSync(
-    [Buffer.from("state")],
-    program.programId
-  );
-
-  return await program.methods
-    .initialize(authority)
-    .accounts({
-      state: statePda,
-      payer: payer,
-      systemProgram: sb.web3.SystemProgram.programId,
-    })
-    .instruction();
-}
 
 /**
  * Loads the basic oracle example program

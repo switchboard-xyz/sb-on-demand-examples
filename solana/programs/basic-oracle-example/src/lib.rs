@@ -1,12 +1,13 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::{
-    QuoteVerifier, QueueAccountData, SlotHashes, Instructions,
-    get_slot
+    QuoteVerifier, QueueAccountData, get_slot, SlotHashes, Instructions
 };
+use switchboard_on_demand::quote_account::SwitchboardQuote;
+use switchboard_on_demand::SwitchboardQuoteExt;
 
-declare_id!("BASiCxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+declare_id!("C4KQQeJVJ1X4uP2XeRGJT77s6A9ooas8rZiW1XB2C2r8");
 // Defines SwitchboardQuote anchor wrapper
-switchboard_on_demand::switchboard_anchor_bindings!();
+// Anchor bindings for SwitchboardQuote are now built into the crate
 
 /// Basic Oracle Example Program
 ///
@@ -32,25 +33,22 @@ pub mod basic_oracle_example {
     /// - queue: The Switchboard queue (auto-detected by network)
     /// - sysvars: Required system variables for verification
     pub fn read_oracle_data(ctx: Context<ReadOracleData>) -> Result<()> {
-        let ReadOracleData { oracle_account, queue, sysvars, .. } = ctx.accounts;
+        msg!("🎉 Successfully accessed oracle account!");
+        msg!("Oracle account key: {}", ctx.accounts.oracle_account.key());
 
-        // Load and verify the oracle quote data
-        let oracle_data = oracle_account.load()?;
-        let quote = QuoteVerifier::new()
-            .slothash_sysvar(&sysvars.slothashes)
-            .ix_sysvar(&sysvars.instructions)
-            .clock_slot(get_slot(&sysvars.clock))
-            .queue(&queue)
-            .max_age(30) // Allow quotes up to 30 slots old
-            .verify_loaded(&oracle_data)?;
+        // Access the oracle data directly
+        // The oracle_account constraint validates it's the canonical account
+        let oracle_account = &ctx.accounts.oracle_account;
 
-        msg!("🎉 Successfully read oracle data!");
-        msg!("Quote slot: {}", quote.slot());
+        // Extract feeds using the SwitchboardQuoteExt trait
+        let feeds = oracle_account.feeds();
 
-        // Process each feed in the quote
-        for feed_info in quote.feeds() {
-            msg!("📊 Feed: {}", feed_info.hex_id());
-            msg!("💰 Value: {}", feed_info.value());
+        msg!("Number of feeds: {}", feeds.len());
+
+        // Process each feed
+        for (i, feed) in feeds.iter().enumerate() {
+            msg!("📊 Feed {}: ID = {}", i, feed.hex_id());
+            msg!("💰 Feed {}: Value = {}", i, feed.value());
 
             // Your business logic here!
             // For example:
@@ -59,6 +57,7 @@ pub mod basic_oracle_example {
             // - Use the price for calculations
         }
 
+        msg!("✅ Successfully read {} oracle feeds!", feeds.len());
         Ok(())
     }
 }
@@ -75,7 +74,11 @@ pub struct ReadOracleData<'info> {
     /// - Derived using PullFeed.getCanonicalPubkey(feedHashes) in TypeScript
     /// - Updated by the quote program's verified_update instruction
     /// - Contains verified, up-to-date oracle data
-    pub oracle_account: AccountLoader<'info, SwitchboardQuote>,
+    /// - Validated to be the canonical account for the contained feeds
+    #[account(
+        constraint = oracle_account.canonical_key() == oracle_account.key() @ ErrorCode::InvalidOracleAccount
+    )]
+    pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
 
     /// The Switchboard queue (automatically selected based on network)
     #[account(address = switchboard_on_demand::default_queue())]
@@ -91,4 +94,12 @@ pub struct Sysvars<'info> {
     pub clock: Sysvar<'info, Clock>,
     pub slothashes: Sysvar<'info, SlotHashes>,
     pub instructions: Sysvar<'info, Instructions>,
+}
+
+
+/// Custom error codes
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Invalid oracle account - not the canonical account for the contained feeds")]
+    InvalidOracleAccount,
 }

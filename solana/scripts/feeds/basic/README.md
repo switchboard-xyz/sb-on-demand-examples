@@ -86,19 +86,19 @@ Example program instruction:
 #[derive(Accounts)]
 pub struct UseOracleData<'info> {
     // The managed oracle account containing verified quote data
-    pub oracle_account: AccountLoader<'info, SwitchboardQuote>,
+    pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
     // Your program's accounts
     #[account(mut)]
     pub your_state: Account<'info, YourState>,
 }
 
 pub fn use_oracle_data(ctx: Context<UseOracleData>) -> Result<()> {
-    let oracle = ctx.accounts.oracle_account.load()?;
+    let oracle = &*ctx.accounts.oracle_account;
 
     // Verify the oracle data is recent and valid
     let quote = QuoteVerifier::new()
         .max_age(20) // 20 slots max age
-        .verify_loaded(&oracle)?;
+        .verify_account(&ctx.accounts.oracle_account)?;
 
     // Extract feed values
     for feed in quote.feeds() {

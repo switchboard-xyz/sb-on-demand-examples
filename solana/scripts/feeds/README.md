@@ -171,7 +171,7 @@ Your Anchor program should accept oracle accounts and verify the data:
 #[derive(Accounts)]
 pub struct UseOracleData<'info> {
     // The managed oracle account containing verified quote data
-    pub oracle_account: AccountLoader<'info, SwitchboardQuote>,
+    pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
     // Your program's state
     #[account(mut)]
     pub state: Account<'info, YourState>,

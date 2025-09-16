@@ -17,5 +17,5 @@ default = []
 
 [dependencies]
 anchor-lang = "0.31.1"
-switchboard-on-demand = "0.1.8"
+switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand" }
 bytemuck = "1.14"

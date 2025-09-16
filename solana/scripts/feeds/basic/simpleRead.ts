@@ -1,5 +1,5 @@
 import * as sb from "@switchboard-xyz/on-demand";
-import { PullFeed, ON_DEMAND_MAINNET_QUEUE, SPL_SYSVAR_SLOT_HASHES_ID, SPL_SYSVAR_INSTRUCTIONS_ID, isMainnetConnection } from "@switchboard-xyz/on-demand";
+import { OracleQuote, ON_DEMAND_MAINNET_QUEUE, SPL_SYSVAR_SLOT_HASHES_ID, SPL_SYSVAR_INSTRUCTIONS_ID, isMainnetConnection } from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
 import {
   TX_CONFIG,
@@ -38,23 +38,15 @@ const argv = yargs(process.argv)
 
   // Auto-detect network and load appropriate queue
   const queue = await sb.Queue.loadDefault(program!);
-  const gateway = await queue.fetchGatewayFromCrossbar(crossbar!);
-
-  // Properly detect network using isMainnetConnection
-  const isMainnet = await isMainnetConnection(connection);
-  console.log("🌐 Queue:", queue.pubkey.toBase58());
-  console.log("🌐 Network:", isMainnet ? 'mainnet' : 'devnet');
 
   // Get the canonical oracle account for this feed
-  const oracleAccount = PullFeed.getCanonicalPubkey([argv.feedId]);
+  const oracleAccount = OracleQuote.getCanonicalPubkey([argv.feedId]);
   console.log("Oracle Account:", oracleAccount.toBase58());
 
   // Get managed update instructions
   const instructions = await queue.fetchManagedUpdateIxs(
-    gateway,
     crossbar,
     [argv.feedId],
-    oracleAccount,
     {
       payer: keypair.publicKey,
     }

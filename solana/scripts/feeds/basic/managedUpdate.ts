@@ -1,5 +1,5 @@
 import * as sb from "@switchboard-xyz/on-demand";
-import { CrossbarClient, PullFeed, isMainnetConnection } from "@switchboard-xyz/on-demand";
+import { CrossbarClient, OracleQuote, isMainnetConnection } from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
 import {
   TX_CONFIG,
@@ -57,7 +57,7 @@ const argv = yargs(process.argv)
 
   // Step 1: Derive the canonical oracle account from feed hashes
   // This uses the same derivation logic as the quote program
-  const oracleAccount = PullFeed.getCanonicalPubkey([argv.feedId]);
+  const oracleAccount = OracleQuote.getCanonicalPubkey([argv.feedId]);
   console.log("📍 Oracle Account (derived):", oracleAccount.toBase58());
 
   // Step 2: Create managed update instructions
@@ -67,7 +67,6 @@ const argv = yargs(process.argv)
     gateway,
     crossbar,
     [argv.feedId],
-    oracleAccount,
     {
       numSignatures: 1, // Use single signature for fastest updates
       variableOverrides: {},

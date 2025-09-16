@@ -96,14 +96,17 @@ The easiest way to use Switchboard On-Demand is with **bundles** - no need to cr
 
 Configure the `Anchor.toml` file to point to your solana wallet and the Solana cluster of your choice - Devnet, Mainnet, etc.
 
-Build and deploy your program:
+Build and deploy your programs:
 ```bash
 anchor build
 anchor deploy
-anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDRESS
+
+# Initialize IDLs for both programs
+anchor idl init --filepath target/idl/basic_oracle_example.json BASIC_PROGRAM_ADDRESS
+anchor idl init --filepath target/idl/advanced_oracle_example.json ADVANCED_PROGRAM_ADDRESS
 ```
 
-*Note:* Use `anchor keys list` to view your program address, then update it in `programs/sb-on-demand-solana/src/lib.rs:6`.
+*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files.
 
 ### Step 2: Get a Feed ID
 
@@ -517,10 +520,13 @@ export SURGE_API_KEY=your_surge_api_key_here  # Optional: For Surge WebSocket st
 
 #### "Program not deployed"
 ```bash
-# Deploy the program first
+# Deploy the programs first
 anchor build
 anchor deploy
-anchor idl init --filepath target/idl/sb_on_demand_solana.json YOUR_PROGRAM_ADDRESS
+
+# Initialize IDLs for both programs
+anchor idl init --filepath target/idl/basic_oracle_example.json BASIC_PROGRAM_ADDRESS
+anchor idl init --filepath target/idl/advanced_oracle_example.json ADVANCED_PROGRAM_ADDRESS
 ```
 
 #### "Invalid feed hash"

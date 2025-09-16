@@ -5,10 +5,12 @@ resolution = true
 skip-lint = true
 
 [programs.devnet]
-sb_on_demand_solana = "2uGHnRkDsupNnicE3btnqJbpus7DWKuniZcRmKAzHFv5"
+basic_oracle_example = "BASiCxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+advanced_oracle_example = "ADVanCedxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 [programs.mainnet]
-sb_on_demand_solana = "13fJ81pBEvmS6Pxqu3UbKutBzbdX6qhYNkt3GJGEBhpf"
+basic_oracle_example = "BASiCxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+advanced_oracle_example = "ADVanCedxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 [registry]
 url = "https://api.apr.dev"

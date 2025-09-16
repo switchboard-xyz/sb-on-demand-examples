@@ -28,11 +28,11 @@ import {
 import * as sb from "@switchboard-xyz/on-demand";
 
 /**
- * Path to the demo program keypair file
- * This is generated when you deploy the example program using Anchor
- * @constant {string}
+ * Program keypair file paths
+ * These are generated when you deploy the example programs using Anchor
  */
-export const DEMO_PATH = "target/deploy/sb_on_demand_solana-keypair.json";
+export const BASIC_PROGRAM_PATH = "target/deploy/basic_oracle_example-keypair.json";
+export const ADVANCED_PROGRAM_PATH = "target/deploy/advanced_oracle_example-keypair.json";
 
 /**
  * Default transaction configuration for Switchboard interactions
@@ -618,4 +618,127 @@ export function calculateStatistics(latencies: number[]) {
     mean,
     count: latencies.length,
   };
+}
+
+/**
+ * Creates an instruction to read oracle data from the basic program
+ *
+ * This is the simplest way to consume Switchboard oracle data.
+ * Perfect for basic examples and learning.
+ *
+ * @param {anchor.Program} program - Basic oracle example program instance
+ * @param {PublicKey} oracleAccount - The canonical oracle account (derived from feed hashes)
+ * @param {PublicKey} queue - The Switchboard queue public key
+ * @returns {Promise<TransactionInstruction>} Instruction to read oracle data
+ */
+export async function basicReadOracleIx(
+  program: anchor.Program,
+  oracleAccount: PublicKey,
+  queue: PublicKey
+): Promise<TransactionInstruction> {
+  return await program.methods
+    .readOracleData()
+    .accounts({
+      oracleAccount: oracleAccount,
+      queue: queue,
+      sysvars: {
+        clock: sb.web3.SYSVAR_CLOCK_PUBKEY,
+        slothashes: sb.SPL_SYSVAR_SLOT_HASHES_ID,
+        instructions: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
+      },
+    })
+    .instruction();
+}
+
+/**
+ * Creates an instruction to process oracle data in the advanced program
+ *
+ * This demonstrates production-ready patterns with state management,
+ * authority validation, and advanced business logic.
+ *
+ * @param {anchor.Program} program - Advanced oracle example program instance
+ * @param {PublicKey} oracleAccount - The canonical oracle account (derived from feed hashes)
+ * @param {PublicKey} queue - The Switchboard queue public key
+ * @param {PublicKey} authority - The program authority (signer)
+ * @returns {Promise<TransactionInstruction>} Instruction to process oracle data
+ */
+export async function advancedProcessOracleIx(
+  program: anchor.Program,
+  oracleAccount: PublicKey,
+  queue: PublicKey,
+  authority: PublicKey
+): Promise<TransactionInstruction> {
+  const [statePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("state")],
+    program.programId
+  );
+
+  return await program.methods
+    .processOracleData()
+    .accounts({
+      state: statePda,
+      oracleAccount: oracleAccount,
+      queue: queue,
+      authority: authority,
+      sysvars: {
+        clock: sb.web3.SYSVAR_CLOCK_PUBKEY,
+        slothashes: sb.SPL_SYSVAR_SLOT_HASHES_ID,
+        instructions: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
+      },
+    })
+    .instruction();
+}
+
+/**
+ * Creates an instruction to initialize the advanced program
+ *
+ * This must be called once before using the advanced program features.
+ *
+ * @param {anchor.Program} program - Advanced oracle example program instance
+ * @param {PublicKey} authority - The program authority
+ * @param {PublicKey} payer - The transaction payer
+ * @returns {Promise<TransactionInstruction>} Instruction to initialize program state
+ */
+export async function initializeAdvancedProgramIx(
+  program: anchor.Program,
+  authority: PublicKey,
+  payer: PublicKey
+): Promise<TransactionInstruction> {
+  const [statePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("state")],
+    program.programId
+  );
+
+  return await program.methods
+    .initialize(authority)
+    .accounts({
+      state: statePda,
+      payer: payer,
+      systemProgram: sb.web3.SystemProgram.programId,
+    })
+    .instruction();
+}
+
+/**
+ * Loads the basic oracle example program
+ *
+ * @param {anchor.Provider} provider - Anchor provider
+ * @returns {Promise<anchor.Program>} Basic program instance
+ */
+export async function loadBasicProgram(
+  provider: anchor.Provider
+): Promise<anchor.Program> {
+  return await myAnchorProgram(provider, BASIC_PROGRAM_PATH);
+}
+
+/**
+ * Loads the advanced oracle example program
+ *
+ * @param {anchor.Provider} provider - Anchor provider
+ * @returns {Promise<anchor.Program>} Advanced program instance
+ */
+export async function loadAdvancedProgram(
+  provider: anchor.Provider
+): Promise<anchor.Program> {
+  return await myAnchorProgram(provider, ADVANCED_PROGRAM_PATH);
 }

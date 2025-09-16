@@ -4,7 +4,7 @@ import {
   TX_CONFIG,
   myAnchorProgram,
   oracleUpdateIx,
-  DEMO_PATH,
+  ADVANCED_PROGRAM_PATH,
   calculateStatistics,
 } from "../utils";
 
@@ -14,7 +14,7 @@ import {
   const apiKey = process.env.SURGE_API_KEY!;
 
   const { keypair, connection, program, crossbar, gateway, queue } = await sb.AnchorUtils.loadEnv();
-  const testProgram = await myAnchorProgram(program!.provider, DEMO_PATH);
+  const testProgram = await myAnchorProgram(program!.provider, ADVANCED_PROGRAM_PATH);
   const lut = await queue.loadLookupTable();
   const latencies: number[] = [];
   let hasRunSimulation = false;

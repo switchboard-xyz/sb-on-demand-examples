@@ -1,0 +1,21 @@
+[package]
+name = "basic-oracle-example"
+version = "0.1.0"
+description = "Basic Switchboard On-Demand Oracle Integration Example"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "basic_oracle_example"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.31.1"
+switchboard-on-demand = "0.1.8"
+bytemuck = "1.14"

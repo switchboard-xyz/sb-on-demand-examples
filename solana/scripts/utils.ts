@@ -24,6 +24,7 @@ import {
   TransactionSignature,
   SYSVAR_SLOT_HASHES_PUBKEY,
   SYSVAR_INSTRUCTIONS_PUBKEY,
+  SYSVAR_CLOCK_PUBKEY,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 
@@ -642,7 +643,7 @@ export async function basicReadOracleIx(
       oracleAccount: oracleAccount,
       queue: queue,
       sysvars: {
-        clock: sb.web3.SYSVAR_CLOCK_PUBKEY,
+        clock: SYSVAR_CLOCK_PUBKEY,
         slothashes: sb.SPL_SYSVAR_SLOT_HASHES_ID,
         instructions: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
       },
@@ -674,7 +675,7 @@ export async function advancedProcessOracleIx(
       oracleAccount: oracleAccount,
       queue: queue,
       sysvars: {
-        clock: sb.web3.SYSVAR_CLOCK_PUBKEY,
+        clock: SYSVAR_CLOCK_PUBKEY,
         slothashes: sb.SPL_SYSVAR_SLOT_HASHES_ID,
         instructions: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
       },

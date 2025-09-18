@@ -32,8 +32,10 @@ import * as sb from "@switchboard-xyz/on-demand";
  * Program keypair file paths
  * These are generated when you deploy the example programs using Anchor
  */
-export const BASIC_PROGRAM_PATH = "target/deploy/basic_oracle_example-keypair.json";
-export const ADVANCED_PROGRAM_PATH = "target/deploy/advanced_oracle_example-keypair.json";
+export const BASIC_PROGRAM_PATH =
+  "target/deploy/basic_oracle_example-keypair.json";
+export const ADVANCED_PROGRAM_PATH =
+  "target/deploy/advanced_oracle_example-keypair.json";
 
 /**
  * Default transaction configuration for Switchboard interactions
@@ -628,7 +630,7 @@ export function calculateStatistics(latencies: number[]) {
  * Perfect for basic examples and learning.
  *
  * @param {anchor.Program} program - Basic oracle example program instance
- * @param {PublicKey} oracleAccount - The canonical oracle account (derived from feed hashes)
+ * @param {PublicKey} quoteAccount - The canonical quote account (derived from feed hashes)
  * @param {PublicKey} queue - The Switchboard queue public key
  * @param {PublicKey} payer - The payer account
  * @returns {Promise<TransactionInstruction>} Instruction to read oracle data
@@ -642,49 +644,104 @@ export async function basicReadOracleIx(
   return await program.methods
     .readOracleData()
     .accounts({
-      queue: queue,                                    // accounts[1]
-      oracleAccount: oracleAccount,                   // accounts[2]
-      ixSysvar: sb.SPL_SYSVAR_INSTRUCTIONS_ID,       // accounts[3]
-      slotSysvar: sb.SPL_SYSVAR_SLOT_HASHES_ID,      // accounts[4]
-      clockSysvar: SYSVAR_CLOCK_PUBKEY,              // accounts[5]
-      payer: payer,                                   // accounts[6]
+      queue: queue, // accounts[1]
+      oracleAccount: oracleAccount, // accounts[2]
+      ixSysvar: sb.SPL_SYSVAR_INSTRUCTIONS_ID, // accounts[3]
+      slotSysvar: sb.SPL_SYSVAR_SLOT_HASHES_ID, // accounts[4]
+      clockSysvar: SYSVAR_CLOCK_PUBKEY, // accounts[5]
+      payer: payer, // accounts[6]
       systemProgram: anchor.web3.SystemProgram.programId, // accounts[7]
     })
     .instruction();
 }
 
 /**
- * Creates an instruction to process oracle data in the advanced program
+ * Creates an instruction to read oracle data in the advanced program (Pinocchio version)
  *
- * This demonstrates production-ready patterns with state management,
- * authority validation, and advanced business logic.
+ * This demonstrates reading and displaying oracle feed data from
+ * the managed oracle account that has been updated by the quote program.
  *
- * @param {anchor.Program} program - Advanced oracle example program instance
- * @param {PublicKey} oracleAccount - The canonical oracle account (derived from feed hashes)
+ * @param {PublicKey} programId - Advanced oracle example program ID
+ * @param {PublicKey} quoteAccount - The canonical quote account (derived from feed hashes)
  * @param {PublicKey} queue - The Switchboard queue public key
- * @param {PublicKey} authority - The program authority (signer)
- * @returns {Promise<TransactionInstruction>} Instruction to process oracle data
+ * @returns {Promise<TransactionInstruction>} Instruction to read oracle data
  */
 export async function advancedProcessOracleIx(
-  program: anchor.Program,
-  oracleAccount: PublicKey,
-  queue: PublicKey,
-  authority?: PublicKey // Made optional since we don't need it anymore
+  programId: PublicKey,
+  quoteAccount: PublicKey,
+  queue: PublicKey
 ): Promise<TransactionInstruction> {
-  return await program.methods
-    .parseOracleData()
-    .accounts({
-      oracleAccount: oracleAccount,
-      queue: queue,
-      sysvars: {
-        clock: SYSVAR_CLOCK_PUBKEY,
-        slothashes: sb.SPL_SYSVAR_SLOT_HASHES_ID,
-        instructions: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
-      },
-    })
-    .instruction();
+  const keys = [
+    { pubkey: quoteAccount, isSigner: false, isWritable: false }, // accounts[0]
+    { pubkey: queue, isSigner: false, isWritable: false }, // accounts[1]
+    { pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false }, // accounts[2]
+    {
+      pubkey: sb.SPL_SYSVAR_SLOT_HASHES_ID,
+      isSigner: false,
+      isWritable: false,
+    }, // accounts[3]
+    {
+      pubkey: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
+      isSigner: false,
+      isWritable: false,
+    }, // accounts[4]
+  ];
+
+  const data = Buffer.from([1]); // instruction discriminator: 1 = read
+
+  return new TransactionInstruction({
+    keys,
+    programId,
+    data,
+  });
 }
 
+/**
+ * Creates an instruction to crank the advanced oracle program (Pinocchio version)
+ *
+ * This demonstrates the advanced pattern where the program manages its own
+ * oracle account with state management and authority validation. This is
+ * an alternative to using the managed update system.
+ *
+ * @param {PublicKey} programId - Advanced oracle example program ID
+ * @param {PublicKey} oracleAccount - The program-owned oracle account
+ * @param {PublicKey} queue - The Switchboard queue public key
+ * @param {PublicKey} payer - The payer account (will be the authority)
+ * @returns {Promise<TransactionInstruction>} Instruction to crank oracle data
+ */
+export async function advancedCrankOracleIx(
+  programId: PublicKey,
+  quoteAccount: PublicKey,
+  queue: PublicKey,
+  payer: PublicKey
+): Promise<TransactionInstruction> {
+  // Derive the state account
+  const [stateAccount] = PublicKey.findProgramAddressSync(
+    [Buffer.from("state")],
+    programId
+  );
+
+  const keys = [
+    { pubkey: quoteAccount, isSigner: false, isWritable: true }, // accounts[0] - quote
+    { pubkey: queue, isSigner: false, isWritable: false }, // accounts[1] - queue
+    { pubkey: stateAccount, isSigner: false, isWritable: true }, // accounts[2] - state
+    { pubkey: payer, isSigner: true, isWritable: true }, // accounts[3] - payer
+    {
+      pubkey: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
+      isSigner: false,
+      isWritable: false,
+    }, // accounts[4] - instructions_sysvar
+    { pubkey: SYSVAR_CLOCK_PUBKEY, isSigner: false, isWritable: false }, // accounts[5] - clock_sysvar
+  ];
+
+  const data = Buffer.from([0]); // instruction discriminator: 0 = crank
+
+  return new TransactionInstruction({
+    keys,
+    programId,
+    data,
+  });
+}
 
 /**
  * Loads the basic oracle example program
@@ -699,13 +756,98 @@ export async function loadBasicProgram(
 }
 
 /**
- * Loads the advanced oracle example program
+ * Creates an instruction to initialize the state account for the advanced program
  *
- * @param {anchor.Provider} provider - Anchor provider
- * @returns {Promise<anchor.Program>} Advanced program instance
+ * This instruction must be called before using the crank instruction.
+ * It creates and initializes the state account that stores the authorized signer.
+ *
+ * @param {PublicKey} programId - Advanced oracle example program ID
+ * @param {PublicKey} payer - The payer account (will be the authority)
+ * @returns {Promise<TransactionInstruction>} Instruction to initialize state
  */
-export async function loadAdvancedProgram(
-  provider: anchor.Provider
-): Promise<anchor.Program> {
-  return await myAnchorProgram(provider, ADVANCED_PROGRAM_PATH);
+export async function advancedInitStateIx(
+  programId: PublicKey,
+  payer: PublicKey
+): Promise<TransactionInstruction> {
+  // Derive the state account
+  const [stateAccount] = PublicKey.findProgramAddressSync(
+    [Buffer.from("state")],
+    programId
+  );
+
+  const keys = [
+    { pubkey: stateAccount, isSigner: false, isWritable: true }, // accounts[0] - state
+    { pubkey: payer, isSigner: true, isWritable: true }, // accounts[1] - payer
+    {
+      pubkey: anchor.web3.SystemProgram.programId,
+      isSigner: false,
+      isWritable: false,
+    }, // accounts[2] - system_program
+  ];
+
+  const data = Buffer.from([2]); // instruction discriminator: 2 = init_state
+
+  return new TransactionInstruction({
+    keys,
+    programId,
+    data,
+  });
+}
+
+/**
+ * Creates an instruction to initialize the oracle account for the advanced program
+ *
+ * This instruction must be called before using the crank instruction if the oracle
+ * account doesn't exist. It creates the oracle account as a PDA derived from queue + feed IDs.
+ *
+ * @param {PublicKey} programId - Advanced oracle example program ID
+ * @param {PublicKey} quoteAccount - The quote account to initialize (PDA)
+ * @param {PublicKey} queue - The Switchboard queue public key
+ * @param {PublicKey} payer - The payer account
+ * @returns {Promise<TransactionInstruction>} Instruction to initialize oracle
+ */
+export async function advancedInitOracleIx(
+  programId: PublicKey,
+  quoteAccount: PublicKey,
+  queue: PublicKey,
+  payer: PublicKey
+): Promise<TransactionInstruction> {
+  const keys = [
+    { pubkey: quoteAccount, isSigner: false, isWritable: true }, // accounts[0] - quote
+    { pubkey: queue, isSigner: false, isWritable: false }, // accounts[1] - queue
+    { pubkey: payer, isSigner: true, isWritable: true }, // accounts[2] - payer
+    {
+      pubkey: anchor.web3.SystemProgram.programId,
+      isSigner: false,
+      isWritable: false,
+    }, // accounts[3] - system_program
+    {
+      pubkey: sb.SPL_SYSVAR_INSTRUCTIONS_ID,
+      isSigner: false,
+      isWritable: false,
+    }, // accounts[4] - instructions_sysvar
+  ];
+
+  const data = Buffer.from([3]); // instruction discriminator: 3 = init_oracle
+
+  return new TransactionInstruction({
+    keys,
+    programId,
+    data,
+  });
+}
+
+/**
+ * Loads the advanced oracle example program ID (Pinocchio version)
+ *
+ * Since the program is now using Pinocchio instead of Anchor,
+ * we just need the program ID rather than a full Anchor program instance.
+ *
+ * @returns {Promise<PublicKey>} Advanced program ID
+ */
+export async function loadAdvancedProgram(): Promise<PublicKey> {
+  const programKeypair = await sb.AnchorUtils.initKeypairFromFile(
+    ADVANCED_PROGRAM_PATH
+  );
+  return programKeypair.publicKey;
 }

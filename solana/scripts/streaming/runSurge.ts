@@ -13,8 +13,12 @@ import {
 
   const apiKey = process.env.SURGE_API_KEY!;
 
-  const { keypair, connection, program, crossbar, gateway, queue } = await sb.AnchorUtils.loadEnv();
-  const testProgram = await myAnchorProgram(program!.provider, ADVANCED_PROGRAM_PATH);
+  const { keypair, connection, program, crossbar, gateway, queue } =
+    await sb.AnchorUtils.loadEnv();
+  const testProgram = await myAnchorProgram(
+    program!.provider,
+    ADVANCED_PROGRAM_PATH
+  );
   const lut = await queue.loadLookupTable();
   const latencies: number[] = [];
   let hasRunSimulation = false;

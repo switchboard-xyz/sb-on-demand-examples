@@ -92,6 +92,60 @@ Oracle → Bundle → Your Program (direct use)
 
 The easiest way to use Switchboard On-Demand is with **bundles** - no need to create accounts on-chain!
 
+### Framework Options: Basic vs Advanced Examples
+
+This repository includes two example programs demonstrating different integration approaches:
+
+#### 🛠️ Basic Example (`programs/basic-oracle-example/`) - **Anchor Framework**
+- **Framework**: **Anchor Framework** for ease of development and safety
+- **Use Case**: Learning, prototyping, and standard DeFi applications
+- **Performance**: ~2k compute unit usage with Anchor overhead
+- **Features**: Full account validation, built-in serialization, comprehensive error handling
+- **Security**: Complete account validation and type safety
+- **Development**: Beginner-friendly with extensive guardrails
+
+#### ⚡ Advanced Example (`programs/advanced-oracle-example/`) - **Pinocchio Framework**
+- **Framework**: **Pinocchio Framework** for maximum optimization and minimal overhead
+- **Use Case**: **Highly optimized oracle programs such as oracle AMMs and MEV-sensitive applications**
+- **Performance**: **Ultra-optimized compute units (~180 CU with Pinocchio wrapper, ~44 CU at lower level)**
+- **Security Model**: **⚠️ TRUSTED CRANKER ONLY - Bypasses account validation for performance**
+
+**🚨 IMPORTANT SECURITY WARNING**: This advanced program is designed for scenarios where you have a **trusted cranker** and understand the security implications. It bypasses many standard account checks for maximum performance optimization. Only use this approach if:
+- You control and trust the cranking infrastructure
+- You understand the reduced security model
+- Your application requires ultra-low compute unit consumption
+
+**Features & Optimizations**:
+- **Trusted Authorization**: Cranker authorization bypasses expensive validation checks
+- **Zero-allocation Parsing**: Account parsing with unsafe operations for speed
+- **Direct Syscalls**: System program calls without framework abstractions
+- **Optimized Dispatch**: Instruction dispatch with `#[inline(always)]`
+- **Minimal Validation**: Reduced account checks in favor of performance
+
+**Performance Breakdown**:
+- **~180 total compute units** with Pinocchio wrapper
+- **~44 compute units** achievable with lower-level optimizations
+- **90% reduction** in compute usage vs standard implementations
+
+This makes the advanced example ideal for **oracle AMMs**, **high-frequency trading bots**, and other applications where compute efficiency is critical and you can guarantee a trusted execution environment.
+
+### Framework Comparison: Anchor vs Pinocchio
+
+| Aspect | **Anchor Framework** (Basic) | **Pinocchio Framework** (Advanced) |
+|--------|------------------------------|-------------------------------------|
+| **Learning Curve** | Beginner-friendly | Advanced developers only |
+| **Safety** | Full type safety & validation | Minimal validation, unsafe optimizations |
+| **Compute Units** | ~2,000 CU | ~180 CU (Pinocchio) / ~44 CU (low-level) |
+| **Development Speed** | Fast prototyping | Requires optimization expertise |
+| **Security Model** | Complete account checks | Trusted cranker required |
+| **Use Cases** | Standard DeFi, Learning | Oracle AMMs, HFT, MEV-sensitive apps |
+| **Code Complexity** | High-level abstractions | Low-level syscalls and unsafe code |
+| **Error Handling** | Comprehensive | Minimal for performance |
+
+**Choose Anchor when**: Building standard DeFi applications, learning Solana development, or need comprehensive safety guarantees.
+
+**Choose Pinocchio when**: Building oracle AMMs, need ultra-low compute costs, have trusted infrastructure, and require maximum performance.
+
 ### Step 1: Setup Your Program
 
 Configure the `Anchor.toml` file to point to your solana wallet and the Solana cluster of your choice - Devnet, Mainnet, etc.
@@ -101,12 +155,13 @@ Build and deploy your programs:
 anchor build
 anchor deploy
 
-# Initialize IDLs for both programs
+# Initialize IDLs for the basic program (Anchor-based)
 anchor idl init --filepath target/idl/basic_oracle_example.json BASIC_PROGRAM_ADDRESS
-anchor idl init --filepath target/idl/advanced_oracle_example.json ADVANCED_PROGRAM_ADDRESS
+
+# The advanced program uses Pinocchio and doesn't require IDL initialization
 ```
 
-*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files.
+*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files. The advanced example includes both basic bundle usage (`scripts/feeds/runUpdate.ts`) and optimized cranking (`scripts/feeds/advanced/runUpdate.ts`).
 
 ### Step 2: Get a Feed ID
 
@@ -115,15 +170,27 @@ Create a data feed using the [Switchboard Feed Builder](https://explorer.switchb
 ### Step 3: Use Bundles
 
 Run the update script with your feed ID:
+
+#### Basic Example (Anchor Framework)
 ```bash
 bun install
 bun run scripts/feeds/runUpdate.ts --feedId YOUR_FEED_ID
 ```
 
-The `scripts/feeds/runUpdate.ts` script fetches live data for your feed and demonstrates how to verify it on-chain using the example program in `programs/sb-on-demand-solana/`. The program shows how to:
+#### Advanced Example (Pinocchio Framework - Optimized)
+```bash
+bun run scripts/feeds/advanced/runUpdate.ts --feedId YOUR_FEED_ID
+```
+
+The scripts demonstrate different integration approaches:
+- **Basic**: Uses Anchor for standard oracle integration with comprehensive validation
+- **Advanced**: Uses Pinocchio for ultra-low compute unit consumption with admin authorization patterns
+
+Both programs show how to:
 - Verify bundle signatures
 - Extract feed values
 - Access feed metadata
+- Handle account initialization
 
 ## 🔧 JavaScript/TypeScript Client Code
 

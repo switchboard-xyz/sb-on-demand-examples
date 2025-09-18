@@ -219,7 +219,7 @@ surge.on('disconnect', () => {
 
 ## Related Examples
 
-- `../feeds/runUpdate.ts`: Fetch signed price quotes for on-chain verification
+- `../feeds/advanced/runUpdate.ts`: Fetch signed price quotes for on-chain verification
 - `../feeds/legacy/runFeed.ts`: (Legacy) Direct feed queries without streaming
 - `../benchmarks/benchmark.ts`: Performance comparison tools
 

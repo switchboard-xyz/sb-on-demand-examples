@@ -10,14 +10,14 @@ function getPolygonJob(): OracleJob {
           method: "GET",
           headers: [],
           body: undefined,
-        }
+        },
       },
       {
         jsonParseTask: {
           path: "$.results.p",
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   return job;
 }
@@ -27,13 +27,15 @@ function getPolygonJob(): OracleJob {
   const res = await queue.fetchSignaturesConsensus({
     gateway,
     useEd25519: true,
-    feedConfigs: [{
-      feed: {
-        jobs: [getPolygonJob()],
+    feedConfigs: [
+      {
+        feed: {
+          jobs: [getPolygonJob()],
+        },
       },
-    }],
+    ],
     variableOverrides: {
-      "POLYGON_API_KEY": process.env.POLYGON_API_KEY!,
+      POLYGON_API_KEY: process.env.POLYGON_API_KEY!,
     },
   });
   console.log(res.median_responses);

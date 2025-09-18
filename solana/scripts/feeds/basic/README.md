@@ -4,18 +4,6 @@ This directory contains simple, easy-to-understand examples for getting started 
 
 ## Examples
 
-### `simpleRead.ts` - Minimal Oracle Integration
-The simplest possible example showing:
-- How to derive canonical oracle accounts with `PullFeed.getCanonicalPubkey()`
-- How to use `fetchManagedUpdateIxs()` for managed updates
-- How to read oracle data in your program
-
-**Perfect for**: First-time users, learning the basics, minimal setup
-
-```bash
-npm run feeds:simple --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
-```
-
 ### `managedUpdate.ts` - Complete Managed Update Flow
 A more detailed example demonstrating:
 - Canonical oracle account derivation
@@ -42,7 +30,7 @@ The new managed update system uses the quote program to:
 ### Canonical Oracle Accounts
 Oracle accounts are derived deterministically from feed hashes:
 ```typescript
-const oracleAccount = PullFeed.getCanonicalPubkey([feedId]);
+const [oracleAccount] = OracleQuote.getCanonicalPubkey([feedId]);
 ```
 
 This ensures:
@@ -112,9 +100,9 @@ pub fn use_oracle_data(ctx: Context<UseOracleData>) -> Result<()> {
 
 ## Getting Started
 
-1. **Choose an example**: Start with `simpleRead.ts` for learning
+1. **Run the example**: Start with `managedUpdate.ts` for learning
 2. **Set your feed ID**: Use a real Switchboard feed hash
-3. **Run the example**: See the oracle integration in action
+3. **See the integration**: Watch the oracle integration in action
 4. **Modify for your needs**: Adapt the pattern to your program
 
 ## Common Feed IDs

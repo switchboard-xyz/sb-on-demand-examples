@@ -32,7 +32,7 @@ npm run benchmark
 ### Using bun (recommended):
 ```bash
 # Fetch price quotes with specific feed
-bun run scripts/feeds/runUpdate.ts --feedHash f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+bun run scripts/feeds/advanced/runUpdate.ts --feedId 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 
 # Stream prices with Surge
 bun run scripts/streaming/runSurge.ts
@@ -47,7 +47,7 @@ bun run scripts/benchmarks/benchmark.ts
 ### Direct execution with ts-node:
 ```bash
 # Run any script directly
-npx ts-node scripts/feeds/runUpdate.ts --feedHash FEED_HASH
+npx ts-node scripts/feeds/advanced/runUpdate.ts --feedId FEED_ID
 ```
 
 ## 📂 Categories
@@ -55,7 +55,7 @@ npx ts-node scripts/feeds/runUpdate.ts --feedHash FEED_HASH
 ### 1. Feeds (`/feeds/`)
 Scripts for fetching and updating oracle price data.
 
-- **`runUpdate.ts`** - Fetch aggregated price quotes (90% cost reduction)
+- **`feeds/advanced/runUpdate.ts`** - Fetch aggregated price quotes (90% cost reduction)
 - **`legacy/runFeed.ts`** - (Legacy) Update individual feed accounts
 
 [📖 Detailed Feeds Documentation](./feeds/README.md)
@@ -99,7 +99,7 @@ export SURGE_API_KEY=your_api_key_here
 
 | Need | Use This Script | Why |
 |------|----------------|-----|
-| Fetch prices for DeFi | `feeds/runUpdate.ts` | Lowest cost, signed data |
+| Fetch prices for DeFi | `feeds/advanced/runUpdate.ts` | Lowest cost, signed data |
 | Real-time UI updates | `streaming/crossbarStream.ts` | Unsigned, lowest latency |
 | Demo streaming integration | `streaming/runSurge.ts` | Clean demo with simulation |
 | Production streaming | `streaming/stream.ts` | Full on-chain integration |
@@ -113,7 +113,7 @@ export SURGE_API_KEY=your_api_key_here
 🔧 Initializing quote fetching demo...
 🌐 RPC: https://api.devnet.solana.com
 👤 Wallet: 7THdgryC8PL7GD6nPjWGxikfZisXdTsgPaXBz1Lzmtxh
-Input feedHash: f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+Input feedId: 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 Min latency: 245 ms
 Median latency: 267 ms
 Mean latency: 256.50 ms

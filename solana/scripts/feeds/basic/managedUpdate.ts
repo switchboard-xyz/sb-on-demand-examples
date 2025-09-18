@@ -2,11 +2,7 @@ import * as sb from "@switchboard-xyz/on-demand";
 import { OracleQuote, isMainnetConnection } from "@switchboard-xyz/on-demand";
 import { CrossbarClient } from "@switchboard-xyz/common";
 import yargs from "yargs";
-import {
-  TX_CONFIG,
-  loadBasicProgram,
-  basicReadOracleIx,
-} from "../../utils";
+import { TX_CONFIG, loadBasicProgram, basicReadOracleIx } from "../../utils";
 
 const argv = yargs(process.argv)
   .options({
@@ -40,17 +36,17 @@ const argv = yargs(process.argv)
  */
 (async function main() {
   // Load Solana environment configuration
-  const { program, keypair, connection, crossbar } = await sb.AnchorUtils.loadEnv();
+  const { program, keypair, connection, crossbar } =
+    await sb.AnchorUtils.loadEnv();
   console.log("RPC:", connection.rpcEndpoint);
   console.log("Using feed ID:", argv.feedId);
 
   // Auto-detect network and load appropriate queue
   const queue = await sb.Queue.loadDefault(program!);
-  const gateway = await queue.fetchGatewayFromCrossbar(crossbar!);
 
   // Display network detection results using proper method
   const isMainnet = await isMainnetConnection(connection);
-  console.log("🌐 Network detected:", isMainnet ? 'mainnet' : 'devnet');
+  console.log("🌐 Network detected:", isMainnet ? "mainnet" : "devnet");
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
 
   // Load the basic oracle example program
@@ -58,7 +54,7 @@ const argv = yargs(process.argv)
 
   // Step 1: Derive the canonical oracle account from feed hashes
   // This uses the same derivation logic as the quote program
-  const oracleAccount = OracleQuote.getCanonicalPubkey([argv.feedId]);
+  const [oracleAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [argv.feedId]);
   console.log("📍 Oracle Account (derived):", oracleAccount.toBase58());
 
   // Step 2: Create managed update instructions
@@ -68,7 +64,6 @@ const argv = yargs(process.argv)
     crossbar,
     [argv.feedId],
     {
-      gateway: gateway,
       numSignatures: 1, // Use single signature for fastest updates
       variableOverrides: {},
       instructionIdx: 0, // Ed25519 instruction index
@@ -82,31 +77,37 @@ const argv = yargs(process.argv)
 
   // Step 3: Create your program instruction to read the oracle data
   // This instruction will read from the oracle account that was just updated
-  const readOracleIx = await basicReadOracleIx(basicProgram, oracleAccount, queue.pubkey);
+  const readOracleIx = await basicReadOracleIx(
+    basicProgram,
+    oracleAccount,
+    queue.pubkey,
+    keypair.publicKey
+  );
 
   // Step 4: Build and send the transaction
   const tx = await sb.asV0Tx({
     connection,
     ixs: [
-      ...instructions,  // Managed update instructions
-      readOracleIx,    // Your program instruction to consume the data
+      ...instructions, // Managed update instructions
+      readOracleIx, // Your program instruction to consume the data
     ],
     signers: [keypair],
     computeUnitPrice: 20_000, // Priority fee
-    computeUnitLimitMultiple: 1.3, // 30% buffer
+    computeUnitLimitMultiple: 1.1, // 10% buffer
   });
 
   // Send the transaction
   try {
+    const sim = await connection.simulateTransaction(tx);
+    console.log(sim.value.logs?.join("\n"));
+    if (sim.value.err) {
+      console.error("❌ Simulation failed:", sim.value.err);
+      return;
+    }
     const sig = await connection.sendTransaction(tx, TX_CONFIG);
     await connection.confirmTransaction(sig, "confirmed");
     console.log("✅ Transaction successful:", sig);
-    console.log(`   View on explorer: https://solscan.io/tx/${sig}`);
   } catch (error) {
     console.error("❌ Transaction failed:", error);
   }
-
-  console.log("\n🎯 Example completed!");
-  console.log("The oracle data is now available in your program at:");
-  console.log(`   Oracle Account: ${oracleAccount.toBase58()}`);
 })();

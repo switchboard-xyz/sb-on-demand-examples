@@ -12,7 +12,7 @@ The scripts in this directory represent older approaches to oracle data fetching
 
 ## Recommended Alternative
 
-For new projects, use **`../runUpdate.ts`** instead, which provides:
+For new projects, use **`../advanced/runUpdate.ts`** instead, which provides:
 
 - ✅ **90% lower costs** through quote aggregation
 - ✅ **Better performance** with reduced network calls
@@ -23,7 +23,7 @@ For new projects, use **`../runUpdate.ts`** instead, which provides:
 
 ### runFeed.ts - Individual Feed Updates
 
-**Status**: Legacy - Use `../runUpdate.ts` instead
+**Status**: Legacy - Use `../advanced/runUpdate.ts` instead
 
 **Purpose**: Update specific pull feed accounts with detailed oracle response visibility.
 
@@ -128,11 +128,11 @@ const response = await feed.fetchUpdateIx({
 ### After (Recommended):
 ```typescript
 // Quote-based update
-const feedHash = "0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f";
+const feedId = "0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f";
 const [sigVerifyIx, quote] = await queue.fetchUpdateQuoteIx(
   gateway,
   crossbar,
-  [feedHash]
+  [feedId]
 );
 ```
 
@@ -146,4 +146,4 @@ These legacy scripts are provided as-is with minimal support. For assistance wit
 
 ---
 
-**⚡ Recommendation**: Start new projects with `../runUpdate.ts` for the best experience and lowest costs.
+**⚡ Recommendation**: Start new projects with `../advanced/runUpdate.ts` for the best experience and lowest costs.

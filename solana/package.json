@@ -21,7 +21,6 @@
   "scripts": {
     "start": "ts-node scripts/feeds/runBundle.ts",
     "fetch-prices": "ts-node scripts/feeds/runBundle.ts",
-    "feeds:simple": "ts-node scripts/feeds/basic/simpleRead.ts",
     "feeds:managed": "ts-node scripts/feeds/basic/managedUpdate.ts",
     "feeds:advanced": "ts-node scripts/feeds/advanced/runUpdate.ts",
     "feeds:legacy": "ts-node scripts/feeds/legacy/runFeed.ts",
@@ -33,9 +32,11 @@
     "test:pullfeed": "ts-node scripts/testPullFeedTransaction.ts",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "build": "anchor build",
-    "deploy": "anchor deploy",
-    "test": "anchor test"
+    "build": "cargo build-sbf",
+    "deploy": "solana program deploy target/deploy/advanced_oracle_example.so",
+    "test": "cargo test",
+    "clippy": "cargo clippy",
+    "fmt": "cargo fmt"
   },
   "engines": {
     "node": ">=16.0.0"

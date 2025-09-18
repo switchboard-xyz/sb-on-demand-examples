@@ -6,8 +6,7 @@ This directory contains examples for integrating Switchboard On-Demand oracles i
 
 ### 📁 `basic/` - Getting Started Examples
 Simple, easy-to-understand examples perfect for learning:
-- **`simpleRead.ts`** - Minimal oracle integration (5 minutes to understand)
-- **`managedUpdate.ts`** - Complete managed update flow with detailed comments
+- **`managedUpdate.ts`** - Complete managed update flow with detailed comments and comprehensive documentation
 
 **Use when**: Learning Switchboard, building your first integration, need minimal setup
 
@@ -26,7 +25,7 @@ Examples using the older Pull Feed system (still supported):
 ### For Beginners (Recommended)
 ```bash
 cd basic/
-npm run feeds:simple --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
+npm run feeds:managed --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
 
 ### For Advanced Users
@@ -78,11 +77,19 @@ const queue = await sb.Queue.loadDefault(program);
 const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
 
 // 2. Derive canonical oracle account
-const oracleAccount = PullFeed.getCanonicalPubkey([feedId]);
+const [oracleAccount] = OracleQuote.getCanonicalPubkey([feedId]);
 
 // 3. Get managed update instructions
 const instructions = await queue.fetchManagedUpdateIxs(
-  gateway, crossbar, [feedId], oracleAccount
+  crossbar,
+  [feedId],
+  {
+    gateway: gateway,
+    numSignatures: 1,
+    variableOverrides: {},
+    instructionIdx: 0,
+    payer: keypair.publicKey,
+  }
 );
 
 // 4. Add your program instruction
@@ -109,9 +116,14 @@ const lut = await queue.loadLookupTable();
 const start = Date.now();
 
 const instructions = await queue.fetchManagedUpdateIxs(
-  gateway, crossbar, feedIds, oracleAccount, {
+  crossbar,
+  feedIds,
+  {
+    gateway: gateway,
     numSignatures: 3,
-    payer: keypair.publicKey
+    variableOverrides: {},
+    instructionIdx: 0,
+    payer: keypair.publicKey,
   }
 );
 
@@ -248,7 +260,7 @@ process.env.DEBUG = "switchboard:*"
 If migrating from legacy Pull Feeds:
 
 1. **Replace** `feed.fetchUpdateIx()` with `queue.fetchManagedUpdateIxs()`
-2. **Derive** oracle accounts with `PullFeed.getCanonicalPubkey()`
+2. **Derive** oracle accounts with `OracleQuote.getCanonicalPubkey()`
 3. **Update** program to use managed oracle accounts
 4. **Test** with basic examples first
 5. **Optimize** with advanced patterns

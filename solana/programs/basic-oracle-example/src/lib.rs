@@ -2,8 +2,7 @@ use anchor_lang::prelude::*;
 use switchboard_on_demand::{
     QuoteVerifier, QueueAccountData, get_slot, SlotHashes, Instructions
 };
-use switchboard_on_demand::quote_account::SwitchboardQuote;
-use switchboard_on_demand::SwitchboardQuoteExt;
+switchboard_on_demand::switchboard_anchor_bindings!();
 
 declare_id!("C4KQQeJVJ1X4uP2XeRGJT77s6A9ooas8rZiW1XB2C2r8");
 
@@ -74,7 +73,7 @@ pub struct ReadOracleData<'info> {
     /// - Contains verified, up-to-date oracle data
     /// - Validated to be the canonical account for the contained feeds
     #[account(
-        constraint = oracle_account.canonical_key() == oracle_account.key() @ ErrorCode::InvalidOracleAccount
+        constraint = oracle_account.canonical_key(&queue.key()) == oracle_account.key() @ ErrorCode::InvalidOracleAccount
     )]
     pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
 

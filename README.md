@@ -27,7 +27,7 @@ The Solana examples demonstrate Switchboard On-Demand functionality on the Solan
 **JavaScript/TypeScript Client Code:**
 - **[📁 Client Examples](./solana/scripts/)** - Complete JavaScript/TypeScript examples for integrating Switchboard On-Demand
   - Feed operations, streaming, job testing, benchmarks, and utilities
-  - Ready-to-run scripts for bundles, Surge WebSocket streaming, and more
+  - Ready-to-run scripts for oracle quotes, Surge WebSocket streaming, and more
 
 **Resources:**
 - [Rust Crate](https://crates.io/crates/switchboard-on-demand)

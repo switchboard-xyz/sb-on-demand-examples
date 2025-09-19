@@ -322,7 +322,7 @@ gateway: "https://crossbar.switchboard.xyz"
 
 ## 🔗 Related Scripts
 
-- **Production Feed Scripts**: See `/scripts/feeds/` for optimized bundle operations
+- **Production Feed Scripts**: See `/scripts/feeds/` for optimized oracle quote operations
 - **Streaming Scripts**: See `/scripts/streaming/` for real-time data streaming  
 - **Benchmarks**: See `/scripts/benchmarks/` for performance testing
 

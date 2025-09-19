@@ -187,7 +187,7 @@ The scripts demonstrate different integration approaches:
 - **Advanced**: Uses Pinocchio for ultra-low compute unit consumption with admin authorization patterns
 
 Both programs show how to:
-- Verify bundle signatures
+- Verify oracle quote signatures
 - Extract feed values
 - Access feed metadata
 - Handle account initialization
@@ -233,7 +233,7 @@ Each directory contains its own README with detailed documentation for the scrip
 
 ### What Makes Oracle Quotes Efficient?
 
-The bundle method (`scripts/feeds/runOracle Quote.ts`) is significantly more efficient than traditional feed updates for several key reasons:
+The oracle quote method (`scripts/feeds/runOracle Quote.ts`) is significantly more efficient than traditional feed updates for several key reasons:
 
 #### 1. **No Write Locks on Data Feeds**
 - Traditional feed updates require write locks on feed accounts, limiting parallelization
@@ -248,7 +248,7 @@ The bundle method (`scripts/feeds/runOracle Quote.ts`) is significantly more eff
 - Reduces latency from seconds to milliseconds
 
 #### 3. **Composable Architecture**
-The bundle method consists of two key components:
+The oracle quote method consists of two key components:
 
 ##### a) **Secp256k1 Precompile Instruction**
 ```typescript
@@ -305,7 +305,7 @@ for feed in quote.feeds() {
 ### Example Usage Pattern
 
 ```typescript
-// Fetch the latest price bundle
+// Fetch the latest price oracle quote
 const sigVerifyIx = await queue.fetchQuoteIx(crossbar, [
   feedHash1,
   feedHash2,
@@ -352,7 +352,7 @@ Surge is a premium WebSocket streaming service that delivers price updates direc
 - **Sub-100ms Latency**: Direct oracle-to-client streaming
 - **Event-Driven Updates**: Receive prices as they change, not on a schedule
 - **No Polling Required**: Persistent WebSocket connection eliminates request overhead
-- **Oracle Quote Compatible**: Seamlessly convert streaming updates to on-chain bundles
+- **Oracle Quote Compatible**: Seamlessly convert streaming updates to on-chain oracle quotes
 
 ### Surge Architecture
 
@@ -444,10 +444,10 @@ surge.on('update', async (response: sb.SurgeUpdate) => {
   // Option 1: Use price directly in your app
   await updatePriceDisplay(response.data.symbol, response.data.price);
 
-  // Option 2: Convert to on-chain bundle when needed
+  // Option 2: Convert to on-chain oracle quote when needed
   if (shouldExecuteTrade(response)) {
-    const [sigVerifyIx, bundle] = response.toBundleIx();
-    await executeTrade(sigVerifyIx, bundle);
+    const [sigVerifyIx, oracleQuote] = response.toOracleQuoteIx();
+    await executeTrade(sigVerifyIx, oracleQuote);
   }
 });
 
@@ -464,8 +464,8 @@ surge.on('update', async (response: sb.SurgeUpdate) => {
   const opportunity = checkArbitrage(response.data);
   if (opportunity && opportunity.profit > MIN_PROFIT) {
     // Execute trade within milliseconds of price change
-    const [ix, bundle] = response.toBundleIx();
-    await executeArbitrageTrade(ix, bundle, opportunity);
+    const [ix, oracleQuote] = response.toOracleQuoteIx();
+    await executeArbitrageTrade(ix, oracleQuote, opportunity);
   }
 });
 ```
@@ -512,7 +512,7 @@ Understanding the byte requirements helps optimize your transactions:
 
 #### Base Instruction Components
 
-For a bundle with **1 oracle signature** and **1 feed**:
+For an oracle quote with **1 oracle signature** and **1 feed**:
 
 ```
 Base instruction size = Fixed overhead + Oracle data + Feed data + Message + Account
@@ -571,7 +571,7 @@ This efficient packing allows you to verify multiple price feeds from multiple o
 
 ## Alternative: Traditional Feed Accounts
 
-While this example focuses on the more efficient bundle method, Switchboard also supports traditional on-chain feed accounts for use cases that require persistent price history.
+While this example focuses on the more efficient oracle quote method, Switchboard also supports traditional on-chain feed accounts for use cases that require persistent price history.
 
 ## 🛠️ Environment Setup
 
@@ -632,7 +632,7 @@ solana airdrop 2
 #### "Simulation failed"
 - Check the program logs: `solana logs | grep "YOUR_PROGRAM_ID"`
 - Ensure all accounts are correctly passed
-- Verify the bundle isn't stale (>150 slots old)
+- Verify the oracle quote isn't stale (>150 slots old)
 
 ## ❓ FAQ
 
@@ -662,21 +662,21 @@ solana config set --url https://api.mainnet-beta.solana.com
 - Check `slots_stale()` in your program to verify freshness
 
 ### Can multiple programs read the same price?
-Yes! The bundle method has no write locks, allowing unlimited parallel reads. This is a major advantage over traditional feeds.
+Yes! The oracle quote method has no write locks, allowing unlimited parallel reads. This is a major advantage over traditional feeds.
 
 ### What is Switchboard Surge?
-Surge is a WebSocket-based streaming service that provides ultra-low latency (<100ms) price updates. It's ideal for high-frequency trading, real-time dashboards, and applications that need the absolute fastest price data. Surge streams prices directly to your application via WebSocket and can convert updates to on-chain bundles when needed.
+Surge is a WebSocket-based streaming service that provides ultra-low latency (<100ms) price updates. It's ideal for high-frequency trading, real-time dashboards, and applications that need the absolute fastest price data. Surge streams prices directly to your application via WebSocket and can convert updates to on-chain oracle quotes when needed.
 
 ### How do I get a Surge API key?
 Contact the Switchboard team through their [Discord](https://discord.gg/switchboard) or support channels to request access to Surge. The API key is required to authenticate with the WebSocket gateway.
 
-### When should I use Surge vs regular bundles?
+### When should I use Surge vs regular oracle quotes?
 - **Use Surge** when you need the absolute lowest latency (<100ms), continuous price streaming, or are building high-frequency trading systems
-- **Use regular bundles** for most DeFi applications, smart contracts, and when you don't need sub-second latency
+- **Use regular oracle quotes** for most DeFi applications, smart contracts, and when you don't need sub-second latency
 - **Use traditional feeds** only when you need persistent on-chain price history
 
 ### Does Surge work offline?
-No, Surge requires an active WebSocket connection. For offline or intermittent connectivity scenarios, use the standard bundle method which works with regular HTTP requests.
+No, Surge requires an active WebSocket connection. For offline or intermittent connectivity scenarios, use the standard oracle quote method which works with regular HTTP requests.
 
 ## 📚 Advanced Usage
 
@@ -693,7 +693,7 @@ const CUSTOM_JOBS = [
 ### Error Handling Best Practices
 ```typescript
 try {
-  // Fetch bundle with proper error handling
+  // Fetch oracle quote with proper error handling
   const sigVerifyIx = await queue.fetchQuoteIx(
     crossbar,
     feedHashes,
@@ -723,8 +723,8 @@ try {
 
   await connection.sendTransaction(tx);
 } catch (error) {
-  if (error.message.includes("bundle too stale")) {
-    // Fetch fresh bundle and retry
+  if (error.message.includes("oracle quote too stale")) {
+    // Fetch fresh oracle quote and retry
   } else if (error.message.includes("insufficient signatures")) {
     // Handle oracle consensus failure
   }
@@ -746,8 +746,8 @@ try {
 ### DeFi Lending Protocol
 ```rust
 // In your Solana program
-pub fn liquidate_position(ctx: Context<Liquidate>, bundle: Vec<u8>) -> Result<()> {
-    // Verify the bundle
+pub fn liquidate_position(ctx: Context<Liquidate>, oracle_quote: Vec<u8>) -> Result<()> {
+    // Verify the oracle quote
     let quote = QuoteVerifier::new()
         .queue(&ctx.accounts.queue)
         .slothash_sysvar(&ctx.accounts.slothashes)
@@ -776,7 +776,7 @@ async function executeTrade(
   leverage: number,
   feedHashes: string[]
 ) {
-  // Fetch multiple prices in one bundle
+  // Fetch multiple prices in one oracle quote
   const sigVerifyIx = await queue.fetchQuoteIx(
     crossbar,
     feedHashes, // ["BTC/USD", "ETH/USD", "SOL/USD"]
@@ -814,14 +814,14 @@ async function executeTrade(
 // Dynamic NFT pricing based on in-game currency rates
 pub fn price_game_item(
     ctx: Context<PriceItem>,
-    bundle: Vec<u8>,
+    oracle_quote: Vec<u8>,
     item_id: u64
 ) -> Result<()> {
-    let verified_bundle = verify_bundle(ctx, bundle)?;
+    let verified_quote = verify_oracle_quote(ctx, oracle_quote)?;
 
     // Get both USD and in-game token prices
-    let usd_price = get_feed_value(&verified_bundle, USD_FEED)?;
-    let game_token_price = get_feed_value(&verified_bundle, GAME_TOKEN_FEED)?;
+    let usd_price = get_feed_value(&verified_quote, USD_FEED)?;
+    let game_token_price = get_feed_value(&verified_quote, GAME_TOKEN_FEED)?;
 
     // Calculate item price in game tokens
     let item_usd_value = ITEM_PRICES[item_id as usize];

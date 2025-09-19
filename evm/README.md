@@ -118,7 +118,7 @@ bun run index.ts
 
 ### Finding and Verifying Feeds
 
-1. **Oracle Quote Builder**: Use [beta.ondemand.switchboard.xyz/bundle-builder](https://beta.ondemand.switchboard.xyz/hyperevm/mainnet/build) to:
+1. **Feed Builder**: Use [explorer.switchboardlabs.xyz/feed-builder](https://explorer.switchboardlabs.xyz/feed-builder) to:
    - Build custom feed Oracle Quotes
    - Verify feed checksums
    - Test feed updates before integration

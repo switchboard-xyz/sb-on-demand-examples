@@ -19,8 +19,8 @@
   "license": "MIT",
   "main": "scripts/index.ts",
   "scripts": {
-    "start": "ts-node scripts/feeds/runBundle.ts",
-    "fetch-prices": "ts-node scripts/feeds/runBundle.ts",
+    "start": "ts-node scripts/feeds/runOracleQuote.ts",
+    "fetch-prices": "ts-node scripts/feeds/runOracleQuote.ts",
     "feeds:managed": "ts-node scripts/feeds/basic/managedUpdate.ts",
     "feeds:advanced": "ts-node scripts/feeds/advanced/runUpdate.ts",
     "feeds:legacy": "ts-node scripts/feeds/legacy/runFeed.ts",

@@ -94,12 +94,12 @@ Then add `EXAMPLE_ADDRESS=0x...` with your deployed contract address to the envi
 source .env
 ```
 
-### 2. Run the Bundle Example
+### 2. Run the Oracle Quote Example
 
 ```bash
 # Update .env with the deployed EXAMPLE_ADDRESS
 # Then run the price update script
-bun run scripts/runBundle.ts
+bun run scripts/runOracleQuote.ts
 ```
 
 This script demonstrates:
@@ -118,8 +118,8 @@ bun run index.ts
 
 ### Finding and Verifying Feeds
 
-1. **Bundle Builder**: Use [beta.ondemand.switchboard.xyz/bundle-builder](https://beta.ondemand.switchboard.xyz/hyperevm/mainnet/build) to:
-   - Build custom feed bundles
+1. **Oracle Quote Builder**: Use [beta.ondemand.switchboard.xyz/bundle-builder](https://beta.ondemand.switchboard.xyz/hyperevm/mainnet/build) to:
+   - Build custom feed Oracle Quotes
    - Verify feed checksums
    - Test feed updates before integration
 

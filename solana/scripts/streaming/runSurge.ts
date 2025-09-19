@@ -58,7 +58,7 @@ import {
     // Only run simulation once after 10 seconds
     if (!hasRunSimulation) return;
 
-    const result = response.toBundleIx();
+    const result = response.toOracleQuoteIx();
     const sigVerifyIx = Array.isArray(result) ? result[0] : result;
     const testIx = await oracleUpdateIx(
       testProgram,
@@ -95,7 +95,7 @@ import {
           if (
             log.includes("Feed hash:") ||
             log.includes("Feed value:") ||
-            log.includes("Bundle verified slot:")
+            log.includes("Oracle Quote verified slot:")
           ) {
             console.log(`   ${log}`);
           }

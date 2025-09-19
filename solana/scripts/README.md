@@ -55,8 +55,8 @@ npx ts-node scripts/feeds/advanced/runUpdate.ts --feedId FEED_ID
 ### 1. Feeds (`/feeds/`)
 Scripts for fetching and updating oracle price data.
 
-- **`feeds/advanced/runUpdate.ts`** - Fetch aggregated price quotes (90% cost reduction)
-- **`legacy/runFeed.ts`** - (Legacy) Update individual feed accounts
+- **`feeds/basic/managedUpdate.ts`** - Simple oracle quote fetching (recommended for beginners)
+- **`feeds/advanced/runUpdate.ts`** - Advanced aggregated price quotes (90% cost reduction)
 
 [📖 Detailed Feeds Documentation](./feeds/README.md)
 

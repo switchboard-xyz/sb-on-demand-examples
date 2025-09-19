@@ -22,7 +22,7 @@ bun install
 
 # Get a feed ID from https://explorer.switchboardlabs.xyz/
 # Run the JavaScript client example (replace with your feed ID)
-bun run scripts/feeds/runUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+bun run scripts/feeds/basic/managedUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 ```
 
 > 💡 **New to client-side integration?** The `scripts/` directory contains all the JavaScript/TypeScript code you need!
@@ -60,7 +60,7 @@ Switchboard On-Demand revolutionizes oracle data delivery on Solana:
 │                        Your Transaction                         │
 │  ┌──────────────────┐         ┌──────────────────┐              │
 │  │ Secp256k1        │         │ Your Program     │              │
-│  │ Signature Verify │────────▶│ verifyBundle()   │              │
+│  │ Signature Verify │────────▶│ verify quote     │              │
 │  │ Instruction      │         │ use prices       │              │
 │  └──────────────────┘         └──────────────────┘              │
 │                                                                 │
@@ -69,13 +69,13 @@ Switchboard On-Demand revolutionizes oracle data delivery on Solana:
 Traditional Feeds (Higher Cost):
 Oracle → Feed Account (write) → Your Program (read)
 
-Bundle Method (90% Lower Cost):
-Oracle → Bundle → Your Program (direct use)
+Oracle Quote Method (90% Lower Cost):
+Oracle → Oracle Quote → Your Program (direct use)
 ```
 
-## 📊 Comparison: Surge vs Bundle vs Traditional Feeds
+## 📊 Comparison: Surge vs Oracle Quote vs Traditional Feeds
 
-| Feature | Surge (WebSocket) 🌊 | Bundle Method ✨ | Traditional Feeds |
+| Feature | Surge (WebSocket) 🌊 | Oracle Quote Method ✨ | Traditional Feeds |
 |---------|---------------------|-----------------|-------------------|
 | **Update Latency** | <100ms | <1 second | 2-10 seconds |
 | **Transaction Cost** | Subscription | ~0.00015 SOL | ~0.002 SOL |
@@ -86,11 +86,11 @@ Oracle → Bundle → Your Program (direct use)
 | **Parallelization** | Unlimited | Unlimited | Limited |
 | **Best Use Case** | HFT, Real-time apps | DeFi, Smart contracts | Analytics, History |
 
-*Surge requires a subscription but transactions still use the efficient bundle method
+*Surge requires a subscription but transactions still use the efficient Oracle Quote method
 
-## 🏃‍♂️ Getting Started with Bundles (Recommended)
+## 🏃‍♂️ Getting Started with Oracle Quotes (Recommended)
 
-The easiest way to use Switchboard On-Demand is with **bundles** - no need to create accounts on-chain!
+The easiest way to use Switchboard On-Demand is with **Oracle Quotes** - no need to create accounts on-chain!
 
 ### Framework Options: Basic vs Advanced Examples
 
@@ -161,20 +161,20 @@ anchor idl init --filepath target/idl/basic_oracle_example.json BASIC_PROGRAM_AD
 # The advanced program uses Pinocchio and doesn't require IDL initialization
 ```
 
-*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files. The advanced example includes both basic bundle usage (`scripts/feeds/runUpdate.ts`) and optimized cranking (`scripts/feeds/advanced/runUpdate.ts`).
+*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files. The examples include basic oracle integration (`scripts/feeds/basic/managedUpdate.ts`) and optimized cranking (`scripts/feeds/advanced/runUpdate.ts`).
 
 ### Step 2: Get a Feed ID
 
 Create a data feed using the [Switchboard Feed Builder](https://explorer.switchboardlabs.xyz/feed-builder) and copy the **feed ID** from your feed.
 
-### Step 3: Use Bundles
+### Step 3: Use Oracle Quotes
 
 Run the update script with your feed ID:
 
 #### Basic Example (Anchor Framework)
 ```bash
 bun install
-bun run scripts/feeds/runUpdate.ts --feedId YOUR_FEED_ID
+bun run scripts/feeds/basic/managedUpdate.ts --feedId YOUR_FEED_ID
 ```
 
 #### Advanced Example (Pinocchio Framework - Optimized)
@@ -208,7 +208,8 @@ Simply navigate to `./scripts/` to find all client-side implementation examples.
 The example scripts are organized into categories based on their functionality:
 
 ### `/scripts/feeds/` - Oracle Feed Operations
-- **`runUpdate.ts`** - Fetch and verify oracle price data (recommended for most use cases)
+- **`basic/managedUpdate.ts`** - Basic oracle integration with Anchor Framework
+- **`advanced/runUpdate.ts`** - Optimized oracle integration with Pinocchio Framework
 
 ### `/scripts/streaming/` - Real-time Price Streaming
 - **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
@@ -228,20 +229,20 @@ Common functions and configurations used across all scripts.
 
 Each directory contains its own README with detailed documentation for the scripts within.
 
-## Understanding the Bundle Method
+## Understanding the Oracle Quote Method
 
-### What Makes Bundles Efficient?
+### What Makes Oracle Quotes Efficient?
 
-The bundle method (`scripts/feeds/runBundle.ts`) is significantly more efficient than traditional feed updates for several key reasons:
+The bundle method (`scripts/feeds/runOracle Quote.ts`) is significantly more efficient than traditional feed updates for several key reasons:
 
 #### 1. **No Write Locks on Data Feeds**
 - Traditional feed updates require write locks on feed accounts, limiting parallelization
-- Bundles are stateless - they don't modify any on-chain accounts
+- Oracle Quotes are stateless - they don't modify any on-chain accounts
 - Multiple programs can read the same price data simultaneously without contention
 - This eliminates bottlenecks in high-throughput scenarios
 
 #### 2. **Streaming Price Updates**
-- Bundles can stream real-time prices without storing them on-chain
+- Oracle Quotes can stream real-time prices without storing them on-chain
 - No need to wait for on-chain state updates
 - Prices are verified and used immediately within your transaction
 - Reduces latency from seconds to milliseconds
@@ -251,26 +252,36 @@ The bundle method consists of two key components:
 
 ##### a) **Secp256k1 Precompile Instruction**
 ```typescript
-const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(gateway, crossbar, [
+const sigVerifyIx = await queue.fetchQuoteIx(crossbar, [
   argv.feedHash,
-]);
+], {
+  numSignatures: 1,
+  variableOverrides: {}
+});
 ```
 - Uses Solana's native secp256k1 precompile for signature verification
 - Verifies oracle signatures without expensive on-chain compute
 - Batches multiple signature verifications in a single instruction
 
-##### b) **verifyBundle Call in User Code**
+##### b) **Quote Verification in User Code**
 ```rust
-let verified_bundle = BundleVerifierBuilder::from(&bundle)
+use switchboard_on_demand::QuoteVerifier;
+
+let quote = QuoteVerifier::new()
     .queue(&queue)
     .slothash_sysvar(&slothashes)
     .ix_sysvar(&instructions)
-    .clock(&Clock::get()?)
-    .max_age(50) // Maximum age in slots for bundle freshness
-    .verify()
+    .clock_slot(Clock::get()?.slot)
+    .max_age(50) // Maximum age in slots for quote freshness
+    .verify_instruction_at(0) // Verify ED25519 instruction at index 0
     .unwrap();
+
+// Access feed data
+for feed in quote.feeds() {
+    msg!("Feed {}: {}", feed.hex_id(), feed.value());
+}
 ```
-- Validates the bundle against authorized oracle keys
+- Validates oracle signatures against authorized queue keys
 - Ensures data freshness using slot hashes
 - Extracts verified price data for immediate use
 
@@ -295,11 +306,14 @@ let verified_bundle = BundleVerifierBuilder::from(&bundle)
 
 ```typescript
 // Fetch the latest price bundle
-const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(gateway, crossbar, [
+const sigVerifyIx = await queue.fetchQuoteIx(crossbar, [
   feedHash1,
   feedHash2,
   // ... can batch multiple feeds
-]);
+], {
+  numSignatures: 1,
+  variableOverrides: {}
+});
 
 // Create transaction with both instructions
 const tx = await asV0Tx({
@@ -313,9 +327,9 @@ const tx = await asV0Tx({
 });
 ```
 
-### When to Use Bundles vs Traditional Feeds
+### When to Use Oracle Quotes vs Traditional Feeds
 
-**Use Bundles when:**
+**Use Oracle Quotes when:**
 - You need real-time price updates
 - Running high-frequency trading strategies
 - Building composable DeFi protocols
@@ -338,7 +352,7 @@ Surge is a premium WebSocket streaming service that delivers price updates direc
 - **Sub-100ms Latency**: Direct oracle-to-client streaming
 - **Event-Driven Updates**: Receive prices as they change, not on a schedule
 - **No Polling Required**: Persistent WebSocket connection eliminates request overhead
-- **Bundle Compatible**: Seamlessly convert streaming updates to on-chain bundles
+- **Oracle Quote Compatible**: Seamlessly convert streaming updates to on-chain bundles
 
 ### Surge Architecture
 
@@ -361,7 +375,7 @@ Surge is a premium WebSocket streaming service that delivers price updates direc
                                               │ └────────┬────────┘ │
                                               │          │          │
                                               │          ▼          │
-                                              │   On-Chain Bundle   │
+                                              │   On-Chain Oracle Quote   │
                                               │   (when needed)     │
                                               └─────────────────────┘
 
@@ -484,7 +498,7 @@ surge.on('update', async (response: sb.SurgeUpdate) => {
 
 ### When to Use Each Method
 
-| Use Case | Surge 🌊 | Bundles 📦 | Traditional Feeds 📊 |
+| Use Case | Surge 🌊 | Oracle Quotes 📦 | Traditional Feeds 📊 |
 |----------|----------|------------|---------------------|
 | **Latency** | <100ms ⚡ | <1000ms | 2-10s |
 | **Best For** | HFT, Real-time Apps | DeFi, Smart Contracts | Analytics, History |
@@ -492,7 +506,7 @@ surge.on('update', async (response: sb.SurgeUpdate) => {
 | **Cost Model** | Subscription | Per Transaction | Per Update |
 | **Complexity** | Medium | Low | Low |
 
-### Bundle Instruction Size Mathematics
+### Oracle Quote Instruction Size Mathematics
 
 Understanding the byte requirements helps optimize your transactions:
 
@@ -631,7 +645,7 @@ A feed hash uniquely identifies a price feed configuration. It's a 32-byte value
 - **Maximum**: 10+ oracles (highest security, higher cost)
 
 ### What's the cost per update?
-- **Bundle method**: ~0.00015 SOL per update
+- **Oracle Quote method**: ~0.00015 SOL per update
 - **Traditional feeds**: ~0.002 SOL per update
 - Costs vary based on compute units and priority fees
 
@@ -643,7 +657,7 @@ solana config set --url https://api.mainnet-beta.solana.com
 ```
 
 ### How fresh is the price data?
-- Bundle data must be used within your configured slot limit
+- Oracle Quote data must be used within your configured slot limit
 - Actual price staleness depends on the oracle configuration
 - Check `slots_stale()` in your program to verify freshness
 
@@ -680,15 +694,18 @@ const CUSTOM_JOBS = [
 ```typescript
 try {
   // Fetch bundle with proper error handling
-  const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(
-    gateway,
+  const sigVerifyIx = await queue.fetchQuoteIx(
     crossbar,
-    feedHashes
+    feedHashes,
+    {
+      numSignatures: 1,
+      variableOverrides: {}
+    }
   );
 
   // Create your program instruction
   const ix = await program.methods
-    .yourMethod(bundle)
+    .yourMethod()
     .accounts({
       queue: queue.pubkey,
       slothashes: SYSVAR_SLOT_HASHES_PUBKEY,
@@ -731,16 +748,16 @@ try {
 // In your Solana program
 pub fn liquidate_position(ctx: Context<Liquidate>, bundle: Vec<u8>) -> Result<()> {
     // Verify the bundle
-    let verified_bundle = BundleVerifierBuilder::from(&bundle)
+    let quote = QuoteVerifier::new()
         .queue(&ctx.accounts.queue)
         .slothash_sysvar(&ctx.accounts.slothashes)
         .ix_sysvar(&ctx.accounts.instructions)
-        .clock(&Clock::get()?)
+        .clock_slot(Clock::get()?.slot)
         .max_age(50)
-        .verify()?;
+        .verify_instruction_at(0)?;
 
-    // Extract BTC price
-    let btc_feed = verified_bundle.feed(BTC_FEED_ID)?;
+    // Extract BTC price from the first feed
+    let btc_feed = quote.feeds()[0];
     let btc_price = btc_feed.value();
 
     // Check if position is underwater
@@ -760,15 +777,18 @@ async function executeTrade(
   feedHashes: string[]
 ) {
   // Fetch multiple prices in one bundle
-  const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(
-    gateway,
+  const sigVerifyIx = await queue.fetchQuoteIx(
     crossbar,
-    feedHashes // ["BTC/USD", "ETH/USD", "SOL/USD"]
+    feedHashes, // ["BTC/USD", "ETH/USD", "SOL/USD"]
+    {
+      numSignatures: 1,
+      variableOverrides: {}
+    }
   );
 
   // Create your trading instruction
   const tradeIx = await program.methods
-    .openPosition(amount, leverage, bundle)
+    .openPosition(amount, leverage)
     .accounts({
       trader: wallet.publicKey,
       market: marketPda,
@@ -826,14 +846,17 @@ async function mintStablecoin(collateralAmount: number) {
     "0x...", // SOL feed hash
   ];
 
-  const [sigVerifyIx, bundle] = await queue.fetchUpdateBundleIx(
-    gateway,
+  const sigVerifyIx = await queue.fetchQuoteIx(
     crossbar,
-    collateralFeeds
+    collateralFeeds,
+    {
+      numSignatures: 1,
+      variableOverrides: {}
+    }
   );
 
   const mintIx = await stablecoinProgram.methods
-    .mint(collateralAmount, bundle)
+    .mint(collateralAmount)
     .accounts({
       user: wallet.publicKey,
       collateralVault: vaultPda,
@@ -844,7 +867,7 @@ async function mintStablecoin(collateralAmount: number) {
     })
     .instruction();
 
-  // Bundle verification + minting in one atomic transaction
+  // Oracle Quote verification + minting in one atomic transaction
   const tx = await asV0Tx({
     connection,
     ixs: [sigVerifyIx, mintIx],

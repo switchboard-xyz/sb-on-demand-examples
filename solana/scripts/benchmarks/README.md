@@ -197,7 +197,7 @@ const maxSignatures = 7; // Test up to 7 signatures
 ## Related Examples
 
 - `../streaming/`: Real-time price streaming implementations
-- `../feeds/`: Bundle and feed fetching examples
+- `../feeds/`: Oracle Quote and feed fetching examples
 - `../../README.md`: Main project documentation
 
 ## Notes

@@ -73,6 +73,35 @@ export CROSSBAR_URL="https://crossbar.switchboardlabs.xyz"
 npm run crossbar-update
 ```
 
+### Batch Simulation of All Feeds
+
+Test all predefined feed IDs at once using a comprehensive simulation:
+
+```bash
+# Simulate all feeds (summary output)
+npm run simulate-all
+
+# Simulate all feeds with detailed output
+npm run simulate-all --details
+
+# Sign and send batch update for all feeds
+export SUI_PRIVATE_KEY="your_private_key_here"
+npm run simulate-all --sign-and-send
+
+# Detailed output with signing
+npm run simulate-all --details --sign-and-send
+
+# Direct script execution
+ts-node scripts/simulateAll.ts --details
+```
+
+This script processes 9 predefined feed IDs and provides:
+- **Batch Performance Metrics**: Success rates, throughput, timing
+- **Oracle Response Summary**: Values, timestamps, configurations
+- **Gas Cost Estimation**: For the entire batch transaction
+- **Detailed Results**: Individual feed responses (with `--details` flag)
+- **Transaction Execution**: Optional signing and sending (with `--sign-and-send` flag)
+
 ### Sui-Specific Flow:
 
 #### Single Feed Update (`crankFeed.ts`)

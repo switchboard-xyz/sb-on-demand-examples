@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "feed-example": "tsx scripts/crankFeed.ts",
-    "crossbar-update": "tsx scripts/crossbarUpdate.ts"
+    "crossbar-update": "tsx scripts/crossbarUpdate.ts",
+    "simulate-all": "tsx scripts/simulateAll.ts"
   },
   "dependencies": {
     "@mysten/sui": "^1.38.0",

@@ -29,7 +29,9 @@ export SUI_RPC_URL="https://fullnode.mainnet.sui.io:443"  # Optional, defaults t
 export FEED_ID="your_feed_id_here"
 ```
 
-## Feed Update Example
+## Feed Update Examples
+
+### Single Feed Update
 
 Fetch fresh oracle data and simulate a feed update by providing a feed ID:
 
@@ -43,8 +45,29 @@ npm run feed-example 0x1234567890abcdef...
 ts-node scripts/crankFeed.ts --feedId 0x1234567890abcdef...
 ```
 
+### Batch Crossbar Updates
+
+Call Crossbar directly for multiple feed updates using `fetchManyUpdateTx`:
+
+```bash
+# Single feed via Crossbar
+npm run crossbar-update 0x1234567890abcdef...
+
+# Multiple feeds (comma-separated)
+ts-node scripts/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh,0x9abc...ijkl
+
+# Using environment variable
+export FEED_IDS="0x1234...abcd,0x5678...efgh"
+npm run crossbar-update
+
+# Custom Crossbar endpoint
+export CROSSBAR_URL="https://crossbar.switchboard.xyz"
+npm run crossbar-update
+```
+
 ### Sui-Specific Flow:
 
+#### Single Feed Update (`crankFeed.ts`)
 1. **Load Aggregator**: Creates an `Aggregator` instance from the feed ID
 2. **Fetch Oracle Data**: Calls `fetchUpdateTx()` which:
    - Contacts the oracle network off-chain
@@ -54,6 +77,19 @@ ts-node scripts/crankFeed.ts --feedId 0x1234567890abcdef...
 3. **Build Transaction**: Creates a Sui transaction with the update instruction
 4. **Simulate**: Dry-runs the transaction to show gas costs and effects
 5. **Extract Results**: Displays the fresh oracle data and aggregated price
+
+#### Batch Crossbar Update (`crossbarUpdate.ts`)
+1. **Configure Crossbar**: Sets the Crossbar URL endpoint (defaults to `https://crossbar.switchboard.xyz`)
+2. **Batch Request**: Calls `fetchManyUpdateTx()` with multiple feed IDs:
+   - Sends a single request to Crossbar for multiple feeds
+   - Crossbar coordinates with oracle networks for all feeds simultaneously
+   - Returns responses for successful feeds and failures for problematic ones
+3. **Process Results**: Extracts oracle data for each feed:
+   - Individual oracle responses with timestamps and values
+   - Feed configuration details (variance, minimum responses)
+   - Performance metrics and error tracking
+4. **Simulate Transaction**: Dry-runs the batch update transaction
+5. **Performance Summary**: Shows timing, success rates, and per-feed metrics
 
 ### What the Script Does:
 
@@ -66,6 +102,7 @@ ts-node scripts/crankFeed.ts --feedId 0x1234567890abcdef...
 
 ### Example Output:
 
+#### Single Feed Update:
 ```
 Oracle 1:
 Full response: {
@@ -90,6 +127,36 @@ Full response: {
 Simulation result: { status: 'success' }
 ✅ Feed update simulation successful!
 Gas used: { computationCost: '1000000', storageCost: '2000000', storageRebate: '0' }
+```
+
+#### Batch Crossbar Update:
+```
+Using Crossbar URL: https://crossbar.switchboard.xyz
+Updating 2 feed(s): [ '0x1234...abcd', '0x5678...efgh' ]
+
+🔄 Calling Crossbar directly for oracle updates...
+✅ Crossbar call completed in 1247ms
+Received responses for 2 feed(s)
+
+📊 Feed 1 (0x1234...abcd):
+Queue: 0x6e43354b8ea2dfad98eadb33db94dcc9b1175e70ee82e42abc605f6b7de9e910
+Fee: 0
+Failures: 0
+
+  Oracle Result 1:
+    Value: 96245.67
+    Timestamp: 2024-01-15T10:30:00.000Z
+    Full result: {
+        "value": "96245.67",
+        "timestamp": 1672531200
+    }
+
+📈 Performance Summary:
+- Feeds requested: 2
+- Successful responses: 2
+- Failed responses: 0
+- Total fetch time: 1247ms
+- Average per feed: 624ms
 ```
 
 ## Key Sui Concepts

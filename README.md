@@ -33,6 +33,23 @@ The Solana examples demonstrate Switchboard On-Demand functionality on the Solan
 - [Rust Crate](https://crates.io/crates/switchboard-on-demand)
 - [Solana SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand)
 
+### Sui
+
+The Sui examples demonstrate Switchboard On-Demand oracle functionality on the Sui blockchain:
+
+- **[🔮 Oracle Feeds](./sui)** - Pull-based price feeds with fresh oracle data
+- Real-time data fetching from external APIs through oracle networks
+- On-demand feed updates with aggregated results from multiple oracles
+
+**JavaScript/TypeScript Client Code:**
+- **[📁 Feed Examples](./sui/scripts/)** - Complete TypeScript examples for Sui integration
+  - Oracle data fetching, feed reading, transaction simulation
+  - No private key required for data reading and simulation
+
+**Resources:**
+- [Sui Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/sui)
+- [Sui SDK](https://www.npmjs.com/package/@switchboard-xyz/sui-sdk)
+
 ### EVM
 
 The EVM examples showcase Switchboard functionality on Ethereum and EVM-compatible chains:

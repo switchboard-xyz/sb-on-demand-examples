@@ -14,11 +14,18 @@ async function crossbarUpdate() {
   const feedIdsIndex = process.argv.findIndex(arg => arg === '--feedIds');
   if (feedIdsIndex !== -1 && process.argv[feedIdsIndex + 1]) {
     FEED_IDS = process.argv[feedIdsIndex + 1].split(',').map(id => id.trim());
-  } else if (process.env.FEED_IDS) {
-    FEED_IDS = process.env.FEED_IDS.split(',').map(id => id.trim());
-  } else if (process.argv[2]) {
-    // Single feed ID as argument
-    FEED_IDS = [process.argv[2]];
+  }
+  // Check for --feedId flag (single feed)
+  else {
+    const feedIdIndex = process.argv.findIndex(arg => arg === '--feedId');
+    if (feedIdIndex !== -1 && process.argv[feedIdIndex + 1]) {
+      FEED_IDS = [process.argv[feedIdIndex + 1]];
+    } else if (process.env.FEED_IDS) {
+      FEED_IDS = process.env.FEED_IDS.split(',').map(id => id.trim());
+    } else if (process.argv[2]) {
+      // Single feed ID as argument
+      FEED_IDS = [process.argv[2]];
+    }
   }
 
   if (FEED_IDS.length === 0) {

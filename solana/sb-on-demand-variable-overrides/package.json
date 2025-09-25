@@ -1,0 +1,33 @@
+{
+  "name": "sb-on-demand-variable-overrides",
+  "version": "1.0.0",
+  "description": "Switchboard On-Demand Variable Overrides Example",
+  "main": "index.js",
+  "scripts": {
+    "pull": "bun run scripts/pull.ts",
+    "test-simple": "bun run scripts/test-simple.ts",
+    "test-multi-auth": "bun run scripts/test-multi-auth.ts"
+  },
+  "keywords": [
+    "switchboard",
+    "oracle",
+    "solana",
+    "on-demand",
+    "variable-overrides"
+  ],
+  "author": "Switchboard",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/web3.js": "^1.95.2",
+    "@switchboard-xyz/common": "^4.1.0",
+    "@switchboard-xyz/on-demand": "^2.16.3",
+    "dotenv": "^16.4.5",
+    "js-sha256": "^0.11.0",
+    "tweetnacl": "^1.0.3"
+  }
+}

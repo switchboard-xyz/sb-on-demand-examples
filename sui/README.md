@@ -50,18 +50,26 @@ ts-node scripts/crankFeed.ts --feedId 0x1234567890abcdef...
 Call Crossbar directly for multiple feed updates using `fetchManyUpdateTx`:
 
 ```bash
-# Single feed via Crossbar
+# Single feed via Crossbar (simulation only)
 npm run crossbar-update 0x1234567890abcdef...
 
 # Multiple feeds (comma-separated)
 ts-node scripts/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh,0x9abc...ijkl
+
+# Sign and send transaction (requires private key)
+export SUI_PRIVATE_KEY="your_private_key_here"
+ts-node scripts/crossbarUpdate.ts --feedId 0x1234...abcd --sign-and-send
+
+# Batch update with signing
+export SUI_PRIVATE_KEY="your_private_key_here"
+ts-node scripts/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh --sign-and-send
 
 # Using environment variable
 export FEED_IDS="0x1234...abcd,0x5678...efgh"
 npm run crossbar-update
 
 # Custom Crossbar endpoint
-export CROSSBAR_URL="https://crossbar.switchboard.xyz"
+export CROSSBAR_URL="https://crossbar.switchboardlabs.xyz"
 npm run crossbar-update
 ```
 

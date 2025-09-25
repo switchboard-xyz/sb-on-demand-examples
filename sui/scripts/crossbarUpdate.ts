@@ -1,14 +1,20 @@
 import { SuiClient } from "@mysten/sui/client";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
 import { SwitchboardClient, Aggregator } from "@switchboard-xyz/sui-sdk";
 
 async function crossbarUpdate() {
   // Configuration
   const RPC_URL = process.env.SUI_RPC_URL || "https://fullnode.mainnet.sui.io:443";
-  const CROSSBAR_URL = process.env.CROSSBAR_URL || "https://crossbar.switchboard.xyz";
+  const CROSSBAR_URL = process.env.CROSSBAR_URL || "https://crossbar.switchboardlabs.xyz";
+  const PRIVATE_KEY = process.env.SUI_PRIVATE_KEY;
 
-  // Parse command line arguments for feed IDs
+  // Parse command line arguments for feed IDs and flags
   let FEED_IDS: string[] = [];
+  let SIGN_AND_SEND = false;
+
+  // Check for --sign-and-send flag
+  SIGN_AND_SEND = process.argv.includes('--sign-and-send');
 
   // Check for --feedIds flag (comma-separated)
   const feedIdsIndex = process.argv.findIndex(arg => arg === '--feedIds');
@@ -22,8 +28,8 @@ async function crossbarUpdate() {
       FEED_IDS = [process.argv[feedIdIndex + 1]];
     } else if (process.env.FEED_IDS) {
       FEED_IDS = process.env.FEED_IDS.split(',').map(id => id.trim());
-    } else if (process.argv[2]) {
-      // Single feed ID as argument
+    } else if (process.argv[2] && !process.argv[2].startsWith('--')) {
+      // Single feed ID as argument (not a flag)
       FEED_IDS = [process.argv[2]];
     }
   }
@@ -32,17 +38,37 @@ async function crossbarUpdate() {
     throw new Error("FEED_IDS must be provided as environment variable (comma-separated) or --feedIds flag");
   }
 
+  // Validate signing requirements
+  if (SIGN_AND_SEND && !PRIVATE_KEY) {
+    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --sign-and-send flag");
+  }
+
   console.log(`Using Crossbar URL: ${CROSSBAR_URL}`);
   console.log(`Updating ${FEED_IDS.length} feed(s):`, FEED_IDS);
+  console.log(`Mode: ${SIGN_AND_SEND ? '🔐 Sign and Send Transaction' : '🎯 Simulate Only'}`);
 
   // Initialize clients
   const suiClient = new SuiClient({ url: RPC_URL });
   const sb = new SwitchboardClient(suiClient);
 
+  // Initialize keypair if signing
+  let keypair: Ed25519Keypair | null = null;
+  let senderAddress: string | null = null;
+
+  if (SIGN_AND_SEND && PRIVATE_KEY) {
+    keypair = Ed25519Keypair.fromSecretKey(PRIVATE_KEY);
+    senderAddress = keypair.getPublicKey().toSuiAddress();
+    console.log(`Signing address: ${senderAddress}`);
+  }
+
   try {
-    // Create transaction with dummy sender for simulation
+    // Create transaction with appropriate sender
     const feedTx = new Transaction();
-    feedTx.setSender("0x0000000000000000000000000000000000000000000000000000000000000000");
+    if (SIGN_AND_SEND && senderAddress) {
+      feedTx.setSender(senderAddress);
+    } else {
+      feedTx.setSender("0x0000000000000000000000000000000000000000000000000000000000000000");
+    }
 
     console.log("\n🔄 Calling Crossbar directly for oracle updates...");
 
@@ -102,27 +128,80 @@ async function crossbarUpdate() {
       });
     }
 
-    // Simulate the transaction
-    console.log("\n🎯 Simulating update transaction...");
-    try {
-      const dryRunResult = await suiClient.dryRunTransactionBlock({
-        transactionBlock: await feedTx.build({ client: suiClient }),
-      });
-
-      console.log(`Simulation result: ${dryRunResult.effects.status.status}`);
-
-      if (dryRunResult.effects.status.status === "success") {
-        console.log("✅ Transaction simulation successful!");
-        console.log("Gas costs:", {
-          computation: dryRunResult.effects.gasUsed.computationCost,
-          storage: dryRunResult.effects.gasUsed.storageCost,
-          storageRebate: dryRunResult.effects.gasUsed.storageRebate
+    // Execute or simulate the transaction
+    if (SIGN_AND_SEND && keypair) {
+      console.log("\n🔐 Signing and sending transaction...");
+      try {
+        const result = await suiClient.signAndExecuteTransaction({
+          signer: keypair,
+          transaction: feedTx,
+          options: {
+            showEffects: true,
+            showEvents: true,
+            showInput: true,
+          },
         });
-      } else {
-        console.log("❌ Transaction simulation failed:", dryRunResult.effects.status);
+
+        console.log(`Transaction result: ${result.effects?.status?.status}`);
+
+        if (result.effects?.status?.status === "success") {
+          console.log("✅ Transaction executed successfully!");
+          console.log(`Transaction digest: ${result.digest}`);
+          console.log("Gas used:", {
+            computation: result.effects.gasUsed.computationCost,
+            storage: result.effects.gasUsed.storageCost,
+            storageRebate: result.effects.gasUsed.storageRebate
+          });
+
+          // Show any events emitted
+          if (result.events && result.events.length > 0) {
+            console.log(`\nEvents emitted (${result.events.length}):`);
+            result.events.forEach((event, index) => {
+              console.log(`  Event ${index + 1}:`, {
+                type: event.type,
+                sender: event.sender,
+                packageId: event.packageId,
+              });
+            });
+          }
+
+          // Show object changes
+          if (result.effects.mutated && result.effects.mutated.length > 0) {
+            console.log(`\nObjects updated (${result.effects.mutated.length}):`);
+            result.effects.mutated.forEach((obj, index) => {
+              console.log(`  Object ${index + 1}: ${obj.reference.objectId}`);
+            });
+          }
+
+        } else {
+          console.log("❌ Transaction execution failed:", result.effects?.status);
+        }
+      } catch (txError) {
+        console.log("❌ Transaction execution error:", txError);
       }
-    } catch (simError) {
-      console.log("❌ Could not simulate transaction:", simError);
+    } else {
+      // Simulate the transaction
+      console.log("\n🎯 Simulating update transaction...");
+      try {
+        const dryRunResult = await suiClient.dryRunTransactionBlock({
+          transactionBlock: await feedTx.build({ client: suiClient }),
+        });
+
+        console.log(`Simulation result: ${dryRunResult.effects.status.status}`);
+
+        if (dryRunResult.effects.status.status === "success") {
+          console.log("✅ Transaction simulation successful!");
+          console.log("Gas costs:", {
+            computation: dryRunResult.effects.gasUsed.computationCost,
+            storage: dryRunResult.effects.gasUsed.storageCost,
+            storageRebate: dryRunResult.effects.gasUsed.storageRebate
+          });
+        } else {
+          console.log("❌ Transaction simulation failed:", dryRunResult.effects.status);
+        }
+      } catch (simError) {
+        console.log("❌ Could not simulate transaction:", simError);
+      }
     }
 
     // Performance summary

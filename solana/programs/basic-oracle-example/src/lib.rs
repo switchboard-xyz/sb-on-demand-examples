@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::{
-    QuoteVerifier, QueueAccountData, get_slot, SlotHashes, Instructions
+    QuoteVerifier, QueueAccountData, SlotHashes, Instructions, default_queue
 };
 switchboard_on_demand::switchboard_anchor_bindings!();
 
@@ -30,15 +30,9 @@ pub mod basic_oracle_example {
     /// - queue: The Switchboard queue (auto-detected by network)
     /// - sysvars: Required system variables for verification
     pub fn read_oracle_data(ctx: Context<ReadOracleData>) -> Result<()> {
-        msg!("🎉 Successfully accessed oracle account!");
-        msg!("Oracle account key: {}", ctx.accounts.oracle_account.key());
-
         // Access the oracle data directly
         // The oracle_account constraint validates it's the canonical account
-        let oracle_account = &ctx.accounts.oracle_account;
-
-        // Extract feeds using the SwitchboardQuoteExt trait
-        let feeds = oracle_account.feeds();
+        let feeds = ctx.accounts.oracle_account.feeds();
 
         msg!("Number of feeds: {}", feeds.len());
 
@@ -68,18 +62,11 @@ pub struct ReadOracleData<'info> {
     /// The canonical oracle account containing verified quote data
     ///
     /// This account is:
-    /// - Derived using PullFeed.getCanonicalPubkey(feedHashes) in TypeScript
     /// - Updated by the quote program's verified_update instruction
-    /// - Contains verified, up-to-date oracle data
+    /// - Contains verified oracle data
     /// - Validated to be the canonical account for the contained feeds
-    #[account(
-        constraint = oracle_account.canonical_key(&queue.key()) == oracle_account.key() @ ErrorCode::InvalidOracleAccount
-    )]
+    #[account(address = oracle_account.canonical_key(&default_queue()))]
     pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
-
-    /// The Switchboard queue (automatically selected based on network)
-    #[account(address = switchboard_on_demand::default_queue())]
-    pub queue: AccountLoader<'info, QueueAccountData>,
 
     /// System variables required for quote verification
     pub sysvars: Sysvars<'info>,
@@ -91,12 +78,4 @@ pub struct Sysvars<'info> {
     pub clock: Sysvar<'info, Clock>,
     pub slothashes: Sysvar<'info, SlotHashes>,
     pub instructions: Sysvar<'info, Instructions>,
-}
-
-
-/// Custom error codes
-#[error_code]
-pub enum ErrorCode {
-    #[msg("Invalid oracle account - not the canonical account for the contained feeds")]
-    InvalidOracleAccount,
 }

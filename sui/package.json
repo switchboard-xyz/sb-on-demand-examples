@@ -1,0 +1,18 @@
+{
+  "name": "sui-switchboard-examples",
+  "version": "1.0.0",
+  "description": "Sui examples for Switchboard On-Demand functionality",
+  "type": "module",
+  "scripts": {
+    "feed-example": "tsx scripts/crankFeed.ts"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.38.0",
+    "@switchboard-xyz/sui-sdk": "^0.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

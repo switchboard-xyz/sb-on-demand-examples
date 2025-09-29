@@ -1,3 +1,18 @@
+// Set up axios timeout override BEFORE importing Switchboard modules
+import axios from 'axios';
+
+// Override axios.create to ensure all instances use 7-second timeout
+const originalCreate = axios.create;
+axios.create = function(config = {}) {
+  return originalCreate({
+    timeout: 7000, // 7 seconds
+    ...config,
+  });
+};
+
+// Also set global default
+axios.defaults.timeout = 7000;
+
 import * as anchor from "@coral-xyz/anchor";
 import {
   Connection,
@@ -22,6 +37,32 @@ const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
 const COMMITMENT = "confirmed";
 const RANDOMNESS_KEYPAIR_PATH = path.join(__dirname, "randomness-keypair.json");
+
+async function retryCommitRandomness(randomness: sb.Randomness, queue: any, maxRetries: number = 3, delayMs: number = 2000): Promise<anchor.web3.TransactionInstruction> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Attempting to commit randomness (attempt ${attempt}/${maxRetries})...`);
+      const commitIx = await randomness.commitIx(queue);
+      console.log("Successfully obtained commit instruction");
+      return commitIx;
+    } catch (error: any) {
+      console.log(`Commit attempt ${attempt} failed:`, error.message);
+
+      if (attempt === maxRetries) {
+        console.error("All commit attempts failed. The Switchboard gateway may be experiencing issues.");
+        throw error;
+      }
+
+      console.log(`Waiting ${delayMs}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+
+      // Increase delay for next attempt
+      delayMs = Math.min(delayMs * 1.5, 8000);
+    }
+  }
+
+  throw new Error("Should not reach here");
+}
 
 async function retryRevealRandomness(randomness: sb.Randomness, maxRetries: number = 5, delayMs: number = 2000): Promise<anchor.web3.TransactionInstruction> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -152,9 +193,9 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
     txOpts
   );
 
-  // Commit to randomness Ix
+  // Commit to randomness Ix with retry logic
   console.log("\nCommit to randomness...");
-  const commitIx = await randomness.commitIx(queue);
+  const commitIx = await retryCommitRandomness(randomness, queue);
 
   // Create coinFlip Ix
   const coinFlipIx = await createCoinFlipInstruction(
@@ -182,6 +223,8 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
 
   // Reveal the randomness Ix with retry logic
   console.log("\nReveal the randomness...");
+  console.log("Waiting 3 seconds before attempting reveal...");
+  await new Promise(resolve => setTimeout(resolve, 3000));
   const revealIx = await retryRevealRandomness(randomness);
   const settleFlipIx = await settleFlipInstruction(
     myProgram,

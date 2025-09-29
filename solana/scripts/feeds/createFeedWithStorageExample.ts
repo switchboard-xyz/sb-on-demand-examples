@@ -79,7 +79,6 @@ const argv = yargs(process.argv)
 
   console.log("Feed configuration:");
   console.log(`  Name: ${oracleFeed.name}`);
-  console.log(`  Symbol: ${oracleFeed.symbol}`);
   console.log(`  Min Oracle Samples: ${oracleFeed.minOracleSamples}`);
   console.log(`  Min Job Responses: ${oracleFeed.minJobResponses}`);
   console.log(`  Max Job Range: ${oracleFeed.maxJobRangePct}%\n`);
@@ -91,24 +90,49 @@ const argv = yargs(process.argv)
   console.log("Storing feed on IPFS via Crossbar...");
   const { feedId, cid } = await crossbar.storeOracleFeed(oracleFeed);
 
+  // Remove 0x prefix from feedId if present
+  const feedHash = feedId.startsWith("0x") ? feedId.slice(2) : feedId;
+
   console.log("Feed stored successfully!");
   console.log(`  Feed ID: ${feedId}`);
+  console.log(`  Feed Hash (without 0x): ${feedHash}`);
   console.log(`  IPFS CID: ${cid}\n`);
+
+  // Wait for feed to propagate through IPFS/Crossbar
+  console.log("Waiting for feed to propagate (3 seconds)...");
+  await new Promise(resolve => setTimeout(resolve, 3000));
 
   console.log("=== Fetching Oracle Update ===\n");
 
   // Step 6: Use fetchManagedUpdateIxs to get oracle-signed data
   // This uses the stored feed hash to fetch fresh oracle signatures
-  const instructions = await queue.fetchManagedUpdateIxs(
-    crossbar,
-    [feedId], // Feed hash from storage
-    {
-      numSignatures: 1, // Number of oracle signatures
-      variableOverrides: {},
-      instructionIdx: 0, // Ed25519 instruction index
-      payer: keypair.publicKey,
+  let instructions;
+  try {
+    instructions = await queue.fetchManagedUpdateIxs(
+      crossbar,
+      [feedHash], // Feed hash from storage (without 0x prefix)
+      {
+        numSignatures: 1, // Number of oracle signatures
+        variableOverrides: {},
+        instructionIdx: 0, // Ed25519 instruction index
+        payer: keypair.publicKey,
+      }
+    );
+  } catch (error: any) {
+    console.error("Failed to fetch managed update instructions:");
+    console.error("Error:", error.message);
+    if (error.response?.data) {
+      console.error("Response data:", error.response.data);
     }
-  );
+    console.error("\nThis might be because:");
+    console.error("1. The feed needs more time to propagate through IPFS");
+    console.error("2. The feed hash format is incorrect");
+    console.error("3. The oracle network cannot fetch the feed data");
+    console.error("\nFeed details:");
+    console.error(`  Feed Hash: ${feedHash}`);
+    console.error(`  IPFS CID: ${cid}`);
+    return;
+  }
 
   console.log(`Generated ${instructions.length} instructions:`);
   console.log("  1. Ed25519 signature verification");
@@ -117,7 +141,7 @@ const argv = yargs(process.argv)
   // Step 7: Derive the canonical quote account
   // This is where the verified oracle data will be stored
   const [quoteAccount] = sb.OracleQuote.getCanonicalPubkey(queue.pubkey, [
-    feedId,
+    feedHash,
   ]);
   console.log("Quote account (canonical):", quoteAccount.toBase58(), "\n");
 
@@ -150,29 +174,18 @@ const argv = yargs(process.argv)
 
   console.log("=== Reading Oracle Data ===\n");
 
-  // Step 10: Load and display the oracle data
-  // The quote program stores the verified oracle data in the canonical account
-  try {
-    const quoteData = await sb.OracleQuote.load(program!, quoteAccount);
-    const price = quoteData.value();
-
-    console.log("Oracle data:");
-    console.log(`  Price: $${price.toFixed(2)}`);
-    console.log(`  Oracle count: ${quoteData.oracleSubmissions.length}`);
-    console.log(
-      `  Last update: slot ${quoteData.oracleSubmissions[0]?.slot.toString() || "N/A"}`
-    );
-    console.log();
-  } catch (error: any) {
-    console.error("Failed to load oracle data:", error.message);
-  }
+  // Step 10: The quote data is now stored in the canonical quote account
+  // Your on-chain program can read from this account using the basicReadOracleIx pattern
+  console.log("Oracle data has been stored in the quote account.");
+  console.log("Use the basicReadOracleIx utility to read this data in your program.");
+  console.log("See managedUpdate.ts for a complete example of reading quote data.\n");
 
   console.log("✅ Successfully created and used oracle feed!\n");
   console.log("Summary:");
-  console.log(`  Feed ID: ${feedId}`);
+  console.log(`  Feed Hash: ${feedHash}`);
   console.log(`  IPFS CID: ${cid}`);
   console.log(`  Quote Account: ${quoteAccount.toBase58()}`);
   console.log(`  Queue: ${queue.pubkey.toBase58()}`);
-  console.log("\nYou can now use this feed ID to fetch updates in your programs.");
+  console.log("\nYou can now use this feed hash to fetch updates in your programs.");
   console.log("The quote account is deterministically derived and doesn't require initialization.");
 })();

@@ -8,7 +8,7 @@ import {
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
-import reader from "readline-sync";
+import * as reader from "readline-sync";
 
 const COMMITMENT = "confirmed";
 

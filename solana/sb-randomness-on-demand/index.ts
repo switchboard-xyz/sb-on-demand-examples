@@ -15,10 +15,65 @@ import { createCoinFlipInstruction } from "./utils";
 import { settleFlipInstruction } from "./utils";
 import { ensureEscrowFunded } from "./utils";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import * as fs from "fs";
+import * as path from "path";
 
 const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
 const COMMITMENT = "confirmed";
+const RANDOMNESS_KEYPAIR_PATH = path.join(__dirname, "randomness-keypair.json");
+
+async function retryRevealRandomness(randomness: sb.Randomness, maxRetries: number = 5, delayMs: number = 2000): Promise<anchor.web3.TransactionInstruction> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Attempting to reveal randomness (attempt ${attempt}/${maxRetries})...`);
+      const revealIx = await randomness.revealIx();
+      console.log("Successfully obtained reveal instruction");
+      return revealIx;
+    } catch (error: any) {
+      console.log(`Reveal attempt ${attempt} failed:`, error.message);
+
+      if (attempt === maxRetries) {
+        console.error("All reveal attempts failed. The Switchboard gateway may be experiencing issues.");
+        throw error;
+      }
+
+      console.log(`Waiting ${delayMs}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+
+      // Increase delay for next attempt (exponential backoff)
+      delayMs = Math.min(delayMs * 1.5, 10000);
+    }
+  }
+
+  throw new Error("Should not reach here");
+}
+
+async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: any): Promise<{ randomness: sb.Randomness; rngKp: Keypair; createIx?: anchor.web3.TransactionInstruction }> {
+  let rngKp: Keypair;
+  let createIx: anchor.web3.TransactionInstruction | undefined;
+
+  if (fs.existsSync(RANDOMNESS_KEYPAIR_PATH)) {
+    console.log("Loading existing randomness account...");
+    const keypairData = JSON.parse(fs.readFileSync(RANDOMNESS_KEYPAIR_PATH, 'utf8'));
+    rngKp = Keypair.fromSecretKey(new Uint8Array(keypairData));
+    console.log("Loaded randomness account", rngKp.publicKey.toString());
+
+    const randomness = new sb.Randomness(sbProgram, rngKp.publicKey);
+    return { randomness, rngKp };
+  } else {
+    console.log("Creating new randomness account...");
+    rngKp = Keypair.generate();
+
+    fs.writeFileSync(RANDOMNESS_KEYPAIR_PATH, JSON.stringify(Array.from(rngKp.secretKey)));
+    console.log("Saved randomness keypair to", RANDOMNESS_KEYPAIR_PATH);
+
+    const [randomness, ix] = await sb.Randomness.create(sbProgram, rngKp, queue);
+    console.log("Created randomness account", randomness.pubkey.toString());
+
+    return { randomness, rngKp, createIx: ix };
+  }
+}
 
 (async function main() {
   console.clear();
@@ -45,28 +100,30 @@ const COMMITMENT = "confirmed";
     maxRetries: 0,
   };
 
-  // create randomness account and initialise it
-  const rngKp = Keypair.generate();
-  const [randomness, ix] = await sb.Randomness.create(sbProgram, rngKp, queue);
-  console.log("\nCreated randomness account..");
-  console.log("Randomness account", randomness.pubkey.toString());
+  // load or create randomness account
+  const { randomness, rngKp, createIx } = await loadOrCreateRandomnessAccount(sbProgram, queue);
 
-  const createRandomnessTx = await sb.asV0Tx({
-    connection: sbProgram.provider.connection,
-    ixs: [ix],
-    payer: keypair.publicKey,
-    signers: [keypair, rngKp],
-    computeUnitPrice: 75_000,
-    computeUnitLimitMultiple: 1.3,
-  });
+  // Only create the randomness account if it's new
+  if (createIx) {
+    const createRandomnessTx = await sb.asV0Tx({
+      connection: sbProgram.provider.connection,
+      ixs: [createIx],
+      payer: keypair.publicKey,
+      signers: [keypair, rngKp],
+      computeUnitPrice: 75_000,
+      computeUnitLimitMultiple: 1.3,
+    });
 
-  const sim = await connection.simulateTransaction(createRandomnessTx, txOpts);
-  const sig1 = await connection.sendTransaction(createRandomnessTx, txOpts);
-  await connection.confirmTransaction(sig1, COMMITMENT);
-  console.log(
-    "  Transaction Signature for randomness account creation: ",
-    sig1
-  );
+    const sim = await connection.simulateTransaction(createRandomnessTx, txOpts);
+    const sig1 = await connection.sendTransaction(createRandomnessTx, txOpts);
+    await connection.confirmTransaction(sig1, COMMITMENT);
+    console.log(
+      "  Transaction Signature for randomness account creation: ",
+      sig1
+    );
+  } else {
+    console.log("Reusing existing randomness account:", randomness.pubkey.toString());
+  }
 
   // initilise example program accounts
   const playerStateAccount = await PublicKey.findProgramAddressSync(
@@ -123,9 +180,9 @@ const COMMITMENT = "confirmed";
   await connection.confirmTransaction(sig4, COMMITMENT);
   console.log("  Transaction Signature commitTx", sig4);
 
-  // Reveal the randomness Ix
+  // Reveal the randomness Ix with retry logic
   console.log("\nReveal the randomness...");
-  const revealIx = await randomness.revealIx();
+  const revealIx = await retryRevealRandomness(randomness);
   const settleFlipIx = await settleFlipInstruction(
     myProgram,
     escrowBump,
@@ -134,11 +191,10 @@ const COMMITMENT = "confirmed";
     escrowAccount,
     keypair
   );
-  const closeIx = await randomness.closeIx();
-
+  // Note: Not closing the randomness account so it can be reused
   const revealTx = await sb.asV0Tx({
     connection: sbProgram.provider.connection,
-    ixs: [revealIx, settleFlipIx, closeIx],
+    ixs: [revealIx, settleFlipIx],
     payer: keypair.publicKey,
     signers: [keypair],
     computeUnitPrice: 75_000,
@@ -161,4 +217,7 @@ const COMMITMENT = "confirmed";
   console.log("\nYour guess is ", userGuess ? "Heads" : "Tails");
 
   console.log(`\nAnd the random result is ... ${result}!`);
+
+  console.log("\nGame completed!");
+  process.exit(0);
 })();

@@ -19,8 +19,8 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = "0.31.1"
-solana-program = ">=2"
+solana-program = ">=2,<3"
 bytemuck = "1.15.0"
-switchboard-on-demand = "0.4.7"
+switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand" }
 
 

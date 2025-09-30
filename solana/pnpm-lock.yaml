@@ -21,8 +21,8 @@ importers:
         specifier: 4.1.1
         version: 4.1.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
-        specifier: 2.17.0
-        version: 2.17.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: link:/Users/mgild/projects/sbv3/javascript/on-demand
+        version: link:../../sbv3/javascript/on-demand
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -111,10 +111,6 @@ packages:
     resolution: {integrity: sha512-DziebCdg4JpGlEqEdGgXmjqcFoJi+JGulUXwEjsZGAscAQ7MyD/7LE/GVCP29vEQxKc7AAwjT3A2ywHp2xfoCA==}
     engines: {node: '>=18'}
     hasBin: true
-
-  '@isaacs/ttlcache@1.4.1':
-    resolution: {integrity: sha512-RQgQ4uQ+pLbqXfOmieB91ejmLwvSgv9nLx6sT6sD83s7umBypgg+OIBOBbEUiJXrfpnp9j0mRhYYdzp9uqq3lA==}
-    engines: {node: '>=12'}
 
   '@noble/curves@1.4.2':
     resolution: {integrity: sha512-TavHr8qycMChk8UwMld0ZDRvatedkzWfH8IiaeGCfymOP5i0hSCozz9vHOL0nkwk7HRMlFnAiKpS2jrUmSybcw==}
@@ -261,10 +257,6 @@ packages:
   '@switchboard-xyz/common@4.1.1':
     resolution: {integrity: sha512-H5esycuUKAzS1SGqV6DZuBME7ZaGLHJc1jP7tgLGjZ2rZSoCRPthPLvHnQAAV3A18uomTyM8aSARyYYEAZnsFA==}
     engines: {node: '>=20'}
-
-  '@switchboard-xyz/on-demand@2.17.0':
-    resolution: {integrity: sha512-SHJG8QRyZXG9aRwGxf3bL/+jtyyCQjZrrUPvUb6cjnYGoqOnLAM88c7NfPk9omRYo5wiH+T50hTsfA/U7mjC+Q==}
-    engines: {node: '>= 18'}
 
   '@types/bn.js@5.2.0':
     resolution: {integrity: sha512-DLbJ1BPqxvQhIGbeu8VbUC1DiAiahHtAYvA0ZEAa4P31F7IaArc8z3C3BRQdWX4mtLQuABG4yzp76ZrS02Ui1Q==}
@@ -601,10 +593,6 @@ packages:
 
   eventemitter3@5.0.1:
     resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
-
-  events@3.3.0:
-    resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
-    engines: {node: '>=0.8.x'}
 
   eyes@0.1.8:
     resolution: {integrity: sha512-GipyPsXO1anza0AOZdy69Im7hGFCNB7Y/NGjDlZGJ3GJJLtwNSb2vrzYrTYJRrRloVx7pl+bhUaTB8yiccPvFQ==}
@@ -1292,8 +1280,6 @@ snapshots:
 
   '@ethereumjs/rlp@5.0.2': {}
 
-  '@isaacs/ttlcache@1.4.1': {}
-
   '@noble/curves@1.4.2':
     dependencies:
       '@noble/hashes': 1.4.0
@@ -1500,25 +1486,6 @@ snapshots:
       protobufjs: 7.5.4
       yaml: 2.8.1
       zod: 4.0.0-beta.20250505T195954
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - typescript
-      - utf-8-validate
-
-  '@switchboard-xyz/on-demand@2.17.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@coral-xyz/anchor-31': '@coral-xyz/anchor@0.31.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)'
-      '@isaacs/ttlcache': 1.4.1
-      '@switchboard-xyz/common': 4.1.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
-      axios: 1.11.0
-      bs58: 6.0.0
-      buffer: 6.0.3
-      events: 3.3.0
-      isomorphic-ws: 5.0.0(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      js-yaml: 4.1.0
-      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -1866,8 +1833,6 @@ snapshots:
   eventemitter3@4.0.7: {}
 
   eventemitter3@5.0.1: {}
-
-  events@3.3.0: {}
 
   eyes@0.1.8: {}
 

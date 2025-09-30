@@ -4,6 +4,9 @@ This directory contains examples for integrating Switchboard On-Demand oracles i
 
 ## Directory Structure
 
+### 📄 Feed Creation
+- **`createManagedFeed.ts`** - Create a new managed feed, store on IPFS, and test oracle updates
+
 ### 📁 `basic/` - Getting Started Examples
 Simple, easy-to-understand examples perfect for learning:
 - **`managedUpdate.ts`** - Complete managed update flow with detailed comments and comprehensive documentation
@@ -21,6 +24,11 @@ Examples using the older Pull Feed system (still supported):
 - **`runFeed.ts`** - Individual feed updates with granular control
 
 ## Quick Start
+
+### Create a New Feed
+```bash
+ts-node feeds/createManagedFeed.ts --name "BTC/USD" --base BTC --quote USD
+```
 
 ### For Beginners (Recommended)
 ```bash

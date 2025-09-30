@@ -101,6 +101,22 @@ const argv = yargs(process.argv)
   const latency = endTime - start;
   latencies.push(latency);
 
+  // Decode the oracle quote data from the Ed25519 instruction
+  const decodedQuote = OracleQuote.decode(instruction.data);
+  console.log("\n📊 Decoded Oracle Quote:");
+  console.log("  Discriminator:", decodedQuote.discriminator);
+  console.log("  Version:", decodedQuote.version);
+  console.log("  Recent Slot:", decodedQuote.recentSlot.toString());
+  console.log("  Signed Slothash:", decodedQuote.signedSlothash.toString("hex"));
+  console.log("  Oracle Indexes:", decodedQuote.oracleIndexes);
+  console.log("\n  Feed Infos:");
+  decodedQuote.feedInfos.forEach((feed, idx) => {
+    console.log(`    Feed ${idx}:`);
+    console.log(`      Feed Hash: ${feed.feedHash.toString("hex")}`);
+    console.log(`      Value: ${feed.value}`);
+    console.log(`      Min Oracle Samples: ${feed.minOracleSamples}`);
+  });
+
   // Step 3: Check if state account is initialized and create init instruction if needed
   const [stateAccount] = PublicKey.findProgramAddressSync(
     [Buffer.from("state")],

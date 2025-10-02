@@ -21,6 +21,6 @@ idl-build = ["anchor-lang/idl-build"]
 anchor-lang = "0.31.1"
 solana-program = ">=2,<3"
 bytemuck = "1.15.0"
-switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on-demand", features = ["anchor"] }
+switchboard-on-demand = { version = "0.9.2", features = ["anchor"] }
 
 

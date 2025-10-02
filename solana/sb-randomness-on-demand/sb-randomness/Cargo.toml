@@ -1,7 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-    "programs/*"
+    "programs/*",
+    "sb-randomness-on-demand/sb-randomness/programs/sb-randomness"
 ]
 
 [profile.release]

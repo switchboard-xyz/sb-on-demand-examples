@@ -36,6 +36,8 @@ export const BASIC_PROGRAM_PATH =
   "target/deploy/basic_oracle_example-keypair.json";
 export const ADVANCED_PROGRAM_PATH =
   "target/deploy/advanced_oracle_example-keypair.json";
+export const PREDICTION_MARKET_PROGRAM_PATH =
+  "target/deploy/prediction_market-keypair.json";
 
 /**
  * Default transaction configuration for Switchboard interactions

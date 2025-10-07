@@ -32,8 +32,8 @@ pub mod prediction_market {
         // Create the quote verifier from sysvars using builder pattern
         let mut verifier = QuoteVerifier::new();
         verifier
-            .slothash_sysvar(ctx.accounts.sysvars.slothashes.as_ref())
-            .ix_sysvar(ctx.accounts.sysvars.instructions.as_ref())
+            .slothash_sysvar(ctx.accounts.slothashes.as_ref())
+            .ix_sysvar(ctx.accounts.instructions.as_ref())
             .clock_slot(Clock::get()?.slot);
 
         // Verify the Ed25519 instruction at index 0
@@ -110,13 +110,6 @@ fn create_kalshi_feed_id(order_id: &str) -> Result<[u8; 32]> {
 
 #[derive(Accounts)]
 pub struct VerifyFeed<'info> {
-    pub sysvars: Sysvars<'info>,
-}
-
-
-#[derive(Accounts)]
-pub struct Sysvars<'info> {
-    pub clock: Sysvar<'info, Clock>,
     pub slothashes: Sysvar<'info, SlotHashes>,
     pub instructions: Sysvar<'info, Instructions>,
 }

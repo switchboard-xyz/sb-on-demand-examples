@@ -47,7 +47,7 @@ import * as crypto from "crypto";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import * as pathModule from "path";
-import { TX_CONFIG } from "../utils";
+import { TX_CONFIG, myAnchorProgram, PREDICTION_MARKET_PROGRAM_PATH } from "../utils";
 
 interface Arguments {
   apiKeyId: string;
@@ -178,10 +178,6 @@ function createSignature(
       ],
     };
 
-    console.log("  ✅ Feed Name:", oracleFeed.name);
-    console.log("  ✅ API URL:", url);
-    console.log("  ✅ JSON Path: $.order.yes_price_dollars\n");
-
     // Step 4: Test feed simulation with Crossbar
     console.log("🧪 Simulating Feed with Crossbar...");
 
@@ -195,19 +191,11 @@ function createSignature(
     console.log("  ✅ Simulation Result:");
     console.log(`    Response: ${JSON.stringify(simulation)}...\n`);
 
-    // Step 7: Crank the oracle to fetch fresh data
-    console.log("🔄 Cranking Oracle Feed...");
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
-    const oracleUpdateIx = await queue.fetchQuoteIx(
+    const quoteIx = await queue.fetchQuoteIx(
       crossbar,
       [oracleFeed],
       {
-        numSignatures: 3,
-        // gateway: new sb.Gateway(anchorProgram!, "http://127.0.0.1:8082"),
-        // gateway: new sb.Gateway(anchorProgram!, "https://141.95.35.110.xip.switchboard-oracles.xyz/devnet"),
-        // gateway,
+        numSignatures: 1,
         variableOverrides: {
           KALSHI_SIGNATURE: signature,
           KALSHI_TIMESTAMP: timestamp,
@@ -219,96 +207,30 @@ function createSignature(
     );
     console.log("  ✅ Oracle Cranked\n");
 
-    // const updateTx = await sb.asV0Tx({
-      // connection,
-      // ixs: oracleUpdateIxs,
-      // signers: [keypair],
-      // computeUnitPrice: 20_000,
-      // computeUnitLimitMultiple: 1.1,
-    // });
-//
-    // const updateSig = await connection.sendTransaction(updateTx, TX_CONFIG);
-    // await connection.confirmTransaction(updateSig, "confirmed");
-    // console.log(`  ✅ Oracle updated: ${updateSig}\n`);
-//
-    // // Step 10: Use on-chain program to verify feed
-    // console.log("🔧 Calling On-Chain Verification Program...");
-//
-    // try {
-      // const idlPath = pathModule.join(
-        // __dirname,
-        // "../../target/idl/prediction_market.json"
-      // );
-      // const idl = JSON.parse(fs.readFileSync(idlPath, "utf-8"));
-      // const predictionProgram = new Program(
-        // idl,
-        // anchorProgram!.provider as AnchorProvider
-      // );
-//
-      // // Create another Ed25519 instruction at index 0 for verification
-      // const verifyUpdateIxs = await queue.fetchManagedUpdateIxs(
-        // crossbar,
-        // [feedHash],
-        // {
-          // numSignatures: 1,
-          // variableOverrides: {
-            // KALSHI_SIGNATURE: signature,
-            // KALSHI_TIMESTAMP: timestamp,
-          // },
-          // instructionIdx: 0,
-          // payer: keypair.publicKey,
-        // }
-      // );
-//
-      // // Add the verify instruction
-      // const verifyIx = await predictionProgram.methods
-        // .verifyKalshiFeed(argv.orderId)
-        // .accounts({
-          // sysvars: {
-            // clock: new PublicKey("SysvarC1ock11111111111111111111111111111111"),
-            // slothashes: new PublicKey(
-              // "SysvarS1otHashes111111111111111111111111111"
-            // ),
-            // instructions: new PublicKey(
-              // "Sysvar1nstructions1111111111111111111111111"
-            // ),
-          // },
-        // })
-        // .instruction();
-//
-      // const verifyTx = await sb.asV0Tx({
-        // connection,
-        // ixs: [...verifyUpdateIxs, verifyIx],
-        // signers: [keypair],
-        // computeUnitPrice: 20_000,
-        // computeUnitLimitMultiple: 1.3,
-      // });
-//
-      // const verifySig = await connection.sendTransaction(verifyTx, TX_CONFIG);
-      // await connection.confirmTransaction(verifySig, "confirmed");
-      // console.log(`  ✅ On-chain verification successful: ${verifySig}\n`);
-//
-      // // Get transaction logs
-      // const txDetails = await connection.getTransaction(verifySig, {
-        // commitment: "confirmed",
-        // maxSupportedTransactionVersion: 0,
-      // });
-//
-      // if (txDetails?.meta?.logMessages) {
-        // console.log("📋 Program Logs:");
-        // txDetails.meta.logMessages
-          // .filter((log) => log.includes("Program log:"))
-          // .forEach((log) => console.log(`    ${log.replace("Program log: ", "")}`));
-        // console.log();
-      // }
-    // } catch (error: any) {
-      // console.log("  ⚠️  On-chain verification skipped");
-      // console.log(`     Error: ${error.message}`);
-      // console.log("     To deploy: anchor build && anchor deploy\n");
-    // }
-//
-    // // Summary
-    // console.log("✅ Verification Complete!");
+    const testProgram = await myAnchorProgram(
+      anchorProgram!.provider,
+      PREDICTION_MARKET_PROGRAM_PATH);
+
+    const verifyKalshiIx = await testProgram.methods
+      .verifyKalshiFeed(argv.orderId)
+    .accounts({
+      slothashSysvar: sb.SYSVAR_SLOTHASHES_PUBKEY,
+      instructionSysvar: sb.SYSVAR_INSTRUCTIONS_PUBKEY,
+    })
+    .instruction();
+
+    const tx = await sb.asV0Tx({
+      connection,
+      ixs: [quoteIx, verifyKalshiIx],
+      signers: [keypair],
+      computeUnitPrice: 20_000,
+      computeUnitLimitMultiple: 1.1,
+    });
+
+    const sim = await connection.simulateTransaction(tx);
+    console.log("  ✅ Transaction Simulated\n");
+    console.log("📝 Transaction Simulation Logs:");
+    console.log(JSON.stringify(sim, null, 2), "\n");
   } catch (error) {
     console.error("❌ Error:", error);
     if (error instanceof Error) {

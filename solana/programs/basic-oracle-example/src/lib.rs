@@ -26,13 +26,13 @@ pub mod basic_oracle_example {
     /// 2. Call this instruction to read the verified data
     ///
     /// ## Parameters
-    /// - oracle_account: The canonical oracle account (derived from feed hashes)
+    /// - quote_account: The canonical oracle account (derived from feed hashes)
     /// - queue: The Switchboard queue (auto-detected by network)
     /// - sysvars: Required system variables for verification
     pub fn read_oracle_data(ctx: Context<ReadOracleData>) -> Result<()> {
         // Access the oracle data directly
-        // The oracle_account constraint validates it's the canonical account
-        let feeds = ctx.accounts.oracle_account.feeds();
+        // The quote_account constraint validates it's the canonical account
+        let feeds = ctx.accounts.quote_account.feeds();
 
         msg!("Number of feeds: {}", feeds.len());
 
@@ -56,7 +56,7 @@ pub mod basic_oracle_example {
 /// Account context for reading oracle data
 ///
 /// This is designed to be as simple as possible while still being secure.
-/// The oracle_account is the canonical account derived from feed hashes.
+/// The quote_account is the canonical account derived from feed hashes.
 #[derive(Accounts)]
 pub struct ReadOracleData<'info> {
     /// The canonical oracle account containing verified quote data
@@ -65,8 +65,8 @@ pub struct ReadOracleData<'info> {
     /// - Updated by the quote program's verified_update instruction
     /// - Contains verified oracle data
     /// - Validated to be the canonical account for the contained feeds
-    #[account(address = oracle_account.canonical_key(&default_queue()))]
-    pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
+    #[account(address = quote_account.canonical_key(&default_queue()))]
+    pub quote_account: InterfaceAccount<'info, SwitchboardQuote>,
 
     /// System variables required for quote verification
     pub sysvars: Sysvars<'info>,

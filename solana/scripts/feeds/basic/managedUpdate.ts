@@ -54,8 +54,8 @@ const argv = yargs(process.argv)
 
   // Step 1: Derive the canonical oracle account from feed hashes
   // This uses the same derivation logic as the quote program
-  const [oracleAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [argv.feedId]);
-  console.log("📍 Oracle Account (derived):", oracleAccount.toBase58());
+  const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [argv.feedId]);
+  console.log("📍 Quote Account (derived):", quoteAccount.toBase58());
 
   // Step 2: Create managed update instructions
   // This returns both the Ed25519 signature verification instruction
@@ -76,10 +76,10 @@ const argv = yargs(process.argv)
   console.log("  - Quote program verified_update");
 
   // Step 3: Create your program instruction to read the oracle data
-  // This instruction will read from the oracle account that was just updated
+  // This instruction will read from the quote account that was just updated
   const readOracleIx = await basicReadOracleIx(
     basicProgram,
-    oracleAccount,
+    quoteAccount,
     queue.pubkey,
     keypair.publicKey
   );

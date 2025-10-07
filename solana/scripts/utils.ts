@@ -639,7 +639,7 @@ export function calculateStatistics(latencies: number[]) {
  */
 export async function basicReadOracleIx(
   program: anchor.Program,
-  oracleAccount: PublicKey,
+  quoteAccount: PublicKey,
   queue: PublicKey,
   payer: PublicKey
 ): Promise<TransactionInstruction> {
@@ -647,7 +647,7 @@ export async function basicReadOracleIx(
     .readOracleData()
     .accounts({
       queue: queue, // accounts[1]
-      oracleAccount: oracleAccount, // accounts[2]
+      quoteAccount: quoteAccount, // accounts[2]
       ixSysvar: sb.SPL_SYSVAR_INSTRUCTIONS_ID, // accounts[3]
       slotSysvar: sb.SPL_SYSVAR_SLOT_HASHES_ID, // accounts[4]
       clockSysvar: SYSVAR_CLOCK_PUBKEY, // accounts[5]

@@ -157,6 +157,9 @@ function createSignature(
 
     const oracleFeed = {
       name: "Kalshi Order Price",
+      minJobResponses: 1,
+      minOracleSamples: 1,
+      maxJobRangePct: 0,
       jobs: [
         {
           tasks: [
@@ -214,6 +217,7 @@ function createSignature(
     const verifyKalshiIx = await testProgram.methods
       .verifyKalshiFeed(argv.orderId)
     .accounts({
+      queue: queue.pubkey,
       slothashSysvar: sb.SYSVAR_SLOTHASHES_PUBKEY,
       instructionSysvar: sb.SYSVAR_INSTRUCTIONS_PUBKEY,
     })

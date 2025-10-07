@@ -4,6 +4,8 @@ use switchboard_protos::OracleFeed;
 use switchboard_protos::OracleJob;
 use switchboard_protos::oracle_job::oracle_job::{KalshiApiTask, JsonParseTask, Task};
 use switchboard_protos::oracle_job::oracle_job::task;
+use switchboard_on_demand::QueueAccountData;
+use switchboard_on_demand::default_queue;
 use prost::Message;
 use solana_program::hash::hash;
 use serde_json::json;
@@ -32,6 +34,7 @@ pub mod prediction_market {
         // Create the quote verifier from sysvars using builder pattern
         let mut verifier = QuoteVerifier::new();
         verifier
+            .queue(ctx.accounts.queue.as_ref())
             .slothash_sysvar(ctx.accounts.slothashes.as_ref())
             .ix_sysvar(ctx.accounts.instructions.as_ref())
             .clock_slot(Clock::get()?.slot);
@@ -110,6 +113,8 @@ fn create_kalshi_feed_id(order_id: &str) -> Result<[u8; 32]> {
 
 #[derive(Accounts)]
 pub struct VerifyFeed<'info> {
+    #[account(address = default_queue())]
+    pub queue: AccountLoader<'info, QueueAccountData>,
     pub slothashes: Sysvar<'info, SlotHashes>,
     pub instructions: Sysvar<'info, Instructions>,
 }

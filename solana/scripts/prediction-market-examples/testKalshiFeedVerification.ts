@@ -199,13 +199,15 @@ function createSignature(
     console.log("🔄 Cranking Oracle Feed...");
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
+    const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
     const oracleUpdateIx = await queue.fetchQuoteIx(
       crossbar,
       [oracleFeed],
       {
         numSignatures: 3,
         // gateway: new sb.Gateway(anchorProgram!, "http://127.0.0.1:8082"),
-        gateway: new sb.Gateway(anchorProgram!, "https://141.95.35.110.xip.switchboard-oracles.xyz/devnet"),
+        // gateway: new sb.Gateway(anchorProgram!, "https://141.95.35.110.xip.switchboard-oracles.xyz/devnet"),
+        // gateway,
         variableOverrides: {
           KALSHI_SIGNATURE: signature,
           KALSHI_TIMESTAMP: timestamp,

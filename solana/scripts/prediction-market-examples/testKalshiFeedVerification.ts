@@ -192,7 +192,7 @@ function createSignature(
     });
 
     console.log("  ✅ Simulation Result:");
-    console.log(`    Response: ${JSON.stringify(simulation)}...\n`);
+    console.log(`    Response: ${simulation.results[0]}...\n`);
 
     const quoteIx = await queue.fetchQuoteIx(
       crossbar,
@@ -208,7 +208,6 @@ function createSignature(
         payer: keypair.publicKey,
       }
     );
-    console.log("  ✅ Oracle Cranked\n");
 
     const testProgram = await myAnchorProgram(
       anchorProgram!.provider,
@@ -232,9 +231,14 @@ function createSignature(
     });
 
     const sim = await connection.simulateTransaction(tx);
+    if (sim.value.err) {
+      throw new Error(
+        `Transaction simulation failed: ${JSON.stringify(sim.value.err)}`
+      );
+    }
     console.log("  ✅ Transaction Simulated\n");
     console.log("📝 Transaction Simulation Logs:");
-    console.log(JSON.stringify(sim, null, 2), "\n");
+    console.log(JSON.stringify(sim.value.logs, null, 2), "\n");
   } catch (error) {
     console.error("❌ Error:", error);
     if (error instanceof Error) {

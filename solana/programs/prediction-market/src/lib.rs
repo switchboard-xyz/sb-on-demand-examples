@@ -40,7 +40,6 @@ pub mod prediction_market {
             .clock_slot(Clock::get()?.slot);
 
         // Verify the Ed25519 instruction at index 0
-        msg!("🔍 Extracting the quote from Ed25519 instruction at index 0...");
         let quote = verifier.verify_instruction_at(0).unwrap();
 
         let feeds = quote.feeds();
@@ -56,6 +55,9 @@ pub mod prediction_market {
         );
 
         msg!("✅ Feed ID verification successful!");
+        msg!("Feed ID: {}", faster_hex::hex_string(actual_feed_id));
+        msg!("Order ID: {}", order_id);
+        msg!("Signed slot: {}", quote.slot());
 
         Ok(())
     }

@@ -26,3 +26,4 @@ serde_json = { version = "1.0", features = ["preserve_order"] }
 sha2 = "0.10"
 prost = "0.13"
 solana-program = "3.0.0"
+faster-hex = "0.10.0"

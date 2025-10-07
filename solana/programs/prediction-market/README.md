@@ -1,171 +1,142 @@
-# Prediction Market Oracle Program
+# Kalshi Feed Verification Program
 
-A Solana program that integrates prediction market data from Switchboard oracles for on-chain position tracking and automated settlement.
+A Solana program demonstrating how to verify Switchboard oracle feed configurations on-chain using Kalshi prediction market data.
 
 ## Overview
 
-This program demonstrates how to build DeFi applications on top of prediction market oracles. It allows users to:
+This program shows how to verify that an oracle feed matches an expected configuration before trusting its data. This is critical for security because feed IDs are deterministic - they're derived by hashing the feed's protobuf definition. By verifying the feed ID on-chain, you ensure the oracle is using exactly the data sources and transformations you expect.
 
-- Create positions tracking specific prediction market outcomes
-- Automatically update positions with real-time oracle data
-- Settle positions when probability thresholds are met
-- Track win/loss outcomes based on market probabilities
+## Key Concept: Feed ID Verification
 
-## Features
+**The Problem:** A malicious actor could create a different oracle feed with similar-looking data but from untrusted sources.
 
-### Position Types
+**The Solution:** Feed IDs are SHA-256 hashes of the feed's protobuf definition. By recreating the feed proto on-chain and comparing its hash to the oracle's feed ID, you cryptographically verify the feed configuration.
 
-1. **Above Threshold**: Position wins when probability exceeds target
-2. **Below Threshold**: Position wins when probability falls below target
-3. **Exact Match**: Position wins when probability matches target (±1% tolerance)
+```
+Feed Definition → Protobuf Encoding → SHA-256 Hash → Feed ID
+```
 
-### Automatic Settlement
+This ensures:
+- The oracle uses the exact API endpoint you expect
+- No substitution of data sources
+- The JSON parsing path is correct
+- All task configurations match your expectations
 
-Positions can auto-settle when conditions are met during updates, or be manually settled by calling the settlement instruction.
+## Program Instruction
 
-### Rent Reclaim
+### verify_kalshi_feed
 
-Settled positions can be closed to reclaim rent, making the system capital-efficient.
-
-## Program Instructions
-
-### 1. Initialize Position
-
-Creates a new position tracking a prediction market feed.
+Verifies that an oracle feed matches the expected Kalshi order configuration.
 
 ```rust
-pub fn initialize_position(
-    ctx: Context<InitializePosition>,
-    feed_hash: [u8; 32],
-    target_probability: u64,  // Basis points (0-10000)
-    position_type: PositionType,
+pub fn verify_kalshi_feed(
+    ctx: Context<VerifyFeed>,
+    order_id: String,
 ) -> Result<()>
 ```
 
 **Parameters:**
-- `feed_hash`: The Switchboard oracle feed hash (32 bytes)
-- `target_probability`: Target probability in basis points (e.g., 5000 = 50%)
-- `position_type`: AboveThreshold, BelowThreshold, or ExactMatch
+- `order_id`: The Kalshi order ID to verify (e.g., "12345678-1234-1234-1234-123456789012")
 
 **Accounts:**
-- `position`: PDA derived from `[b"position", owner, feed_hash]`
-- `owner`: Signer creating the position
-- `system_program`: System program for account creation
-
-### 2. Update Position
-
-Updates the position with current oracle data.
-
-```rust
-pub fn update_position(ctx: Context<UpdatePosition>) -> Result<()>
-```
-
-**Accounts:**
-- `position`: The position account to update
-- `owner`: Position owner (must sign)
-- `oracle_account`: Canonical Switchboard oracle account
-- `sysvars`: Clock, SlotHashes, Instructions
+- `queue`: The Switchboard queue account (validates against default queue)
+- `slothashes`: Solana SlotHashes sysvar for signature verification
+- `instructions`: Solana Instructions sysvar for Ed25519 verification
 
 **Behavior:**
-- Reads current probability from oracle
-- Updates position state
-- Auto-settles if conditions are met
+1. Verifies the Ed25519 instruction at index 0 (oracle signature)
+2. Extracts the feed ID from the verified oracle quote
+3. Recreates the expected feed proto for the given order ID
+4. Hashes the recreated proto to derive the expected feed ID
+5. Compares actual vs expected feed IDs
+6. Logs verification results
 
-### 3. Settle Position
+**Error Conditions:**
+- `NoOracleFeeds`: No feeds found in oracle quote
+- `FeedMismatch`: Feed ID doesn't match expected configuration
+- `VerificationFailed`: Ed25519 signature verification failed
 
-Manually settles a position based on current oracle data.
+## How It Works
 
-```rust
-pub fn settle_position(ctx: Context<SettlePosition>) -> Result<()>
-```
+### 1. Feed Proto Recreation
 
-**Accounts:**
-- Same as update_position
-
-**Behavior:**
-- Marks position as settled
-- Records final probability
-- Determines win/loss outcome
-
-### 4. Close Position
-
-Closes a settled position and reclaims rent.
+The program recreates the exact feed definition on-chain:
 
 ```rust
-pub fn close_position(ctx: Context<ClosePosition>) -> Result<()>
+let feed = OracleFeed {
+    name: Some("Kalshi Order Price".to_string()),
+    jobs: vec![
+        OracleJob {
+            tasks: vec![
+                Task {
+                    task: Some(task::Task::KalshiApiTask(KalshiApiTask {
+                        url: Some(format!(
+                            "https://api.elections.kalshi.com/trade-api/v2/portfolio/orders/{}",
+                            order_id
+                        )),
+                        api_key_id: Some("${KALSHI_API_KEY_ID}".to_string()),
+                        signature: Some("${KALSHI_SIGNATURE}".to_string()),
+                        timestamp: Some("${KALSHI_TIMESTAMP}".to_string()),
+                        ..Default::default()
+                    })),
+                },
+                Task {
+                    task: Some(task::Task::JsonParseTask(JsonParseTask {
+                        path: Some("$.order.yes_price_dollars".to_string()),
+                        ..Default::default()
+                    })),
+                },
+            ],
+            weight: None,
+        }
+    ],
+    min_job_responses: Some(1),
+    min_oracle_samples: Some(1),
+    max_job_range_pct: Some(0),
+};
 ```
 
-**Requirements:**
-- Position must be settled first
+### 2. Feed ID Derivation
+
+```rust
+// Encode as protobuf length-delimited bytes
+let bytes = OracleFeed::encode_length_delimited_to_vec(&feed);
+
+// Hash to get feed ID
+let feed_id = hash(&bytes).to_bytes();
+```
+
+### 3. Verification
+
+```rust
+// Extract feed ID from oracle quote
+let actual_feed_id = feeds[0].feed_id();
+
+// Compare with expected
+require!(
+    *actual_feed_id == create_kalshi_feed_id(&order_id)?,
+    ErrorCode::FeedMismatch
+);
+```
 
 ## Account Structure
 
-### PredictionPosition
+### VerifyFeed Context
 
 ```rust
-pub struct PredictionPosition {
-    pub owner: Pubkey,              // Position owner
-    pub feed_hash: [u8; 32],        // Oracle feed hash
-    pub target_probability: u64,    // Target in basis points
-    pub current_probability: u64,   // Current oracle value
-    pub position_type: PositionType,// Position type
-    pub is_settled: bool,           // Settlement status
-    pub settlement_value: u64,      // Final value
-    pub last_update_slot: u64,      // Last update slot
-    pub settlement_slot: Option<u64>, // Settlement slot
-    pub bump: u8,                   // PDA bump
+#[derive(Accounts)]
+pub struct VerifyFeed<'info> {
+    #[account(address = default_queue())]
+    pub queue: AccountLoader<'info, QueueAccountData>,
+    pub slothashes: Sysvar<'info, SlotHashes>,
+    pub instructions: Sysvar<'info, Instructions>,
 }
 ```
 
-**Size:** 8 (discriminator) + 141 (data) = 149 bytes
-
-### PositionType Enum
-
-```rust
-pub enum PositionType {
-    AboveThreshold,  // Win if probability >= target
-    BelowThreshold,  // Win if probability <= target
-    ExactMatch,      // Win if |probability - target| < 1%
-}
-```
-
-## Oracle Integration
-
-### Feed Hash Derivation
-
-Oracle feeds are stored on IPFS and referenced by their hash:
-
-```typescript
-const { feedId } = await crossbar.storeOracleFeed(oracleFeed);
-const feedHash = feedId.slice(2); // Remove "0x" prefix
-```
-
-### Canonical Oracle Account
-
-The program validates that the oracle account is canonical:
-
-```rust
-#[account(address = oracle_account.canonical_key(&default_queue()))]
-pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>
-```
-
-This ensures:
-- Oracle data is from the correct feed
-- No fake oracle accounts can be used
-- Automatic account derivation works
-
-### Probability Calculation
-
-Oracle values use i128 with 18 decimals:
-
-```rust
-fn calculate_probability_bps(value: i128) -> Result<u64> {
-    const DIVISOR: i128 = 10^18;
-    let probability = value / DIVISOR;  // 0.0 to 1.0
-    let bps = (probability * 10000) as u64;  // Convert to basis points
-    Ok(bps.min(10000))  // Cap at 100%
-}
-```
+**Security Features:**
+- Queue account must match the default Switchboard queue
+- SlotHashes sysvar ensures recent signatures
+- Instructions sysvar provides Ed25519 verification data
 
 ## Build & Deploy
 
@@ -184,7 +155,7 @@ anchor deploy --provider.cluster devnet
 ### Update Program ID
 
 After deployment, update the program ID in:
-1. `src/lib.rs` - `declare_id!("YOUR_PROGRAM_ID")`
+1. `src/lib.rs:13` - `declare_id!("YOUR_PROGRAM_ID")`
 2. `Anchor.toml` - `[programs.devnet]` section
 
 Rebuild after updating:
@@ -192,138 +163,186 @@ Rebuild after updating:
 anchor build
 ```
 
-## Usage Examples
+## Usage Example
 
-### TypeScript Client
+### Prerequisites
 
-See `scripts/prediction-market-examples/usePredictionMarketProgram.ts` for a complete example.
+1. Kalshi API credentials (API key ID and private key)
+2. Kalshi order ID to verify
 
-### Basic Flow
+### Running the Example
 
-```typescript
-// 1. Create oracle feed
-const oracleFeed = {
-  name: "Polymarket Probability",
-  jobs: [{ tasks: [httpTask, jsonParseTask] }]
-};
-
-// 2. Store on IPFS
-const { feedId } = await crossbar.storeOracleFeed(oracleFeed);
-const feedHash = Buffer.from(feedId.slice(2), "hex");
-
-// 3. Initialize position
-await program.methods
-  .initializePosition(
-    Array.from(feedHash),
-    5000,  // 50% target
-    { aboveThreshold: {} }
-  )
-  .accounts({ ... })
-  .rpc();
-
-// 4. Update with oracle data
-const oracleUpdateIxs = await queue.fetchManagedUpdateIxs(...);
-const updatePositionIx = await program.methods
-  .updatePosition()
-  .accounts({ ... })
-  .instruction();
-
-await sendTransaction([...oracleUpdateIxs, updatePositionIx]);
-
-// 5. Check settlement
-const position = await program.account.predictionPosition.fetch(positionPda);
-console.log("Settled:", position.isSettled);
+```bash
+bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
+  --api-key-id YOUR_KALSHI_API_KEY_ID \
+  --private-key-path /path/to/kalshi/private-key.pem \
+  --order-id KALSHI_ORDER_ID
 ```
 
-## Use Cases
-
-### 1. Conditional Payments
-
-Automatically release funds when prediction markets reach certain probabilities.
-
-```rust
-if position.is_settled && position_won {
-    // Transfer funds to winner
-}
+**Example:**
+```bash
+bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
+  --api-key-id abc123def456 \
+  --private-key-path ~/.kalshi/private-key.pem \
+  --order-id 12345678-1234-1234-1234-123456789012
 ```
 
-### 2. Automated Market Maker
+### Script Workflow
 
-Use prediction probabilities to price synthetic assets or options.
+The example script demonstrates the complete verification flow:
 
-### 3. Risk Management
+1. **Load Kalshi credentials** from file system
+2. **Create Kalshi API signature** using RSA-PSS-SHA256
+3. **Define oracle feed** with KalshiApiTask and JsonParseTask
+4. **Simulate feed** with Crossbar to verify it works
+5. **Fetch oracle quote** with variable overrides for credentials
+6. **Create verification instruction** calling `verify_kalshi_feed`
+7. **Simulate transaction** to verify feed ID matches on-chain
 
-Track portfolio risk based on real-time prediction market data.
-
-### 4. Betting & Gaming
-
-Create on-chain betting markets with oracle-verified outcomes.
-
-### 5. DAO Governance
-
-Use prediction markets to inform governance decisions.
+See `scripts/prediction-market-examples/testKalshiFeedVerification.ts` for the complete implementation.
 
 ## Security Considerations
 
-### Oracle Validation
+### ✅ Feed ID Verification
 
-✅ **Good**: Program validates canonical oracle accounts
+**Good:** Verify feed configuration on-chain
 ```rust
-#[account(address = oracle_account.canonical_key(&default_queue()))]
+let actual_feed_id = feeds[0].feed_id();
+require!(
+    *actual_feed_id == create_kalshi_feed_id(&order_id)?,
+    ErrorCode::FeedMismatch
+);
 ```
 
-❌ **Bad**: Accepting any account as oracle
+**Why:** Prevents oracle feed substitution attacks
+
+### ✅ Queue Validation
+
+**Good:** Validate against the default Switchboard queue
 ```rust
-pub oracle_account: AccountInfo<'info>  // Don't do this!
+#[account(address = default_queue())]
+pub queue: AccountLoader<'info, QueueAccountData>,
 ```
 
-### Owner Checks
+**Why:** Ensures oracle data comes from trusted Switchboard infrastructure
 
-All instructions verify the position owner:
+### ✅ Ed25519 Verification
+
+**Good:** Verify oracle signatures using QuoteVerifier
 ```rust
-#[account(has_one = owner)]
-pub position: Account<'info, PredictionPosition>
+let mut verifier = QuoteVerifier::new();
+verifier
+    .queue(ctx.accounts.queue.as_ref())
+    .slothash_sysvar(ctx.accounts.slothashes.as_ref())
+    .ix_sysvar(ctx.accounts.instructions.as_ref())
+    .clock_slot(Clock::get()?.slot);
+
+let quote = verifier.verify_instruction_at(0)?;
 ```
 
-### Settlement Protection
+**Why:** Cryptographically proves oracle data is signed by trusted guardians
 
-Positions can't be settled twice:
+### ❌ Don't Skip Verification
+
+**Bad:** Trusting oracle data without feed verification
 ```rust
-require!(!position.is_settled, ErrorCode::AlreadySettled);
+// Don't do this!
+let value = oracle_account.value;
+// Use value without verifying feed configuration
 ```
 
-### Probability Validation
+**Why:** Attacker could provide data from untrusted sources
 
-Probabilities are capped at 100%:
-```rust
-Ok(bps.min(10000))  // Max 10000 basis points
-```
+## Use Cases
 
-## Testing
+### 1. Prediction Market Integration
 
-### Unit Tests
+Verify that prediction market data comes from the correct API endpoint and uses proper JSON parsing before settling positions or releasing funds.
 
-```bash
-anchor test
-```
+### 2. Conditional Payments
 
-### Integration Tests
+Ensure oracle data matches expected sources before executing automated payments based on market outcomes.
 
-```bash
-ts-node scripts/prediction-market-examples/usePredictionMarketProgram.ts \
-  --eventId "test-123" \
-  --targetProbability 5000 \
-  --positionType above
-```
+### 3. DeFi Protocol Integration
+
+Verify oracle feed configurations before using price data for liquidations, collateral calculations, or other critical operations.
+
+### 4. Compliance & Auditing
+
+Prove on-chain that specific data sources were used for regulatory compliance or audit trails.
+
+### 5. Multi-Source Oracle Validation
+
+Extend this pattern to verify multiple oracle feeds and ensure data aggregation uses only approved sources.
 
 ## Error Codes
 
 | Code | Name | Description |
 |------|------|-------------|
-| 6000 | NoOracleFeeds | No oracle feeds available in account |
-| 6001 | AlreadySettled | Position has already been settled |
-| 6002 | NotSettled | Position must be settled before closing |
-| 6003 | InvalidProbability | Probability value is invalid |
+| 6000 | NoOracleFeeds | No oracle feeds available in the quote |
+| 6001 | FeedMismatch | Feed ID doesn't match expected configuration |
+| 6002 | InvalidFeedJson | Failed to construct or parse feed JSON |
+| 6003 | VerifierError | Failed to create QuoteVerifier instance |
+| 6004 | VerificationFailed | Ed25519 signature verification failed |
+
+## Dependencies
+
+```toml
+[dependencies]
+anchor-lang = "0.31.1"
+switchboard-on-demand = { version = "0.9.2", features = ["anchor", "devnet"] }
+switchboard-protos = { version = "^0.2.1", features = ["serde"] }
+prost = "0.13"
+solana-program = "3.0.0"
+faster-hex = "0.10.0"
+```
+
+## Testing
+
+### Integration Test
+
+```bash
+bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
+  --api-key-id test-key \
+  --private-key-path ./test-key.pem \
+  --order-id test-order-id
+```
+
+The script will:
+1. Create and simulate the oracle feed
+2. Fetch a quote from Switchboard
+3. Verify the feed ID matches on-chain
+4. Display verification results and logs
+
+## Extending This Pattern
+
+This verification pattern can be adapted for other oracle feed types:
+
+### Generic HTTP API
+```rust
+HttpTask {
+    url: Some("https://api.example.com/data".to_string()),
+    method: Some(Method::Get as i32),
+    headers: vec![/* ... */],
+}
+```
+
+### Polymarket Integration
+```rust
+HttpTask {
+    url: Some(format!("https://clob.polymarket.com/event/{}", event_id)),
+    method: Some(Method::Get as i32),
+}
+```
+
+### Price Feeds
+```rust
+HttpTask {
+    url: Some("https://api.coingecko.com/price".to_string()),
+}
+```
+
+The key principle remains: recreate the feed proto on-chain, hash it, and compare against the oracle's feed ID.
 
 ## License
 
@@ -331,6 +350,7 @@ MIT
 
 ## Resources
 
-- [Switchboard Docs](https://docs.switchboard.xyz)
+- [Switchboard Documentation](https://docs.switchboard.xyz)
+- [Kalshi API Documentation](https://trading-api.readme.io/reference/getting-started)
 - [Anchor Framework](https://www.anchor-lang.com/)
-- [Solana Cookbook](https://solanacookbook.com/)
+- [Protocol Buffers](https://protobuf.dev/)

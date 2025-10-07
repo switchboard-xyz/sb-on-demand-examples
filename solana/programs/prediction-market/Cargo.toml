@@ -1,0 +1,27 @@
+[package]
+name = "prediction-market"
+version = "0.1.0"
+description = "Prediction Market Oracle Integration Example"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "prediction_market"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build"]
+anchor-debug = []
+
+[dependencies]
+anchor-lang = "0.31.1"
+switchboard-on-demand = { version = "0.9.2", features = ["anchor", "devnet"] }
+switchboard-protos = { path = "/Users/mgild/projects/sbv3/protos", features = ["serde"] }
+bytemuck = "1.14"
+serde_json = { version = "1.0", features = ["preserve_order"] }
+sha2 = "0.10"
+prost = "0.13"

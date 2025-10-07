@@ -8,7 +8,7 @@ use prost::Message;
 use solana_program::hash::hash;
 use serde_json::json;
 
-declare_id!("PREDwvCuCKFQ5SUe7kNZaUMJ6aEVMgJKMsjL1Y7iDFC");
+declare_id!("5VjqP71zWPGc169ogvSphDG4tS2zdJ3qoiB6XTghmH1r");
 
 /// Prediction Market Feed Verification Program
 ///

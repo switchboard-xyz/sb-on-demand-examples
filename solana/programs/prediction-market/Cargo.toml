@@ -20,7 +20,7 @@ anchor-debug = []
 [dependencies]
 anchor-lang = "0.31.1"
 switchboard-on-demand = { version = "0.9.2", features = ["anchor", "devnet"] }
-switchboard-protos = { path = "/Users/mgild/projects/sbv3/protos", features = ["serde"] }
+switchboard-protos = { version = "^0.2.1", features = ["serde"] }
 bytemuck = "1.14"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 sha2 = "0.10"

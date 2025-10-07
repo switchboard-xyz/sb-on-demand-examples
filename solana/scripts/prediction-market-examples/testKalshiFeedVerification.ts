@@ -194,20 +194,40 @@ function createSignature(
     console.log("  ✅ Simulation Result:");
     console.log(`    Response: ${simulation.results[0]}...\n`);
 
-    const quoteIx = await queue.fetchQuoteIx(
-      crossbar,
-      [oracleFeed],
-      {
-        numSignatures: 1,
-        variableOverrides: {
-          KALSHI_SIGNATURE: signature,
-          KALSHI_TIMESTAMP: timestamp,
-          KALSHI_API_KEY_ID: argv.apiKeyId,
-        },
-        instructionIdx: 0,
-        payer: keypair.publicKey,
+    let quoteIx;
+    let lastError;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        console.log(`🔄 Fetching quote instruction (attempt ${attempt}/3)...`);
+        quoteIx = await queue.fetchQuoteIx(
+          crossbar,
+          [oracleFeed],
+          {
+            numSignatures: 1,
+            variableOverrides: {
+              KALSHI_SIGNATURE: signature,
+              KALSHI_TIMESTAMP: timestamp,
+              KALSHI_API_KEY_ID: argv.apiKeyId,
+            },
+            instructionIdx: 0,
+            payer: keypair.publicKey,
+          }
+        );
+        console.log(`  ✅ Successfully fetched quote instruction\n`);
+        break;
+      } catch (error) {
+        lastError = error;
+        console.log(`  ❌ Attempt ${attempt} failed:`, error instanceof Error ? error.message : error);
+        if (attempt < 3) {
+          console.log(`  ⏳ Waiting 2s before retry...\n`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       }
-    );
+    }
+
+    if (!quoteIx) {
+      throw new Error(`Failed to fetch quote instruction after 3 attempts: ${lastError}`);
+    }
 
     const testProgram = await myAnchorProgram(
       anchorProgram!.provider,

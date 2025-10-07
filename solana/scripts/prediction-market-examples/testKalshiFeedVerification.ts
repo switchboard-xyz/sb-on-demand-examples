@@ -131,22 +131,21 @@ function createSignature(
     validatePrivateKeyPath(argv.privateKeyPath);
 
     const privateKey = loadPrivateKey(argv.privateKeyPath);
-    const timestamp = Date.now().toString();
     const method = "GET";
     const path = `/trade-api/v2/portfolio/orders/${argv.orderId}`;
-    const signature = createSignature(privateKey, timestamp, method, path);
     const url = `https://api.elections.kalshi.com${path}`;
 
     console.log("📋 Configuration:");
     console.log(`  🔑 API Key ID: ${argv.apiKeyId}`);
     console.log(`  📋 Order ID: ${argv.orderId}`);
     console.log(`  🌐 Crossbar URL: ${argv.crossbarUrl}`);
-    console.log(`  ⏰ Timestamp: ${timestamp}\n`);
 
     // Step 2: Load Switchboard environment
     const { program: anchorProgram, keypair, connection } =
       await sb.AnchorUtils.loadEnv();
     const queue = await sb.Queue.loadDefault(anchorProgram!);
+    const crossbar = new CrossbarClient(argv.crossbarUrl);
+    const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
 
     console.log("🔧 Solana Configuration:");
     console.log(`  Wallet: ${keypair.publicKey.toBase58()}`);
@@ -184,7 +183,8 @@ function createSignature(
     // Step 4: Test feed simulation with Crossbar
     console.log("🧪 Simulating Feed with Crossbar...");
 
-    const crossbar = new CrossbarClient(argv.crossbarUrl);
+    const timestamp = Date.now().toString();
+    const signature = createSignature(privateKey, timestamp, method, path);
     const simulation = await crossbar.simulateFeed(oracleFeed, true, {
       KALSHI_SIGNATURE: signature,
       KALSHI_TIMESTAMP: timestamp,

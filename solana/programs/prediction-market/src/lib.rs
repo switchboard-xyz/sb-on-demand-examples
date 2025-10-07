@@ -1,9 +1,12 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::{SlotHashes, Instructions, QuoteVerifier};
 use switchboard_protos::OracleFeed;
+use switchboard_protos::OracleJob;
+use switchboard_protos::oracle_job::oracle_job::{KalshiApiTask, JsonParseTask, Task};
+use switchboard_protos::oracle_job::oracle_job::task;
+use prost::Message;
+use solana_program::hash::hash;
 use serde_json::json;
-use sha2::{Sha256, Digest};
-switchboard_on_demand::switchboard_anchor_bindings!();
 
 declare_id!("PREDwvCuCKFQ5SUe7kNZaUMJ6aEVMgJKMsjL1Y7iDFC");
 
@@ -38,7 +41,7 @@ pub mod prediction_market {
         let quote = verifier.verify_instruction_at(0).unwrap();
 
         let feeds = quote.feeds();
-        require!(feeds.len() > 0, ErrorCode::NoOracleFeeds);
+        require!(!feeds.is_empty(), ErrorCode::NoOracleFeeds);
 
         let feed = &feeds[0];
         let actual_feed_id = feed.feed_id();
@@ -61,47 +64,49 @@ pub mod prediction_market {
 /// This recreates the feed proto structure using the json! macro
 /// and hashes it to derive the feed ID
 fn create_kalshi_feed_id(order_id: &str) -> Result<[u8; 32]> {
+
     // Build the Kalshi API URL
     let url = format!(
         "https://api.elections.kalshi.com/trade-api/v2/portfolio/orders/{}",
         order_id
     );
 
-    // Create the feed using json! macro - matches the TypeScript side exactly
-    let oracle_feed = json!({
-        "name": "Kalshi Order Price",
-        "jobs": [{
-            "tasks": [
-                {
-                    "kalshiApiTask": {
-                        "url": url,
-                        "apiKeyId": "${KALSHI_API_KEY_ID}}",
-                        "signature": "${KALSHI_SIGNATURE}",
-                        "timestamp": "${KALSHI_TIMESTAMP}"
-                    }
-                },
-                {
-                    "jsonParseTask": {
-                        "path": "$.order.yes_price_dollars"
-                    }
-                }
-            ]
-        }]
-    });
-    // Convert to canonical JSON string
-    let feed: OracleFeed = serde_json::from_value(oracle_feed).unwrap();
+    let feed = OracleFeed {
+        name: Some("Kalshi Order Price".to_string()),
+        jobs: vec![
+            OracleJob {
+                tasks: vec![
+                    Task {
+                        task: Some(task::Task::KalshiApiTask(KalshiApiTask {
+                            url: Some(url.clone()),
+                            api_key_id: Some("${KALSHI_API_KEY_ID}".to_string()),
+                            signature: Some("${KALSHI_SIGNATURE}".to_string()),
+                            timestamp: Some("${KALSHI_TIMESTAMP}".to_string()),
+                            ..Default::default()
+                        })),
+                    },
+                    Task {
+                        task: Some(task::Task::JsonParseTask(JsonParseTask {
+                            path: Some("$.order.yes_price_dollars".to_string()),
+                            ..Default::default()
+                        })),
+                    },
+                ],
+                weight: None,
+            }
+        ],
+        min_job_responses: Some(1),
+        min_oracle_samples: Some(1),
+        max_job_range_pct: Some(0),
+    };
 
-    // Hash the JSON string directly (simpler and fits in BPF)
-    let hash = Sha256::digest(feed.encode_length_delimited_to_vec.as_slice());
-    Ok(hash.into())
+    // Encode as protobuf length-delimited bytes using prost::Message trait
+    let bytes = OracleFeed::encode_length_delimited_to_vec(&feed);
+
+    // Hash the protobuf bytes
+    Ok(hash(&bytes).to_bytes())
 }
 
-/// Simple hex encoding for logging
-fn hex_encode(bytes: &[u8]) -> String {
-    bytes.iter()
-        .map(|b| format!("{:02x}", b))
-        .collect::<String>()
-}
 
 #[derive(Accounts)]
 pub struct VerifyFeed<'info> {

@@ -66,8 +66,7 @@ pub mod prediction_market {
 
 /// Create Kalshi feed hash from order ID
 ///
-/// This recreates the feed proto structure using the json! macro
-/// and hashes it to derive the feed ID
+/// This recreates the feed proto structure and hashes it to derive the feed ID
 fn create_kalshi_feed_id(order_id: &str) -> Result<[u8; 32]> {
 
     // Build the Kalshi API URL

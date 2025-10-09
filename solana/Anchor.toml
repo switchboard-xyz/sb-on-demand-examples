@@ -10,9 +10,9 @@ basic_oracle_example = "4ZK7w1R7R4GJrFBSUZrNPnmzsUeG8bvVKvk6z7bvQ2zZ"
 sb_randomness = "44wNsyMPUQxCDhJpKqwNu8XGjqYbThqgRPUpQCARyrUc"
 
 [programs.mainnet]
-advanced_oracle_example = "FNnhcuzFqg8CSVHRauPh8rFaqSrJzsQ8wL66GFL8VJZQ"
-basic_oracle_example = "C4KQQeJVJ1X4uP2XeRGJT77s6A9ooas8rZiW1XB2C2r8"
-sb_randomness = "44wNsyMPUQxCDhJpKqwNu8XGjqYbThqgRPUpQCARyrUc"
+advanced_oracle_example = "AtzoHFHwuJs3BiP8zMnaoEo7q3Q7N6ACCUYL7jXhZ5en"
+basic_oracle_example = "9kVBXoCrvZgKYWTJ74w3S8wAp7daEB7zpG7kwiXxkCVN"
+sb_randomness = "93tkpep2PYDxweHHi2vQBpi7eTBF23y8LGdiLMt5R9f2"
 
 [registry]
 url = "https://api.apr.dev"

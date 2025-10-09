@@ -19,5 +19,5 @@ anchor-debug = []
 
 [dependencies]
 anchor-lang = "0.31.1"
-switchboard-on-demand = { version = "0.9.2", features = ["anchor", "devnet"] }
+switchboard-on-demand = { version = "=0.9.4", features = ["anchor", "devnet"] }
 bytemuck = "1.14"

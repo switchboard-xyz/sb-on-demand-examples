@@ -4,7 +4,7 @@ use switchboard_on_demand::{
 };
 switchboard_on_demand::switchboard_anchor_bindings!();
 
-declare_id!("C4KQQeJVJ1X4uP2XeRGJT77s6A9ooas8rZiW1XB2C2r8");
+declare_id!("9kVBXoCrvZgKYWTJ74w3S8wAp7daEB7zpG7kwiXxkCVN");
 
 /// Basic Oracle Example Program
 ///

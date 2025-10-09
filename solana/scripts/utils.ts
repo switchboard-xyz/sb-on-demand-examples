@@ -90,7 +90,7 @@ export async function myAnchorProgram(
     const program = new anchor.Program(idl!, provider);
     return program;
   } catch (e) {
-    throw new Error("Failed to load demo program. Was it deployed?");
+    throw new Error("Failed to load IDL of demo program. Was it deployed?");
   }
 }
 

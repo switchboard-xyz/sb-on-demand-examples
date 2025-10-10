@@ -15,12 +15,11 @@ no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
-idl-build = ["anchor-lang/idl-build"]
+idl-build = ["anchor-lang/idl-build", "switchboard-on-demand/idl-build"]
 
 [dependencies]
 anchor-lang = "0.31.1"
 solana-program = ">=2,<3"
 bytemuck = "1.15.0"
-switchboard-on-demand = { version = "0.9.2", features = ["anchor"] }
-
+switchboard-on-demand = { version = "0.10.0", features = ["anchor"] }
 

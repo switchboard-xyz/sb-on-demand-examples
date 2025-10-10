@@ -1,8 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::{
-    QuoteVerifier, QueueAccountData, SlotHashes, Instructions, default_queue
+    SlotHashes, Instructions, default_queue, SwitchboardQuoteExt, SwitchboardQuote
 };
-switchboard_on_demand::switchboard_anchor_bindings!();
 
 declare_id!("9kVBXoCrvZgKYWTJ74w3S8wAp7daEB7zpG7kwiXxkCVN");
 
@@ -32,7 +31,7 @@ pub mod basic_oracle_example {
     pub fn read_oracle_data(ctx: Context<ReadOracleData>) -> Result<()> {
         // Access the oracle data directly
         // The quote_account constraint validates it's the canonical account
-        let feeds = ctx.accounts.quote_account.feeds();
+        let feeds = &ctx.accounts.quote_account.feeds;
 
         msg!("Number of feeds: {}", feeds.len());
 
@@ -66,7 +65,7 @@ pub struct ReadOracleData<'info> {
     /// - Contains verified oracle data
     /// - Validated to be the canonical account for the contained feeds
     #[account(address = quote_account.canonical_key(&default_queue()))]
-    pub quote_account: InterfaceAccount<'info, SwitchboardQuote>,
+    pub quote_account: Box<Account<'info, SwitchboardQuote>>,
 
     /// System variables required for quote verification
     pub sysvars: Sysvars<'info>,

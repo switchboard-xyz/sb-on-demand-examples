@@ -183,38 +183,38 @@ console.log(feedInfo); // Shows available sources
 #### Example Output
 
 ```
-🚀 Switchboard Surge Example for Sui
+Switchboard Surge Example for Sui
 Feeds: BTC/USD, ETH/USD
-Mode: 🎯 Simulate Only
+Mode: Simulate Only
 
-📡 Connecting to Surge...
-✅ Connected to Surge!
+Connecting to Surge...
+Connected to Surge!
 
-📊 Subscribing to feeds: BTC/USD, ETH/USD
-✅ Successfully subscribed to 1 bundles
+Subscribing to feeds: BTC/USD, ETH/USD
+Successfully subscribed to 1 bundles
 
-⏳ Waiting for first price update from Surge...
-✅ Received price update from Surge!
+Waiting for first price update from Surge...
+Received price update from Surge!
 
-🔄 Converting Surge update to Sui quotes...
-✅ Converted to quote format!
+Converting Surge update to Sui quotes...
+Converted to quote format!
 Feed hashes: 0x5f8fb5...,0x6f9cc6...
 Values: 96245670000000000000,3245700000000000000
 Timestamp (seconds): 1704067200
 
-💰 Price Data from Surge:
+Price Data from Surge:
   0x5f8fb5...: $96,245.67
   0x6f9cc6...: $3,245.70
 
-🎯 Simulating transaction...
-✅ Transaction simulation successful!
+Simulating transaction...
+Transaction simulation successful!
 Gas costs: {
   computation: '1000000',
   storage: '2000000',
   storageRebate: '0'
 }
 
-✅ Example completed successfully!
+Example completed successfully!
 ```
 
 ### Batch Simulation of All Feeds
@@ -323,7 +323,7 @@ Full response: {
 }
 
 Simulation result: { status: 'success' }
-✅ Feed update simulation successful!
+Feed update simulation successful!
 Gas used: { computationCost: '1000000', storageCost: '2000000', storageRebate: '0' }
 ```
 
@@ -332,11 +332,11 @@ Gas used: { computationCost: '1000000', storageCost: '2000000', storageRebate: '
 Using Crossbar URL: https://crossbar.switchboard.xyz
 Updating 2 feed(s): [ '0x1234...abcd', '0x5678...efgh' ]
 
-🔄 Calling Crossbar directly for oracle updates...
-✅ Crossbar call completed in 1247ms
+Calling Crossbar directly for oracle updates...
+Crossbar call completed in 1247ms
 Received responses for 2 feed(s)
 
-📊 Feed 1 (0x1234...abcd):
+Feed 1 (0x1234...abcd):
 Queue: 0x6e43354b8ea2dfad98eadb33db94dcc9b1175e70ee82e42abc605f6b7de9e910
 Fee: 0
 Failures: 0
@@ -349,7 +349,7 @@ Failures: 0
         "timestamp": 1672531200
     }
 
-📈 Performance Summary:
+Performance Summary:
 - Feeds requested: 2
 - Successful responses: 2
 - Failed responses: 0
@@ -359,30 +359,30 @@ Failures: 0
 
 #### Surge Streaming Update:
 ```
-🚀 Switchboard Surge Example for Sui
+Switchboard Surge Example for Sui
 Feeds: BTC/USD, ETH/USD
-Mode: 🎯 Simulate Only
+Mode: Simulate Only
 
-📡 Connecting to Surge...
-✅ Connected to Surge!
+Connecting to Surge...
+Connected to Surge!
 
-📊 Subscribing to feeds: BTC/USD, ETH/USD
-✅ Successfully subscribed to 1 bundles
+Subscribing to feeds: BTC/USD, ETH/USD
+Successfully subscribed to 1 bundles
 
-⏳ Waiting for first price update from Surge...
-✅ Received price update from Surge!
+Waiting for first price update from Surge...
+Received price update from Surge!
 
-🔄 Converting Surge update to Sui quotes...
-✅ Converted to quote format!
+Converting Surge update to Sui quotes...
+Converted to quote format!
 Feed hashes: 0x5f8fb5...,0x6f9cc6...
 Values: 96245670000000000000,3245700000000000000
 Timestamp (seconds): 1704067200
 
-💰 Price Data from Surge:
+Price Data from Surge:
   0x5f8fb5...: $96,245.67
   0x6f9cc6...: $3,245.70
 
-✅ Example completed successfully!
+Example completed successfully!
 ```
 
 ## Key Sui Concepts

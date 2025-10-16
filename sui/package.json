@@ -6,10 +6,12 @@
   "scripts": {
     "feed-example": "tsx scripts/crankFeed.ts",
     "crossbar-update": "tsx scripts/crossbarUpdate.ts",
+    "surge-update": "tsx scripts/surgeUpdate.ts",
     "simulate-all": "tsx scripts/simulateAll.ts"
   },
   "dependencies": {
     "@mysten/sui": "^1.38.0",
+    "@switchboard-xyz/on-demand": "latest",
     "@switchboard-xyz/sui-sdk": "^0.1.7"
   },
   "devDependencies": {

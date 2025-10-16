@@ -73,6 +73,156 @@ export CROSSBAR_URL="https://crossbar.switchboardlabs.xyz"
 npm run crossbar-update
 ```
 
+### Switchboard Surge Streaming
+
+Connect to Switchboard Surge for real-time WebSocket streaming of price updates and convert them directly into Sui quote format:
+
+#### What is Surge?
+
+Surge is a WebSocket-based streaming service that provides:
+- **Real-time price feeds** - Subscribe to live price updates across 1000+ trading pairs
+- **Low latency updates** - Direct WebSocket connections with millisecond-level latency
+- **Multiple data sources** - Aggregate pricing from multiple exchanges and data providers
+- **Flexible subscription** - Subscribe to specific symbols/sources or all available feeds
+- **Built-in verification** - All prices are cryptographically signed by Switchboard oracles
+
+#### Setup Surge
+
+1. Get an API key from [Switchboard Dashboard](https://explorer.switchboard.xyz)
+
+2. Set the environment variable:
+```bash
+export SURGE_API_KEY="sb_live_your_api_key_here"
+```
+
+#### Running the Surge Example
+
+The Surge example demonstrates:
+- Connecting to the Surge WebSocket service
+- Subscribing to real-time price feeds
+- Converting Surge price updates to Sui quote format
+- Using the quotes in a Sui transaction
+
+```bash
+# Subscribe to default feeds (BTC/USD, ETH/USD)
+npm run surge-update
+
+# Subscribe to specific feeds (comma-separated)
+ts-node scripts/surgeUpdate.ts --feeds "BTC/USD,ETH/USD,SOL/USD"
+
+# Sign and send transaction (requires private key)
+export SUI_PRIVATE_KEY="your_private_key_here"
+ts-node scripts/surgeUpdate.ts --feeds "BTC/USD" --sign-and-send
+```
+
+#### Surge Integration with Sui Quotes
+
+The example shows how to:
+
+1. **Connect to Surge**
+   ```typescript
+   const surge = new Surge({
+     apiKey: API_KEY,
+     network: "mainnet",
+     verbose: true,
+   });
+   await surge.connect();
+   ```
+
+2. **Subscribe to feeds**
+   ```typescript
+   await surge.subscribe([
+     { symbol: "BTC/USD", source: "WEIGHTED" },
+     { symbol: "ETH/USD", source: "WEIGHTED" }
+   ]);
+   ```
+
+3. **Listen for price updates**
+   ```typescript
+   surge.on('signedPriceUpdate', (priceUpdate) => {
+     // Process price update
+   });
+   ```
+
+4. **Convert to Sui quotes**
+   ```typescript
+   const quoteData = await convertSurgeUpdateToQuotes(
+     priceUpdate,
+     QUEUE_ID
+   );
+   ```
+
+5. **Use in a Sui transaction**
+   ```typescript
+   // You now have formatted quote data ready for Sui contracts:
+   // - feedHashes: Array of feed identifiers
+   // - values: 18-decimal price values
+   // - valuesNeg: Boolean array for negative values
+   // - timestampSeconds: Oracle timestamp
+   // - slot: Current slot number
+   ```
+
+#### Available Feed Symbols
+
+Surge supports hundreds of trading pairs. Common examples include:
+
+**Cryptocurrencies:**
+- BTC/USD, ETH/USD, SOL/USD, MATIC/USD, AVAX/USD
+- BNB/USD, XRP/USD, ADA/USD, DOGE/USD
+
+**Forex:**
+- EUR/USD, GBP/USD, JPY/USD, CHF/USD
+
+**Commodities:**
+- GOLD/USD, SILVER/USD, CRUDE/USD, NATGAS/USD
+
+**Data Sources:**
+- BINANCE, COINBASE, KRAKEN, FTX (historical)
+- WEIGHTED (aggregated from multiple sources)
+
+For the complete list of available feeds, call:
+```typescript
+const feedInfo = await surge.getFeedInfo("BTC/USD");
+console.log(feedInfo); // Shows available sources
+```
+
+#### Example Output
+
+```
+🚀 Switchboard Surge Example for Sui
+Feeds: BTC/USD, ETH/USD
+Mode: 🎯 Simulate Only
+
+📡 Connecting to Surge...
+✅ Connected to Surge!
+
+📊 Subscribing to feeds: BTC/USD, ETH/USD
+✅ Successfully subscribed to 1 bundles
+
+⏳ Waiting for first price update from Surge...
+✅ Received price update from Surge!
+
+🔄 Converting Surge update to Sui quotes...
+✅ Converted to quote format!
+Feed hashes: 0x5f8fb5...,0x6f9cc6...
+Values: 96245670000000000000,3245700000000000000
+Timestamp (seconds): 1704067200
+
+💰 Price Data from Surge:
+  0x5f8fb5...: $96,245.67
+  0x6f9cc6...: $3,245.70
+
+🎯 Simulating transaction...
+✅ Transaction simulation successful!
+Gas costs: {
+  computation: '1000000',
+  storage: '2000000',
+  storageRebate: '0'
+}
+
+✅ Example completed successfully!
+```
+
 ### Batch Simulation of All Feeds
 
 Test all predefined feed IDs at once using a comprehensive simulation:
@@ -128,14 +278,31 @@ This script processes 9 predefined feed IDs and provides:
 4. **Simulate Transaction**: Dry-runs the batch update transaction
 5. **Performance Summary**: Shows timing, success rates, and per-feed metrics
 
-### What the Script Does:
+#### Surge Streaming Update (`surgeUpdate.ts`)
+1. **Connect to Surge**: Establish WebSocket connection to Switchboard Surge
+2. **Subscribe to Feeds**: Request real-time updates for specific symbols/sources
+3. **Receive Updates**: Listen for WebSocket messages with signed price data
+4. **Convert to Quotes**: Transform SurgeUpdate into Sui quote format using `convertSurgeUpdateToQuotes()`
+5. **Build Transaction**: Create a Sui transaction with the converted quotes
+6. **Simulate**: Dry-run the transaction to validate gas costs
+7. **Optional Send**: If `--sign-and-send` is used, execute the transaction on-chain
 
+### What the Scripts Do:
+
+#### crankFeed.ts & crossbarUpdate.ts:
 - **No private key required** - reads data and simulates transactions
 - Loads the specified Switchboard feed (Aggregator object)
 - Fetches **fresh oracle data** from external sources via oracle network
 - Shows **detailed oracle responses** including individual oracle results
 - Displays the **aggregated price** from multiple oracle sources
 - Simulates the update transaction to show gas costs and effects
+
+#### surgeUpdate.ts:
+- **Connects to WebSocket** - Real-time streaming of price updates
+- **Subscribes to feeds** - Specify symbols and data sources
+- **Converts to Sui format** - Uses `convertSurgeUpdateToQuotes()` from sui-sdk
+- **Demonstrates integration** - Shows how to use Surge data in Sui contracts
+- **Optional signing** - Can sign and send transactions with `--sign-and-send`
 
 ### Example Output:
 
@@ -196,6 +363,34 @@ Failures: 0
 - Average per feed: 624ms
 ```
 
+#### Surge Streaming Update:
+```
+🚀 Switchboard Surge Example for Sui
+Feeds: BTC/USD, ETH/USD
+Mode: 🎯 Simulate Only
+
+📡 Connecting to Surge...
+✅ Connected to Surge!
+
+📊 Subscribing to feeds: BTC/USD, ETH/USD
+✅ Successfully subscribed to 1 bundles
+
+⏳ Waiting for first price update from Surge...
+✅ Received price update from Surge!
+
+🔄 Converting Surge update to Sui quotes...
+✅ Converted to quote format!
+Feed hashes: 0x5f8fb5...,0x6f9cc6...
+Values: 96245670000000000000,3245700000000000000
+Timestamp (seconds): 1704067200
+
+💰 Price Data from Surge:
+  0x5f8fb5...: $96,245.67
+  0x6f9cc6...: $3,245.70
+
+✅ Example completed successfully!
+```
+
 ## Key Sui Concepts
 
 ### Aggregator Object
@@ -211,6 +406,13 @@ Each feed is represented as an `Aggregator` object on Sui that stores:
 3. **Aggregation** - Results are combined using median or weighted average
 4. **On-chain Update** - Transaction updates the Aggregator object with fresh data
 
+### Surge WebSocket Flow
+1. **Connection** - Establish secure WebSocket to Surge gateway
+2. **Subscription** - Request specific feeds (symbol/source pairs)
+3. **Streaming** - Receive real-time price updates via WebSocket
+4. **Conversion** - Transform SurgeUpdate to Sui quote format
+5. **On-chain Usage** - Integrate quotes into Sui contracts/transactions
+
 ### Move Integration
 To use feeds in Move contracts:
 ```move
@@ -224,9 +426,24 @@ public fun consume_price_data(feed: &Aggregator) {
 }
 ```
 
+To use quotes in Move contracts:
+```move
+use switchboard::quote::{Quotes, QuoteVerifier};
+
+public fun consume_quotes(verifier: &QuoteVerifier, quotes: Quotes) {
+    let feed_hash = b"btc/usd";
+    let quote = verifier.get_quote(feed_hash);
+    let price = quote.result();
+    let timestamp = quote.timestamp_ms();
+    // Use quote data in your logic
+}
+```
+
 ## Resources
 
 - [Switchboard Sui Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/sui)
+- [Switchboard Surge Documentation](https://docs.switchboard.xyz/product-documentation/surge/websocket-streaming)
 - [Sui SDK NPM Package](https://www.npmjs.com/package/@switchboard-xyz/sui-sdk)
+- [On-Demand NPM Package](https://www.npmjs.com/package/@switchboard-xyz/on-demand)
 - [Sui Developer Documentation](https://docs.sui.io)
-- [Feed Builder Tool](https://explorer.switchboardlabs.xyz/feed-builder)
+- [Feed Builder Tool](https://explorer.switchboard.xyz/feed-builder)

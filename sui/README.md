@@ -5,7 +5,7 @@ This directory contains examples for using Switchboard On-Demand feeds on the Su
 ## Switchboard on Sui Overview
 
 Switchboard provides decentralized oracle feeds on Sui through a pull-based model where:
-- **Feeds are stored on-chain** as Aggregator objects
+- **Feeds are defined off-chain** with their own Feed Identifier linking them to customized logic
 - **Updates are triggered on-demand** by calling oracle networks
 - **Fresh data is fetched** from external APIs and verified by multiple oracles
 - **Results are aggregated** and stored in the feed for immediate use
@@ -170,14 +170,8 @@ Surge supports hundreds of trading pairs. Common examples include:
 - BTC/USD, ETH/USD, SOL/USD, MATIC/USD, AVAX/USD
 - BNB/USD, XRP/USD, ADA/USD, DOGE/USD
 
-**Forex:**
-- EUR/USD, GBP/USD, JPY/USD, CHF/USD
-
-**Commodities:**
-- GOLD/USD, SILVER/USD, CRUDE/USD, NATGAS/USD
-
 **Data Sources:**
-- BINANCE, COINBASE, KRAKEN, FTX (historical)
+- BINANCE, COINBASE, BYBIT, and more
 - WEIGHTED (aggregated from multiple sources)
 
 For the complete list of available feeds, call:

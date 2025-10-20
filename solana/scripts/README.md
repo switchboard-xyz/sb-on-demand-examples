@@ -34,6 +34,9 @@ npm run benchmark
 # Fetch price quotes with specific feed
 bun run scripts/feeds/advanced/runUpdate.ts --feedId 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 
+# X402 paywalled RPC access
+bun run scripts/feeds/x402Update.ts --rpcUrl https://helius.api.corbits.dev --method getBlockHeight
+
 # Stream prices with Surge
 bun run scripts/streaming/runSurge.ts
 
@@ -57,6 +60,7 @@ Scripts for fetching and updating oracle price data.
 
 - **`feeds/basic/managedUpdate.ts`** - Simple oracle quote fetching (recommended for beginners)
 - **`feeds/advanced/runUpdate.ts`** - Advanced aggregated price quotes (90% cost reduction)
+- **`feeds/x402Update.ts`** - X402 paywalled RPC access with micropayments
 
 [📖 Detailed Feeds Documentation](./feeds/README.md)
 
@@ -87,6 +91,11 @@ export ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
 
 # Optional (for Surge streaming)
 export SURGE_API_KEY=your_api_key_here
+
+# For X402 paywalled RPC (x402Update.ts)
+# Uses the same ANCHOR_WALLET and ANCHOR_PROVIDER_URL as other scripts
+export ANCHOR_WALLET=~/.config/solana/id.json
+export ANCHOR_PROVIDER_URL=https://api.mainnet-beta.solana.com
 ```
 
 ### Prerequisites
@@ -100,6 +109,7 @@ export SURGE_API_KEY=your_api_key_here
 | Need | Use This Script | Why |
 |------|----------------|-----|
 | Fetch prices for DeFi | `feeds/advanced/runUpdate.ts` | Lowest cost, signed data |
+| Access paywalled RPC | `feeds/x402Update.ts` | X402 micropayments, premium RPC |
 | Real-time UI updates | `streaming/crossbarStream.ts` | Unsigned, lowest latency |
 | Demo streaming integration | `streaming/runSurge.ts` | Clean demo with simulation |
 | Production streaming | `streaming/stream.ts` | Full on-chain integration |

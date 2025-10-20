@@ -48,7 +48,7 @@ npm run feeds:advanced --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18fae
 |---------|----------------|-------------------|-----------------|
 | **Setup Time** | 5 minutes | 15 minutes | 10 minutes |
 | **Code Lines** | ~50 lines | ~150 lines | ~100 lines |
-| **Compute Units** | ~25,000 CU | ~18,000 CU | ~30,000 CU |
+| **Compute Units** | < 600 CU | < 70 CU | ~30,000 CU |
 | **Transaction Size** | Standard | 90% smaller with LUT | Standard |
 | **Error Handling** | Basic | Comprehensive | Moderate |
 | **Monitoring** | None | Performance metrics | Basic stats |

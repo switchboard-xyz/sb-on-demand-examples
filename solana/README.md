@@ -99,7 +99,7 @@ This repository includes two example programs demonstrating different integratio
 #### 🛠️ Basic Example (`programs/basic-oracle-example/`) - **Anchor Framework**
 - **Framework**: **Anchor Framework** for ease of development and safety
 - **Use Case**: Learning, prototyping, and standard DeFi applications
-- **Performance**: ~2k compute unit usage with Anchor overhead
+- **Performance**: < 600 CU with Anchor overhead
 - **Features**: Full account validation, built-in serialization, comprehensive error handling
 - **Security**: Complete account validation and type safety
 - **Development**: Beginner-friendly with extensive guardrails
@@ -107,7 +107,7 @@ This repository includes two example programs demonstrating different integratio
 #### ⚡ Advanced Example (`programs/advanced-oracle-example/`) - **Pinocchio Framework**
 - **Framework**: **Pinocchio Framework** for maximum optimization and minimal overhead
 - **Use Case**: **Highly optimized oracle programs such as oracle AMMs and MEV-sensitive applications**
-- **Performance**: **Ultra-optimized compute units (~180 CU with Pinocchio wrapper, ~44 CU at lower level)**
+- **Performance**: **Ultra-optimized compute units (< 70 CU)**
 - **Security Model**: **⚠️ TRUSTED CRANKER ONLY - Bypasses account validation for performance**
 
 **🚨 IMPORTANT SECURITY WARNING**: This advanced program is designed for scenarios where you have a **trusted cranker** and understand the security implications. It bypasses many standard account checks for maximum performance optimization. Only use this approach if:
@@ -123,8 +123,7 @@ This repository includes two example programs demonstrating different integratio
 - **Minimal Validation**: Reduced account checks in favor of performance
 
 **Performance Breakdown**:
-- **~180 total compute units** with Pinocchio wrapper
-- **~44 compute units** achievable with lower-level optimizations
+- **< 70 compute units** with optimized implementation
 - **90% reduction** in compute usage vs standard implementations
 
 This makes the advanced example ideal for **oracle AMMs**, **high-frequency trading bots**, and other applications where compute efficiency is critical and you can guarantee a trusted execution environment.
@@ -135,7 +134,7 @@ This makes the advanced example ideal for **oracle AMMs**, **high-frequency trad
 |--------|------------------------------|-------------------------------------|
 | **Learning Curve** | Beginner-friendly | Advanced developers only |
 | **Safety** | Full type safety & validation | Minimal validation, unsafe optimizations |
-| **Compute Units** | ~2,000 CU | ~180 CU (Pinocchio) / ~44 CU (low-level) |
+| **Compute Units** | < 600 CU | < 70 CU |
 | **Development Speed** | Fast prototyping | Requires optimization expertise |
 | **Security Model** | Complete account checks | Trusted cranker required |
 | **Use Cases** | Standard DeFi, Learning | Oracle AMMs, HFT, MEV-sensitive apps |
@@ -210,6 +209,7 @@ The example scripts are organized into categories based on their functionality:
 ### `/scripts/feeds/` - Oracle Feed Operations
 - **`basic/managedUpdate.ts`** - Basic oracle integration with Anchor Framework
 - **`advanced/runUpdate.ts`** - Optimized oracle integration with Pinocchio Framework
+- **`x402Update.ts`** - X402 paywalled RPC access with micropayments
 
 ### `/scripts/streaming/` - Real-time Price Streaming
 - **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
@@ -340,6 +340,151 @@ const tx = await asV0Tx({
 - You need persistent on-chain price history
 - Other programs need to read your price data
 - Building price archives or analytics
+
+## 🔐 X402 Paywalled RPC Access
+
+Switchboard's X402 integration enables pay-per-use access to premium RPC endpoints using micropayments on Solana.
+
+### What is X402?
+
+X402 is a payment protocol that extends HTTP with payment capabilities. When accessing X402-enabled RPC endpoints:
+
+1. **Automatic Payment Negotiation**: Client receives payment requirements via HTTP 402 (Payment Required) response
+2. **Micropayment Authorization**: Payment is authorized using USDC on Solana
+3. **Transparent Access**: Once payment is authorized, the RPC request proceeds automatically
+
+### X402 Architecture
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│  Your Client    │────▶│  X402 Gateway   │────▶│  Premium RPC    │
+│                 │     │  (Payment)      │     │  (Helius, etc)  │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │
+        │ 1. Request            │ 2. 402 Payment Required
+        │ ─────────────────────▶│    {payTo, amount, asset...}
+        │                       │
+        │ 3. Payment Header     │
+        │ ◀─────────────────────│
+        │                       │
+        │ 4. Authenticated      │ 5. Forward to RPC
+        │    Request            │ ──────────────────▶
+        │ ─────────────────────▶│
+        │                       │ 6. RPC Response
+        │ 7. Response           │ ◀──────────────────
+        │ ◀─────────────────────│
+```
+
+### Getting Started with X402
+
+#### Step 1: Setup Environment
+
+X402Update.ts uses the standard Anchor environment configuration (Anchor.toml or environment variables).
+
+#### Step 2: Run X402 Example
+
+```bash
+# Access paywalled RPC with automatic payment handling
+bun run scripts/feeds/x402Update.ts --rpcUrl https://helius.api.corbits.dev --method getBlockHeight
+
+# Example output:
+# 🔧 Initializing X402 payment demo...
+# 👤 Wallet: YourWalletAddress...
+# 💰 Payment token: USDC
+# 🔐 X402 manager initialized
+# 🌐 Paywalled RPC: https://helius.api.corbits.dev
+# 📡 RPC method: getBlockHeight
+#
+# 📋 Fetching X402 payment info...
+# Payment required: {
+#   scheme: 'exact',
+#   network: 'solana-mainnet-beta',
+#   payTo: 'FvaJmaAob2woFwxmvHroKXr8WRqUwEY5cWMCKoES2Bbu',
+#   maxAmountRequired: '1000',
+#   asset: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+# }
+#
+# 🔑 Deriving payment header...
+# 🚀 Executing paywalled RPC call...
+# ✅ RPC Response: { "result": 123456789 }
+```
+
+### X402 Implementation Example
+
+```typescript
+import { X402FetchManager } from "@switchboard-xyz/x402-utils";
+import { createLocalWallet } from "@faremeter/wallet-solana";
+import { exact } from "@faremeter/payment-solana";
+import * as sb from "@switchboard-xyz/on-demand";
+
+// Load Solana wallet and connection
+const { keypair, connection } = await sb.AnchorUtils.loadEnv();
+
+// Create Faremeter wallet for payment signing
+const wallet = await createLocalWallet("mainnet-beta", keypair);
+
+// Configure USDC payment handler
+const usdcMint = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+const paymentHandler = exact.createPaymentHandler(wallet, usdcMint, connection);
+
+// Initialize X402 manager
+const x402Manager = new X402FetchManager(paymentHandler);
+
+// Make paywalled RPC request
+const response = await x402Manager.fetch("https://helius.api.corbits.dev", {
+  method: "POST",
+  body: JSON.stringify({
+    jsonrpc: "2.0",
+    id: 1,
+    method: "getBlockHeight"
+  })
+});
+
+const result = await response.json();
+console.log("Block height:", result.result);
+```
+
+### X402 Payment Flow Details
+
+The X402FetchManager handles the complete payment flow automatically:
+
+1. **Initial Request**: Makes request to paywalled endpoint
+2. **Payment Discovery**: Receives 402 response with payment details:
+   ```json
+   {
+     "x402Version": 1,
+     "accepts": [{
+       "scheme": "exact",
+       "network": "solana-mainnet-beta",
+       "payTo": "FvaJmaAob2w...",
+       "maxAmountRequired": "1000",
+       "asset": "EPjFWdd5AufqSSqe...",
+       "extra": { "decimals": 6, ... }
+     }]
+   }
+   ```
+3. **Payment Authorization**: Creates signed payment authorization header
+4. **Authenticated Request**: Retries request with `X-PAYMENT` header
+5. **RPC Response**: Receives successful response from premium RPC
+
+### Use Cases for X402
+
+- **Premium RPC Access**: Pay-per-use access to high-performance RPC nodes
+- **Metered APIs**: Pay only for the API calls you make
+- **Rate Limiting Bypass**: Access endpoints with dynamic pricing instead of fixed rate limits
+- **Quality of Service**: Access priority RPC endpoints with guaranteed performance
+
+### X402 vs Other Methods
+
+| Feature | X402 Paywalled RPC | Standard RPC | RPC Subscriptions |
+|---------|-------------------|--------------|-------------------|
+| **Payment Model** | Per-request micropayments | Free (rate-limited) | Monthly subscription |
+| **Cost** | ~$0.0001-0.001 per call | Free | $50-500/month |
+| **Rate Limits** | Based on payment | Strict limits | Higher limits |
+| **Setup** | Instant | None | Account setup |
+| **Flexibility** | Pay only for what you use | Limited | Fixed monthly cost |
 
 ## 🌊 Switchboard Surge: WebSocket Streaming (NEW!)
 

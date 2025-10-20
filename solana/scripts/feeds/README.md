@@ -157,15 +157,9 @@ trackMetrics({ latency, computeUnits: sim.value.unitsConsumed });
 - Valid RPC endpoint URL
 - Network access to Switchboard Crossbar
 
-## Common Feed IDs
+## Finding Feed IDs
 
-Use these feed IDs for testing:
-
-- **BTC/USD**: `0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f`
-- **ETH/USD**: `0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef`
-- **SOL/USD**: `0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890`
-
-Find more feed IDs in the [Switchboard Explorer](https://ondemand.switchboard.xyz/)
+Find feed IDs in the [Switchboard Explorer](https://ondemand.switchboard.xyz/)
 
 ## Environment Configuration
 
@@ -188,13 +182,24 @@ export SOLANA_CLUSTER=devnet
 Your Anchor program should accept oracle accounts and verify the data:
 
 ```rust
+use switchboard_on_demand::{
+    QuoteVerifier, SwitchboardQuote, default_queue, get_slot
+};
+
 #[derive(Accounts)]
 pub struct UseOracleData<'info> {
     // The managed oracle account containing verified quote data
-    pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
+    // Validates it's the canonical account for the contained feeds
+    #[account(address = quote_account.canonical_key(&default_queue()))]
+    pub quote_account: InterfaceAccount<'info, SwitchboardQuote>,
+
+    /// CHECK: Switchboard queue - validated in QuoteVerifier
+    pub queue: AccountInfo<'info>,
+
     // Your program's state
     #[account(mut)]
     pub state: Account<'info, YourState>,
+
     // Required sysvars for verification
     pub clock: Sysvar<'info, Clock>,
     pub slothashes: Sysvar<'info, SlotHashes>,
@@ -204,11 +209,12 @@ pub struct UseOracleData<'info> {
 pub fn use_oracle_data(ctx: Context<UseOracleData>) -> Result<()> {
     // Verify the oracle data
     let quote = QuoteVerifier::new()
+        .queue(&ctx.accounts.queue)
         .slothash_sysvar(&ctx.accounts.slothashes)
         .ix_sysvar(&ctx.accounts.instructions)
         .clock_slot(get_slot(&ctx.accounts.clock))
         .max_age(20) // Max 20 slots old
-        .verify_account(&ctx.accounts.oracle_account)?;
+        .verify_account(&ctx.accounts.quote_account)?;
 
     // Use the verified data
     for feed in quote.feeds() {

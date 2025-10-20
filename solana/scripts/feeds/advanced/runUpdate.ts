@@ -19,8 +19,7 @@ const argv = yargs(process.argv)
     feedId: {
       type: "string",
       required: true,
-      description: "The hexadecimal ID of the price feed (e.g., BTC/USD)",
-      example: "0x1234567890abcdef...",
+      description: "The hexadecimal ID of the price feed (get from Switchboard Explorer)",
     },
   })
   .parseSync();

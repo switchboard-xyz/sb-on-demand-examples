@@ -71,22 +71,39 @@ Your Anchor program should:
 
 Example program instruction:
 ```rust
+use switchboard_on_demand::{
+    QuoteVerifier, SwitchboardQuote, default_queue, get_slot
+};
+
 #[derive(Accounts)]
 pub struct UseOracleData<'info> {
     // The managed oracle account containing verified quote data
-    pub oracle_account: InterfaceAccount<'info, SwitchboardQuote>,
+    // Validates it's the canonical account for the contained feeds
+    #[account(address = quote_account.canonical_key(&default_queue()))]
+    pub quote_account: InterfaceAccount<'info, SwitchboardQuote>,
+
+    /// CHECK: Switchboard queue - validated in QuoteVerifier
+    pub queue: AccountInfo<'info>,
+
     // Your program's accounts
     #[account(mut)]
     pub your_state: Account<'info, YourState>,
+
+    // Required sysvars for verification
+    pub clock: Sysvar<'info, Clock>,
+    pub slothashes: Sysvar<'info, SlotHashes>,
+    pub instructions: Sysvar<'info, Instructions>,
 }
 
 pub fn use_oracle_data(ctx: Context<UseOracleData>) -> Result<()> {
-    let oracle = &*ctx.accounts.oracle_account;
-
     // Verify the oracle data is recent and valid
     let quote = QuoteVerifier::new()
+        .queue(&ctx.accounts.queue)
+        .slothash_sysvar(&ctx.accounts.slothashes)
+        .ix_sysvar(&ctx.accounts.instructions)
+        .clock_slot(get_slot(&ctx.accounts.clock))
         .max_age(20) // 20 slots max age
-        .verify_account(&ctx.accounts.oracle_account)?;
+        .verify_account(&ctx.accounts.quote_account)?;
 
     // Extract feed values
     for feed in quote.feeds() {
@@ -105,10 +122,6 @@ pub fn use_oracle_data(ctx: Context<UseOracleData>) -> Result<()> {
 3. **See the integration**: Watch the oracle integration in action
 4. **Modify for your needs**: Adapt the pattern to your program
 
-## Common Feed IDs
+## Finding Feed IDs
 
-- **BTC/USD**: `0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f`
-- **ETH/USD**: `0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef`
-- **SOL/USD**: `0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890`
-
-Find more feed IDs in the [Switchboard Explorer](https://ondemand.switchboard.xyz/)
+Find feed IDs in the [Switchboard Explorer](https://ondemand.switchboard.xyz/)

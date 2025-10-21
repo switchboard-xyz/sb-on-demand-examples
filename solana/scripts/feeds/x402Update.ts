@@ -1,13 +1,16 @@
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, Connection } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
+import { OracleQuote } from "@switchboard-xyz/on-demand";
+import { CrossbarClient, FeedHash, IOracleFeed, OracleJob } from "@switchboard-xyz/common";
 import { createLocalWallet } from "@faremeter/wallet-solana";
 import { exact } from "@faremeter/payment-solana";
 import { X402FetchManager } from "@switchboard-xyz/x402-utils";
 import yargs from "yargs";
+import { TX_CONFIG, loadBasicProgram, basicReadOracleIx } from "../utils";
 
 const argv = yargs(process.argv)
   .options({
-    rpcUrl: {
+    url: {
       type: "string",
       default: "https://helius.api.corbits.dev",
       description: "The X402-enabled paywalled RPC URL",
@@ -15,113 +18,182 @@ const argv = yargs(process.argv)
     method: {
       type: "string",
       default: "getBlockHeight",
-      description: "The RPC method to call",
+      description: "The JSON-RPC method to call",
     },
   })
   .parseSync();
 
+const ORACLE_FEED: IOracleFeed = {
+  name: "X402 Paywalled RPC Call",
+  minJobResponses: 1,
+  minOracleSamples: 1,
+  maxJobRangePct: 0,
+  jobs: [
+    {
+      tasks: [
+        {
+          httpTask: {
+            url: argv.url,
+            method: OracleJob.HttpTask.Method.METHOD_POST,
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id: 1,
+              method: argv.method,
+            }),
+            headers: [
+              {
+                key: "X-PAYMENT",
+                // Use variable placeholder - will be replaced by variable override
+                value: "${X402_PAYMENT_HEADER}",
+              },
+            ],
+          },
+        },
+        {
+          jsonParseTask: {
+            path: "$.result", // Extract result from JSON-RPC response
+          },
+        },
+      ],
+    },
+  ],
+};
+
 /**
- * X402 Paywalled RPC Example
+ * X402 Variable Override Example - Paywalled RPC Access
  *
- * This example demonstrates how to interact with X402-enabled paywalled RPC endpoints
- * using Switchboard's X402FetchManager and Faremeter payment infrastructure. It shows how to:
+ * This example demonstrates using X402 authentication headers as variable overrides
+ * to access paywalled RPC endpoints. Similar to the prediction market example, the
+ * feed is defined inline rather than stored on IPFS.
  *
- * 1. Create a Solana wallet for payment authorization
- * 2. Configure USDC payment handler for exact payments
- * 3. Initialize X402FetchManager to handle payment headers
- * 4. Fetch X402 payment requirements from the paywalled endpoint (returns an `accepts` array)
- * 5. Derive and attach payment headers to RPC requests
- * 6. Execute paywalled RPC calls with automatic payment handling
+ * Key concepts:
+ * 1. Define oracle feed inline with ${X402_PAYMENT_HEADER} placeholder
+ * 2. Derive X402 payment header for the paywalled RPC endpoint
+ * 3. Pass header as variable override to oracle job
+ * 4. Oracle uses the header to authenticate JSON-RPC calls
+ * 5. Extract $.result from JSON-RPC response
+ * 6. Verified data is returned in the Ed25519 instruction
  *
- * The X402 payment protocol enables:
- * - Micropayments for individual RPC requests
- * - Automatic payment header generation and signing
- * - Transparent integration with existing RPC workflows
- * - USDC-based exact payment handling
- * - Pay-per-use access to premium RPC infrastructure
+ * This approach is useful for:
+ * - Paywalled RPC endpoints requiring micropayments
+ * - Dynamic authentication without IPFS storage
+ * - JSON-RPC methods on premium infrastructure
+ * - Custom authentication schemes
+ *
+ * Unlike managed updates (which use feed IDs from IPFS), this creates the feed
+ * definition on-the-fly and passes authentication dynamically.
  */
 (async function main() {
   try {
-    console.log("🔧 Initializing X402 payment demo...");
+    console.log("🔧 Initializing X402 variable override demo...");
 
-    // Step 1: Load Solana environment configuration using AnchorUtils
-    const { keypair, connection } = await sb.AnchorUtils.loadEnv();
+    // Step 1: Load Solana environment configuration
+    const { program, keypair, connection, crossbar } = await sb.AnchorUtils.loadEnv();
     console.log("👤 Wallet:", keypair.publicKey.toBase58());
+    console.log("📡 RPC Method:", argv.method);
 
-    // Step 2: Create Faremeter wallet from keypair
-    // This wallet handles payment signing and authorization
+    // Step 2: Create Faremeter wallet for X402 payments
     const wallet = await createLocalWallet("mainnet-beta", keypair);
 
     // Step 3: Configure USDC payment handler
-    // USDC mint address on Solana mainnet
     const usdcMint = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
-    const paymentHandler = exact.createPaymentHandler(wallet, usdcMint, connection);
+    const mainnetConnection = new Connection("https://api.mainnet-beta.solana.com");
+    const paymentHandler = exact.createPaymentHandler(wallet, usdcMint, mainnetConnection);
     console.log("💰 Payment token: USDC");
 
-    // Step 4: Initialize X402FetchManager
-    // This manager handles payment header derivation and X402 protocol
+    // Step 4: Initialize X402FetchManager to derive payment headers
     const x402Manager = new X402FetchManager(paymentHandler);
     console.log("🔐 X402 manager initialized");
 
-    // Step 5: Configure the paywalled RPC request
-    const paywalledRpcUrl = argv.rpcUrl;
-    console.log("🌐 Paywalled RPC:", paywalledRpcUrl);
-    console.log("📡 RPC method:", argv.method);
-
-    const params = {
+    // Step 5: Derive X402 payment header for the paywalled RPC
+    // This header will be passed as a variable override to the oracle job
+    console.log("\n🔑 Deriving X402 payment header...");
+    const paymentHeader = await x402Manager.derivePaymentHeader(argv.url, {
       method: "POST",
       body: JSON.stringify({
         jsonrpc: "2.0",
         id: 1,
-        method: argv.method
+        method: argv.method,
       }),
-    };
+    });
+    console.log("✅ X402 payment header generated");
 
-    // Step 6: Fetch X402 payment information
-    // This retrieves the payment requirements from the paywalled endpoint
-    console.log("\n📋 Fetching X402 payment info...");
-    const x402Info = await x402Manager.fetchX402Info(paywalledRpcUrl, params);
+    // Step 6: Load Switchboard queue
+    const queue = await sb.Queue.loadDefault(program!);
 
-    const paymentDetails = x402Info.accepts[0];
-    console.log("Payment required:", {
-      scheme: paymentDetails.scheme,
-      network: paymentDetails.network,
-      resource: paymentDetails.resource,
-      payTo: paymentDetails.payTo,
-      maxAmountRequired: paymentDetails.maxAmountRequired,
-      asset: paymentDetails.asset,
-      description: paymentDetails.description,
-      extra: paymentDetails.extra,
+    // Step 7: Compute and display the feed ID (hash of the protobuf)
+    const feedId = FeedHash.computeOracleFeedId(ORACLE_FEED);
+    console.log("🔖 Feed ID:", `0x${feedId.toString("hex")}`);
+
+    // Step 8: Derive the canonical quote account from feed hash
+    const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [feedId]);
+    console.log("📍 Quote Account:", quoteAccount.toBase58());
+
+    // Step 9: Fetch managed update instructions with X402 header as variable override
+    console.log("\n📋 Fetching managed update instructions with X402 variable override...");
+    const instructions = await queue.fetchManagedUpdateIxs(
+      crossbar,
+      [ORACLE_FEED],
+      {
+        numSignatures: 1,
+        // Pass the X402 payment header as a variable override
+        // This replaces ${X402_PAYMENT_HEADER} in the job definition
+        variableOverrides: {
+          X402_PAYMENT_HEADER: paymentHeader,
+        },
+        instructionIdx: 0,
+        payer: keypair.publicKey,
+      }
+    );
+
+    console.log("✅ Generated instructions:", instructions.length);
+    console.log("   - Ed25519 signature verification");
+    console.log("   - Quote program verified_update");
+    console.log("   - Variable override: X402_PAYMENT_HEADER");
+
+    // Step 10: Load basic program and create read instruction
+    const basicProgram = await loadBasicProgram(program!.provider);
+    const readOracleIx = await basicReadOracleIx(
+      basicProgram,
+      quoteAccount,
+      queue.pubkey,
+      keypair.publicKey
+    );
+
+    // Step 11: Build and simulate transaction
+    console.log("\n🔨 Building transaction...");
+    const tx = await sb.asV0Tx({
+      connection,
+      ixs: [
+        ...instructions, // Managed update instructions
+        readOracleIx,    // Read from quote account
+      ],
+      signers: [keypair],
+      computeUnitPrice: 20_000,
+      computeUnitLimitMultiple: 1.1,
     });
 
-    // Step 7: Derive payment header
-    // The X402FetchManager creates a signed payment authorization header
-    console.log("\n🔑 Deriving payment header...");
-    const header = await x402Manager.derivePaymentHeader(paywalledRpcUrl, params);
+    console.log("🧪 Simulating transaction...");
+    const sim = await connection.simulateTransaction(tx);
+    console.log(sim.value.logs?.join("\n"));
 
-    // Step 8: Execute the paywalled RPC request
-    // Include the X-PAYMENT header to authorize the request
-    console.log("\n🚀 Executing paywalled RPC call...");
-    const response = await fetch(paywalledRpcUrl, {
-      ...params,
-      headers: {
-        'X-PAYMENT': header,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    // Step 9: Process and display results
-    if (!response.ok) {
-      console.error("❌ Request failed:", response.status, response.statusText);
+    if (sim.value.err) {
+      console.error("❌ Simulation failed:", sim.value.err);
       return;
     }
 
-    const result = await response.json();
-    console.log("\n✅ RPC Response:");
-    console.log(JSON.stringify(result, null, 2));
+    console.log("\n✅ Simulation succeeded!");
+    console.log("\n💡 Key Takeaways:");
+    console.log("   • Feed defined inline (not stored on IPFS)");
+    console.log("   • X402 header passed via variable override");
+    console.log("   • Oracle authenticated with paywalled RPC");
+    console.log("   • Data stored in quote account");
 
   } catch (error) {
     console.error("\n❌ Error:", error instanceof Error ? error.message : error);
+    if (error instanceof Error && error.stack) {
+      console.error("\nStack:", error.stack);
+    }
     process.exit(1);
   }
 })();

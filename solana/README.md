@@ -209,7 +209,7 @@ The example scripts are organized into categories based on their functionality:
 ### `/scripts/feeds/` - Oracle Feed Operations
 - **`basic/managedUpdate.ts`** - Basic oracle integration with Anchor Framework
 - **`advanced/runUpdate.ts`** - Optimized oracle integration with Pinocchio Framework
-- **`x402Update.ts`** - X402 paywalled RPC access with micropayments
+- **`x402Update.ts`** - X402 authentication with inline feed definition (like prediction market)
 
 ### `/scripts/streaming/` - Real-time Price Streaming
 - **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
@@ -341,40 +341,36 @@ const tx = await asV0Tx({
 - Other programs need to read your price data
 - Building price archives or analytics
 
-## 🔐 X402 Paywalled RPC Access
+## 🔐 X402 Variable Overrides
 
-Switchboard's X402 integration enables pay-per-use access to premium RPC endpoints using micropayments on Solana.
+Switchboard's X402 integration enables using X402 payment headers as variable overrides in oracle jobs, allowing access to paywalled APIs without storing credentials on IPFS.
 
 ### What is X402?
 
-X402 is a payment protocol that extends HTTP with payment capabilities. When accessing X402-enabled RPC endpoints:
+X402 is a payment protocol that extends HTTP with payment capabilities. When integrated with Switchboard oracle jobs:
 
-1. **Automatic Payment Negotiation**: Client receives payment requirements via HTTP 402 (Payment Required) response
-2. **Micropayment Authorization**: Payment is authorized using USDC on Solana
-3. **Transparent Access**: Once payment is authorized, the RPC request proceeds automatically
+1. **Dynamic Authentication**: Pass X402 payment headers as variable overrides to oracle jobs
+2. **No IPFS Dependency**: Feed hash is derived from job definition, similar to prediction markets
+3. **Paywalled API Access**: Oracles can authenticate with paywalled data sources using X402 headers
 
-### X402 Architecture
+### X402 Variable Override Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │                 │     │                 │     │                 │
-│  Your Client    │────▶│  X402 Gateway   │────▶│  Premium RPC    │
-│                 │     │  (Payment)      │     │  (Helius, etc)  │
+│  Your Program   │────▶│  X402 Manager   │────▶│  Switchboard    │
+│                 │     │  (Headers)      │     │  Oracles        │
 │                 │     │                 │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-        │                       │
-        │ 1. Request            │ 2. 402 Payment Required
-        │ ─────────────────────▶│    {payTo, amount, asset...}
-        │                       │
-        │ 3. Payment Header     │
-        │ ◀─────────────────────│
-        │                       │
-        │ 4. Authenticated      │ 5. Forward to RPC
-        │    Request            │ ──────────────────▶
-        │ ─────────────────────▶│
-        │                       │ 6. RPC Response
-        │ 7. Response           │ ◀──────────────────
-        │ ◀─────────────────────│
+└─────────────────┘     └─────────────────┘     └────────┬────────┘
+        │                       │                         │
+        │ 1. Feed Hash          │ 2. Derive X402 Header   │ 3. Fetch Data
+        │ ─────────────────────▶│ ──────────────────────▶ │    with Header
+        │                       │                         │
+        │                       │                         ▼
+        │                       │                  ┌─────────────────┐
+        │ 5. Oracle Data        │ 4. Variable      │  Paywalled API  │
+        │ ◀──────────────────────────Override─────▶│  (X402-enabled) │
+        │                       │                  └─────────────────┘
 ```
 
 ### Getting Started with X402
@@ -386,29 +382,46 @@ X402Update.ts uses the standard Anchor environment configuration (Anchor.toml or
 #### Step 2: Run X402 Example
 
 ```bash
-# Access paywalled RPC with automatic payment handling
+# Access paywalled RPC with X402 headers via inline feed definition
 bun run scripts/feeds/x402Update.ts --rpcUrl https://helius.api.corbits.dev --method getBlockHeight
 
 # Example output:
-# 🔧 Initializing X402 payment demo...
+# 🔧 Initializing X402 variable override demo...
 # 👤 Wallet: YourWalletAddress...
+# 🌐 Paywalled RPC: https://helius.api.corbits.dev
+# 📡 RPC Method: getBlockHeight
 # 💰 Payment token: USDC
 # 🔐 X402 manager initialized
-# 🌐 Paywalled RPC: https://helius.api.corbits.dev
-# 📡 RPC method: getBlockHeight
 #
-# 📋 Fetching X402 payment info...
-# Payment required: {
-#   scheme: 'exact',
-#   network: 'solana-mainnet-beta',
-#   payTo: 'FvaJmaAob2woFwxmvHroKXr8WRqUwEY5cWMCKoES2Bbu',
-#   maxAmountRequired: '1000',
-#   asset: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
-# }
+# 🔑 Deriving X402 payment header...
+# ✅ X402 payment header generated
+# 🌐 Queue: CkvizjVnm2zA5Wuwan34NhVT3zFc7vqUyGnA6tuEF5aE
 #
-# 🔑 Deriving payment header...
-# 🚀 Executing paywalled RPC call...
-# ✅ RPC Response: { "result": 123456789 }
+# 📝 Creating inline oracle feed definition...
+# ✅ Oracle feed defined with X402 header placeholder
+#
+# 🧪 Simulating feed with Crossbar...
+# ✅ Simulation successful:
+#    Result: 285473829
+#
+# 📋 Fetching managed update instructions with X402 variable override...
+# ✅ Generated instructions: 2
+#    - Ed25519 signature verification
+#    - Quote program verified_update
+#    - Variable override: X402_PAYMENT_HEADER
+#
+# 🔨 Building transaction...
+# 🧪 Simulating transaction...
+# [Simulation logs...]
+#
+# ✅ Simulation succeeded!
+#
+# 💡 Key Takeaways:
+#    • Feed defined inline (not stored on IPFS)
+#    • X402 header passed via variable override
+#    • Oracle authenticated with paywalled RPC
+#    • Data stored in quote account
+#    • Similar pattern to prediction market example
 ```
 
 ### X402 Implementation Example
@@ -419,72 +432,152 @@ import { createLocalWallet } from "@faremeter/wallet-solana";
 import { exact } from "@faremeter/payment-solana";
 import * as sb from "@switchboard-xyz/on-demand";
 
-// Load Solana wallet and connection
+// Setup X402 payment handler
 const { keypair, connection } = await sb.AnchorUtils.loadEnv();
-
-// Create Faremeter wallet for payment signing
 const wallet = await createLocalWallet("mainnet-beta", keypair);
-
-// Configure USDC payment handler
 const usdcMint = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 const paymentHandler = exact.createPaymentHandler(wallet, usdcMint, connection);
 
-// Initialize X402 manager
+// Initialize X402 manager and derive payment header
 const x402Manager = new X402FetchManager(paymentHandler);
+const paymentHeader = await x402Manager.derivePaymentHeader(
+  "https://api.example.com/data",
+  { method: "GET" }
+);
 
-// Make paywalled RPC request
-const response = await x402Manager.fetch("https://helius.api.corbits.dev", {
-  method: "POST",
-  body: JSON.stringify({
-    jsonrpc: "2.0",
-    id: 1,
-    method: "getBlockHeight"
-  })
+// Define oracle feed inline (like prediction market example)
+const oracleFeed = {
+  name: "X402 Paywalled RPC Call",
+  jobs: [{
+    tasks: [
+      {
+        httpTask: {
+          url: "https://helius.api.corbits.dev",
+          method: "POST",
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "getBlockHeight",
+          }),
+          headers: [
+            {
+              key: "X-PAYMENT",
+              value: "${X402_PAYMENT_HEADER}", // Placeholder for variable override
+            },
+            {
+              key: "Content-Type",
+              value: "application/json",
+            },
+          ],
+        },
+      },
+      { jsonParseTask: { path: "$.result" } }, // Extract result from JSON-RPC
+    ],
+  }],
+};
+
+// Compute feed ID and derive canonical quote account
+const queue = await sb.Queue.loadDefault(program!);
+const feedId = FeedHash.computeOracleFeedId(oracleFeed);
+const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [feedId.toString("hex")]);
+
+// Fetch managed update with X402 header as variable override
+const instructions = await queue.fetchManagedUpdateIxs(
+  crossbar,
+  [feedId.toString("hex")],
+  {
+    numSignatures: 1,
+    variableOverrides: {
+      X402_PAYMENT_HEADER: paymentHeader, // Replaces ${X402_PAYMENT_HEADER}
+    },
+    instructionIdx: 0,
+    payer: keypair.publicKey,
+  }
+);
+
+// Create instruction to read from quote account
+const basicProgram = await loadBasicProgram(program!.provider);
+const readOracleIx = await basicReadOracleIx(
+  basicProgram,
+  quoteAccount,
+  queue.pubkey,
+  keypair.publicKey
+);
+
+// Send transaction with update and read instructions
+const tx = await sb.asV0Tx({
+  connection,
+  ixs: [...instructions, readOracleIx],
+  signers: [keypair],
 });
 
-const result = await response.json();
-console.log("Block height:", result.result);
+await connection.sendTransaction(tx);
 ```
 
-### X402 Payment Flow Details
+### X402 Variable Override Flow
 
-The X402FetchManager handles the complete payment flow automatically:
+The X402FetchManager handles deriving payment headers that are passed to oracle jobs:
 
-1. **Initial Request**: Makes request to paywalled endpoint
-2. **Payment Discovery**: Receives 402 response with payment details:
+1. **Derive Payment Header**: X402Manager creates a signed payment authorization header
+   ```typescript
+   const header = await x402Manager.derivePaymentHeader(apiUrl, options);
+   ```
+
+2. **Pass as Variable Override**: Header is passed to the oracle job via variableOverrides
+   ```typescript
+   variableOverrides: {
+     X402_PAYMENT_HEADER: paymentHeader,
+   }
+   ```
+
+3. **Oracle Job Uses Header**: The job definition references the variable:
    ```json
    {
-     "x402Version": 1,
-     "accepts": [{
-       "scheme": "exact",
-       "network": "solana-mainnet-beta",
-       "payTo": "FvaJmaAob2w...",
-       "maxAmountRequired": "1000",
-       "asset": "EPjFWdd5AufqSSqe...",
-       "extra": { "decimals": 6, ... }
+     "tasks": [{
+       "httpTask": {
+         "url": "https://helius.api.corbits.dev",
+         "method": "POST",
+         "body": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBlockHeight\"}",
+         "headers": [
+           {
+             "key": "X-PAYMENT",
+             "value": "${X402_PAYMENT_HEADER}"
+           },
+           {
+             "key": "Content-Type",
+             "value": "application/json"
+           }
+         ]
+       }
+     }, {
+       "jsonParseTask": {
+         "path": "$.result"
+       }
      }]
    }
    ```
-3. **Payment Authorization**: Creates signed payment authorization header
-4. **Authenticated Request**: Retries request with `X-PAYMENT` header
-5. **RPC Response**: Receives successful response from premium RPC
 
-### Use Cases for X402
+4. **Oracle Makes RPC Call**: Switchboard oracles use the header to authenticate with paywalled RPC
+5. **Extract Result**: JSON-RPC `$.result` field is extracted from the response
+6. **Data Stored On-Chain**: Managed update stores verified oracle data in quote account
+7. **Program Reads Data**: Your program can read from the quote account
 
-- **Premium RPC Access**: Pay-per-use access to high-performance RPC nodes
-- **Metered APIs**: Pay only for the API calls you make
-- **Rate Limiting Bypass**: Access endpoints with dynamic pricing instead of fixed rate limits
-- **Quality of Service**: Access priority RPC endpoints with guaranteed performance
+### Use Cases for X402 Variable Overrides
 
-### X402 vs Other Methods
+- **Paywalled APIs**: Access premium data sources without exposing credentials
+- **Dynamic Authentication**: Pass authentication headers per-request without IPFS
+- **On-Chain Feed Derivation**: Compute feed hashes from job definitions like prediction markets
+- **Custom Data Sources**: Integrate proprietary APIs requiring authentication
 
-| Feature | X402 Paywalled RPC | Standard RPC | RPC Subscriptions |
-|---------|-------------------|--------------|-------------------|
-| **Payment Model** | Per-request micropayments | Free (rate-limited) | Monthly subscription |
-| **Cost** | ~$0.0001-0.001 per call | Free | $50-500/month |
-| **Rate Limits** | Based on payment | Strict limits | Higher limits |
-| **Setup** | Instant | None | Account setup |
-| **Flexibility** | Pay only for what you use | Limited | Fixed monthly cost |
+### X402 vs Other Approaches
+
+| Feature | X402 Variable Override | IPFS Feed Storage | Hardcoded API Keys |
+|---------|----------------------|-------------------|-------------------|
+| **Security** | Dynamic per-request | Static on IPFS | Exposed in code |
+| **Flexibility** | Runtime configuration | Fixed configuration | Requires redeployment |
+| **Cost** | Micropayments per use | Storage + bandwidth | Free but insecure |
+| **Feed Derivation** | On-chain like prediction market | IPFS hash lookup | N/A |
+| **Update Speed** | Instant | IPFS propagation delay | N/A |
 
 ## 🌊 Switchboard Surge: WebSocket Streaming (NEW!)
 

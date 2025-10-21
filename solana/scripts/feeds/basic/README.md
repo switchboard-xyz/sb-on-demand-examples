@@ -30,7 +30,7 @@ The new managed update system uses the quote program to:
 ### Canonical Oracle Accounts
 Oracle accounts are derived deterministically from feed hashes:
 ```typescript
-const [oracleAccount] = OracleQuote.getCanonicalPubkey([feedId]);
+const [oracleAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [feedId]);
 ```
 
 This ensures:

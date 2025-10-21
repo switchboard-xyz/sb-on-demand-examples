@@ -5,6 +5,7 @@ import { CrossbarClient, FeedHash, IOracleFeed, OracleJob } from "@switchboard-x
 import { createLocalWallet } from "@faremeter/wallet-solana";
 import { exact } from "@faremeter/payment-solana";
 import { X402FetchManager } from "@switchboard-xyz/x402-utils";
+import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
 import yargs from "yargs";
 import { TX_CONFIG, loadBasicProgram, basicReadOracleIx } from "../utils";
 
@@ -23,6 +24,42 @@ const argv = yargs(process.argv)
   })
   .parseSync();
 
+
+const USDC = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+
+/**
+ * Build JSON-RPC request body
+ */
+function buildJsonRpcBody(method: string): string {
+  return JSON.stringify({
+    jsonrpc: "2.0",
+    id: 1,
+    method,
+  });
+}
+
+/**
+ * Check and display the USDC balance for a given keypair on mainnet
+ */
+async function checkUsdcBalance(
+  connection: Connection,
+  keypair: sb.Keypair,
+  usdcMint: PublicKey
+): Promise<void> {
+  try {
+    const usdcTokenAccount = await getAssociatedTokenAddress(
+      usdcMint,
+      keypair.publicKey
+    );
+    const tokenAccountInfo = await getAccount(connection, usdcTokenAccount);
+    const usdcBalance = Number(tokenAccountInfo.amount) / 1_000_000; // USDC has 6 decimals
+    console.log("💵 Current USDC balance on mainnet:", usdcBalance.toFixed(6), "USDC");
+  } catch (error) {
+    console.error("❌ Failed to fetch USDC balance (token account may not exist):", error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
+}
+
 const ORACLE_FEED: IOracleFeed = {
   name: "X402 Paywalled RPC Call",
   minJobResponses: 1,
@@ -35,11 +72,7 @@ const ORACLE_FEED: IOracleFeed = {
           httpTask: {
             url: argv.url,
             method: OracleJob.HttpTask.Method.METHOD_POST,
-            body: JSON.stringify({
-              jsonrpc: "2.0",
-              id: 1,
-              method: argv.method,
-            }),
+            body: buildJsonRpcBody(argv.method),
             headers: [
               {
                 key: "X-PAYMENT",
@@ -87,7 +120,7 @@ const ORACLE_FEED: IOracleFeed = {
   try {
     console.log("🔧 Initializing X402 variable override demo...");
 
-    // Step 1: Load Solana environment configuration
+    // Step 1: Load Solana environment configuration (`$ solana config get`)
     const { program, keypair, connection, crossbar } = await sb.AnchorUtils.loadEnv();
     console.log("👤 Wallet:", keypair.publicKey.toBase58());
     console.log("📡 RPC Method:", argv.method);
@@ -96,10 +129,12 @@ const ORACLE_FEED: IOracleFeed = {
     const wallet = await createLocalWallet("mainnet-beta", keypair);
 
     // Step 3: Configure USDC payment handler
-    const usdcMint = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
     const mainnetConnection = new Connection("https://api.mainnet-beta.solana.com");
-    const paymentHandler = exact.createPaymentHandler(wallet, usdcMint, mainnetConnection);
+    const paymentHandler = exact.createPaymentHandler(wallet, USDC, mainnetConnection);
     console.log("💰 Payment token: USDC");
+
+    // Check USDC balance on mainnet
+    await checkUsdcBalance(mainnetConnection, keypair, USDC);
 
     // Step 4: Initialize X402FetchManager to derive payment headers
     const x402Manager = new X402FetchManager(paymentHandler);
@@ -110,11 +145,7 @@ const ORACLE_FEED: IOracleFeed = {
     console.log("\n🔑 Deriving X402 payment header...");
     const paymentHeader = await x402Manager.derivePaymentHeader(argv.url, {
       method: "POST",
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: argv.method,
-      }),
+      body: buildJsonRpcBody(argv.method),
     });
     console.log("✅ X402 payment header generated");
 
@@ -125,9 +156,13 @@ const ORACLE_FEED: IOracleFeed = {
     const feedId = FeedHash.computeOracleFeedId(ORACLE_FEED);
     console.log("🔖 Feed ID:", `0x${feedId.toString("hex")}`);
 
-    // Step 8: Derive the canonical quote account from feed hash
+    // Step 8: Derive the canonical quote account from the feed id
     const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [feedId]);
     console.log("📍 Quote Account:", quoteAccount.toBase58());
+
+    // NOTE: You must not simulate with the same x402 header or you will pay twice!
+    // const simFeed = await crossbar.simulateFeed(ORACLE_FEED, true, { X402_PAYMENT_HEADER: paymentHeader });
+    // console.log(simFeed);
 
     // Step 9: Fetch managed update instructions with X402 header as variable override
     console.log("\n📋 Fetching managed update instructions with X402 variable override...");
@@ -135,6 +170,7 @@ const ORACLE_FEED: IOracleFeed = {
       crossbar,
       [ORACLE_FEED],
       {
+        // NOTE: NUM_SIGNATURES MUST BE 1 FOR x402 REQUESTS
         numSignatures: 1,
         // Pass the X402 payment header as a variable override
         // This replaces ${X402_PAYMENT_HEADER} in the job definition

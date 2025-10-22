@@ -19,7 +19,7 @@ const argv = yargs(process.argv)
   })
   .parseSync();
 
-async function simulateAllFeeds() {
+(async function main() => {
   // Predefined aggregator IDs for simulation
   const aggregatorIds = [
     '0x8b8730df2806ff5ed076b51a048e0cf8c87300538ec21cd80f10ebc5cbc8b19e',
@@ -60,7 +60,6 @@ async function simulateAllFeeds() {
     console.log(`Signing address: ${senderAddress}\n`);
   }
 
-  try {
     // Create transaction with appropriate sender
     const feedTx = createTransaction(argv.signAndSend, senderAddress);
 
@@ -96,7 +95,7 @@ async function simulateAllFeeds() {
       console.log("📊 Detailed Feed Results:");
       console.log('─'.repeat(80));
 
-      oracleResponses.responses.forEach((response: any, index: number) => {
+      oracleResponses?.responses?.forEach((response: any, index: number) => {
         console.log(`\n${index + 1}. Feed: ${aggregatorIds[index]}`);
         console.log(`   Queue: ${response.queue || 'N/A'}`);
         console.log(`   Fee: ${response.fee || 0}`);
@@ -122,12 +121,9 @@ async function simulateAllFeeds() {
     }
 
     // Show failures if any
-    if (failureCount > 0 && oracleResponses.failures) {
-      console.log(`\n❌ Failed Feeds (${failureCount}):`);
-      oracleResponses.failures.forEach((failure: any, index: number) => {
-        console.log(`  ${index + 1}. ${JSON.stringify(failure)}`);
-      });
-    }
+    oracleResponses?.failures?.forEach((failure: any, index: number) => {
+      console.log(`  ❌ Failure ${index + 1}. ${JSON.stringify(failure)}`);
+    });
 
     // Execute or simulate the transaction
     await executeOrSimulate(suiClient, feedTx, argv.signAndSend, keypair, { showDetails: argv.details });
@@ -138,13 +134,4 @@ async function simulateAllFeeds() {
     console.log(`- Oracle responses received: ${successCount}`);
     console.log(`- Total processing time: ${fetchTime}ms`);
     console.log(`- Throughput: ${(aggregatorIds.length / (fetchTime / 1000)).toFixed(2)} feeds/second`);
-
-  } catch (error) {
-    console.error("\n❌ Error during batch simulation:", error);
-    process.exit(1);
-  }
-}
-
-// Run the simulation
-console.log("Starting batch feed simulation...\n");
-simulateAllFeeds().catch(console.error);
+})();

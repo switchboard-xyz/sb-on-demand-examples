@@ -2,9 +2,9 @@ import { Transaction } from "@mysten/sui/transactions";
 import { convertSurgeUpdateToQuotes } from "@switchboard-xyz/sui-sdk";
 import { Surge } from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
-import { loadConfig, validateConfig } from "./utils/config";
-import { initializeClients, initializeKeypair } from "./utils/clients";
-import { createTransaction, executeOrSimulate, logGasCosts } from "./utils/transaction";
+import { loadConfig, validateConfig } from "../utils/config";
+import { initializeClients, initializeKeypair } from "../utils/clients";
+import { createTransaction, executeOrSimulate, logGasCosts } from "../utils/transaction";
 
 const argv = yargs(process.argv)
   .options({

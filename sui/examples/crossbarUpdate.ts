@@ -24,7 +24,7 @@ const argv = yargs(process.argv)
   })
   .parseSync();
 
-async function crossbarUpdate() {
+(async function main() {
   // Load and validate configuration
   const config = loadConfig();
   validateConfig(config, {
@@ -56,93 +56,64 @@ async function crossbarUpdate() {
     console.log(`Signing address: ${senderAddress}`);
   }
 
-  try {
-    // Create transaction with appropriate sender
-    const feedTx = createTransaction(argv.signAndSend, senderAddress);
+  // Create transaction with appropriate sender
+  const feedTx = createTransaction(argv.signAndSend, senderAddress);
+  const configs = { crossbarUrl: config.crossbarUrl };
 
-    console.log("\n🔄 Calling Crossbar directly for oracle updates...");
+  console.log("\n🔄 Calling Crossbar directly for oracle updates...");
 
-    // Call Crossbar directly using fetchManyUpdateTx
-    const startTime = Date.now();
-    const oracleResponses = await Aggregator.fetchManyUpdateTx(
-      sb,
-      FEED_IDS,
-      feedTx,
-      {
-        crossbarUrl: config.crossbarUrl
-      }
-    );
-    const fetchTime = Date.now() - startTime;
+  // Call Crossbar directly using fetchManyUpdateTx
+  const startTime = Date.now();
+  const oracleResponses = await Aggregator.fetchManyUpdateTx(sb, FEED_IDS, feedTx, configs);
+  const fetchTime = Date.now() - startTime;
 
-    console.log(`✅ Crossbar call completed in ${fetchTime}ms`);
-    console.log(`\nReceived responses for ${oracleResponses.responses?.length || 0} feed(s)`);
+  console.log(`✅ Crossbar call completed in ${fetchTime}ms`);
+  console.log(`\nReceived responses for ${oracleResponses.responses?.length || 0} feed(s)`);
 
-    // Process each response
-    if (oracleResponses.responses) {
-      oracleResponses.responses.forEach((response: any, index: number) => {
-        console.log(`\n📊 Feed ${index + 1} (${FEED_IDS[index]}):`);
-        console.log(`Queue: ${response.queue}`);
-        console.log(`Fee: ${response.fee}`);
-        console.log(`Failures: ${response.failures?.length || 0}`);
+  // Process each response
+  oracleResponses?.responses?.forEach((response: any, index: number) => {
+    console.log(`\n📊 Feed ${index + 1} (${FEED_IDS[index]}):`);
+    console.log(`Queue: ${response.queue}`);
+    console.log(`Fee: ${response.fee}`);
+    console.log(`Failures: ${response.failures?.length || 0}`);
 
-        if (response.results && Array.isArray(response.results)) {
-          response.results.forEach((result: any, resultIndex: number) => {
-            console.log(`\n  Oracle Result ${resultIndex + 1}:`);
-            if (result.value !== undefined) {
-              console.log(`    Value: ${result.value}`);
-            }
-            if (result.timestamp) {
-              console.log(`    Timestamp: ${new Date(result.timestamp * 1000).toISOString()}`);
-            }
-            // Show full result structure
-            console.log(`    Full result:`, JSON.stringify(result, null, 4));
-          });
+    if (response.results && Array.isArray(response.results)) {
+      response.results.forEach((result: any, resultIndex: number) => {
+        console.log(`\n  Oracle Result ${resultIndex + 1}:`);
+        if (result.value !== undefined) {
+          console.log(`    Value: ${result.value}`);
         }
-
-        // Show feed configuration
-        if (response.feedConfigs) {
-          console.log(`\n  Feed Configuration:`);
-          console.log(`    Feed Hash: ${response.feedConfigs.feedHash}`);
-          console.log(`    Max Variance: ${response.feedConfigs.maxVariance}`);
-          console.log(`    Min Responses: ${response.feedConfigs.minResponses}`);
-          console.log(`    Min Sample Size: ${response.feedConfigs.minSampleSize}`);
+        if (result.timestamp) {
+          console.log(`    Timestamp: ${new Date(result.timestamp * 1000).toISOString()}`);
         }
+        // Show full result structure
+        console.log(`    Full result:`, JSON.stringify(result, null, 4));
       });
     }
 
-    // Handle any failures
-    if (oracleResponses.failures && oracleResponses.failures.length > 0) {
-      console.log(`\n❌ Failed Updates (${oracleResponses.failures.length}):`);
-      oracleResponses.failures.forEach((failure: any, index: number) => {
-        console.log(`  Failure ${index + 1}:`, failure);
-      });
+    // Show feed configuration
+    if (response.feedConfigs) {
+      console.log(`\n  Feed Configuration:`);
+      console.log(`    Feed Hash: ${response.feedConfigs.feedHash}`);
+      console.log(`    Max Variance: ${response.feedConfigs.maxVariance}`);
+      console.log(`    Min Responses: ${response.feedConfigs.minResponses}`);
+      console.log(`    Min Sample Size: ${response.feedConfigs.minSampleSize}`);
     }
+  });
 
-    // Execute or simulate the transaction
-    await executeOrSimulate(suiClient, feedTx, argv.signAndSend, keypair, { showDetails: true });
+  // Handle any failures
+  oracleResponses?.failures?.forEach((failure: any, index: number) => {
+    console.log(`  Failure ${index + 1}:`, failure);
+  });
 
-    // Performance summary
-    console.log(`\n📈 Performance Summary:`);
-    console.log(`- Feeds requested: ${FEED_IDS.length}`);
-    console.log(`- Successful responses: ${oracleResponses.responses?.length || 0}`);
-    console.log(`- Failed responses: ${oracleResponses.failures?.length || 0}`);
-    console.log(`- Total fetch time: ${fetchTime}ms`);
-    console.log(`- Average per feed: ${Math.round(fetchTime / FEED_IDS.length)}ms`);
+  // Execute or simulate the transaction
+  await executeOrSimulate(suiClient, feedTx, argv.signAndSend, keypair, { showDetails: true });
 
-  } catch (error) {
-    console.error("❌ Error calling Crossbar:", error);
-
-    // Show more specific error information if available
-    if (error instanceof Error) {
-      console.error("Error message:", error.message);
-      if (error.stack) {
-        console.error("Stack trace:", error.stack);
-      }
-    }
-
-    process.exit(1);
-  }
-}
-
-// Run the crossbar update example
-crossbarUpdate().catch(console.error);
+  // Performance summary
+  console.log(`\n📈 Performance Summary:`);
+  console.log(`- Feeds requested: ${FEED_IDS.length}`);
+  console.log(`- Successful responses: ${oracleResponses.responses?.length || 0}`);
+  console.log(`- Failed responses: ${oracleResponses.failures?.length || 0}`);
+  console.log(`- Total fetch time: ${fetchTime}ms`);
+  console.log(`- Average per feed: ${Math.round(fetchTime / FEED_IDS.length)}ms`);
+})()

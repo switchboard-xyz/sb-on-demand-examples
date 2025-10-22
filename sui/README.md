@@ -2,6 +2,37 @@
 
 This directory contains examples for using Switchboard On-Demand feeds on the Sui blockchain.
 
+## 📁 Directory Structure
+
+```
+sui/
+├── examples/          # TypeScript client examples
+│   ├── crankFeed.ts          # Single feed update
+│   ├── crossbarUpdate.ts     # Batch Crossbar updates
+│   ├── simulateAll.ts        # Simulation utilities
+│   ├── surge/                # Surge WebSocket streaming examples
+│   │   └── surgeUpdate.ts
+│   └── utils/                # Shared utilities
+│       ├── config.ts         # Environment configuration
+│       ├── clients.ts        # Client initialization
+│       └── transaction.ts    # Transaction helpers
+├── package.json
+└── README.md
+```
+
+## 📂 Examples Overview
+
+The `examples/` directory contains TypeScript client code for interacting with Switchboard On-Demand on Sui:
+
+- **`crankFeed.ts`** - Single feed update example with simulation and transaction building
+- **`crossbarUpdate.ts`** - Batch feed updates by calling Crossbar directly for multiple feeds
+- **`simulateAll.ts`** - Comprehensive simulation utility for testing multiple feeds at once
+- **`surge/`** - Surge WebSocket streaming examples
+  - **`surgeUpdate.ts`** - Real-time WebSocket streaming with Surge for ultra-low latency
+- **`utils/`** - Shared utility modules for configuration, client initialization, and transactions
+
+These examples demonstrate the client-side integration patterns you'll use in your Sui applications.
+
 ## Switchboard on Sui Overview
 
 Switchboard provides decentralized oracle feeds on Sui through a pull-based model where:
@@ -108,11 +139,11 @@ The Surge example demonstrates:
 npm run surge-update
 
 # Subscribe to specific feeds (comma-separated)
-ts-node examples/surgeUpdate.ts --feeds "BTC/USD,ETH/USD,SOL/USD"
+ts-node examples/surge/surgeUpdate.ts --feeds "BTC/USD,ETH/USD,SOL/USD"
 
 # Sign and send transaction (requires private key)
 export SUI_PRIVATE_KEY="your_private_key_here"
-ts-node examples/surgeUpdate.ts --feeds "BTC/USD" --sign-and-send
+ts-node examples/surge/surgeUpdate.ts --feeds "BTC/USD" --sign-and-send
 ```
 
 #### Surge Integration with Sui Quotes

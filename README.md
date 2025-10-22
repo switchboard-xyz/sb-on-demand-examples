@@ -23,7 +23,7 @@ The Solana examples demonstrate Switchboard On-Demand functionality on the Solan
 
 - **[📊 On-Demand Feeds](./solana)** - Price feeds and data oracles
 - **[🎲 On-Demand Randomness](./solana/examples/randomness)** - Verifiable Random Function (VRF)
-- **[🔧 Variable Overrides](./solana/examples/variable-overrides)** - Secure credential management with variable substitution
+- **[🔧 Variable Overrides](./common/variable-overrides)** - Secure credential management with variable substitution
 
 **JavaScript/TypeScript Client Code:**
 - **[📁 Client Examples](./solana/examples/)** - Complete JavaScript/TypeScript examples for integrating Switchboard On-Demand

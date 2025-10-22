@@ -312,7 +312,7 @@ gateway: "https://crossbar.switchboard.xyz"
 - **Streaming Examples**: See `solana/examples/streaming/` for real-time data streaming
 - **Benchmarks**: See `solana/examples/benchmarks/` for performance testing
 - **Randomness**: See `solana/examples/randomness/` for VRF examples
-- **Variable Overrides**: See `solana/examples/variable-overrides/` for credential management
+- **Variable Overrides**: See `common/variable-overrides/` for credential management
 
 ## 📖 Additional Resources
 

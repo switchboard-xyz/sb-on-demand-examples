@@ -11,6 +11,8 @@ const argv = yargs(process.argv)
     feeds: {
       type: "string",
       description: "Comma-separated list of feed symbols (e.g., BTC/USD,ETH/USD)",
+      default: "BTC/USD,ETH/USD",
+      coerce: (arg) => arg.split(',').map(s => s.trim()),
     },
     signAndSend: {
       type: "boolean",
@@ -28,16 +30,8 @@ async function surgeExample() {
     requirePrivateKey: argv.signAndSend,
   });
 
-  // Parse feed symbols
-  let FEED_SYMBOLS: string[] = [];
-  if (argv.feeds) {
-    FEED_SYMBOLS = argv.feeds.split(",").map(s => s.trim());
-  }
-
-  if (FEED_SYMBOLS.length === 0) {
-    // Default to BTC/USD and ETH/USD
-    FEED_SYMBOLS = ["BTC/USD", "ETH/USD"];
-  }
+  // Feed symbols are automatically parsed by yargs
+  const FEED_SYMBOLS = argv.feeds;
 
   console.log(`🚀 Switchboard Surge Example for Sui`);
   console.log(`Feeds: ${FEED_SYMBOLS.join(", ")}`);

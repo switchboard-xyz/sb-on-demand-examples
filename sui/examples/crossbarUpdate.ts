@@ -13,6 +13,8 @@ const argv = yargs(process.argv)
     feedIds: {
       type: "string",
       description: "Comma-separated list of feed IDs",
+      default: process.env.FEED_IDS,
+      coerce: (arg) => arg ? arg.split(',').map(id => id.trim()) : undefined,
     },
     signAndSend: {
       type: "boolean",
@@ -29,16 +31,8 @@ async function crossbarUpdate() {
     requirePrivateKey: argv.signAndSend,
   });
 
-  // Parse feed IDs
-  let FEED_IDS: string[] = [];
-
-  if (argv.feedIds) {
-    FEED_IDS = argv.feedIds.split(',').map(id => id.trim());
-  } else if (argv.feedId) {
-    FEED_IDS = [argv.feedId];
-  } else if (process.env.FEED_IDS) {
-    FEED_IDS = process.env.FEED_IDS.split(',').map(id => id.trim());
-  }
+  // Parse feed IDs (feedIds auto-splits, feedId wraps in array)
+  const FEED_IDS = argv.feedIds || (argv.feedId ? [argv.feedId] : []);
 
   if (FEED_IDS.length === 0) {
     throw new Error("Feed IDs must be provided via --feedId, --feedIds, or FEED_IDS environment variable");

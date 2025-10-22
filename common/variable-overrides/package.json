@@ -1,0 +1,25 @@
+{
+  "name": "variable-overrides",
+  "version": "1.0.0",
+  "description": "Chain-agnostic examples for Switchboard variable overrides",
+  "type": "module",
+  "scripts": {
+    "test": "bun run testVariableOverrides.ts"
+  },
+  "keywords": [
+    "switchboard",
+    "oracle",
+    "variable-overrides",
+    "chain-agnostic"
+  ],
+  "author": "Switchboard",
+  "license": "MIT",
+  "dependencies": {
+    "@switchboard-xyz/common": "^4.1.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -4,6 +4,12 @@ This directory contains chain-agnostic resources and tools that work across all 
 
 ## What's Here
 
+### Variable Overrides
+The `variable-overrides/` directory demonstrates secure credential management for oracle feeds:
+- **`testVariableOverrides.ts`** - Chain-agnostic variable override examples
+- **Security best practices** - Only use variables for API keys/auth tokens
+- **Full documentation** - See [variable-overrides/README.md](./variable-overrides/README.md)
+
 ### Job Testing Tools
 The `job-testing/` directory provides tools for testing and developing custom oracle job definitions:
 - **`runJob.ts`** - Test oracle jobs with variable substitution and API integrations
@@ -30,6 +36,13 @@ This means you can:
 3. **Share job definitions** - Cross-chain applications can use identical oracle jobs
 
 ## Quick Start
+
+### Variable Overrides
+```bash
+# Test variable overrides with Polygon.io stock data
+cd common/variable-overrides
+POLYGON_API_KEY=your_key bun run testVariableOverrides.ts
+```
 
 ### Job Testing
 ```bash

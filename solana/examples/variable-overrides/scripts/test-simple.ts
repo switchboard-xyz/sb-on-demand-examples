@@ -1,5 +1,5 @@
 import { CrossbarClient } from "@switchboard-xyz/common";
-import { buildSimpleValueJob } from "./utils";
+import { buildSimpleValueJob } from "./utils/utils";
 import * as sb from "@switchboard-xyz/on-demand";
 import dotenv from "dotenv";
 

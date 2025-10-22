@@ -69,6 +69,11 @@ The EVM examples showcase Switchboard functionality on Ethereum and EVM-compatib
 
 The **[`common/`](./common/)** directory contains tools and examples that work across all blockchain platforms:
 
+- **[Variable Overrides](./common/variable-overrides/)** - Secure credential management for oracle feeds
+  - Use variables for API keys/auth tokens only
+  - Maintain feed verifiability with hardcoded data sources
+  - Works identically on Solana, EVM, and Sui
+
 - **[Job Testing](./common/job-testing/)** - Test and develop custom oracle job definitions
   - Works identically on Solana, EVM, and Sui
   - Validate API integrations before on-chain deployment

@@ -224,12 +224,14 @@ The examples are organized into categories based on their functionality:
 - Verifiable random function (VRF) integration examples
 - See [randomness README](./examples/randomness/README.md) for details
 
-### `/examples/variable-overrides/` - Credential Management
-- Secure variable substitution examples
-- See [variable-overrides README](./examples/variable-overrides/README.md) for details
-
 ### `/examples/utils.ts` - Shared Utilities
 Common functions and configurations used across all examples.
+
+### `../../common/variable-overrides/` - Credential Management ⭐
+- **`testVariableOverrides.ts`** - Chain-agnostic variable override examples
+- **Security best practices** - Only use variables for API keys/auth tokens
+- **[Complete Guide](../../common/variable-overrides/README.md)** - Comprehensive documentation for secure credential management
+- **Chain-agnostic** - Works identically on Solana, EVM, and Sui
 
 ### `../../common/job-testing/` - Job Testing & Development ⭐
 - **`runJob.ts`** - Test custom job definitions with variable substitution and API integrations

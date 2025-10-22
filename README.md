@@ -65,6 +65,20 @@ The EVM examples showcase Switchboard functionality on Ethereum and EVM-compatib
 - [EVM Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/evm)
 - [Solidity SDK](https://www.npmjs.com/package/@switchboard-xyz/evm.js)
 
+## 🌍 Chain-Agnostic Resources
+
+The **[`common/`](./common/)** directory contains tools and examples that work across all blockchain platforms:
+
+- **[Job Testing](./common/job-testing/)** - Test and develop custom oracle job definitions
+  - Works identically on Solana, EVM, and Sui
+  - Validate API integrations before on-chain deployment
+
+- **[Streaming](./common/streaming/)** - Real-time unsigned price streaming via WebSocket
+  - Chain-agnostic price monitoring for UIs and dashboards
+  - Ultra-low latency data feeds
+
+These resources let you design and test oracle functionality once, then deploy on any supported blockchain.
+
 ## 🚀 Getting Started
 
 Each directory contains specific examples with their own setup instructions. Choose your blockchain platform above to explore the relevant examples.

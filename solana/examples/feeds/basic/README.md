@@ -11,7 +11,7 @@ A more detailed example demonstrating:
 - Custom program instructions for reading oracle data
 - Complete transaction flow with error handling
 
-**Perfect for**: Understanding the full flow, implementing in production apps
+**Perfect for**: Understanding the full flow, implementing in production apps (https://explorer.switchboardlabs.xyz/)
 
 ```bash
 npm run feeds:managed --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f

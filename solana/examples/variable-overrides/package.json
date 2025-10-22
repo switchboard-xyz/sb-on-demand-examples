@@ -1,5 +1,5 @@
 {
-  "name": "sb-on-demand-variable-overrides",
+  "name": "variable-overrides",
   "version": "1.0.0",
   "description": "Switchboard On-Demand Variable Overrides Example",
   "main": "index.js",

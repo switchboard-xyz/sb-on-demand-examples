@@ -1,5 +1,5 @@
 {
-  "name": "sb-on-demand-rng",
+  "name": "randomness",
   "module": "index.ts",
   "scripts": {
     "start": "NODE_OPTIONS='--no-warnings' ts-node index.ts",

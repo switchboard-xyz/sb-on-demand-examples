@@ -1,27 +1,50 @@
 # Common Resources
 
-This directory contains chain-agnostic resources shared across all Switchboard On-Demand examples.
+This directory contains chain-agnostic resources and tools that work across all Switchboard On-Demand blockchain implementations.
 
-## Directory Structure
+## What's Here
 
-- **docs/** - Documentation about Switchboard concepts that apply to all chains
-- **job-testing/** - Oracle job testing and development tools (chain-agnostic)
-- **scripts/** - Cross-chain utilities and helper scripts
-- **types/** - Shared TypeScript type definitions
+### Job Testing Tools
+The `job-testing/` directory provides tools for testing and developing custom oracle job definitions:
+- **`runJob.ts`** - Test oracle jobs with variable substitution and API integrations
+- **Chain-agnostic** - Works with Solana, EVM, and Sui
+- **Full documentation** - See [job-testing/README.md](./job-testing/README.md)
 
-## Available Tools
+## Why Job Testing is Chain-Agnostic
 
-### Job Testing
-The `job-testing/` directory contains tools for testing custom oracle job definitions:
-- **`runJob.ts`** - Test oracle jobs with variable substitution
-- Works across all chains (Solana, EVM, Sui)
-- See [job-testing/README.md](./job-testing/README.md) for usage
+Oracle job definitions use a universal format that works across all Switchboard-supported chains:
+- Same job definition syntax (HttpTask, JsonParseTask, etc.)
+- Same variable substitution patterns (`${API_KEY}`)
+- Same oracle consensus mechanism
+- Only the final oracle quote verification differs by chain
 
-## Usage
+This means you can:
+1. **Design once, deploy everywhere** - Test your job definition here, use it on any chain
+2. **Test without blockchain costs** - Validate API integrations before on-chain deployment
+3. **Share job definitions** - Cross-chain applications can use identical oracle jobs
 
-Resources in this directory are referenced by the blockchain-specific examples in:
-- `../solana/`
-- `../sui/`
-- `../evm/`
+## Quick Start
 
-For chain-specific documentation and examples, see the README files in each blockchain directory.
+```bash
+# Test a simple oracle job
+cd common/job-testing
+VALUE=100 bun run runJob.ts
+
+# Test with real API integration
+POLYGON_API_KEY=your_key bun run runJob.ts
+```
+
+## Related Examples
+
+Once you've tested your job definitions, see chain-specific examples for implementation:
+- **Solana**: `../solana/examples/` - Oracle quotes, streaming, VRF
+- **EVM**: `../evm/` - Price feeds on EVM-compatible chains
+- **Sui**: `../sui/` - Pull-based oracle feeds
+
+## Contributing
+
+When adding new chain-agnostic tools:
+1. Ensure they work across all supported chains
+2. Add comprehensive documentation
+3. Include usage examples for each chain
+4. Keep dependencies minimal and cross-platform compatible

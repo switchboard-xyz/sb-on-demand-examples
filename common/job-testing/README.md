@@ -21,20 +21,17 @@ cd common/job-testing
 
 # Run with environment variables
 POLYGON_API_KEY=your_api_key bun run runJob.ts
-
-# Set multiple environment variables
-POLYGON_API_KEY=your_key VALUE=12345 bun run runJob.ts
 ```
 
 ## 🧪 Job Examples Included
 
 ### 1. **Value Job**
-Simple job that returns a static value using variable substitution:
+Simple job that returns a static value:
 ```typescript
 {
   tasks: [{
     valueTask: {
-      big: "${VALUE}",  // Uses VALUE environment variable
+      big: "100",
     },
   }],
 }
@@ -64,8 +61,8 @@ Real-world example fetching stock prices from Polygon.io:
 
 Oracle jobs use `${VARIABLE_NAME}` syntax for dynamic parameters. The script demonstrates:
 
-- **API Authentication**: `${POLYGON_API_KEY}` 
-- **Dynamic Values**: `${VALUE}`
+- **API Authentication**: `${POLYGON_API_KEY}`
+- **Configuration**: `${SYMBOL}`, `${BASE_URL}`, etc.
 - **Environment Variables**: Loaded automatically from process.env
 
 ### Common Variable Patterns
@@ -85,9 +82,9 @@ Oracle jobs use `${VARIABLE_NAME}` syntax for dynamic parameters. The script dem
 
 ### 1. **Basic Testing**
 ```bash
-# Test the value job with a simple number
+# Run the basic value job
 cd common/job-testing
-VALUE=100 bun run runJob.ts
+bun run runJob.ts
 ```
 
 ### 2. **API Integration Testing**
@@ -170,7 +167,7 @@ cd common/job-testing
 grep '\${' runJob.ts
 
 # Set required variables
-POLYGON_API_KEY=your_key VALUE=123 bun run runJob.ts
+POLYGON_API_KEY=your_key bun run runJob.ts
 ```
 
 ### 2. **API Authentication Errors**
@@ -224,9 +221,9 @@ const simpleJob = OracleJob.fromObject({
 
 ### 1. **Start Simple**
 ```bash
-# Begin with the value job
+# Begin with the basic value job
 cd common/job-testing
-VALUE=100 bun run runJob.ts
+bun run runJob.ts
 ```
 
 ### 2. **Test API Connectivity**

@@ -3,19 +3,33 @@ import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
 import { SwitchboardClient, convertSurgeUpdateToQuotes } from "@switchboard-xyz/sui-sdk";
 import { Surge } from "@switchboard-xyz/on-demand";
+import yargs from "yargs";
+
+const argv = yargs(process.argv)
+  .options({
+    feeds: {
+      type: "string",
+      description: "Comma-separated list of feed symbols (e.g., BTC/USD,ETH/USD)",
+    },
+    signAndSend: {
+      type: "boolean",
+      default: false,
+      description: "Sign and send the transaction (requires SUI_PRIVATE_KEY)",
+    },
+  })
+  .parseSync();
 
 async function surgeExample() {
   // Configuration
   const RPC_URL = process.env.SUI_RPC_URL || "https://fullnode.mainnet.sui.io:443";
   const API_KEY = process.env.SURGE_API_KEY;
   const PRIVATE_KEY = process.env.SUI_PRIVATE_KEY;
-  const SIGN_AND_SEND = process.argv.includes("--sign-and-send");
+  const SIGN_AND_SEND = argv.signAndSend;
 
-  // Parse command line arguments
+  // Parse feed symbols
   let FEED_SYMBOLS: string[] = [];
-  const feedsIndex = process.argv.findIndex(arg => arg === "--feeds");
-  if (feedsIndex !== -1 && process.argv[feedsIndex + 1]) {
-    FEED_SYMBOLS = process.argv[feedsIndex + 1].split(",").map(s => s.trim());
+  if (argv.feeds) {
+    FEED_SYMBOLS = argv.feeds.split(",").map(s => s.trim());
   }
 
   if (!API_KEY) {
@@ -23,7 +37,7 @@ async function surgeExample() {
   }
 
   if (SIGN_AND_SEND && !PRIVATE_KEY) {
-    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --sign-and-send");
+    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --signAndSend");
   }
 
   if (FEED_SYMBOLS.length === 0) {

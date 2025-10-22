@@ -2,6 +2,22 @@ import { SuiClient } from "@mysten/sui/client";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
 import { SwitchboardClient, Aggregator } from "@switchboard-xyz/sui-sdk";
+import yargs from "yargs";
+
+const argv = yargs(process.argv)
+  .options({
+    signAndSend: {
+      type: "boolean",
+      default: false,
+      description: "Sign and send the transaction (requires SUI_PRIVATE_KEY)",
+    },
+    details: {
+      type: "boolean",
+      default: false,
+      description: "Show detailed output for each feed",
+    },
+  })
+  .parseSync();
 
 async function simulateAllFeeds() {
   // Predefined aggregator IDs for simulation
@@ -22,13 +38,12 @@ async function simulateAllFeeds() {
   const CROSSBAR_URL = process.env.CROSSBAR_URL || "https://crossbar.switchboardlabs.xyz";
   const PRIVATE_KEY = process.env.SUI_PRIVATE_KEY;
 
-  // Parse command line flags
-  const SIGN_AND_SEND = process.argv.includes('--sign-and-send');
-  const SHOW_DETAILS = process.argv.includes('--details');
+  const SIGN_AND_SEND = argv.signAndSend;
+  const SHOW_DETAILS = argv.details;
 
   // Validate signing requirements
   if (SIGN_AND_SEND && !PRIVATE_KEY) {
-    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --sign-and-send flag");
+    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --signAndSend");
   }
 
   console.log(`🚀 Simulating All Switchboard Feeds on Sui`);

@@ -103,13 +103,13 @@ function getCustomJob(): OracleJob {
     tasks: [
       {
         httpTask: {
-          url: "${BASE_URL}/api/${VERSION}/data?key=${API_KEY}",
+          url: "https://api.example.com/data?key=${API_KEY}",
           method: "GET",
         }
       },
       {
         jsonParseTask: {
-          path: "${JSON_PATH}",
+          path: "$.price",
         }
       }
     ]
@@ -118,20 +118,19 @@ function getCustomJob(): OracleJob {
 }
 
 // Then use it in main():
+const { queue, gateway } = await sb.AnchorUtils.loadEnv();
 const res = await queue.fetchSignaturesConsensus({
-  gateway: "http://localhost:8082",
-  feedConfigs: [{
-    feed: {
-      jobs: [getCustomJob()], // Use your custom job
-    },
-  }],
-  numSignatures: 1,
+  gateway,
   useEd25519: true,
+  feedConfigs: [
+    {
+      feed: {
+        jobs: [getCustomJob()],
+      },
+    },
+  ],
   variableOverrides: {
-    "BASE_URL": process.env.BASE_URL!,
-    "VERSION": process.env.VERSION!,
     "API_KEY": process.env.API_KEY!,
-    "JSON_PATH": process.env.JSON_PATH!,
   },
 });
 ```
@@ -160,27 +159,7 @@ Error: Cannot read property 'POLYGON_API_KEY' of undefined
 
 ## 🚨 Troubleshooting
 
-### 1. **Missing Environment Variables**
-```bash
-# Check what variables your job needs
-cd common/job-testing
-grep '\${' runJob.ts
-
-# Set required variables
-POLYGON_API_KEY=your_key bun run runJob.ts
-```
-
-### 2. **API Authentication Errors**
-- Verify API keys are correct and active
-- Check if API endpoints are accessible
-- Ensure proper permissions for the API key
-
-### 3. **Network Issues**
-- Check network connectivity to API endpoints
-- Verify URLs are correct and accessible
-- Consider using a local gateway for testing: `gateway: "http://localhost:8082"`
-
-### 4. **JSON Parsing Errors**
+### 1. **JSON Parsing Errors**
 - Verify the JSON path in `jsonParseTask` matches the API response structure
 - Test API endpoints manually to understand response format
 - Use tools like `curl` to inspect raw API responses

@@ -1,25 +1,22 @@
 import { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import { SwitchboardClient, Aggregator } from "@switchboard-xyz/sui-sdk";
+import yargs from "yargs";
+
+const argv = yargs(process.argv)
+  .options({
+    feedId: {
+      type: "string",
+      required: true,
+      description: "The feed ID to crank",
+    },
+  })
+  .parseSync();
 
 async function crankFeed() {
   // Configuration
   const RPC_URL = process.env.SUI_RPC_URL || "https://fullnode.mainnet.sui.io:443";
-
-  // Parse command line arguments
-  let FEED_ID = process.env.FEED_ID;
-
-  // Check for --feedId flag
-  const feedIdIndex = process.argv.findIndex(arg => arg === '--feedId');
-  if (feedIdIndex !== -1 && process.argv[feedIdIndex + 1]) {
-    FEED_ID = process.argv[feedIdIndex + 1];
-  } else if (!FEED_ID && process.argv[2]) {
-    FEED_ID = process.argv[2];
-  }
-
-  if (!FEED_ID) {
-    throw new Error("FEED_ID must be provided as environment variable or command line argument");
-  }
+  const FEED_ID = argv.feedId;
 
   // Initialize clients
   const suiClient = new SuiClient({ url: RPC_URL });

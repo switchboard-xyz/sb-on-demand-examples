@@ -1128,6 +1128,7 @@ async function mintStablecoin(collateralAmount: number) {
 ## 📖 Additional Resources
 
 - [Switchboard Documentation](https://docs.switchboard.xyz)
+- [TypeDoc Documentation](https://switchboard-docs.web.app/) - Solana On-Demand SDK TypeDoc
 - [On-Demand Architecture Deep Dive](https://switchboardxyz.gitbook.io/switchboard-on-demand)
 - [Discord Community](https://discord.gg/switchboard)
 - [Example DeFi Integration](https://github.com/switchboard-xyz/switchboard-v2/tree/main/programs/anchor-defi)

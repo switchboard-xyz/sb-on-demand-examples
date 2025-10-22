@@ -2,6 +2,25 @@ import { SuiClient } from "@mysten/sui/client";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
 import { SwitchboardClient, Aggregator } from "@switchboard-xyz/sui-sdk";
+import yargs from "yargs";
+
+const argv = yargs(process.argv)
+  .options({
+    feedId: {
+      type: "string",
+      description: "Single feed ID",
+    },
+    feedIds: {
+      type: "string",
+      description: "Comma-separated list of feed IDs",
+    },
+    signAndSend: {
+      type: "boolean",
+      default: false,
+      description: "Sign and send the transaction (requires SUI_PRIVATE_KEY)",
+    },
+  })
+  .parseSync();
 
 async function crossbarUpdate() {
   // Configuration
@@ -9,38 +28,26 @@ async function crossbarUpdate() {
   const CROSSBAR_URL = process.env.CROSSBAR_URL || "https://crossbar.switchboardlabs.xyz";
   const PRIVATE_KEY = process.env.SUI_PRIVATE_KEY;
 
-  // Parse command line arguments for feed IDs and flags
+  // Parse feed IDs
   let FEED_IDS: string[] = [];
-  let SIGN_AND_SEND = false;
 
-  // Check for --sign-and-send flag
-  SIGN_AND_SEND = process.argv.includes('--sign-and-send');
-
-  // Check for --feedIds flag (comma-separated)
-  const feedIdsIndex = process.argv.findIndex(arg => arg === '--feedIds');
-  if (feedIdsIndex !== -1 && process.argv[feedIdsIndex + 1]) {
-    FEED_IDS = process.argv[feedIdsIndex + 1].split(',').map(id => id.trim());
-  }
-  // Check for --feedId flag (single feed)
-  else {
-    const feedIdIndex = process.argv.findIndex(arg => arg === '--feedId');
-    if (feedIdIndex !== -1 && process.argv[feedIdIndex + 1]) {
-      FEED_IDS = [process.argv[feedIdIndex + 1]];
-    } else if (process.env.FEED_IDS) {
-      FEED_IDS = process.env.FEED_IDS.split(',').map(id => id.trim());
-    } else if (process.argv[2] && !process.argv[2].startsWith('--')) {
-      // Single feed ID as argument (not a flag)
-      FEED_IDS = [process.argv[2]];
-    }
+  if (argv.feedIds) {
+    FEED_IDS = argv.feedIds.split(',').map(id => id.trim());
+  } else if (argv.feedId) {
+    FEED_IDS = [argv.feedId];
+  } else if (process.env.FEED_IDS) {
+    FEED_IDS = process.env.FEED_IDS.split(',').map(id => id.trim());
   }
 
   if (FEED_IDS.length === 0) {
-    throw new Error("FEED_IDS must be provided as environment variable (comma-separated) or --feedIds flag");
+    throw new Error("Feed IDs must be provided via --feedId, --feedIds, or FEED_IDS environment variable");
   }
+
+  const SIGN_AND_SEND = argv.signAndSend;
 
   // Validate signing requirements
   if (SIGN_AND_SEND && !PRIVATE_KEY) {
-    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --sign-and-send flag");
+    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --signAndSend");
   }
 
   console.log(`Using Crossbar URL: ${CROSSBAR_URL}`);

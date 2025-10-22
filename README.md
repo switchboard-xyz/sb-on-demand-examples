@@ -10,8 +10,9 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 ## Quick Links
 
 - **[User Guide and Technical Documentation](https://docs.switchboard.xyz/tooling-and-resources/technical-resources-and-documentation)** - Detailed information on getting started, usage examples, and API references.
-- **[TypeDoc Documentation](https://switchboard-docs.web.app/)** - Comprehensive TypeDoc generated documentation.
+- **[Common TypeDoc Documentation](https://switchboardxyz-common.netlify.app/)** - TypeDoc for @switchboard-xyz/common shared utilities.
 - **[Feed Builder](https://explorer.switchboardlabs.xyz/feed-builder)** - Build and verify custom price feeds with checksum validation.
+- **[Feed Builder Documentation](https://explorer.switchboardlabs.xyz/task-docs)** - Documentation for oracle tasks and feed building.
 - **[Explorer](https://explorer.switchboard.xyz)** - Browse feeds, verify integrity, and view historical data.
 
 ## 🌐 Examples by Chain
@@ -32,6 +33,7 @@ The Solana examples demonstrate Switchboard On-Demand functionality on the Solan
 **Resources:**
 - [Rust Crate](https://crates.io/crates/switchboard-on-demand)
 - [Solana SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand)
+- [TypeDoc Documentation](https://switchboard-docs.web.app/)
 
 ### Sui
 

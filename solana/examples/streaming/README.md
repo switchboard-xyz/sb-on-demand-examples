@@ -2,11 +2,12 @@
 
 ## Overview
 
-This directory contains three different approaches to streaming real-time price data from Switchboard oracles:
+This directory contains **Solana-specific** streaming examples that integrate real-time price data with Solana transactions:
 
-1. **`crossbarStream.ts`** - Unsigned price streaming via Crossbar service for UI/monitoring
-2. **`runSurge.ts`** - Surge API streaming with latency tracking and transaction simulation
-3. **`stream.ts`** - Full streaming implementation with on-chain transaction submission
+1. **`runSurge.ts`** - Surge API streaming with latency tracking and transaction simulation
+2. **`stream.ts`** - Full streaming implementation with on-chain transaction submission
+
+For a **chain-agnostic** streaming example (unsigned price data), see: **[`../../common/streaming/crossbarStream.ts`](../../common/streaming/)**
 
 ## Key Features
 
@@ -41,39 +42,7 @@ export SURGE_API_KEY="your-api-key-here"
 
 ## Script Details
 
-### 1. crossbarStream.ts - Unsigned Price Streaming
-
-**Purpose**: Stream unsigned price data for frontend displays and monitoring dashboards.
-
-**Usage**:
-```bash
-# Using bun (recommended)
-bun run examples/streaming/crossbarStream.ts
-
-# Using npm script
-npm run stream:crossbar
-
-# Using ts-node directly
-npx ts-node examples/streaming/crossbarStream.ts
-```
-
-**Features**:
-- Connects to Switchboard's Crossbar service for unsigned price data
-- Subscribes to all available price feeds
-- Displays formatted prices with latency metrics
-- Ideal for UI components that need fast updates without on-chain verification
-
-**Configuration**:
-```typescript
-const surge = new sb.Surge({
-  apiKey: apiKey,                                        // Your Surge API key
-  crossbarUrl: 'https://staging.crossbar.switchboard.xyz', // Crossbar endpoint
-  crossbarMode: true,                                    // Enable Crossbar mode
-  verbose: true,                                         // Enable detailed logging
-});
-```
-
-### 2. runSurge.ts - Surge Streaming Demo
+### 1. runSurge.ts - Surge Streaming Demo
 
 **Purpose**: Demonstration of streaming with real-time price updates and single simulation.
 
@@ -108,7 +77,7 @@ npx ts-node examples/streaming/runSurge.ts
 📈 Final stats: 15 updates, 43.2ms avg latency
 ```
 
-### 3. stream.ts - Full Streaming with On-chain Submission
+### 2. stream.ts - Full Streaming with On-chain Submission
 
 **Purpose**: Complete streaming implementation with throttled on-chain transaction submission.
 
@@ -152,9 +121,9 @@ npx ts-node examples/streaming/stream.ts
 
 | Script | Use Case | Transaction | Latency | Best For |
 |--------|----------|-------------|---------|----------|
-| `crossbarStream.ts` | Frontend displays | None (unsigned) | 50-150ms | UIs, dashboards, monitoring |
 | `runSurge.ts` | Demo & customer presentations | Single simulation after 10s | 50-200ms | Demonstrations, testing |
 | `stream.ts` | Production integration | Submitted on-chain | 100-300ms | Live trading systems |
+| [`../../common/streaming/crossbarStream.ts`](../../common/streaming/) | Frontend displays | None (unsigned) | 50-150ms | UIs, dashboards, monitoring (chain-agnostic) |
 
 ## Event Handling
 

@@ -40,8 +40,8 @@ bun run scripts/feeds/x402Update.ts --url https://helius.api.corbits.dev --metho
 # Stream prices with Surge
 bun run scripts/streaming/runSurge.ts
 
-# Run Crossbar streaming
-bun run scripts/streaming/crossbarStream.ts
+# Run Crossbar streaming (chain-agnostic)
+bun run ../common/streaming/crossbarStream.ts
 
 # Performance benchmarks
 bun run scripts/benchmarks/benchmark.ts
@@ -69,7 +69,7 @@ Real-time price streaming implementations.
 
 - **`runSurge.ts`** - Demo streaming with single simulation after 10 seconds
 - **`stream.ts`** - Full streaming with on-chain transactions
-- **`crossbarStream.ts`** - Unsigned prices for UI/monitoring
+- See **[`../../common/streaming/crossbarStream.ts`](../../common/streaming/)** - Chain-agnostic unsigned prices for UI/monitoring
 
 [📖 Detailed Streaming Documentation](./streaming/README.md)
 
@@ -105,7 +105,7 @@ export SURGE_API_KEY=your_api_key_here
 |------|----------------|-----|
 | Fetch prices for DeFi | `feeds/advanced/runUpdate.ts` | Lowest cost, signed data |
 | Access paywalled RPC | `feeds/x402Update.ts` | X402 micropayments, premium RPC |
-| Real-time UI updates | `streaming/crossbarStream.ts` | Unsigned, lowest latency |
+| Real-time UI updates | `../../common/streaming/crossbarStream.ts` | Unsigned, lowest latency (chain-agnostic) |
 | Demo streaming integration | `streaming/runSurge.ts` | Clean demo with simulation |
 | Production streaming | `streaming/stream.ts` | Full on-chain integration |
 | Test performance | `benchmarks/benchmark.ts` | Compare oracle providers |

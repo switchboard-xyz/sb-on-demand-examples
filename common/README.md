@@ -10,6 +10,12 @@ The `job-testing/` directory provides tools for testing and developing custom or
 - **Chain-agnostic** - Works with Solana, EVM, and Sui
 - **Full documentation** - See [job-testing/README.md](./job-testing/README.md)
 
+### Streaming Examples
+The `streaming/` directory contains chain-agnostic real-time price streaming examples:
+- **`crossbarStream.ts`** - Stream unsigned price updates via WebSocket for UI/monitoring
+- **Chain-agnostic** - Works with any blockchain
+- **Full documentation** - See [streaming/README.md](./streaming/README.md)
+
 ## Why Job Testing is Chain-Agnostic
 
 Oracle job definitions use a universal format that works across all Switchboard-supported chains:
@@ -25,13 +31,21 @@ This means you can:
 
 ## Quick Start
 
+### Job Testing
 ```bash
 # Test a simple oracle job
 cd common/job-testing
-VALUE=100 bun run runJob.ts
+bun run runJob.ts
 
 # Test with real API integration
 POLYGON_API_KEY=your_key bun run runJob.ts
+```
+
+### Streaming
+```bash
+# Stream unsigned price data (requires API key)
+cd common/streaming
+SURGE_API_KEY=your_key bun run crossbarStream.ts
 ```
 
 ## Related Examples

@@ -214,7 +214,7 @@ The examples are organized into categories based on their functionality:
 ### `/examples/streaming/` - Real-time Price Streaming
 - **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
 - **`stream.ts`** - Full streaming implementation with on-chain transaction submission
-- **`crossbarStream.ts`** - Unsigned price streaming via Crossbar for UI/monitoring
+- See **[`../common/streaming/crossbarStream.ts`](../common/streaming/)** - Chain-agnostic unsigned price streaming for UI/monitoring
 
 ### `/examples/benchmarks/` - Performance Testing
 - **`benchmark.ts`** - Compare latency across different oracle providers

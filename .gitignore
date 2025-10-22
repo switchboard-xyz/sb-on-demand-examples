@@ -12,3 +12,4 @@ test-ledger
 broadcast/
 cache/
 out/
+**/**/bun.lockb

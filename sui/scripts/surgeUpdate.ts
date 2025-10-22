@@ -1,9 +1,10 @@
-import { SuiClient } from "@mysten/sui/client";
-import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
-import { SwitchboardClient, convertSurgeUpdateToQuotes } from "@switchboard-xyz/sui-sdk";
+import { convertSurgeUpdateToQuotes } from "@switchboard-xyz/sui-sdk";
 import { Surge } from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
+import { loadConfig, validateConfig } from "./config";
+import { initializeClients, initializeKeypair } from "./clients";
+import { createTransaction, executeOrSimulate, logGasCosts } from "./transaction";
 
 const argv = yargs(process.argv)
   .options({
@@ -20,24 +21,17 @@ const argv = yargs(process.argv)
   .parseSync();
 
 async function surgeExample() {
-  // Configuration
-  const RPC_URL = process.env.SUI_RPC_URL || "https://fullnode.mainnet.sui.io:443";
-  const API_KEY = process.env.SURGE_API_KEY;
-  const PRIVATE_KEY = process.env.SUI_PRIVATE_KEY;
-  const SIGN_AND_SEND = argv.signAndSend;
+  // Load and validate configuration
+  const config = loadConfig();
+  validateConfig(config, {
+    requireSurgeApiKey: true,
+    requirePrivateKey: argv.signAndSend,
+  });
 
   // Parse feed symbols
   let FEED_SYMBOLS: string[] = [];
   if (argv.feeds) {
     FEED_SYMBOLS = argv.feeds.split(",").map(s => s.trim());
-  }
-
-  if (!API_KEY) {
-    throw new Error("SURGE_API_KEY environment variable is required");
-  }
-
-  if (SIGN_AND_SEND && !PRIVATE_KEY) {
-    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --signAndSend");
   }
 
   if (FEED_SYMBOLS.length === 0) {
@@ -47,25 +41,26 @@ async function surgeExample() {
 
   console.log(`🚀 Switchboard Surge Example for Sui`);
   console.log(`Feeds: ${FEED_SYMBOLS.join(", ")}`);
-  console.log(`Mode: ${SIGN_AND_SEND ? "🔐 Sign and Send" : "🎯 Simulate Only"}`);
+  console.log(`Mode: ${argv.signAndSend ? "🔐 Sign and Send" : "🎯 Simulate Only"}`);
 
   // Initialize clients
-  const suiClient = new SuiClient({ url: RPC_URL });
-  const sb = new SwitchboardClient(suiClient);
+  const { suiClient, sb } = initializeClients(config.rpcUrl);
 
   // Initialize Surge
   const surge = new Surge({
-    apiKey: API_KEY,
+    apiKey: config.surgeApiKey!,
     network: "mainnet",
     verbose: true,
   });
 
-  let keypair: Ed25519Keypair | null = null;
-  let senderAddress: string | null = null;
+  // Initialize keypair if signing
+  let keypair = null;
+  let senderAddress = undefined;
 
-  if (SIGN_AND_SEND && PRIVATE_KEY) {
-    keypair = Ed25519Keypair.fromSecretKey(PRIVATE_KEY);
-    senderAddress = keypair.getPublicKey().toSuiAddress();
+  if (argv.signAndSend && config.privateKey) {
+    const keypairInfo = initializeKeypair(config.privateKey);
+    keypair = keypairInfo.keypair;
+    senderAddress = keypairInfo.address;
     console.log(`Signing address: ${senderAddress}`);
   }
 
@@ -119,12 +114,7 @@ async function surgeExample() {
     console.log(`Timestamp (seconds): ${quoteData.timestampSeconds}`);
 
     // Create a transaction with the quote data
-    const tx = new Transaction();
-    if (SIGN_AND_SEND && senderAddress) {
-      tx.setSender(senderAddress);
-    } else {
-      tx.setSender("0x0000000000000000000000000000000000000000000000000000000000000000");
-    }
+    const tx = createTransaction(argv.signAndSend, senderAddress);
 
     // This is a simple example showing how to use the quote data
     // In a real scenario, you would call your Move contract with these quotes
@@ -140,26 +130,8 @@ async function surgeExample() {
       console.log(`  ${hash.substring(0, 10)}...: ${price}`);
     });
 
-    // Simulate the transaction
-    console.log("\n🎯 Simulating transaction...");
-    try {
-      const dryRunResult = await suiClient.dryRunTransactionBlock({
-        transactionBlock: await tx.build({ client: suiClient }),
-      });
-
-      if (dryRunResult.effects.status.status === "success") {
-        console.log("✅ Transaction simulation successful!");
-        console.log("Gas costs:", {
-          computation: dryRunResult.effects.gasUsed.computationCost,
-          storage: dryRunResult.effects.gasUsed.storageCost,
-          storageRebate: dryRunResult.effects.gasUsed.storageRebate,
-        });
-      } else {
-        console.log("❌ Transaction simulation failed:", dryRunResult.effects.status);
-      }
-    } catch (simError) {
-      console.log("⚠️ Could not simulate transaction (expected if no contract):", simError);
-    }
+    // Execute or simulate the transaction
+    await executeOrSimulate(suiClient, tx, argv.signAndSend, keypair);
 
     // Disconnect from Surge
     console.log("\n🔌 Disconnecting from Surge...");

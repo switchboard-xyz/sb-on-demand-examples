@@ -1,8 +1,8 @@
-import { SuiClient } from "@mysten/sui/client";
-import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
-import { Transaction } from "@mysten/sui/transactions";
-import { SwitchboardClient, Aggregator } from "@switchboard-xyz/sui-sdk";
+import { Aggregator } from "@switchboard-xyz/sui-sdk";
 import yargs from "yargs";
+import { loadConfig, validateConfig } from "./config";
+import { initializeClients, initializeKeypair } from "./clients";
+import { createTransaction, executeOrSimulate } from "./transaction";
 
 const argv = yargs(process.argv)
   .options({
@@ -33,48 +33,36 @@ async function simulateAllFeeds() {
     '0x6fad8b69ab1d9550302c610e5a0ffcb81c1e2b218ff05b6ea6cdd236b5963346',
   ];
 
-  // Configuration
-  const RPC_URL = process.env.SUI_RPC_URL || "https://fullnode.mainnet.sui.io:443";
-  const CROSSBAR_URL = process.env.CROSSBAR_URL || "https://crossbar.switchboardlabs.xyz";
-  const PRIVATE_KEY = process.env.SUI_PRIVATE_KEY;
-
-  const SIGN_AND_SEND = argv.signAndSend;
-  const SHOW_DETAILS = argv.details;
-
-  // Validate signing requirements
-  if (SIGN_AND_SEND && !PRIVATE_KEY) {
-    throw new Error("SUI_PRIVATE_KEY environment variable is required when using --signAndSend");
-  }
+  // Load and validate configuration
+  const config = loadConfig();
+  validateConfig(config, {
+    requirePrivateKey: argv.signAndSend,
+  });
 
   console.log(`🚀 Simulating All Switchboard Feeds on Sui`);
-  console.log(`Using Crossbar URL: ${CROSSBAR_URL}`);
+  console.log(`Using Crossbar URL: ${config.crossbarUrl}`);
   console.log(`Total feeds to process: ${aggregatorIds.length}`);
-  console.log(`Mode: ${SIGN_AND_SEND ? '🔐 Sign and Send Transaction' : '🎯 Simulate Only'}`);
-  console.log(`Details: ${SHOW_DETAILS ? '📝 Detailed Output' : '📊 Summary Only'}`);
+  console.log(`Mode: ${argv.signAndSend ? '🔐 Sign and Send Transaction' : '🎯 Simulate Only'}`);
+  console.log(`Details: ${argv.details ? '📝 Detailed Output' : '📊 Summary Only'}`);
   console.log('─'.repeat(80));
 
   // Initialize clients
-  const suiClient = new SuiClient({ url: RPC_URL });
-  const sb = new SwitchboardClient(suiClient);
+  const { suiClient, sb } = initializeClients(config.rpcUrl);
 
   // Initialize keypair if signing
-  let keypair: Ed25519Keypair | null = null;
-  let senderAddress: string | null = null;
+  let keypair = null;
+  let senderAddress = undefined;
 
-  if (SIGN_AND_SEND && PRIVATE_KEY) {
-    keypair = Ed25519Keypair.fromSecretKey(PRIVATE_KEY);
-    senderAddress = keypair.getPublicKey().toSuiAddress();
+  if (argv.signAndSend && config.privateKey) {
+    const keypairInfo = initializeKeypair(config.privateKey);
+    keypair = keypairInfo.keypair;
+    senderAddress = keypairInfo.address;
     console.log(`Signing address: ${senderAddress}\n`);
   }
 
   try {
     // Create transaction with appropriate sender
-    const feedTx = new Transaction();
-    if (SIGN_AND_SEND && senderAddress) {
-      feedTx.setSender(senderAddress);
-    } else {
-      feedTx.setSender("0x0000000000000000000000000000000000000000000000000000000000000000");
-    }
+    const feedTx = createTransaction(argv.signAndSend, senderAddress);
 
     console.log("🔄 Calling Crossbar for all feeds...");
     const startTime = Date.now();
@@ -85,7 +73,7 @@ async function simulateAllFeeds() {
       aggregatorIds,
       feedTx,
       {
-        crossbarUrl: CROSSBAR_URL
+        crossbarUrl: config.crossbarUrl
       }
     );
 
@@ -104,7 +92,7 @@ async function simulateAllFeeds() {
     console.log(`- Average fetch time per feed: ${Math.round(fetchTime / aggregatorIds.length)}ms\n`);
 
     // Show detailed results if requested
-    if (SHOW_DETAILS && oracleResponses.responses) {
+    if (argv.details && oracleResponses.responses) {
       console.log("📊 Detailed Feed Results:");
       console.log('─'.repeat(80));
 
@@ -142,74 +130,7 @@ async function simulateAllFeeds() {
     }
 
     // Execute or simulate the transaction
-    if (SIGN_AND_SEND && keypair) {
-      console.log("\n🔐 Signing and sending batch transaction...");
-      try {
-        const result = await suiClient.signAndExecuteTransaction({
-          signer: keypair,
-          transaction: feedTx,
-          options: {
-            showEffects: true,
-            showEvents: true,
-          },
-        });
-
-        console.log(`Transaction result: ${result.effects?.status?.status}`);
-
-        if (result.effects?.status?.status === "success") {
-          console.log("✅ Batch transaction executed successfully!");
-          console.log(`Transaction digest: ${result.digest}`);
-          console.log("Gas used:", {
-            computation: result.effects.gasUsed.computationCost,
-            storage: result.effects.gasUsed.storageCost,
-            storageRebate: result.effects.gasUsed.storageRebate
-          });
-
-          if (result.effects.mutated && result.effects.mutated.length > 0) {
-            console.log(`\nFeed objects updated: ${result.effects.mutated.length}`);
-            if (SHOW_DETAILS) {
-              result.effects.mutated.forEach((obj, index) => {
-                console.log(`  ${index + 1}. ${obj.reference.objectId}`);
-              });
-            }
-          }
-        } else {
-          console.log("❌ Batch transaction failed:", result.effects?.status);
-        }
-      } catch (txError) {
-        console.log("❌ Transaction execution error:", txError);
-      }
-    } else {
-      // Simulate the transaction
-      console.log("\n🎯 Simulating batch transaction...");
-      try {
-        const dryRunResult = await suiClient.dryRunTransactionBlock({
-          transactionBlock: await feedTx.build({ client: suiClient }),
-        });
-
-        console.log(`Simulation result: ${dryRunResult.effects.status.status}`);
-
-        if (dryRunResult.effects.status.status === "success") {
-          console.log("✅ Batch simulation successful!");
-          console.log("Estimated gas costs:", {
-            computation: dryRunResult.effects.gasUsed.computationCost,
-            storage: dryRunResult.effects.gasUsed.storageCost,
-            storageRebate: dryRunResult.effects.gasUsed.storageRebate
-          });
-
-          // Calculate total estimated cost
-          const totalCost = BigInt(dryRunResult.effects.gasUsed.computationCost) +
-                          BigInt(dryRunResult.effects.gasUsed.storageCost) -
-                          BigInt(dryRunResult.effects.gasUsed.storageRebate);
-          console.log(`Total estimated cost: ${totalCost} MIST`);
-
-        } else {
-          console.log("❌ Batch simulation failed:", dryRunResult.effects.status);
-        }
-      } catch (simError) {
-        console.log("❌ Could not simulate transaction:", simError);
-      }
-    }
+    await executeOrSimulate(suiClient, feedTx, argv.signAndSend, keypair, { showDetails: argv.details });
 
     // Final performance summary
     console.log(`\n🏁 Final Summary:`);

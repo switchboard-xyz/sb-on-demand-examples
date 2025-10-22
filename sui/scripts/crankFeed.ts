@@ -1,7 +1,8 @@
-import { SuiClient } from "@mysten/sui/client";
-import { Transaction } from "@mysten/sui/transactions";
-import { SwitchboardClient, Aggregator } from "@switchboard-xyz/sui-sdk";
+import { Aggregator } from "@switchboard-xyz/sui-sdk";
 import yargs from "yargs";
+import { loadConfig } from "./config";
+import { initializeClients } from "./clients";
+import { createTransaction, simulateTransaction } from "./transaction";
 
 const argv = yargs(process.argv)
   .options({
@@ -14,23 +15,18 @@ const argv = yargs(process.argv)
   .parseSync();
 
 async function crankFeed() {
-  // Configuration
-  const RPC_URL = process.env.SUI_RPC_URL || "https://fullnode.mainnet.sui.io:443";
-  const FEED_ID = argv.feedId;
+  // Load configuration
+  const config = loadConfig();
 
   // Initialize clients
-  const suiClient = new SuiClient({ url: RPC_URL });
-
-  // Initialize Switchboard client
-  const sb = new SwitchboardClient(suiClient);
+  const { suiClient, sb } = initializeClients(config.rpcUrl);
 
   try {
     // Load the aggregator (feed)
-    const aggregator = new Aggregator(sb, FEED_ID);
+    const aggregator = new Aggregator(sb, argv.feedId);
 
     // Create transaction to simulate feed update with a dummy sender
-    const transaction = new Transaction();
-    transaction.setSender("0x0000000000000000000000000000000000000000000000000000000000000000");
+    const transaction = createTransaction(false);
 
     // Add update instruction to transaction
     const updateResponse = await aggregator.fetchUpdateTx(transaction);
@@ -58,21 +54,8 @@ async function crankFeed() {
       }
     }
 
-    // Simulate the transaction instead of executing
-    console.log("Simulating feed update transaction...");
-    const dryRunResult = await suiClient.dryRunTransactionBlock({
-      transactionBlock: await transaction.build({ client: suiClient }),
-    });
-
-    console.log("Simulation result:", dryRunResult.effects.status);
-
-    if (dryRunResult.effects.status.status === "success") {
-      console.log("✅ Feed update simulation successful!");
-      console.log("Gas used:", dryRunResult.effects.gasUsed);
-
-    } else {
-      console.log("❌ Feed update simulation failed:", dryRunResult.effects.status);
-    }
+    // Simulate the transaction
+    await simulateTransaction(suiClient, transaction);
 
   } catch (error) {
     console.error("Error processing feed:", error);

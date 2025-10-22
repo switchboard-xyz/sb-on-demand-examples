@@ -99,7 +99,7 @@ This repository includes two example programs demonstrating different integratio
 #### 🛠️ Basic Example (`programs/basic-oracle-example/`) - **Anchor Framework**
 - **Framework**: **Anchor Framework** for ease of development and safety
 - **Use Case**: Learning, prototyping, and standard DeFi applications
-- **Performance**: < 600 CU with Anchor overhead
+- **Performance**: ~2,000 CU with Anchor overhead
 - **Features**: Full account validation, built-in serialization, comprehensive error handling
 - **Security**: Complete account validation and type safety
 - **Development**: Beginner-friendly with extensive guardrails
@@ -107,7 +107,7 @@ This repository includes two example programs demonstrating different integratio
 #### ⚡ Advanced Example (`programs/advanced-oracle-example/`) - **Pinocchio Framework**
 - **Framework**: **Pinocchio Framework** for maximum optimization and minimal overhead
 - **Use Case**: **Highly optimized oracle programs such as oracle AMMs and MEV-sensitive applications**
-- **Performance**: **Ultra-optimized compute units (< 70 CU)**
+- **Performance**: **Ultra-optimized compute units (~190 CU total: ~90 CU feed crank + ~100 CU framework overhead)**
 - **Security Model**: **⚠️ TRUSTED CRANKER ONLY - Bypasses account validation for performance**
 
 **🚨 IMPORTANT SECURITY WARNING**: This advanced program is designed for scenarios where you have a **trusted cranker** and understand the security implications. It bypasses many standard account checks for maximum performance optimization. Only use this approach if:
@@ -123,7 +123,7 @@ This repository includes two example programs demonstrating different integratio
 - **Minimal Validation**: Reduced account checks in favor of performance
 
 **Performance Breakdown**:
-- **< 70 compute units** with optimized implementation
+- **~190 total compute units** (~90 CU feed crank + ~100 CU framework overhead)
 - **90% reduction** in compute usage vs standard implementations
 
 This makes the advanced example ideal for **oracle AMMs**, **high-frequency trading bots**, and other applications where compute efficiency is critical and you can guarantee a trusted execution environment.
@@ -134,7 +134,7 @@ This makes the advanced example ideal for **oracle AMMs**, **high-frequency trad
 |--------|------------------------------|-------------------------------------|
 | **Learning Curve** | Beginner-friendly | Advanced developers only |
 | **Safety** | Full type safety & validation | Minimal validation, unsafe optimizations |
-| **Compute Units** | < 600 CU | < 70 CU |
+| **Compute Units** | ~2,000 CU | ~190 CU |
 | **Development Speed** | Fast prototyping | Requires optimization expertise |
 | **Security Model** | Complete account checks | Trusted cranker required |
 | **Use Cases** | Standard DeFi, Learning | Oracle AMMs, HFT, MEV-sensitive apps |
@@ -233,7 +233,7 @@ Each directory contains its own README with detailed documentation for the scrip
 
 ### What Makes Oracle Quotes Efficient?
 
-The oracle quote method (`scripts/feeds/runOracle Quote.ts`) is significantly more efficient than traditional feed updates for several key reasons:
+The oracle quote method (e.g., `scripts/feeds/advanced/runUpdate.ts`) is significantly more efficient than traditional feed updates for several key reasons:
 
 #### 1. **No Write Locks on Data Feeds**
 - Traditional feed updates require write locks on feed accounts, limiting parallelization

@@ -27,7 +27,7 @@ Examples using the older Pull Feed system (still supported):
 
 ### Create a New Feed
 ```bash
-ts-node feeds/createManagedFeed.ts --name "BTC/USD" --base BTC --quote USD
+ts-node scripts/feeds/createManagedFeed.ts --name "BTC/USD" --base BTC --quote USD
 ```
 
 ### For Beginners (Recommended)
@@ -48,7 +48,7 @@ npm run feeds:advanced --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18fae
 |---------|----------------|-------------------|-----------------|
 | **Setup Time** | 5 minutes | 15 minutes | 10 minutes |
 | **Code Lines** | ~50 lines | ~150 lines | ~100 lines |
-| **Compute Units** | < 600 CU | < 70 CU | ~30,000 CU |
+| **Compute Units** | ~2,000 CU (Anchor) | ~190 CU (Pinocchio) | ~30,000 CU |
 | **Transaction Size** | Standard | 90% smaller with LUT | Standard |
 | **Error Handling** | Basic | Comprehensive | Moderate |
 | **Monitoring** | None | Performance metrics | Basic stats |
@@ -85,7 +85,7 @@ const queue = await sb.Queue.loadDefault(program);
 const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
 
 // 2. Derive canonical oracle account
-const [oracleAccount] = OracleQuote.getCanonicalPubkey([feedId]);
+const [oracleAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [feedId]);
 
 // 3. Get managed update instructions
 const instructions = await queue.fetchManagedUpdateIxs(
@@ -229,8 +229,9 @@ pub fn use_oracle_data(ctx: Context<UseOracleData>) -> Result<()> {
 ## Performance Optimization
 
 ### Compute Unit Savings
-- **Basic**: ~25,000 CU per update
-- **With LUT**: ~18,000 CU per update (28% reduction)
+- **Basic (Anchor)**: ~2,000 CU per update
+- **Advanced (Pinocchio)**: ~190 CU per update (90% reduction)
+- **Legacy**: ~30,000 CU per update
 - **Multi-feed batching**: Linear scaling with feeds
 
 ### Transaction Size Optimization

@@ -27,7 +27,7 @@ cd ..
 anchor build
 ```
 After building, take note of your program address and insert it in your program `lib.rs` file here:
-*Note:* an easy command to view your recently built programm address - `anchor keys list`.
+*Note:* an easy command to view your recently built program address - `anchor keys list`.
 ```rust
 declare_id!(“[YOUR_PROGRAM_ADDRESS]“);
 ```

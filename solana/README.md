@@ -22,10 +22,10 @@ bun install
 
 # Get a feed ID from https://explorer.switchboardlabs.xyz/
 # Run the JavaScript client example (replace with your feed ID)
-bun run scripts/feeds/basic/managedUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+bun run examples/feeds/basic/managedUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 ```
 
-> 💡 **New to client-side integration?** The `scripts/` directory contains all the JavaScript/TypeScript code you need!
+> 💡 **New to client-side integration?** The `examples/` directory contains all the JavaScript/TypeScript code you need!
 
 That's it! You're now fetching real-time oracle prices. 🎉
 
@@ -160,7 +160,7 @@ anchor idl init --filepath target/idl/basic_oracle_example.json BASIC_PROGRAM_AD
 # The advanced program uses Pinocchio and doesn't require IDL initialization
 ```
 
-*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files. The examples include basic oracle integration (`scripts/feeds/basic/managedUpdate.ts`) and optimized cranking (`scripts/feeds/advanced/runUpdate.ts`).
+*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files. The examples include basic oracle integration (`examples/feeds/basic/managedUpdate.ts`) and optimized cranking (`examples/feeds/advanced/runUpdate.ts`).
 
 ### Step 2: Get a Feed ID
 
@@ -173,15 +173,15 @@ Run the update script with your feed ID:
 #### Basic Example (Anchor Framework)
 ```bash
 bun install
-bun run scripts/feeds/basic/managedUpdate.ts --feedId YOUR_FEED_ID
+bun run examples/feeds/basic/managedUpdate.ts --feedId YOUR_FEED_ID
 ```
 
 #### Advanced Example (Pinocchio Framework - Optimized)
 ```bash
-bun run scripts/feeds/advanced/runUpdate.ts --feedId YOUR_FEED_ID
+bun run examples/feeds/advanced/runUpdate.ts --feedId YOUR_FEED_ID
 ```
 
-The scripts demonstrate different integration approaches:
+The examples demonstrate different integration approaches:
 - **Basic**: Uses Anchor for standard oracle integration with comprehensive validation
 - **Advanced**: Uses Pinocchio for ultra-low compute unit consumption with admin authorization patterns
 
@@ -193,47 +193,56 @@ Both programs show how to:
 
 ## 🔧 JavaScript/TypeScript Client Code
 
-**Looking for client-side code?** All JavaScript/TypeScript examples are located in the **`/scripts/`** directory. This includes:
+**Looking for client-side code?** All JavaScript/TypeScript examples are located in the **`/examples/`** directory. This includes:
 
 - **Complete working examples** for all Switchboard On-Demand features
-- **Production-ready client code** for integration into your applications  
+- **Production-ready client code** for integration into your applications
 - **Utilities and helpers** for common operations
 - **Testing and benchmarking tools**
 
-Simply navigate to `./scripts/` to find all client-side implementation examples.
+Simply navigate to `./examples/` to find all client-side implementation examples.
 
-## 📁 Script Organization
+## 📁 Example Organization
 
-The example scripts are organized into categories based on their functionality:
+The examples are organized into categories based on their functionality:
 
-### `/scripts/feeds/` - Oracle Feed Operations
+### `/examples/feeds/` - Oracle Feed Operations
 - **`basic/managedUpdate.ts`** - Basic oracle integration with Anchor Framework
 - **`advanced/runUpdate.ts`** - Optimized oracle integration with Pinocchio Framework
 - **`x402Update.ts`** - X402 authentication with inline feed definition (like prediction market)
 
-### `/scripts/streaming/` - Real-time Price Streaming
+### `/examples/streaming/` - Real-time Price Streaming
 - **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
 - **`stream.ts`** - Full streaming implementation with on-chain transaction submission
 - **`crossbarStream.ts`** - Unsigned price streaming via Crossbar for UI/monitoring
 
-### `/scripts/job-testing/` - Job Testing & Development ⭐
-- **`runJob.ts`** - Test custom job definitions with variable substitution and API integrations
-- **[Complete Testing Guide](scripts/job-testing/README.md)** - Comprehensive documentation for job testing workflows
-
-### `/scripts/benchmarks/` - Performance Testing
+### `/examples/benchmarks/` - Performance Testing
 - **`benchmark.ts`** - Compare latency across different oracle providers
 - **`benchmarkCU.ts`** - Measure compute unit consumption for various configurations
 
-### `/scripts/utils.ts` - Shared Utilities
-Common functions and configurations used across all scripts.
+### `/examples/randomness/` - VRF Examples
+- Verifiable random function (VRF) integration examples
+- See [randomness README](./examples/randomness/README.md) for details
 
-Each directory contains its own README with detailed documentation for the scripts within.
+### `/examples/variable-overrides/` - Credential Management
+- Secure variable substitution examples
+- See [variable-overrides README](./examples/variable-overrides/README.md) for details
+
+### `/examples/utils.ts` - Shared Utilities
+Common functions and configurations used across all examples.
+
+### `../../common/job-testing/` - Job Testing & Development ⭐
+- **`runJob.ts`** - Test custom job definitions with variable substitution and API integrations
+- **[Complete Testing Guide](../../common/job-testing/README.md)** - Comprehensive documentation for job testing workflows
+- **Chain-agnostic** - Works across Solana, EVM, and Sui
+
+Each directory contains its own README with detailed documentation for the examples within.
 
 ## Understanding the Oracle Quote Method
 
 ### What Makes Oracle Quotes Efficient?
 
-The oracle quote method (e.g., `scripts/feeds/advanced/runUpdate.ts`) is significantly more efficient than traditional feed updates for several key reasons:
+The oracle quote method (e.g., `examples/feeds/advanced/runUpdate.ts`) is significantly more efficient than traditional feed updates for several key reasons:
 
 #### 1. **No Write Locks on Data Feeds**
 - Traditional feed updates require write locks on feed accounts, limiting parallelization
@@ -383,7 +392,7 @@ X402Update.ts uses the standard Anchor environment configuration (Anchor.toml or
 
 ```bash
 # Access paywalled RPC with X402 headers via inline feed definition
-bun run scripts/feeds/x402Update.ts --rpcUrl https://helius.api.corbits.dev --method getBlockHeight
+bun run examples/feeds/x402Update.ts --rpcUrl https://helius.api.corbits.dev --method getBlockHeight
 
 # Example output:
 # 🔧 Initializing X402 variable override demo...
@@ -640,7 +649,7 @@ SURGE_API_KEY=your_surge_api_key_here
 
 ```bash
 # Stream real-time BTC/USDT prices
-bun run scripts/streaming/runSurge.ts
+bun run examples/streaming/runSurge.ts
 
 # Example output:
 # ==================== Switchboard Surge ====================

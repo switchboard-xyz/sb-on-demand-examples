@@ -48,13 +48,13 @@ export SURGE_API_KEY="your-api-key-here"
 **Usage**:
 ```bash
 # Using bun (recommended)
-bun run scripts/streaming/crossbarStream.ts
+bun run examples/streaming/crossbarStream.ts
 
 # Using npm script
 npm run stream:crossbar
 
-# Using ts-node directly  
-npx ts-node scripts/streaming/crossbarStream.ts
+# Using ts-node directly
+npx ts-node examples/streaming/crossbarStream.ts
 ```
 
 **Features**:
@@ -80,13 +80,13 @@ const surge = new sb.Surge({
 **Usage**:
 ```bash
 # Using bun (recommended)
-bun run scripts/streaming/runSurge.ts
+bun run examples/streaming/runSurge.ts
 
 # Using npm script
 npm run stream:surge
 
 # Using ts-node directly
-npx ts-node scripts/streaming/runSurge.ts
+npx ts-node examples/streaming/runSurge.ts
 ```
 
 **Features**:
@@ -115,13 +115,13 @@ npx ts-node scripts/streaming/runSurge.ts
 **Usage**:
 ```bash
 # Using bun (recommended)
-bun run scripts/streaming/stream.ts
+bun run examples/streaming/stream.ts
 
 # Using npm script
 npm run stream
 
 # Using ts-node directly
-npx ts-node scripts/streaming/stream.ts
+npx ts-node examples/streaming/stream.ts
 ```
 
 **Features**:

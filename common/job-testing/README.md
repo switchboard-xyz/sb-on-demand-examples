@@ -16,11 +16,14 @@ This directory contains scripts for testing and experimenting with Switchboard o
 
 **Usage**:
 ```bash
+# From the repository root
+cd common/job-testing
+
 # Run with environment variables
-POLYGON_API_KEY=your_api_key bun run scripts/job-testing/runJob.ts
+POLYGON_API_KEY=your_api_key bun run runJob.ts
 
 # Set multiple environment variables
-POLYGON_API_KEY=your_key VALUE=12345 bun run scripts/job-testing/runJob.ts
+POLYGON_API_KEY=your_key VALUE=12345 bun run runJob.ts
 ```
 
 ## 🧪 Job Examples Included
@@ -83,13 +86,15 @@ Oracle jobs use `${VARIABLE_NAME}` syntax for dynamic parameters. The script dem
 ### 1. **Basic Testing**
 ```bash
 # Test the value job with a simple number
-VALUE=100 bun run scripts/job-testing/runJob.ts
+cd common/job-testing
+VALUE=100 bun run runJob.ts
 ```
 
 ### 2. **API Integration Testing**
 ```bash
 # Test Polygon API integration
-POLYGON_API_KEY=your_polygon_key bun run scripts/job-testing/runJob.ts
+cd common/job-testing
+POLYGON_API_KEY=your_polygon_key bun run runJob.ts
 ```
 
 ### 3. **Custom Job Development**
@@ -138,11 +143,12 @@ const res = await queue.fetchSignaturesConsensus({
 
 ### Successful Response
 ```bash
-POLYGON_API_KEY=your_key bun run scripts/job-testing/runJob.ts
+cd common/job-testing
+POLYGON_API_KEY=your_key bun run runJob.ts
 [
   {
     "value": 150.25,      // The parsed price value
-    "timestamp": 1234567, // When the data was fetched  
+    "timestamp": 1234567, // When the data was fetched
     "oracle": "oracle_pubkey_here"
   }
 ]
@@ -150,7 +156,8 @@ POLYGON_API_KEY=your_key bun run scripts/job-testing/runJob.ts
 
 ### Environment Variable Missing
 ```bash
-bun run scripts/job-testing/runJob.ts
+cd common/job-testing
+bun run runJob.ts
 Error: Cannot read property 'POLYGON_API_KEY' of undefined
 ```
 
@@ -159,10 +166,11 @@ Error: Cannot read property 'POLYGON_API_KEY' of undefined
 ### 1. **Missing Environment Variables**
 ```bash
 # Check what variables your job needs
-grep '\${' scripts/job-testing/runJob.ts
+cd common/job-testing
+grep '\${' runJob.ts
 
 # Set required variables
-POLYGON_API_KEY=your_key VALUE=123 bun run scripts/job-testing/runJob.ts
+POLYGON_API_KEY=your_key VALUE=123 bun run runJob.ts
 ```
 
 ### 2. **API Authentication Errors**
@@ -217,13 +225,15 @@ const simpleJob = OracleJob.fromObject({
 ### 1. **Start Simple**
 ```bash
 # Begin with the value job
-VALUE=100 bun run scripts/job-testing/runJob.ts
+cd common/job-testing
+VALUE=100 bun run runJob.ts
 ```
 
 ### 2. **Test API Connectivity**
 ```bash
 # Test with real API
-API_KEY=your_key bun run scripts/job-testing/runJob.ts
+cd common/job-testing
+API_KEY=your_key bun run runJob.ts
 ```
 
 ### 3. **Validate JSON Parsing**
@@ -320,11 +330,13 @@ gateway: "https://crossbar.switchboard.xyz"
 }
 ```
 
-## 🔗 Related Scripts
+## 🔗 Related Examples
 
-- **Production Feed Scripts**: See `/scripts/feeds/` for optimized oracle quote operations
-- **Streaming Scripts**: See `/scripts/streaming/` for real-time data streaming  
-- **Benchmarks**: See `/scripts/benchmarks/` for performance testing
+- **Production Feed Examples**: See `solana/examples/feeds/` for optimized oracle quote operations
+- **Streaming Examples**: See `solana/examples/streaming/` for real-time data streaming
+- **Benchmarks**: See `solana/examples/benchmarks/` for performance testing
+- **Randomness**: See `solana/examples/randomness/` for VRF examples
+- **Variable Overrides**: See `solana/examples/variable-overrides/` for credential management
 
 ## 📖 Additional Resources
 
@@ -335,4 +347,4 @@ gateway: "https://crossbar.switchboard.xyz"
 
 ---
 
-**Note**: This testing script is designed for development and validation. For production applications, use the optimized scripts in `/scripts/feeds/` and `/scripts/streaming/`.
+**Note**: This testing script is designed for development and validation. For production applications, use the optimized examples in `solana/examples/feeds/` and `solana/examples/streaming/`.

@@ -56,6 +56,9 @@ const argv = yargs(process.argv)
   const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [argv.feedId]);
   console.log("📍 Quote Account (derived):", quoteAccount.toBase58());
 
+  const simFeed = await crossbar.simulateFeed(argv.feedId);
+  console.log(simFeed);
+
   // Step 2: Create managed update instructions
   // This returns both the Ed25519 signature verification instruction
   // and the quote program instruction that stores the verified data

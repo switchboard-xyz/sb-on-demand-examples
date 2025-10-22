@@ -1,6 +1,16 @@
-/* Example Using Crossbar (equivalent to index.ts) */
+/**
+ * @fileoverview Example demonstrating how to fetch and update Switchboard oracle prices on EVM chains
+ *
+ * This script shows:
+ * - Fetching signed price data from Crossbar
+ * - Submitting oracle updates to your contract
+ * - Reading and parsing updated feed values
+ * - Event parsing and logging
+ *
+ * Run with: bun run examples/updateFeed.ts
+ */
+
 import * as ethers from "ethers";
-import * as fs from "fs";
 import { CrossbarClient } from "@switchboard-xyz/common";
 
 // Parse the response as JSON

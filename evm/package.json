@@ -1,7 +1,9 @@
 {
   "name": "evm-on-demand-example",
-  "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "update": "bun run examples/updateFeed.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

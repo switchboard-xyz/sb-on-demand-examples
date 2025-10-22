@@ -2,6 +2,21 @@
 
 This directory contains examples for using Switchboard On-Demand functionality on EVM-compatible chains.
 
+## 📁 Directory Structure
+
+```
+evm/
+├── src/               # Solidity smart contracts
+│   └── Example.sol
+├── script/            # Foundry deployment scripts
+│   └── Deploy.s.sol
+├── examples/          # TypeScript client examples
+│   ├── updateFeed.ts
+│   └── utils.ts
+├── package.json
+└── README.md
+```
+
 ## Quick Start
 
 ### Prerequisites
@@ -94,27 +109,24 @@ Then add `EXAMPLE_ADDRESS=0x...` with your deployed contract address to the envi
 source .env
 ```
 
-### 2. Run the Oracle Quote Example
+### 2. Run the Price Update Example
 
 ```bash
 # Update .env with the deployed EXAMPLE_ADDRESS
 # Then run the price update script
-bun run scripts/runOracleQuote.ts
+
+# Using npm script
+npm run update
+
+# Or directly with bun
+bun run examples/updateFeed.ts
 ```
 
 This script demonstrates:
 - Fetching signed price data from Switchboard's Crossbar instance
 - Submitting the oracle update to your contract
 - Reading the updated price from the contract
-- Performance monitoring and statistics
-
-### 3. Single Update Example
-
-For a one-time price update:
-
-```bash
-bun run index.ts
-```
+- Event parsing and logging
 
 ### Finding and Verifying Feeds
 
@@ -145,6 +157,15 @@ bun run index.ts
 
 **⚠️ Important**: Always verify the current contract addresses at [docs.switchboard.xyz](https://docs.switchboard.xyz/product-documentation/data-feeds/evm/contract-addresses) as they may be updated.
 
+## 📂 Examples Overview
+
+The `examples/` directory contains TypeScript client code for interacting with Switchboard On-Demand:
+
+- **`updateFeed.ts`** - Complete example of fetching and submitting oracle updates
+- **`utils.ts`** - Shared utility functions and constants
+
+These examples demonstrate the client-side integration patterns you'll use in your applications.
+
 ## Advanced Usage
 
 ### Custom Feed Integration
@@ -152,7 +173,7 @@ bun run index.ts
 1. Find your desired feed at [ondemand.switchboard.xyz](https://ondemand.switchboard.xyz)
 2. Copy the aggregator ID
 3. Update your contract to use the new feed
-4. Modify the scripts to fetch your specific feed
+4. Modify the examples to fetch your specific feed
 
 ### Error Handling
 

@@ -1,8 +1,8 @@
 import { Aggregator } from "@switchboard-xyz/sui-sdk";
 import yargs from "yargs";
-import { loadConfig, validateConfig } from "./config";
-import { initializeClients, initializeKeypair } from "./clients";
-import { createTransaction, executeOrSimulate } from "./transaction";
+import { loadConfig, validateConfig } from "./utils/config";
+import { initializeClients, initializeKeypair } from "./utils/clients";
+import { createTransaction, executeOrSimulate } from "./utils/transaction";
 
 const argv = yargs(process.argv)
   .options({

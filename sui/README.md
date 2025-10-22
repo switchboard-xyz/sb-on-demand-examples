@@ -42,7 +42,7 @@ npm run feed-example
 # Or pass feed ID as argument
 npm run feed-example 0x1234567890abcdef...
 # Or with flag
-ts-node scripts/crankFeed.ts --feedId 0x1234567890abcdef...
+ts-node examples/crankFeed.ts --feedId 0x1234567890abcdef...
 ```
 
 ### Batch Crossbar Updates
@@ -54,15 +54,15 @@ Call Crossbar directly for multiple feed updates using `fetchManyUpdateTx`:
 npm run crossbar-update 0x1234567890abcdef...
 
 # Multiple feeds (comma-separated)
-ts-node scripts/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh,0x9abc...ijkl
+ts-node examples/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh,0x9abc...ijkl
 
 # Sign and send transaction (requires private key)
 export SUI_PRIVATE_KEY="your_private_key_here"
-ts-node scripts/crossbarUpdate.ts --feedId 0x1234...abcd --sign-and-send
+ts-node examples/crossbarUpdate.ts --feedId 0x1234...abcd --sign-and-send
 
 # Batch update with signing
 export SUI_PRIVATE_KEY="your_private_key_here"
-ts-node scripts/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh --sign-and-send
+ts-node examples/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh --sign-and-send
 
 # Using environment variable
 export FEED_IDS="0x1234...abcd,0x5678...efgh"
@@ -108,11 +108,11 @@ The Surge example demonstrates:
 npm run surge-update
 
 # Subscribe to specific feeds (comma-separated)
-ts-node scripts/surgeUpdate.ts --feeds "BTC/USD,ETH/USD,SOL/USD"
+ts-node examples/surgeUpdate.ts --feeds "BTC/USD,ETH/USD,SOL/USD"
 
 # Sign and send transaction (requires private key)
 export SUI_PRIVATE_KEY="your_private_key_here"
-ts-node scripts/surgeUpdate.ts --feeds "BTC/USD" --sign-and-send
+ts-node examples/surgeUpdate.ts --feeds "BTC/USD" --sign-and-send
 ```
 
 #### Surge Integration with Sui Quotes
@@ -236,7 +236,7 @@ npm run simulate-all --sign-and-send
 npm run simulate-all --details --sign-and-send
 
 # Direct script execution
-ts-node scripts/simulateAll.ts --details
+ts-node examples/simulateAll.ts --details
 ```
 
 This script processes 9 predefined feed IDs and provides:
@@ -281,7 +281,7 @@ This script processes 9 predefined feed IDs and provides:
 6. **Simulate**: Dry-run the transaction to validate gas costs
 7. **Optional Send**: If `--sign-and-send` is used, execute the transaction on-chain
 
-### What the Scripts Do:
+### What the Examples Do:
 
 #### crankFeed.ts & crossbarUpdate.ts:
 - **No private key required** - reads data and simulates transactions

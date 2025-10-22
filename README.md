@@ -44,7 +44,7 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 - On-demand feed updates with aggregated results from multiple oracles
 
 **JavaScript/TypeScript Client Code:**
-- **[📁 Feed Examples](./sui/scripts/)** - Complete TypeScript examples for Sui integration
+- **[📁 Feed Examples](./sui/examples/)** - Complete TypeScript examples for Sui integration
   - Oracle data fetching, feed reading, transaction simulation
   - No private key required for data reading and simulation
 

@@ -4,10 +4,10 @@
   "description": "Sui examples for Switchboard On-Demand functionality",
   "type": "module",
   "scripts": {
-    "feed-example": "tsx scripts/crankFeed.ts",
-    "crossbar-update": "tsx scripts/crossbarUpdate.ts",
-    "surge-update": "tsx scripts/surgeUpdate.ts",
-    "simulate-all": "tsx scripts/simulateAll.ts"
+    "feed-example": "tsx examples/crankFeed.ts",
+    "crossbar-update": "tsx examples/crossbarUpdate.ts",
+    "surge-update": "tsx examples/surgeUpdate.ts",
+    "simulate-all": "tsx examples/simulateAll.ts"
   },
   "dependencies": {
     "@mysten/sui": "^1.38.0",

@@ -35,17 +35,9 @@ const argv = yargs(process.argv)
 (async function main() {
   // Load Solana environment configuration
   // Note: loadEnv automatically sets the crossbar network based on the detected RPC connection
-  const { program, keypair, connection, crossbar } =
+  const { program, keypair, connection, crossbar, queue, isMainnet } =
     await sb.AnchorUtils.loadEnv();
-  console.log("RPC:", connection.rpcEndpoint);
   console.log("Using feed ID:", argv.feedId);
-
-  // Auto-detect network and load appropriate queue
-  const queue = await sb.Queue.loadDefault(program!);
-
-  // Display network detection results using proper method
-  const isMainnet = await isMainnetConnection(connection);
-  console.log("🌐 Network detected:", isMainnet ? "mainnet" : "devnet");
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
   console.log("🔧 Crossbar network:", crossbar.getNetwork());
 
@@ -102,15 +94,12 @@ const argv = yargs(process.argv)
 
   // Send the transaction
   try {
-    const sim = await connection.simulateTransaction(tx);
+    const sim = await program!.provider.connection.simulateTransaction(tx);
     console.log(sim.value.logs?.join("\n"));
     if (sim.value.err) {
       console.error("❌ Simulation failed:", sim.value.err);
       return;
     }
-    const sig = await connection.sendTransaction(tx, TX_CONFIG);
-    await connection.confirmTransaction(sig, "confirmed");
-    console.log("✅ Transaction successful:", sig);
   } catch (error) {
     console.error("❌ Transaction failed:", error);
   }

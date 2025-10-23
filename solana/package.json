@@ -51,7 +51,7 @@
     "@solana/spl-token": "^0.4.13",
     "@solana/web3.js": "^1.98.0",
     "@switchboard-xyz/common": "^5.1.0",
-    "@switchboard-xyz/on-demand": "^3.0.0",
+    "@switchboard-xyz/on-demand": "^3.1.1",
     "@switchboard-xyz/x402-utils": "0.1.2",
     "assert": "^2.1.0",
     "axios": "^1.8.4",

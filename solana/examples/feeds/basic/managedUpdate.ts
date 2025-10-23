@@ -1,6 +1,5 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { OracleQuote, isMainnetConnection } from "@switchboard-xyz/on-demand";
-import { CrossbarClient } from "@switchboard-xyz/common";
 import yargs from "yargs";
 import { TX_CONFIG, loadBasicProgram, basicReadOracleIx } from "../../utils";
 
@@ -35,6 +34,7 @@ const argv = yargs(process.argv)
  */
 (async function main() {
   // Load Solana environment configuration
+  // Note: loadEnv automatically sets the crossbar network based on the detected RPC connection
   const { program, keypair, connection, crossbar } =
     await sb.AnchorUtils.loadEnv();
   console.log("RPC:", connection.rpcEndpoint);
@@ -47,6 +47,7 @@ const argv = yargs(process.argv)
   const isMainnet = await isMainnetConnection(connection);
   console.log("🌐 Network detected:", isMainnet ? "mainnet" : "devnet");
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
+  console.log("🔧 Crossbar network:", crossbar.getNetwork());
 
   // Load the basic oracle example program
   const basicProgram = await loadBasicProgram(program!.provider);
@@ -56,6 +57,7 @@ const argv = yargs(process.argv)
   const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [argv.feedId]);
   console.log("📍 Quote Account (derived):", quoteAccount.toBase58());
 
+  // Simulate the feed - automatically uses the network configured in loadEnv
   const simFeed = await crossbar.simulateFeed(argv.feedId);
   console.log(simFeed);
 

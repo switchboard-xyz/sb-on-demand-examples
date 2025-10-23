@@ -33,11 +33,11 @@ importers:
         specifier: ^1.98.0
         version: 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/common':
-        specifier: ^4.1.10
-        version: 4.1.10(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: ^5.1.0
+        version: 5.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
-        specifier: ^2.17.5
-        version: 2.17.6(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: ^3.0.0
+        version: 3.0.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/x402-utils':
         specifier: 0.1.2
         version: 0.1.2(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
@@ -593,12 +593,12 @@ packages:
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
 
-  '@switchboard-xyz/common@4.1.10':
-    resolution: {integrity: sha512-qC6UuXESKGpAkdTMBvzOyecKScQJLcORcuQjF/Rzv9G35vH7RB6LMK2GXKWof7yjPLt0XYmdjtj5ibBcU1AOkg==}
+  '@switchboard-xyz/common@5.1.0':
+    resolution: {integrity: sha512-vGxwWTA8FBQFu/Lnekelcra5Yx7B6bGYYc5Q5A1yn0CxTt6uLrkw8RbNs1iQ4Xka33m3v1TB5Esk6+yrejdaNA==}
     engines: {node: '>=20'}
 
-  '@switchboard-xyz/on-demand@2.17.6':
-    resolution: {integrity: sha512-uHHoT7/XOcuDZ54midnuedjhWX2Z4z+BlOcjzA/zZwNtnbai7tmqdOPXnFBXgxVrYz5GCBEUjQpCXyANrKtWpA==}
+  '@switchboard-xyz/on-demand@3.0.0':
+    resolution: {integrity: sha512-xVqsju9xb/p/j47EDDLP+3uSFTPRaYWFlXkPM0lMG3N+TB4mLXQKIL3xJpQhbu1+RKtSo8T/wuC3DqCwT1qDaQ==}
     engines: {node: '>= 18'}
 
   '@switchboard-xyz/x402-utils@0.1.2':
@@ -2341,7 +2341,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@switchboard-xyz/common@4.1.10(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+  '@switchboard-xyz/common@5.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       axios: 1.12.2
@@ -2361,11 +2361,11 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@switchboard-xyz/on-demand@2.17.6(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+  '@switchboard-xyz/on-demand@3.0.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@coral-xyz/anchor-31': '@coral-xyz/anchor@0.31.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)'
       '@isaacs/ttlcache': 1.4.1
-      '@switchboard-xyz/common': 4.1.10(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      '@switchboard-xyz/common': 5.1.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       axios: 1.12.2
       bs58: 6.0.0
       buffer: 6.0.3

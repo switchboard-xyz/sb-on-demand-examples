@@ -60,7 +60,6 @@ const argv = yargs(process.argv)
     crossbar,
     [argv.feedId],
     {
-      numSignatures: 1, // Use single signature for fastest updates
       variableOverrides: {},
       instructionIdx: 0, // Ed25519 instruction index
       payer: keypair.publicKey,
@@ -94,7 +93,7 @@ const argv = yargs(process.argv)
 
   // Send the transaction
   try {
-    const sim = await program!.provider.connection.simulateTransaction(tx);
+    const sim = await connection.simulateTransaction(tx);
     console.log(sim.value.logs?.join("\n"));
     if (sim.value.err) {
       console.error("❌ Simulation failed:", sim.value.err);

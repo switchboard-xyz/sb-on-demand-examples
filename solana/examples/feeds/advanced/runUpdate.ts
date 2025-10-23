@@ -1,6 +1,5 @@
 import * as sb from "@switchboard-xyz/on-demand";
-import { OracleQuote, isMainnetConnection } from "@switchboard-xyz/on-demand";
-import { CrossbarClient } from "@switchboard-xyz/common";
+import { OracleQuote } from "@switchboard-xyz/on-demand";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import yargs from "yargs";
 import {
@@ -28,35 +27,32 @@ const argv = yargs(process.argv)
  * Advanced Oracle Update Example with Performance Monitoring
  *
  * This example demonstrates production-ready oracle integration with:
- * 1. Auto-detection of network (mainnet/devnet) and queue selection
+ * 1. Auto-detection of network (mainnet/devnet) and automatic configuration
  * 2. Managed oracle updates using the quote program
  * 3. Advanced oracle data parsing and display (multiple feeds)
  * 4. Address Lookup Tables for transaction optimization
  * 5. Performance monitoring and metrics tracking
- * 6. Continuous processing loop with comprehensive error handling
+ * 6. Comprehensive error handling and state management
  *
  * What makes this "advanced" compared to the basic example:
  * - Performance metrics tracking and statistics
- * - Continuous loop with proper timing
+ * - State and oracle initialization handling
  * - Address lookup table optimization
  * - More sophisticated error handling
  * - The advanced program can parse and display multiple feeds with detailed info
+ * - Decoded quote inspection
  */
 (async function main() {
   // Load Solana environment configuration from standard locations
-  // Expects ANCHOR_WALLET environment variable or ~/.config/solana/id.json
-  const { program, keypair, connection, crossbar } =
+  // from ~/.config/solana/id.json
+  // loadEnv automatically detects network and configures crossbar/queue
+  const { program, keypair, connection, crossbar, queue, isMainnet } =
     await sb.AnchorUtils.loadEnv();
-  console.log("RPC:", connection.rpcEndpoint);
 
-  // Auto-detect network and load appropriate queue
-  console.log("🔍 Auto-detecting network and selecting optimal queue...");
-  const queue = await sb.Queue.loadDefault(program!);
-
-  // Display network detection results using proper method
-  const isMainnet = await isMainnetConnection(connection);
+  // Display network detection results
   console.log("🌐 Network detected:", isMainnet ? "mainnet" : "devnet");
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
+  console.log("🔧 Crossbar network:", crossbar.getNetwork());
 
   // Load the advanced oracle example program ID (Pinocchio version)
   const advancedProgramId = await loadAdvancedProgram();
@@ -90,7 +86,6 @@ const argv = yargs(process.argv)
   // Step 2: Fetch managed update instructions
   // This gets both Ed25519 verification and quote program instructions
   const instruction = await queue.fetchQuoteIx(crossbar, [argv.feedId], {
-    numSignatures: 1, // Use single signature for fastest updates
     variableOverrides: {},
     instructionIdx: 0, // Ed25519 instruction index
   });
@@ -103,13 +98,12 @@ const argv = yargs(process.argv)
   // Decode the oracle quote data from the Ed25519 instruction
   const decodedQuote = OracleQuote.decode(instruction.data);
   console.log("\n📊 Decoded Oracle Quote:");
-  console.log("  Discriminator:", decodedQuote.discriminator);
   console.log("  Version:", decodedQuote.version);
-  console.log("  Recent Slot:", decodedQuote.recentSlot.toString());
+  console.log("  Slot:", decodedQuote.slot.toString());
   console.log("  Signed Slothash:", decodedQuote.signedSlothash.toString("hex"));
-  console.log("  Oracle Indexes:", decodedQuote.oracleIndexes);
-  console.log("\n  Feed Infos:");
-  decodedQuote.feedInfos.forEach((feed, idx) => {
+  console.log("  Oracle Indexes:", decodedQuote.oracleIdxs);
+  console.log("\n  Feeds:");
+  decodedQuote.feeds.forEach((feed, idx) => {
     console.log(`    Feed ${idx}:`);
     console.log(`      Feed Hash: ${feed.feedHash.toString("hex")}`);
     console.log(`      Value: ${feed.value}`);
@@ -139,16 +133,6 @@ const argv = yargs(process.argv)
         advancedProgramId,
         keypair.publicKey
       );
-
-      // Log the accounts in the init instruction
-      console.log("📋 Init State Instruction Accounts:");
-      initStateIx.keys.forEach((key, index) => {
-        console.log(
-          `  Account ${index}: ${key.pubkey.toBase58()} (signer: ${
-            key.isSigner
-          }, writable: ${key.isWritable})`
-        );
-      });
     } else {
       console.log("✅ State account already initialized");
     }
@@ -158,16 +142,6 @@ const argv = yargs(process.argv)
       advancedProgramId,
       keypair.publicKey
     );
-
-    // Log the accounts in the init instruction
-    console.log("📋 Init State Instruction Accounts:");
-    initStateIx.keys.forEach((key, index) => {
-      console.log(
-        `  Account ${index}: ${key.pubkey.toBase58()} (signer: ${
-          key.isSigner
-        }, writable: ${key.isWritable})`
-      );
-    });
   }
 
   // Step 4: Check if quote account is initialized and create init instruction if needed
@@ -185,15 +159,6 @@ const argv = yargs(process.argv)
         keypair.publicKey
       );
 
-      // Log the accounts in the init oracle instruction
-      console.log("📋 Init Oracle Instruction Accounts:");
-      initOracleIx.keys.forEach((key, index) => {
-        console.log(
-          `  Account ${index}: ${key.pubkey.toBase58()} (signer: ${
-            key.isSigner
-          }, writable: ${key.isWritable})`
-        );
-      });
     } else {
       console.log("✅ Quote account already initialized");
     }
@@ -205,16 +170,6 @@ const argv = yargs(process.argv)
       queue.pubkey,
       keypair.publicKey
     );
-
-    // Log the accounts in the init oracle instruction
-    console.log("📋 Init Oracle Instruction Accounts:");
-    initOracleIx.keys.forEach((key, index) => {
-      console.log(
-        `  Account ${index}: ${key.pubkey.toBase58()} (signer: ${
-          key.isSigner
-        }, writable: ${key.isWritable})`
-      );
-    });
   }
 
   // Step 5: Create the crank instruction to update the quote account
@@ -224,16 +179,6 @@ const argv = yargs(process.argv)
     queue.pubkey,
     keypair.publicKey
   );
-
-  // Log the accounts in the crank instruction
-  console.log("📋 Crank Instruction Accounts:");
-  crankOracleIx.keys.forEach((key, index) => {
-    console.log(
-      `  Account ${index}: ${key.pubkey.toBase58()} (signer: ${
-        key.isSigner
-      }, writable: ${key.isWritable})`
-    );
-  });
 
   // Step 6: Create the advanced program instruction to read and display quote data
   const parseOracleIx = await advancedProcessOracleIx(
@@ -282,7 +227,7 @@ const argv = yargs(process.argv)
     ixs: instructions,
     signers: [keypair],
     computeUnitPrice: 10_000, // Priority fee
-    computeUnitLimitMultiple: 1.3, // 10% buffer
+    computeUnitLimitMultiple: 1.1, // 10% buffer
   });
 
   // Send the transaction
@@ -293,9 +238,6 @@ const argv = yargs(process.argv)
       console.error("❌ Simulation failed:", sim.value.err);
       return;
     }
-    const sig = await connection.sendTransaction(tx, TX_CONFIG);
-    await connection.confirmTransaction(sig, "confirmed");
-    console.log("✅ Transaction successful:", sig);
   } catch (error) {
     console.error("❌ Transaction failed:", error);
   }

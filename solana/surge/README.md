@@ -49,13 +49,13 @@ export SURGE_API_KEY="your-api-key-here"
 **Usage**:
 ```bash
 # Using bun (recommended)
-bun run examples/streaming/runSurge.ts
+bun run surge/runSurge.ts
 
 # Using npm script
 npm run stream:surge
 
 # Using ts-node directly
-npx ts-node examples/streaming/runSurge.ts
+npx ts-node surge/runSurge.ts
 ```
 
 **Features**:
@@ -77,52 +77,11 @@ npx ts-node examples/streaming/runSurge.ts
 📈 Final stats: 15 updates, 43.2ms avg latency
 ```
 
-### 2. stream.ts - Full Streaming with On-chain Submission
-
-**Purpose**: Complete streaming implementation with throttled on-chain transaction submission.
-
-**Usage**:
-```bash
-# Using bun (recommended)
-bun run examples/streaming/stream.ts
-
-# Using npm script
-npm run stream
-
-# Using ts-node directly
-npx ts-node examples/streaming/stream.ts
-```
-
-**Features**:
-- Streams BTC/USDT from Binance with 5-second transaction throttling
-- Actually submits transactions to Solana network
-- Runs for 30 seconds as a demo
-- Tracks comprehensive metrics:
-  - Total updates received
-  - Heartbeats vs price changes
-  - Transaction success rate
-  - Oracle processing times
-- Color-coded output for better visibility
-
-**Output Example**:
-```
-🎉 Starting 30-second streaming demo...
-💓 Heartbeat: $45,123.45 (unchanged)
-📊 Price Update: $45,124.10 (+$0.65)
-✅ Transaction confirmed: 3xY2z...
-📈 Demo Statistics:
-  - Total Updates: 142
-  - Price Changes: 28
-  - Transactions Sent: 6
-  - Success Rate: 100%
-```
-
 ## Choosing the Right Script
 
 | Script | Use Case | Transaction | Latency | Best For |
 |--------|----------|-------------|---------|----------|
 | `runSurge.ts` | Demo & customer presentations | Single simulation after 10s | 50-200ms | Demonstrations, testing |
-| `stream.ts` | Production integration | Submitted on-chain | 100-300ms | Live trading systems |
 | [`../../common/streaming/crossbarStream.ts`](../../common/streaming/) | Frontend displays | None (unsigned) | 50-150ms | UIs, dashboards, monitoring (chain-agnostic) |
 
 ## Event Handling
@@ -188,9 +147,9 @@ surge.on('disconnect', () => {
 
 ## Related Examples
 
-- `../feeds/advanced/runUpdate.ts`: Fetch signed price quotes for on-chain verification
-- `../feeds/legacy/runFeed.ts`: (Legacy) Direct feed queries without streaming
-- `../benchmarks/benchmark.ts`: Performance comparison tools
+- `../examples/feeds/advanced/runUpdate.ts`: Fetch signed price quotes for on-chain verification
+- `../examples/feeds/legacy/runFeed.ts`: (Legacy) Direct feed queries without streaming
+- `../examples/benchmarks/benchmark.ts`: Performance comparison tools
 
 ## Support
 

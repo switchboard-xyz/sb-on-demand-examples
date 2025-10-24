@@ -41,9 +41,6 @@ const argv = yargs(process.argv)
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
   console.log("🔧 Crossbar network:", crossbar.getNetwork());
 
-  // Load the basic oracle example program
-  const basicProgram = await loadBasicProgram(program!.provider);
-
   // Step 1: Derive the canonical oracle account from feed hashes
   // This uses the same derivation logic as the quote program
   const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [argv.feedId]);
@@ -72,6 +69,9 @@ const argv = yargs(process.argv)
 
   // Step 3: Create your program instruction to read the oracle data
   // This instruction will read from the quote account that was just updated
+  // Load the basic oracle example program
+  const basicProgram = await loadBasicProgram(program!.provider);
+
   const readOracleIx = await basicReadOracleIx(
     basicProgram,
     quoteAccount,

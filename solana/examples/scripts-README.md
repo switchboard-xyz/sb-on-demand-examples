@@ -5,11 +5,12 @@ This directory contains example scripts demonstrating various ways to interact w
 ## 📁 Directory Structure
 
 ```
-scripts/
+examples/
 ├── feeds/          # Oracle feed operations
-├── streaming/      # Real-time price streaming
 ├── benchmarks/     # Performance testing
 └── utils.ts        # Shared utilities
+surge/
+└── runSurge.ts     # Real-time price streaming
 ```
 
 ## 🚀 Quick Start
@@ -32,25 +33,25 @@ npm run benchmark
 ### Using bun (recommended):
 ```bash
 # Fetch price quotes with specific feed
-bun run scripts/feeds/advanced/runUpdate.ts --feedId 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
+bun run examples/feeds/advanced/runUpdate.ts --feedId 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 
 # X402 paywalled RPC access (inline feed with X402 headers)
-bun run scripts/feeds/x402Update.ts --url https://helius.api.corbits.dev --method getBlockHeight
+bun run examples/feeds/x402Update.ts --url https://helius.api.corbits.dev --method getBlockHeight
 
 # Stream prices with Surge
-bun run scripts/streaming/runSurge.ts
+bun run surge/runSurge.ts
 
 # Run Crossbar streaming (chain-agnostic)
 bun run ../common/streaming/crossbarStream.ts
 
 # Performance benchmarks
-bun run scripts/benchmarks/benchmark.ts
+bun run examples/benchmarks/benchmark.ts
 ```
 
 ### Direct execution with ts-node:
 ```bash
 # Run any script directly
-npx ts-node scripts/feeds/advanced/runUpdate.ts --feedId FEED_ID
+npx ts-node examples/feeds/advanced/runUpdate.ts --feedId FEED_ID
 ```
 
 ## 📂 Categories
@@ -64,14 +65,13 @@ Scripts for fetching and updating oracle price data.
 
 [📖 Detailed Feeds Documentation](./feeds/README.md)
 
-### 2. Streaming (`/streaming/`)
+### 2. Streaming (`/surge/`)
 Real-time price streaming implementations.
 
 - **`runSurge.ts`** - Demo streaming with single simulation after 10 seconds
-- **`stream.ts`** - Full streaming with on-chain transactions
 - See **[`../../common/streaming/crossbarStream.ts`](../../common/streaming/)** - Chain-agnostic unsigned prices for UI/monitoring
 
-[📖 Detailed Streaming Documentation](./streaming/README.md)
+[📖 Detailed Streaming Documentation](../surge/README.md)
 
 ### 3. Benchmarks (`/benchmarks/`)
 Performance testing and comparison tools.
@@ -103,13 +103,12 @@ export SURGE_API_KEY=your_api_key_here
 
 | Need | Use This Script | Why |
 |------|----------------|-----|
-| Fetch prices for DeFi | `feeds/advanced/runUpdate.ts` | Lowest cost, signed data |
-| Access paywalled RPC | `feeds/x402Update.ts` | X402 micropayments, premium RPC |
+| Fetch prices for DeFi | `examples/feeds/advanced/runUpdate.ts` | Lowest cost, signed data |
+| Access paywalled RPC | `examples/feeds/x402Update.ts` | X402 micropayments, premium RPC |
 | Real-time UI updates | `../../common/streaming/crossbarStream.ts` | Unsigned, lowest latency (chain-agnostic) |
-| Demo streaming integration | `streaming/runSurge.ts` | Clean demo with simulation |
-| Production streaming | `streaming/stream.ts` | Full on-chain integration |
-| Test performance | `benchmarks/benchmark.ts` | Compare oracle providers |
-| Optimize gas costs | `benchmarks/benchmarkCU.ts` | Measure compute units |
+| Demo streaming integration | `surge/runSurge.ts` | Clean demo with simulation |
+| Test performance | `examples/benchmarks/benchmark.ts` | Compare oracle providers |
+| Optimize gas costs | `examples/benchmarks/benchmarkCU.ts` | Measure compute units |
 
 ## 📊 Example Outputs
 

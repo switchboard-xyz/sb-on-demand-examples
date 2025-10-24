@@ -211,9 +211,8 @@ The examples are organized into categories based on their functionality:
 - **`advanced/runUpdate.ts`** - Optimized oracle integration with Pinocchio Framework
 - **`x402Update.ts`** - X402 authentication with inline feed definition (like prediction market)
 
-### `/examples/streaming/` - Real-time Price Streaming
+### `/surge/` - Real-time Price Streaming
 - **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
-- **`stream.ts`** - Full streaming implementation with on-chain transaction submission
 - See **[`../common/streaming/crossbarStream.ts`](../common/streaming/)** - Chain-agnostic unsigned price streaming for UI/monitoring
 
 ### `/examples/benchmarks/` - Performance Testing
@@ -651,7 +650,7 @@ SURGE_API_KEY=your_surge_api_key_here
 
 ```bash
 # Stream real-time BTC/USDT prices
-bun run examples/streaming/runSurge.ts
+bun run surge/runSurge.ts
 
 # Example output:
 # ==================== Switchboard Surge ====================

@@ -93,6 +93,7 @@ fn test_oracle_integration_with_litesvm() {
     // Serialize to account data format (includes discriminator)
     let account_data = quote.to_account_data().expect("Failed to serialize");
     println!("   Account data size: {} bytes", account_data.len());
+    println!("   First 8 bytes (discriminator): {:?}", &account_data[0..8]);
 
     // Step 5: Derive the canonical oracle account address
     // This is where the quote program would store the verified oracle data
@@ -108,12 +109,16 @@ fn test_oracle_integration_with_litesvm() {
         oracle_account,
         Account {
             lamports: 1_000_000, // Rent-exempt amount
-            data: account_data,
+            data: account_data.clone(),
             owner: to_solana_pubkey(&QUOTE_PROGRAM_ID),
             executable: false,
             rent_epoch: 0,
         }
     ).expect("Failed to create oracle account");
+
+    // Verify the account was created
+    let account_info = svm.get_account(&oracle_account).expect("Account should exist");
+    println!("   ✓ Account created with {} bytes, owner: {}", account_info.data.len(), account_info.owner);
 
     // Step 7: Get sysvars required by the oracle program
     let clock_sysvar = solana_sdk::sysvar::clock::id();

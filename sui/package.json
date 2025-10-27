@@ -4,18 +4,19 @@
   "description": "Sui examples for Switchboard On-Demand functionality",
   "type": "module",
   "scripts": {
-    "feed-example": "tsx examples/crankFeed.ts",
-    "crossbar-update": "tsx examples/crossbarUpdate.ts",
-    "surge-update": "tsx examples/surge/surgeUpdate.ts",
-    "simulate-all": "tsx examples/simulateAll.ts"
+    "quotes": "tsx examples/quotes.ts",
+    "surge": "tsx examples/surge.ts"
   },
   "dependencies": {
     "@mysten/sui": "^1.38.0",
-    "@switchboard-xyz/on-demand": "latest",
-    "@switchboard-xyz/sui-sdk": "^0.1.7"
+    "@switchboard-xyz/common": "link:/Users/mgild/projects/sbv3/javascript/common",
+    "@switchboard-xyz/on-demand": "link:/Users/mgild/projects/sbv3/javascript/on-demand",
+    "@switchboard-xyz/sui-sdk": "^0.1.9",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/yargs": "^17.0.32",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   }

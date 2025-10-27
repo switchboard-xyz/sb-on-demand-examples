@@ -6,40 +6,49 @@ This directory contains examples for using Switchboard On-Demand feeds on the Su
 
 ```
 sui/
-├── examples/          # TypeScript client examples
-│   ├── crankFeed.ts          # Single feed update
-│   ├── crossbarUpdate.ts     # Batch Crossbar updates
-│   ├── simulateAll.ts        # Simulation utilities
-│   ├── surge/                # Surge WebSocket streaming examples
-│   │   └── surgeUpdate.ts
-│   └── utils/                # Shared utilities
-│       ├── config.ts         # Environment configuration
-│       ├── clients.ts        # Client initialization
-│       └── transaction.ts    # Transaction helpers
+├── examples/
+│   ├── quotes.ts     # Oracle Quotes for Sui contracts
+│   └── surge.ts      # Real-time price streaming
 ├── package.json
 └── README.md
 ```
 
 ## 📂 Examples Overview
 
-The `examples/` directory contains TypeScript client code for interacting with Switchboard On-Demand on Sui:
+The `examples/` directory contains two concise examples for Switchboard on Sui:
 
-- **`crankFeed.ts`** - Single feed update example with simulation and transaction building
-- **`crossbarUpdate.ts`** - Batch feed updates by calling Crossbar directly for multiple feeds
-- **`simulateAll.ts`** - Comprehensive simulation utility for testing multiple feeds at once
-- **`surge/`** - Surge WebSocket streaming examples
-  - **`surgeUpdate.ts`** - Real-time WebSocket streaming with Surge for ultra-low latency
-- **`utils/`** - Shared utility modules for configuration, client initialization, and transactions
+- **`quotes.ts`** - Oracle Quotes example showing zero-setup, on-demand oracle data for Sui contracts
+- **`surge.ts`** - Surge WebSocket streaming for real-time price monitoring (display only)
 
-These examples demonstrate the client-side integration patterns you'll use in your Sui applications.
+The `quotes.ts` example demonstrates the recommended approach for integrating Switchboard oracles in your Sui applications. The `surge.ts` example shows how to stream and monitor real-time prices.
+
+## Table of Contents
+
+- [Switchboard on Sui Overview](#switchboard-on-sui-overview)
+- [Active Deployments](#active-deployments)
+- [Setup](#setup)
+- [Installation](#installation)
+- [Oracle Quotes (October 2025)](#oracle-quotes-october-2025)
+- [Move Integration](#move-integration)
+- [Running the Examples](#running-the-examples)
+- [Key Concepts](#key-concepts)
+- [Resources](#resources)
 
 ## Switchboard on Sui Overview
 
-Switchboard provides decentralized oracle feeds on Sui through a pull-based model where:
-- **Feeds are defined off-chain** with their own Feed Identifier linking them to customized logic
-- **Updates are triggered on-demand** by calling oracle networks
-- **Fresh data is fetched** from external APIs and verified by multiple oracles
-- **Results are aggregated** and stored in the feed for immediate use
+Switchboard provides decentralized oracle data on Sui with two modern approaches:
+
+**Oracle Quotes** - Zero-setup, on-demand oracle data:
+- No need to initialize or manage on-chain feeds
+- Fetch fresh oracle data exactly when you need it
+- Multi-oracle verification for security
+- Pay only when you use data
+
+**Surge WebSocket Streaming** - Real-time price monitoring:
+- Sub-100ms latency WebSocket streaming
+- Subscribe to 1000+ trading pairs
+- Ideal for dashboards and price monitoring
+- Use Oracle Quotes for on-chain Sui transactions
 
 ### Active Deployments
 
@@ -60,137 +69,303 @@ export SUI_RPC_URL="https://fullnode.mainnet.sui.io:443"  # Optional, defaults t
 export FEED_ID="your_feed_id_here"
 ```
 
-## Feed Update Examples
+## Installation
 
-### Single Feed Update
+To use Switchboard in your Sui TypeScript projects, install the required packages:
 
-Fetch fresh oracle data and simulate a feed update by providing a feed ID:
-
+**NPM:**
 ```bash
-# Using environment variable
-npm run feed-example
-
-# Or pass feed ID as argument
-npm run feed-example 0x1234567890abcdef...
-# Or with flag
-ts-node examples/crankFeed.ts --feedId 0x1234567890abcdef...
+npm install @switchboard-xyz/sui-sdk @mysten/sui --save
 ```
 
-### Batch Crossbar Updates
-
-Call Crossbar directly for multiple feed updates using `fetchManyUpdateTx`:
-
+**Bun:**
 ```bash
-# Single feed via Crossbar (simulation only)
-npm run crossbar-update 0x1234567890abcdef...
-
-# Multiple feeds (comma-separated)
-ts-node examples/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh,0x9abc...ijkl
-
-# Sign and send transaction (requires private key)
-export SUI_PRIVATE_KEY="your_private_key_here"
-ts-node examples/crossbarUpdate.ts --feedId 0x1234...abcd --sign-and-send
-
-# Batch update with signing
-export SUI_PRIVATE_KEY="your_private_key_here"
-ts-node examples/crossbarUpdate.ts --feedIds 0x1234...abcd,0x5678...efgh --sign-and-send
-
-# Using environment variable
-export FEED_IDS="0x1234...abcd,0x5678...efgh"
-npm run crossbar-update
-
-# Custom Crossbar endpoint
-export CROSSBAR_URL="https://crossbar.switchboardlabs.xyz"
-npm run crossbar-update
+bun add @switchboard-xyz/sui-sdk @mysten/sui
 ```
 
-### Switchboard Surge Streaming
+**PNPM:**
+```bash
+pnpm add @switchboard-xyz/sui-sdk @mysten/sui
+```
 
-Connect to Switchboard Surge for real-time WebSocket streaming of price updates and convert them directly into Sui quote format:
+## Oracle Quotes
 
-#### What is Surge?
+Oracle Quotes is a new feature that provides a simpler integration pattern without requiring aggregator initialization. This is ideal for applications that need on-demand oracle data without managing feed state.
+
+### Creating a Quote Verifier
+
+First, create a quote verifier in your Move program:
+
+```typescript
+import { Quote, SwitchboardClient } from "@switchboard-xyz/sui-sdk";
+import { Transaction } from "@mysten/sui/transactions";
+
+const client = new SwitchboardClient(suiClient);
+const tx = new Transaction();
+
+const verifier = await Quote.createVerifierTx(client, tx, {
+  queue: queueId,
+});
+
+const result = await suiClient.signAndExecuteTransaction({
+  transaction: tx,
+  signer: keypair,
+});
+```
+
+### Fetching Quotes
+
+Fetch oracle quotes for specific feed hashes on-demand:
+
+```typescript
+import { fetchQuoteUpdate } from "@switchboard-xyz/sui-sdk";
+
+const tx = new Transaction();
+
+// Fetch quotes for one or more feed hashes
+const quotes = await fetchQuoteUpdate(
+  client,
+  ['0x7418dc6408f5e0eb4724dabd81922ee7b0814a43abc2b30ea7a08222cd1e23ee'],
+  tx,
+  {
+    numOracles: 3,
+  }
+);
+
+// Use the quotes in your Move function
+tx.moveCall({
+  target: 'YOUR_PACKAGE::your_module::use_quotes',
+  arguments: [
+    quotes,
+  ],
+});
+
+const result = await suiClient.signAndExecuteTransaction({
+  transaction: tx,
+  signer: keypair,
+});
+```
+
+### Benefits of Oracle Quotes
+
+- **Zero Setup**: No need to initialize aggregators on-chain
+- **On-Demand**: Fetch fresh oracle data only when needed
+- **Flexible**: Use multiple feeds in a single transaction
+- **Cost Effective**: Pay only when you need data
+
+## Move Integration
+
+To use Switchboard in your Move contracts, add the dependencies to your `Move.toml`:
+
+### Move.toml Configuration
+
+```toml
+[dependencies.Switchboard]
+git = "https://github.com/switchboard-xyz/sui.git"
+subdir = "on_demand/"
+rev = "mainnet" # or "testnet" for testnet
+
+[dependencies.Sui]
+git = "https://github.com/MystenLabs/sui.git"
+subdir = "crates/sui-framework/packages/sui-framework"
+rev = "framework/mainnet" # or "framework/testnet" for testnet
+```
+
+### Using Oracle Quotes in Move
+
+For the new Oracle Quotes system, here's a complete integration example:
+
+```move
+module example::quote_consumer;
+
+use switchboard::quote::{Self, QuoteVerifier, Quotes};
+use switchboard::decimal::Decimal;
+use sui::object::{Self, UID, ID};
+use sui::tx_context::TxContext;
+use sui::transfer;
+
+public struct State has key {
+    id: UID,
+    quote_verifier: QuoteVerifier,
+}
+
+/// Initialize your program with a quote verifier
+public fun init_with_verifier(ctx: &mut TxContext, queue: ID) {
+    let verifier = switchboard::quote::new_verifier(ctx, queue);
+
+    transfer::share_object(State {
+        id: object::new(ctx),
+        quote_verifier: verifier,
+    });
+}
+
+/// Consume quotes in your Move function
+public entry fun consume_quotes(
+    program: &mut State,
+    quotes: Quotes,
+    ctx: &mut TxContext
+) {
+    // Verify the quotes against the oracle queue
+    let quote_data = program.quote_verifier.verify_quotes(&quotes);
+
+    // Look up a specific feed by its hash
+    let feed_hash = b"7418dc6408f5e0eb4724dabd81922ee7b0814a43abc2b30ea7a08222cd1e23ee";
+
+    if (quote_data.contains(feed_hash)) {
+        let quote = quote_data.get(feed_hash);
+
+        // Extract the price and metadata
+        let result: Decimal = quote.result();
+        let value_u128 = result.value();
+        let timestamp: u64 = quote.timestamp_ms();
+
+        // Use the oracle data in your application logic
+        // For example, execute a trade if price meets conditions
+        // execute_trade_logic(value_u128, timestamp);
+    };
+}
+```
+
+### Key Move Types
+
+- **`QuoteVerifier`**: Verifies oracle quotes against a specific queue
+- **`Quotes`**: Collection of oracle quotes fetched on-demand
+- **`Decimal`**: Fixed-point decimal representation with 18 decimals for price values
+
+## Running the Examples
+
+### Oracle Quotes Example
+
+The simplest way to get oracle data on Sui - no feed initialization required:
+
+```bash
+# Simulate transaction (default)
+npm run quotes
+
+# Sign and send transaction
+export SUI_PRIVATE_KEY="your_private_key_here"
+npm run quotes -- --sign
+
+# Use a custom feed hash
+npm run quotes -- --feedHash 0x1234567890abcdef...
+
+# Request data from 5 oracles
+npm run quotes -- --numOracles 5
+
+# Or run directly with tsx
+tsx examples/quotes.ts
+tsx examples/quotes.ts --sign
+tsx examples/quotes.ts --feedHash 0x1234... --numOracles 5
+
+# View all options
+tsx examples/quotes.ts --help
+```
+
+**What it does:**
+- Fetches oracle quotes for a BTC/USD feed on-demand (default feed hash)
+- No need to initialize or manage aggregators
+- Simulates or executes the transaction
+- Shows how to integrate quotes into your Move contracts
+
+**Options:**
+- `--sign` - Sign and send the transaction (requires SUI_PRIVATE_KEY)
+- `--feedHash` - Feed hash to fetch quotes for (default: BTC/USD)
+- `--numOracles` - Number of oracles to request data from (default: 3)
+
+### Surge WebSocket Streaming Example
+
+Stream real-time price updates with sub-100ms latency for monitoring and display:
+
+```bash
+# Get a Surge API key from https://explorer.switchboard.xyz
+export SURGE_API_KEY="sb_live_your_api_key_here"
+
+# Stream for 10 seconds (default)
+npm run surge
+
+# Subscribe to specific feeds
+npm run surge -- --feeds BTC/USD,ETH/USD,SOL/USD
+
+# Stream for 30 seconds
+npm run surge -- --duration 30
+
+# Stream continuously (until Ctrl+C)
+npm run surge -- --duration 0
+
+# Or run directly with tsx
+tsx examples/surge.ts
+tsx examples/surge.ts --feeds BTC/USD,SOL/USD --duration 60
+tsx examples/surge.ts --feeds ETH/USD --duration 0
+
+# View all options
+tsx examples/surge.ts --help
+```
+
+**What it does:**
+- Connects to Switchboard Surge WebSocket service
+- Subscribes to real-time price feeds for specified symbols
+- Displays live price updates with formatted prices
+- Shows latency metrics for each update
+- Great for monitoring prices and testing Surge connectivity
+
+**Options:**
+- `--feeds` - Comma-separated list of feed symbols (default: BTC/USD,ETH/USD)
+- `--duration` - How long to stream in seconds (default: 10, use 0 for continuous)
+
+**Note:** This example is for price monitoring only. For Sui oracle integration, use the Oracle Quotes example above.
+
+**What is Surge?**
 
 Surge is a WebSocket-based streaming service that provides:
 - **Real-time price feeds** - Subscribe to live price updates across 1000+ trading pairs
-- **Low latency updates** - Direct WebSocket connections with millisecond-level latency
+- **Sub-100ms latency** - Direct WebSocket connections with millisecond-level latency
 - **Multiple data sources** - Aggregate pricing from multiple exchanges and data providers
 - **Flexible subscription** - Subscribe to specific symbols/sources or all available feeds
 - **Built-in verification** - All prices are cryptographically signed by Switchboard oracles
 
-#### Setup Surge
-
-1. Get an API key from [Switchboard Dashboard](https://explorer.switchboard.xyz)
-
-2. Set the environment variable:
-```bash
-export SURGE_API_KEY="sb_live_your_api_key_here"
-```
-
-#### Running the Surge Example
-
-The Surge example demonstrates:
-- Connecting to the Surge WebSocket service
-- Subscribing to real-time price feeds
-- Converting Surge price updates to Sui quote format
-- Using the quotes in a Sui transaction
-
-```bash
-# Subscribe to default feeds (BTC/USD, ETH/USD)
-npm run surge-update
-
-# Subscribe to specific feeds (comma-separated)
-ts-node examples/surge/surgeUpdate.ts --feeds "BTC/USD,ETH/USD,SOL/USD"
-
-# Sign and send transaction (requires private key)
-export SUI_PRIVATE_KEY="your_private_key_here"
-ts-node examples/surge/surgeUpdate.ts --feeds "BTC/USD" --sign-and-send
-```
-
-#### Surge Integration with Sui Quotes
+#### Using Surge for Price Monitoring
 
 The example shows how to:
 
 1. **Connect to Surge**
    ```typescript
    const surge = new Surge({
-     apiKey: API_KEY,
+     apiKey: SURGE_API_KEY,
      network: "mainnet",
-     verbose: true,
+     verbose: false,
    });
    await surge.connect();
    ```
 
 2. **Subscribe to feeds**
    ```typescript
-   await surge.subscribe([
+   const subscriptions = [
      { symbol: "BTC/USD", source: "WEIGHTED" },
      { symbol: "ETH/USD", source: "WEIGHTED" }
-   ]);
+   ];
+   await surge.subscribe(subscriptions);
    ```
 
 3. **Listen for price updates**
    ```typescript
-   surge.on('signedPriceUpdate', (priceUpdate) => {
-     // Process price update
+   surge.on('signedPriceUpdate', (update) => {
+     // Display formatted prices
+     const prices = update.getFormattedPrices();
+     console.log(prices);
+
+     // Get latency metrics
+     const latency = update.getLatencyMetrics();
+     console.log(`Latency: ${latency.endToEnd}`);
    });
    ```
 
-4. **Convert to Sui quotes**
+4. **Stream for a duration**
    ```typescript
-   const quoteData = await convertSurgeUpdateToQuotes(
-     priceUpdate,
-     QUEUE_ID
-   );
-   ```
+   // Stream for 30 seconds
+   await new Promise((resolve) => setTimeout(resolve, 30000));
 
-5. **Use in a Sui transaction**
-   ```typescript
-   // You now have formatted quote data ready for Sui contracts:
-   // - feedHashes: Array of feed identifiers
-   // - values: 18-decimal price values
-   // - valuesNeg: Boolean array for negative values
-   // - timestampSeconds: Oracle timestamp
-   // - slot: Current slot number
+   // Disconnect when done
+   surge.disconnect();
    ```
 
 #### Available Feed Symbols
@@ -214,261 +389,72 @@ console.log(feedInfo); // Shows available sources
 #### Example Output
 
 ```
-Switchboard Surge Example for Sui
-Feeds: BTC/USD, ETH/USD
-Mode: Simulate Only
+🚀 Switchboard Surge Streaming Example
+📊 Feeds: BTC/USD, ETH/USD
+⏱️  Duration: 10s
 
-Connecting to Surge...
-Connected to Surge!
+📡 Connecting to Surge...
+✅ Connected to Surge!
 
-Subscribing to feeds: BTC/USD, ETH/USD
-Successfully subscribed to 1 bundles
+📊 Subscribing to feeds: BTC/USD, ETH/USD
+✅ Subscribed successfully!
 
-Waiting for first price update from Surge...
-Received price update from Surge!
+⏳ Streaming real-time price updates...
 
-Converting Surge update to Sui quotes...
-Converted to quote format!
-Feed hashes: 0x5f8fb5...,0x6f9cc6...
-Values: 96245670000000000000,3245700000000000000
-Timestamp (seconds): 1704067200
+────────────────────────────────────────────────────────────────────────────────
 
-Price Data from Surge:
-  0x5f8fb5...: $96,245.67
-  0x6f9cc6...: $3,245.70
+📈 Update #1 at 2025-01-15T10:30:00.123Z
+   5f8fb5c3d2e1a4b8...: $96,245.67
+   6f9cc6d4e3f2b5c9...: $3,245.70
+   ⚡ End-to-end latency: 45ms
+   📊 Triggered by price change
 
-Simulating transaction...
-Transaction simulation successful!
-Gas costs: {
-  computation: '1000000',
-  storage: '2000000',
-  storageRebate: '0'
-}
+📈 Update #2 at 2025-01-15T10:30:05.456Z
+   5f8fb5c3d2e1a4b8...: $96,248.12
+   6f9cc6d4e3f2b5c9...: $3,246.33
+   ⚡ End-to-end latency: 52ms
 
-Example completed successfully!
+────────────────────────────────────────────────────────────────────────────────
+
+📊 Received 8 total updates
+
+🔌 Disconnecting from Surge...
+✅ Example completed successfully!
+
+💡 Tips:
+   - Use --duration 0 to stream continuously
+   - For Sui oracle integration, see examples/quotes.ts
+   - Example: tsx examples/surge.ts --feeds BTC/USD,SOL/USD --duration 30
 ```
 
-### Batch Simulation of All Feeds
 
-Test all predefined feed IDs at once using a comprehensive simulation:
+## Key Concepts
 
-```bash
-# Simulate all feeds (summary output)
-npm run simulate-all
-
-# Simulate all feeds with detailed output
-npm run simulate-all --details
-
-# Sign and send batch update for all feeds
-export SUI_PRIVATE_KEY="your_private_key_here"
-npm run simulate-all --sign-and-send
-
-# Detailed output with signing
-npm run simulate-all --details --sign-and-send
-
-# Direct script execution
-ts-node examples/simulateAll.ts --details
-```
-
-This script processes 9 predefined feed IDs and provides:
-- **Batch Performance Metrics**: Success rates, throughput, timing
-- **Oracle Response Summary**: Values, timestamps, configurations
-- **Gas Cost Estimation**: For the entire batch transaction
-- **Detailed Results**: Individual feed responses (with `--details` flag)
-- **Transaction Execution**: Optional signing and sending (with `--sign-and-send` flag)
-
-### Sui-Specific Flow:
-
-#### Single Feed Update (`crankFeed.ts`)
-1. **Load Aggregator**: Creates an `Aggregator` instance from the feed ID
-2. **Fetch Oracle Data**: Calls `fetchUpdateTx()` which:
-   - Contacts the oracle network off-chain
-   - Fetches fresh data from configured data sources (APIs, exchanges)
-   - Gets responses from multiple oracles for verification
-   - Aggregates the results into a single price/value
-3. **Build Transaction**: Creates a Sui transaction with the update instruction
-4. **Simulate**: Dry-runs the transaction to show gas costs and effects
-5. **Extract Results**: Displays the fresh oracle data and aggregated price
-
-#### Batch Crossbar Update (`crossbarUpdate.ts`)
-1. **Configure Crossbar**: Sets the Crossbar URL endpoint (defaults to `https://crossbar.switchboard.xyz`)
-2. **Batch Request**: Calls `fetchManyUpdateTx()` with multiple feed IDs:
-   - Sends a single request to Crossbar for multiple feeds
-   - Crossbar coordinates with oracle networks for all feeds simultaneously
-   - Returns responses for successful feeds and failures for problematic ones
-3. **Process Results**: Extracts oracle data for each feed:
-   - Individual oracle responses with timestamps and values
-   - Feed configuration details (variance, minimum responses)
-   - Performance metrics and error tracking
-4. **Simulate Transaction**: Dry-runs the batch update transaction
-5. **Performance Summary**: Shows timing, success rates, and per-feed metrics
-
-#### Surge Streaming Update (`surgeUpdate.ts`)
-1. **Connect to Surge**: Establish WebSocket connection to Switchboard Surge
-2. **Subscribe to Feeds**: Request real-time updates for specific symbols/sources
-3. **Receive Updates**: Listen for WebSocket messages with signed price data
-4. **Convert to Quotes**: Transform SurgeUpdate into Sui quote format using `convertSurgeUpdateToQuotes()`
-5. **Build Transaction**: Create a Sui transaction with the converted quotes
-6. **Simulate**: Dry-run the transaction to validate gas costs
-7. **Optional Send**: If `--sign-and-send` is used, execute the transaction on-chain
-
-### What the Examples Do:
-
-#### crankFeed.ts & crossbarUpdate.ts:
-- **No private key required** - reads data and simulates transactions
-- Loads the specified Switchboard feed (Aggregator object)
-- Fetches **fresh oracle data** from external sources via oracle network
-- Shows **detailed oracle responses** including individual oracle results
-- Displays the **aggregated price** from multiple oracle sources
-- Simulates the update transaction to show gas costs and effects
-
-#### surgeUpdate.ts:
-- **Connects to WebSocket** - Real-time streaming of price updates
-- **Subscribes to feeds** - Specify symbols and data sources
-- **Converts to Sui format** - Uses `convertSurgeUpdateToQuotes()` from sui-sdk
-- **Demonstrates integration** - Shows how to use Surge data in Sui contracts
-- **Optional signing** - Can sign and send transactions with `--sign-and-send`
-
-### Example Output:
-
-#### Single Feed Update:
-```
-Oracle 1:
-Full response: {
-  "results": [
-    {
-      "value": "96245.67",
-      "timestamp": 1672531200,
-      "oracleId": "oracle_1"
-    }
-  ],
-  "feedConfigs": {
-    "feedHash": "0x5f8fb5...",
-    "maxVariance": 1000000000,
-    "minResponses": 1,
-    "minSampleSize": 1
-  },
-  "failures": [],
-  "fee": 0,
-  "queue": "0x6e43354b..."
-}
-
-Simulation result: { status: 'success' }
-Feed update simulation successful!
-Gas used: { computationCost: '1000000', storageCost: '2000000', storageRebate: '0' }
-```
-
-#### Batch Crossbar Update:
-```
-Using Crossbar URL: https://crossbar.switchboard.xyz
-Updating 2 feed(s): [ '0x1234...abcd', '0x5678...efgh' ]
-
-Calling Crossbar directly for oracle updates...
-Crossbar call completed in 1247ms
-Received responses for 2 feed(s)
-
-Feed 1 (0x1234...abcd):
-Queue: 0x6e43354b8ea2dfad98eadb33db94dcc9b1175e70ee82e42abc605f6b7de9e910
-Fee: 0
-Failures: 0
-
-  Oracle Result 1:
-    Value: 96245.67
-    Timestamp: 2024-01-15T10:30:00.000Z
-    Full result: {
-        "value": "96245.67",
-        "timestamp": 1672531200
-    }
-
-Performance Summary:
-- Feeds requested: 2
-- Successful responses: 2
-- Failed responses: 0
-- Total fetch time: 1247ms
-- Average per feed: 624ms
-```
-
-#### Surge Streaming Update:
-```
-Switchboard Surge Example for Sui
-Feeds: BTC/USD, ETH/USD
-Mode: Simulate Only
-
-Connecting to Surge...
-Connected to Surge!
-
-Subscribing to feeds: BTC/USD, ETH/USD
-Successfully subscribed to 1 bundles
-
-Waiting for first price update from Surge...
-Received price update from Surge!
-
-Converting Surge update to Sui quotes...
-Converted to quote format!
-Feed hashes: 0x5f8fb5...,0x6f9cc6...
-Values: 96245670000000000000,3245700000000000000
-Timestamp (seconds): 1704067200
-
-Price Data from Surge:
-  0x5f8fb5...: $96,245.67
-  0x6f9cc6...: $3,245.70
-
-Example completed successfully!
-```
-
-## Key Sui Concepts
-
-### Aggregator Object
-Each feed is represented as an `Aggregator` object on Sui that stores:
-- Current price/value data
-- Feed configuration (variance tolerance, minimum responses)
-- Oracle network settings
-- Update history and timestamps
-
-### Update Transaction Flow
-1. **fetchUpdateTx()** - Contacts oracles off-chain and builds update transaction
-2. **Oracle Network** - Multiple oracles fetch data from configured sources
-3. **Aggregation** - Results are combined using median or weighted average
-4. **On-chain Update** - Transaction updates the Aggregator object with fresh data
+### Oracle Quotes Flow
+1. **On-Demand** - Fetch oracle data exactly when you need it
+2. **Zero Setup** - No need to initialize or manage aggregators on-chain
+3. **Multi-Oracle** - Data is verified by multiple oracles for security
+4. **Quote Verification** - Quotes are verified by a QuoteVerifier in your Move contract
+5. **Immediate Use** - Fresh data is available in the same transaction
 
 ### Surge WebSocket Flow
 1. **Connection** - Establish secure WebSocket to Surge gateway
 2. **Subscription** - Request specific feeds (symbol/source pairs)
 3. **Streaming** - Receive real-time price updates via WebSocket
-4. **Conversion** - Transform SurgeUpdate to Sui quote format
-5. **On-chain Usage** - Integrate quotes into Sui contracts/transactions
+4. **Display** - Show formatted prices and latency metrics
+5. **Use Case** - Ideal for dashboards, monitoring, and price alerts
 
-### Move Integration
-To use feeds in Move contracts:
-```move
-use switchboard::aggregator::{Aggregator, current_result};
+### Move Contract Integration
 
-public fun consume_price_data(feed: &Aggregator) {
-    let result = current_result(feed);
-    let price = result.value();
-    let timestamp = result.timestamp();
-    // Use price data in your logic
-}
-```
-
-To use quotes in Move contracts:
-```move
-use switchboard::quote::{Quotes, QuoteVerifier};
-
-public fun consume_quotes(verifier: &QuoteVerifier, quotes: Quotes) {
-    let feed_hash = b"btc/usd";
-    let quote = verifier.get_quote(feed_hash);
-    let price = quote.result();
-    let timestamp = quote.timestamp_ms();
-    // Use quote data in your logic
-}
-```
+For complete Move integration examples including Move.toml configuration and quote consumption patterns, see the [Move Integration](#move-integration) section above.
 
 ## Resources
 
 - [Switchboard Sui Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/sui)
+- [Oracle Quotes Documentation](https://docs.switchboard.xyz/product-documentation/oracle-quotes)
 - [Switchboard Surge Documentation](https://docs.switchboard.xyz/product-documentation/surge/websocket-streaming)
 - [Sui SDK NPM Package](https://www.npmjs.com/package/@switchboard-xyz/sui-sdk)
 - [On-Demand NPM Package](https://www.npmjs.com/package/@switchboard-xyz/on-demand)
 - [Sui Developer Documentation](https://docs.sui.io)
 - [Feed Builder Tool](https://explorer.switchboard.xyz/feed-builder)
+- [Switchboard Explorer](https://explorer.switchboard.xyz)

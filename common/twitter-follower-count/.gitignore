@@ -1,0 +1,23 @@
+# Environment variables
+.env
+.env.local
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+*.js
+*.d.ts
+*.js.map
+
+# TypeScript cache
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

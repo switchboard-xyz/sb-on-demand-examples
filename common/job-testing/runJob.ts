@@ -1,42 +1,64 @@
 import { OracleJob, CrossbarClient } from "@switchboard-xyz/common";
-import * as sb from "@switchboard-xyz/on-demand";
 
-function getPolygonJob(): OracleJob {
-  const job = OracleJob.fromObject({
+function buildCoinbaseJob(pair: string): OracleJob {
+  const parts = pair.split("-");
+  const jobConfig = {
     tasks: [
       {
-        httpTask: {
-          url: "https://api.polygon.io/v2/last/trade/AAPL?apiKey=${POLYGON_API_KEY}",
-          method: "GET",
-          headers: [],
-          body: undefined,
-        },
+        valueTask: { value: 1 },
       },
       {
-        jsonParseTask: {
-          path: "$.results.p",
+        divideTask: {
+          job: {
+            tasks: [
+              {
+                httpTask: {
+                  url: `https://api.coinbase.com/v2/exchange-rates?currency=${parts[1]}`,
+                  headers: [
+                    { key: "Accept", value: "application/json" },
+                    { key: "User-Agent", value: "Mozilla/5.0" },
+                  ],
+                },
+              },
+              {
+                jsonParseTask: {
+                  path: `$.data.rates.${parts[0]}`,
+                },
+              },
+            ],
+          },
         },
       },
     ],
-  });
-  return job;
+  };
+  return OracleJob.fromObject(jobConfig);
 }
 
 (async function main() {
-  const { crossbar, queue, gateway } = await sb.AnchorUtils.loadEnv();
-  const res = await queue.fetchSignaturesConsensus({
-    gateway,
-    useEd25519: true,
-    feedConfigs: [
-      {
-        feed: {
-          jobs: [getPolygonJob()],
-        },
-      },
-    ],
-    variableOverrides: {
-      POLYGON_API_KEY: process.env.POLYGON_API_KEY!,
-    },
-  });
-  console.log(res.median_responses);
+  // Get pair from command line args or use default
+  const pair = "BTC-USD";
+
+  // Initialize Crossbar client (chain-agnostic)
+  const crossbarUrl = "https://crossbar.switchboard.xyz";
+  const crossbarClient = new CrossbarClient(crossbarUrl);
+
+  console.log(`\n📊 Fetching ${pair} price from Coinbase...\n`);
+
+  // Create an OracleFeed with the job
+  const feed = {
+    name: `${pair} Price - Coinbase`,
+    jobs: [buildCoinbaseJob(pair)],
+  };
+
+  // Simulate feed with Crossbar
+  const result = await crossbarClient.simulateFeed(
+    feed,
+    false, // includeReceipts
+  );
+
+  // Display results
+  const price = result.results?.[0];
+
+  console.log(`✅ ${pair} Price: $${Number(price).toLocaleString()}`);
+  console.log(JSON.stringify(result, null, 2));
 })();

@@ -24,7 +24,7 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
-use switchboard_on_demand::{on_demand::oracle_quote::QuoteBuilder, QUOTE_PROGRAM_ID};
+use switchboard_on_demand::{on_demand::oracle_quote::QuoteBuilder, default_queue, QUOTE_PROGRAM_ID};
 
 // Re-export the program module so we can access instruction builders
 use basic_oracle_example;
@@ -47,13 +47,26 @@ fn test_oracle_integration_with_litesvm() {
     println!("📦 Initializing litesvm...");
     let mut svm = LiteSVM::new();
 
+    // Load the program
+    let program_id = to_solana_pubkey(&basic_oracle_example::ID);
+    println!("📚 Loading program: {}", program_id);
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let program_path = manifest_dir
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("target/deploy/basic_oracle_example.so");
+    svm.add_program_from_file(program_id, program_path.to_str().unwrap())
+        .expect("Failed to load program");
+
     // Step 2: Create and fund a payer
     let payer = Keypair::new();
     println!("💰 Payer: {}", payer.pubkey());
     svm.airdrop(&payer.pubkey(), 10_000_000_000).unwrap();
 
-    // Step 3: Set up queue (mock)
-    let queue_key = to_anchor_pubkey(&SolanaPubkey::new_unique());
+    // Step 3: Use the default devnet queue
+    let queue_key = default_queue();
     println!("🔗 Queue: {}", queue_key);
 
     // Step 4: Create mock oracle data using QuoteBuilder
@@ -186,10 +199,23 @@ fn test_multiple_feeds() {
     println!("\n🚀 Testing Multiple Oracle Feeds\n");
 
     let mut svm = LiteSVM::new();
+
+    // Load the program
+    let program_id = to_solana_pubkey(&basic_oracle_example::ID);
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let program_path = manifest_dir
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("target/deploy/basic_oracle_example.so");
+    svm.add_program_from_file(program_id, program_path.to_str().unwrap())
+        .expect("Failed to load program");
+
     let payer = Keypair::new();
     svm.airdrop(&payer.pubkey(), 10_000_000_000).unwrap();
 
-    let queue_key = to_anchor_pubkey(&SolanaPubkey::new_unique());
+    let queue_key = default_queue();
 
     // Create a quote with multiple feeds
     let btc_feed: [u8; 32] = [
@@ -281,10 +307,23 @@ fn test_price_extremes() {
     println!("\n🚀 Testing Price Extremes\n");
 
     let mut svm = LiteSVM::new();
+
+    // Load the program
+    let program_id = to_solana_pubkey(&basic_oracle_example::ID);
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let program_path = manifest_dir
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("target/deploy/basic_oracle_example.so");
+    svm.add_program_from_file(program_id, program_path.to_str().unwrap())
+        .expect("Failed to load program");
+
     let payer = Keypair::new();
     svm.airdrop(&payer.pubkey(), 10_000_000_000).unwrap();
 
-    let queue_key = to_anchor_pubkey(&SolanaPubkey::new_unique());
+    let queue_key = default_queue();
     let feed_id: [u8; 32] = [0x42; 32];
 
     // Test with an extreme price

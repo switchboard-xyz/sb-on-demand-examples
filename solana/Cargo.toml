@@ -1,7 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "programs/*"
+    "programs/basic-oracle-example",
+    "programs/advanced-oracle-example",
+    "programs/sb-randomness",
+    # Excluded due to solana v3 dependency conflict with litesvm
+    # "programs/prediction-market",
 ]
 
 [profile.release]

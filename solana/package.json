@@ -33,6 +33,7 @@
     "build": "cargo build-sbf",
     "deploy": "solana program deploy target/deploy/advanced_oracle_example.so",
     "test": "cargo test",
+    "test:litesvm": "cargo test --test litesvm_oracle_test",
     "clippy": "cargo clippy",
     "fmt": "cargo fmt"
   },

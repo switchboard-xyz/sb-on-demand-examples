@@ -23,6 +23,7 @@ switchboard-on-demand = { path = "/Users/mgild/projects/sbv3/rust/switchboard-on
 bytemuck = "1.14"
 
 [dev-dependencies]
-litesvm = "=0.7.1"
-solana-sdk = "=2.2"  # Match litesvm's version
+litesvm = "=0.6.1"
+solana-sdk = "2.1"  # Match litesvm's version
 hex = "0.4"
+openssl = { version = "0.10.74", features = ["vendored"] }

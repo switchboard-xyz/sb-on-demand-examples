@@ -15,18 +15,16 @@
 /// - Perfect for CI/CD and TDD workflows
 
 use anchor_lang::prelude::*;
-use anchor_lang::{InstructionData, ToAccountMetas};
+use anchor_lang::InstructionData;
 use litesvm::LiteSVM;
 use solana_sdk::{
     account::Account,
-    instruction::Instruction,
+    instruction::{AccountMeta, Instruction},
     pubkey::Pubkey as SolanaPubkey,
     signature::{Keypair, Signer},
-    system_program,
     transaction::Transaction,
 };
-use switchboard_on_demand::on_demand::oracle_quote::test_utils::QuoteBuilder;
-use switchboard_on_demand::prelude::*;
+use switchboard_on_demand::{on_demand::oracle_quote::QuoteBuilder, QUOTE_PROGRAM_ID};
 
 // Re-export the program module so we can access instruction builders
 use basic_oracle_example;
@@ -60,14 +58,14 @@ fn test_oracle_integration_with_litesvm() {
 
     // Step 4: Create mock oracle data using QuoteBuilder
     println!("\n📊 Creating mock oracle data...");
-    let btc_feed_hex = "ef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f";
+    // BTC/USD feed ID from Switchboard Explorer
+    let feed_bytes: [u8; 32] = [
+        0xef, 0x0d, 0x8b, 0x6f, 0xcd, 0x01, 0x04, 0xe3,
+        0xe7, 0x50, 0x96, 0x91, 0x2f, 0xc8, 0xe1, 0xe4,
+        0x32, 0x89, 0x3d, 0xa4, 0xf1, 0x8f, 0xae, 0xda,
+        0xac, 0xca, 0x7e, 0x58, 0x75, 0xda, 0x62, 0x0f,
+    ];
     let btc_price = 95000.0;
-
-    // Decode feed ID to bytes
-    let feed_bytes: [u8; 32] = hex::decode(btc_feed_hex)
-        .expect("Invalid hex")
-        .try_into()
-        .expect("Feed ID must be 32 bytes");
 
     // Build the quote with our test data
     let quote = QuoteBuilder::new(queue_key)
@@ -76,7 +74,7 @@ fn test_oracle_integration_with_litesvm() {
         .build()
         .expect("Failed to build quote");
 
-    println!("   Feed ID: 0x{}", btc_feed_hex);
+    println!("   Feed ID: 0x{}", hex::encode(&feed_bytes));
     println!("   Price: ${}", btc_price);
 
     // Serialize to account data format (includes discriminator)
@@ -120,19 +118,17 @@ fn test_oracle_integration_with_litesvm() {
     let program_id = to_solana_pubkey(&basic_oracle_example::ID);
     println!("   Program ID: {}", program_id);
 
-    // Build the instruction using Anchor's instruction builder
-    let accounts = basic_oracle_example::accounts::ReadOracleData {
-        quote_account: to_anchor_pubkey(&oracle_account),
-        sysvars: basic_oracle_example::Sysvars {
-            clock: to_anchor_pubkey(&clock_sysvar),
-            slothashes: to_anchor_pubkey(&slothashes_sysvar),
-            instructions: to_anchor_pubkey(&instructions_sysvar),
-        },
-    };
+    // Build account metas manually (since Sysvars struct has lifetimes)
+    let accounts = vec![
+        AccountMeta::new_readonly(oracle_account, false),  // quote_account
+        AccountMeta::new_readonly(clock_sysvar, false),    // sysvars.clock
+        AccountMeta::new_readonly(slothashes_sysvar, false), // sysvars.slothashes
+        AccountMeta::new_readonly(instructions_sysvar, false), // sysvars.instructions
+    ];
 
     let instruction = Instruction {
         program_id,
-        accounts: accounts.to_account_metas(None),
+        accounts,
         data: basic_oracle_example::instruction::ReadOracleData {}.data(),
     };
 
@@ -157,25 +153,23 @@ fn test_oracle_integration_with_litesvm() {
             println!("   Compute units used: {:?}", metadata.compute_units_consumed);
 
             // Check logs for our expected output
-            if let Some(logs) = metadata.logs {
-                println!("\n📋 Program logs:");
-                for log in logs {
-                    println!("   {}", log);
+            println!("\n📋 Program logs:");
+            for log in &metadata.logs {
+                println!("   {}", log);
 
-                    // Verify we processed the feed
-                    if log.contains("Number of feeds: 1") {
-                        println!("   ✓ Correctly processed 1 feed");
-                    }
+                // Verify we processed the feed
+                if log.contains("Number of feeds: 1") {
+                    println!("   ✓ Correctly processed 1 feed");
+                }
 
-                    // Verify the feed ID was logged
-                    if log.contains(btc_feed_hex) {
-                        println!("   ✓ Feed ID matches: 0x{}", btc_feed_hex);
-                    }
+                // Verify the feed ID was logged
+                if log.contains("ef0d8b6fcd") {
+                    println!("   ✓ Feed ID matches");
+                }
 
-                    // Verify the price value (scaled to 18 decimals)
-                    if log.contains("95000") {
-                        println!("   ✓ Price value correct: ${}", btc_price);
-                    }
+                // Verify the price value (scaled to 18 decimals)
+                if log.contains("95000") {
+                    println!("   ✓ Price value correct: ${}", btc_price);
                 }
             }
 
@@ -198,15 +192,19 @@ fn test_multiple_feeds() {
     let queue_key = to_anchor_pubkey(&SolanaPubkey::new_unique());
 
     // Create a quote with multiple feeds
-    let btc_feed: [u8; 32] = hex::decode("ef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f")
-        .unwrap()
-        .try_into()
-        .unwrap();
+    let btc_feed: [u8; 32] = [
+        0xef, 0x0d, 0x8b, 0x6f, 0xcd, 0x01, 0x04, 0xe3,
+        0xe7, 0x50, 0x96, 0x91, 0x2f, 0xc8, 0xe1, 0xe4,
+        0x32, 0x89, 0x3d, 0xa4, 0xf1, 0x8f, 0xae, 0xda,
+        0xac, 0xca, 0x7e, 0x58, 0x75, 0xda, 0x62, 0x0f,
+    ];
 
-    let eth_feed: [u8; 32] = hex::decode("84c2dde9633d93d1bcad84e7dc41c9d56578b7ec52fabedc1f335d673df0a7c1")
-        .unwrap()
-        .try_into()
-        .unwrap();
+    let eth_feed: [u8; 32] = [
+        0x84, 0xc2, 0xdd, 0xe9, 0x63, 0x3d, 0x93, 0xd1,
+        0xbc, 0xad, 0x84, 0xe7, 0xdc, 0x41, 0xc9, 0xd5,
+        0x65, 0x78, 0xb7, 0xec, 0x52, 0xfa, 0xbe, 0xdc,
+        0x1f, 0x33, 0x5d, 0x67, 0x3d, 0xf0, 0xa7, 0xc1,
+    ];
 
     println!("📊 Creating quote with multiple feeds:");
     println!("   BTC/USD: $95000");
@@ -239,18 +237,16 @@ fn test_multiple_feeds() {
     ).unwrap();
 
     // Call the program
-    let accounts = basic_oracle_example::accounts::ReadOracleData {
-        quote_account: to_anchor_pubkey(&oracle_account),
-        sysvars: basic_oracle_example::Sysvars {
-            clock: to_anchor_pubkey(&solana_sdk::sysvar::clock::id()),
-            slothashes: to_anchor_pubkey(&solana_sdk::sysvar::slot_hashes::id()),
-            instructions: to_anchor_pubkey(&solana_sdk::sysvar::instructions::id()),
-        },
-    };
+    let accounts = vec![
+        AccountMeta::new_readonly(oracle_account, false),  // quote_account
+        AccountMeta::new_readonly(solana_sdk::sysvar::clock::id(), false),    // sysvars.clock
+        AccountMeta::new_readonly(solana_sdk::sysvar::slot_hashes::id(), false), // sysvars.slothashes
+        AccountMeta::new_readonly(solana_sdk::sysvar::instructions::id(), false), // sysvars.instructions
+    ];
 
     let instruction = Instruction {
         program_id: to_solana_pubkey(&basic_oracle_example::ID),
-        accounts: accounts.to_account_metas(None),
+        accounts,
         data: basic_oracle_example::instruction::ReadOracleData {}.data(),
     };
 
@@ -266,11 +262,9 @@ fn test_multiple_feeds() {
     match result {
         Ok(metadata) => {
             println!("\n✅ Multiple feeds processed successfully!");
-            if let Some(logs) = metadata.logs {
-                for log in logs {
-                    if log.contains("Number of feeds: 2") {
-                        println!("   ✓ Correctly processed 2 feeds");
-                    }
+            for log in &metadata.logs {
+                if log.contains("Number of feeds: 2") {
+                    println!("   ✓ Correctly processed 2 feeds");
                 }
             }
         }
@@ -321,18 +315,16 @@ fn test_price_extremes() {
         }
     ).unwrap();
 
-    let accounts = basic_oracle_example::accounts::ReadOracleData {
-        quote_account: to_anchor_pubkey(&oracle_account),
-        sysvars: basic_oracle_example::Sysvars {
-            clock: to_anchor_pubkey(&solana_sdk::sysvar::clock::id()),
-            slothashes: to_anchor_pubkey(&solana_sdk::sysvar::slot_hashes::id()),
-            instructions: to_anchor_pubkey(&solana_sdk::sysvar::instructions::id()),
-        },
-    };
+    let accounts = vec![
+        AccountMeta::new_readonly(oracle_account, false),  // quote_account
+        AccountMeta::new_readonly(solana_sdk::sysvar::clock::id(), false),    // sysvars.clock
+        AccountMeta::new_readonly(solana_sdk::sysvar::slot_hashes::id(), false), // sysvars.slothashes
+        AccountMeta::new_readonly(solana_sdk::sysvar::instructions::id(), false), // sysvars.instructions
+    ];
 
     let instruction = Instruction {
         program_id: to_solana_pubkey(&basic_oracle_example::ID),
-        accounts: accounts.to_account_metas(None),
+        accounts,
         data: basic_oracle_example::instruction::ReadOracleData {}.data(),
     };
 

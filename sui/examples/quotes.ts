@@ -97,6 +97,10 @@ async function main() {
     // Simulate transaction
     console.log("\n🎯 Simulating transaction...");
 
+    // Set a dummy sender for simulation (required by Sui SDK)
+    const dummySender = "0x0000000000000000000000000000000000000000000000000000000000000000";
+    tx.setSender(dummySender);
+
     const result = await suiClient.dryRunTransactionBlock({
       transactionBlock: await tx.build({ client: suiClient }),
     });

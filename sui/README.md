@@ -28,22 +28,27 @@ These examples demonstrate the modern, recommended approaches for integrating Sw
 - [Active Deployments](#active-deployments)
 - [Setup](#setup)
 - [Installation](#installation)
-- [Creating Feeds and Aggregators](#creating-feeds-and-aggregators)
-- [Updating Feeds](#updating-feeds)
 - [Oracle Quotes (October 2025)](#oracle-quotes-october-2025)
 - [Move Integration](#move-integration)
-- [Feed Update Examples](#feed-update-examples)
-- [Switchboard Surge Streaming](#switchboard-surge-streaming)
-- [Key Sui Concepts](#key-sui-concepts)
+- [Running the Examples](#running-the-examples)
+- [Key Concepts](#key-concepts)
 - [Resources](#resources)
 
 ## Switchboard on Sui Overview
 
-Switchboard provides decentralized oracle feeds on Sui through a pull-based model where:
-- **Feeds are defined off-chain** with their own Feed Identifier linking them to customized logic
-- **Updates are triggered on-demand** by calling oracle networks
-- **Fresh data is fetched** from external APIs and verified by multiple oracles
-- **Results are aggregated** and stored in the feed for immediate use
+Switchboard provides decentralized oracle data on Sui with two modern approaches:
+
+**Oracle Quotes** - Zero-setup, on-demand oracle data:
+- No need to initialize or manage on-chain feeds
+- Fetch fresh oracle data exactly when you need it
+- Multi-oracle verification for security
+- Pay only when you use data
+
+**Surge WebSocket Streaming** - Real-time price updates:
+- Sub-100ms latency WebSocket streaming
+- Subscribe to 1000+ trading pairs
+- Cryptographically signed price updates
+- Ideal for high-frequency applications
 
 ### Active Deployments
 
@@ -83,132 +88,7 @@ bun add @switchboard-xyz/sui-sdk @mysten/sui
 pnpm add @switchboard-xyz/sui-sdk @mysten/sui
 ```
 
-## Creating Feeds and Aggregators
-
-Switchboard feeds can be created using the TypeScript SDK or through the [Feed Builder Tool](https://explorer.switchboard.xyz/feed-builder). Here's a complete example:
-
-```typescript
-import {
-  SwitchboardClient,
-  Aggregator,
-} from "@switchboard-xyz/sui-sdk";
-import { CrossbarClient, OracleJob } from "@switchboard-xyz/common";
-import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { Transaction } from '@mysten/sui/transactions';
-
-const keypair = new Ed25519Keypair();
-const userAddress = keypair.getPublicKey().toSuiAddress();
-const suiClient = new SuiClient({
-    url: getFullnodeUrl('testnet'),
-});
-
-const crossbarClient = new CrossbarClient("https://crossbar.switchboard.xyz");
-
-// Define oracle jobs - what data sources to fetch
-const jobs: OracleJob[] = [
-  OracleJob.fromObject({
-    tasks: [
-      {
-        httpTask: {
-          url: "https://binance.com/api/v3/ticker/price?symbol=BTCUSDT",
-        }
-      },
-      {
-        jsonParseTask: {
-          path: "$.price"
-        }
-      }
-    ],
-  }),
-];
-
-const sb = new SwitchboardClient(suiClient);
-const state = await sb.fetchState();
-const queue = state.oracleQueueId;
-
-// Store the job definition and get a feed hash
-const { feedHash } = await crossbarClient.store(queue, jobs);
-
-// Configure feed parameters
-const feedName = "BTC/USDT";
-const minSampleSize = 1;
-const maxStalenessSeconds = 60;
-const maxVariance = 1e9;
-const minJobResponses = 1;
-
-let transaction = new Transaction();
-
-// Initialize the aggregator on-chain
-await Aggregator.initTx(sb, transaction, {
-  feedHash,
-  name: feedName,
-  authority: userAddress,
-  minSampleSize,
-  maxStalenessSeconds,
-  maxVariance,
-  minResponses: minJobResponses,
-});
-
-const res = await suiClient.signAndExecuteTransaction({
-  signer: keypair,
-  transaction,
-  options: {
-    showEffects: true,
-  },
-});
-
-// Extract the created aggregator ID
-let aggregatorId;
-res.effects?.created?.forEach((c: any) => {
-  if (c.reference.objectId) {
-    aggregatorId = c.reference.objectId;
-  }
-});
-
-await suiClient.waitForTransaction({
-  digest: res.digest,
-});
-
-console.log("Aggregator created:", aggregatorId);
-```
-
-## Updating Feeds
-
-Once you have an aggregator, you can update it with fresh oracle data:
-
-```typescript
-const aggregator = new Aggregator(sb, aggregatorId);
-
-let feedTx = new Transaction();
-
-// Fetch fresh oracle data and build update transaction
-const response = await aggregator.fetchUpdateTx(feedTx);
-console.log("Fetch Update Oracle Response: ", response);
-
-const res = await suiClient.signAndExecuteTransaction({
-  signer: keypair,
-  transaction: feedTx,
-  options: {
-    showEffects: true,
-  },
-});
-
-await suiClient.waitForTransaction({
-  digest: res.digest,
-});
-
-console.log({ aggregatorId, res });
-```
-
-The `fetchUpdateTx()` method automatically handles:
-- Contacting the oracle network off-chain
-- Fetching fresh data from configured data sources
-- Getting responses from multiple oracles for verification
-- Aggregating the results into a single price/value
-- Building the Sui transaction with the update instruction
-
-## Oracle Quotes (October 2025)
+## Oracle Quotes
 
 Oracle Quotes is a new feature that provides a simpler integration pattern without requiring aggregator initialization. This is ideal for applications that need on-demand oracle data without managing feed state.
 
@@ -291,37 +171,6 @@ subdir = "crates/sui-framework/packages/sui-framework"
 rev = "framework/mainnet" # or "framework/testnet" for testnet
 ```
 
-### Using Aggregators in Move
-
-Here's how to consume oracle data from an aggregator in your Move contracts:
-
-```move
-module example::switchboard;
-
-use switchboard::aggregator::{Aggregator, CurrentResult};
-use switchboard::decimal::Decimal;
-
-public entry fun use_switchboard_value(aggregator: &Aggregator) {
-    let current_result = aggregator.current_result();
-
-    let result: Decimal = current_result.result();
-    let result_u128: u128 = result.value();
-    let min_timestamp_ms: u64 = current_result.min_timestamp_ms();
-    let max_timestamp_ms: u64 = current_result.max_timestamp_ms();
-    let range: Decimal = current_result.range();
-    let mean: Decimal = current_result.mean();
-    let stdev: Decimal = current_result.stdev();
-    let max_result: Decimal = current_result.max_result();
-    let min_result: Decimal = current_result.min_result();
-    let neg: bool = result.neg();
-
-    // Use the price data in your logic
-    // For example, check if price is above a threshold
-    // let threshold: u128 = 50000 * 1000000000000000000; // $50k with 18 decimals
-    // assert!(result_u128 > threshold, 0);
-}
-```
-
 ### Using Oracle Quotes in Move
 
 For the new Oracle Quotes system, here's a complete integration example:
@@ -379,11 +228,9 @@ public entry fun consume_quotes(
 
 ### Key Move Types
 
-- **`Aggregator`**: The on-chain feed object storing oracle data
-- **`CurrentResult`**: Contains the aggregated price and metadata
-- **`Decimal`**: Fixed-point decimal representation with 18 decimals
 - **`QuoteVerifier`**: Verifies oracle quotes against a specific queue
 - **`Quotes`**: Collection of oracle quotes fetched on-demand
+- **`Decimal`**: Fixed-point decimal representation with 18 decimals for price values
 
 ## Running the Examples
 
@@ -399,16 +246,31 @@ npm run quotes
 export SUI_PRIVATE_KEY="your_private_key_here"
 npm run quotes -- --sign
 
-# Or run directly
+# Use a custom feed hash
+npm run quotes -- --feedHash 0x1234567890abcdef...
+
+# Request data from 5 oracles
+npm run quotes -- --numOracles 5
+
+# Or run directly with tsx
 tsx examples/quotes.ts
 tsx examples/quotes.ts --sign
+tsx examples/quotes.ts --feedHash 0x1234... --numOracles 5
+
+# View all options
+tsx examples/quotes.ts --help
 ```
 
 **What it does:**
-- Fetches oracle quotes for a BTC/USD feed on-demand
+- Fetches oracle quotes for a BTC/USD feed on-demand (default feed hash)
 - No need to initialize or manage aggregators
 - Simulates or executes the transaction
 - Shows how to integrate quotes into your Move contracts
+
+**Options:**
+- `--sign` - Sign and send the transaction (requires SUI_PRIVATE_KEY)
+- `--feedHash` - Feed hash to fetch quotes for (default: BTC/USD)
+- `--numOracles` - Number of oracles to request data from (default: 3)
 
 ### Surge WebSocket Streaming Example
 
@@ -422,15 +284,22 @@ export SURGE_API_KEY="sb_live_your_api_key_here"
 npm run surge
 
 # Subscribe to specific feeds
-npm run surge -- --feeds=BTC/USD,ETH/USD,SOL/USD
+npm run surge -- --feeds BTC/USD,ETH/USD,SOL/USD
 
 # Sign and send transaction
 export SUI_PRIVATE_KEY="your_private_key_here"
 npm run surge -- --sign
 
-# Or run directly
+# Use a custom queue ID
+npm run surge -- --queueId 0x1234...
+
+# Or run directly with tsx
 tsx examples/surge.ts
-tsx examples/surge.ts --feeds=BTC/USD,SOL/USD --sign
+tsx examples/surge.ts --feeds BTC/USD,SOL/USD --sign
+tsx examples/surge.ts --feeds ETH/USD --queueId 0x1234... --sign
+
+# View all options
+tsx examples/surge.ts --help
 ```
 
 **What it does:**
@@ -439,6 +308,11 @@ tsx examples/surge.ts --feeds=BTC/USD,SOL/USD --sign
 - Receives live price updates with cryptographic signatures
 - Converts Surge updates to Sui quote format
 - Shows how to use streaming data in Sui transactions
+
+**Options:**
+- `--sign` - Sign and send the transaction (requires SUI_PRIVATE_KEY)
+- `--feeds` - Comma-separated list of feed symbols (default: BTC/USD,ETH/USD)
+- `--queueId` - Queue ID for the oracle network (default: mainnet queue)
 
 **What is Surge?**
 
@@ -552,20 +426,14 @@ Example completed successfully!
 ```
 
 
-## Key Sui Concepts
+## Key Concepts
 
-### Aggregator Object
-Each feed is represented as an `Aggregator` object on Sui that stores:
-- Current price/value data
-- Feed configuration (variance tolerance, minimum responses)
-- Oracle network settings
-- Update history and timestamps
-
-### Update Transaction Flow
-1. **fetchUpdateTx()** - Contacts oracles off-chain and builds update transaction
-2. **Oracle Network** - Multiple oracles fetch data from configured sources
-3. **Aggregation** - Results are combined using median or weighted average
-4. **On-chain Update** - Transaction updates the Aggregator object with fresh data
+### Oracle Quotes Flow
+1. **On-Demand** - Fetch oracle data exactly when you need it
+2. **Zero Setup** - No need to initialize or manage aggregators on-chain
+3. **Multi-Oracle** - Data is verified by multiple oracles for security
+4. **Quote Verification** - Quotes are verified by a QuoteVerifier in your Move contract
+5. **Immediate Use** - Fresh data is available in the same transaction
 
 ### Surge WebSocket Flow
 1. **Connection** - Establish secure WebSocket to Surge gateway
@@ -576,7 +444,7 @@ Each feed is represented as an `Aggregator` object on Sui that stores:
 
 ### Move Contract Integration
 
-For complete Move integration examples including Move.toml configuration, aggregator usage, and quote consumption patterns, see the [Move Integration](#move-integration) section above.
+For complete Move integration examples including Move.toml configuration and quote consumption patterns, see the [Move Integration](#move-integration) section above.
 
 ## Resources
 

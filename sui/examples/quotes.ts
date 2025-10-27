@@ -6,29 +6,50 @@
  * Usage:
  *   tsx examples/quotes.ts
  *   tsx examples/quotes.ts --sign  # Sign and send transaction (requires SUI_PRIVATE_KEY)
+ *   tsx examples/quotes.ts --feedHash 0x7418dc6408f5e0eb4724dabd81922ee7b0814a43abc2b30ea7a08222cd1e23ee
  */
 
 import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
 import { SwitchboardClient, fetchQuoteUpdate } from "@switchboard-xyz/sui-sdk";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
-// Parse command line arguments
-const args = process.argv.slice(2);
-const shouldSign = args.includes("--sign");
+const argv = yargs(hideBin(process.argv))
+  .options({
+    sign: {
+      type: "boolean",
+      default: false,
+      description: "Sign and send the transaction (requires SUI_PRIVATE_KEY)",
+    },
+    feedHash: {
+      type: "string",
+      description: "Feed hash to fetch quotes for",
+      default: "0x7418dc6408f5e0eb4724dabd81922ee7b0814a43abc2b30ea7a08222cd1e23ee",
+    },
+    numOracles: {
+      type: "number",
+      description: "Number of oracles to request data from",
+      default: 3,
+    },
+  })
+  .help()
+  .alias("help", "h")
+  .parseSync();
 
 async function main() {
-  console.log("🔮 Switchboard Oracle Quotes Example for Sui\n");
+  console.log("🔮 Switchboard Oracle Quotes Example for Sui");
+  console.log(`Feed: ${argv.feedHash.substring(0, 20)}...`);
+  console.log(`Oracles: ${argv.numOracles}`);
+  console.log(`Mode: ${argv.sign ? "🔐 Sign and Send" : "🎯 Simulate Only"}\n`);
 
   // Setup clients
   const rpcUrl = process.env.SUI_RPC_URL || getFullnodeUrl("mainnet");
   const suiClient = new SuiClient({ url: rpcUrl });
   const sb = new SwitchboardClient(suiClient);
 
-  // Example feed hash (BTC/USD)
-  const feedHash = "0x7418dc6408f5e0eb4724dabd81922ee7b0814a43abc2b30ea7a08222cd1e23ee";
-
-  console.log(`📊 Fetching oracle quote for feed: ${feedHash.substring(0, 20)}...\n`);
+  console.log(`📊 Fetching oracle quote for feed...\n`);
 
   // Create transaction
   const tx = new Transaction();
@@ -36,10 +57,10 @@ async function main() {
   // Fetch quotes for the feed
   const quotes = await fetchQuoteUpdate(
     sb,
-    [feedHash],
+    [argv.feedHash],
     tx,
     {
-      numOracles: 3,  // Request data from 3 oracles
+      numOracles: argv.numOracles,
     }
   );
 
@@ -51,7 +72,7 @@ async function main() {
   //   arguments: [quotes],
   // });
 
-  if (shouldSign) {
+  if (argv.sign) {
     // Sign and send transaction
     const privateKey = process.env.SUI_PRIVATE_KEY;
     if (!privateKey) {

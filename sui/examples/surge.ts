@@ -15,19 +15,36 @@ import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Transaction } from "@mysten/sui/transactions";
 import { convertSurgeUpdateToQuotes, SwitchboardClient } from "@switchboard-xyz/sui-sdk";
 import { Surge } from "@switchboard-xyz/on-demand";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
-// Parse command line arguments
-const args = process.argv.slice(2);
-const shouldSign = args.includes("--sign");
-const feedsArg = args.find(arg => arg.startsWith("--feeds="));
-const feedSymbols = feedsArg
-  ? feedsArg.split("=")[1].split(",").map(s => s.trim())
-  : ["BTC/USD", "ETH/USD"];
+const argv = yargs(hideBin(process.argv))
+  .options({
+    sign: {
+      type: "boolean",
+      default: false,
+      description: "Sign and send the transaction (requires SUI_PRIVATE_KEY)",
+    },
+    feeds: {
+      type: "string",
+      description: "Comma-separated list of feed symbols (e.g., BTC/USD,ETH/USD)",
+      default: "BTC/USD,ETH/USD",
+      coerce: (arg) => arg.split(",").map((s) => s.trim()),
+    },
+    queueId: {
+      type: "string",
+      description: "Queue ID for the oracle network",
+      default: "0x6e43354b8ea2dfad98eadb33db94dcc9b1175e70ee82e42abc605f6b7de9e910",
+    },
+  })
+  .help()
+  .alias("help", "h")
+  .parseSync();
 
 async function main() {
   console.log("🚀 Switchboard Surge Example for Sui");
-  console.log(`📊 Feeds: ${feedSymbols.join(", ")}`);
-  console.log(`Mode: ${shouldSign ? "🔐 Sign and Send" : "🎯 Simulate Only"}\n`);
+  console.log(`📊 Feeds: ${argv.feeds.join(", ")}`);
+  console.log(`Mode: ${argv.sign ? "🔐 Sign and Send" : "🎯 Simulate Only"}\n`);
 
   // Setup clients
   const rpcUrl = process.env.SUI_RPC_URL || getFullnodeUrl("mainnet");
@@ -52,12 +69,12 @@ async function main() {
   console.log("✅ Connected to Surge!\n");
 
   // Subscribe to feeds
-  const subscriptions = feedSymbols.map(symbol => ({
+  const subscriptions = argv.feeds.map(symbol => ({
     symbol,
     source: "WEIGHTED" as const,
   }));
 
-  console.log(`📊 Subscribing to feeds: ${feedSymbols.join(", ")}`);
+  console.log(`📊 Subscribing to feeds: ${argv.feeds.join(", ")}`);
   await surge.subscribe(subscriptions);
   console.log("✅ Subscribed successfully!\n");
 
@@ -85,9 +102,7 @@ async function main() {
   // Convert Surge update to Sui quotes format
   console.log("🔄 Converting Surge update to Sui quotes...");
 
-  // Queue ID for mainnet (use your actual queue in production)
-  const QUEUE_ID = "0x6e43354b8ea2dfad98eadb33db94dcc9b1175e70ee82e42abc605f6b7de9e910";
-  const quoteData = await convertSurgeUpdateToQuotes(priceUpdate, QUEUE_ID);
+  const quoteData = await convertSurgeUpdateToQuotes(priceUpdate, argv.queueId);
 
   console.log("✅ Converted to quote format!");
   console.log(`Feed hashes: ${quoteData.feedHashes.join(", ")}`);
@@ -114,7 +129,7 @@ async function main() {
   //   ],
   // });
 
-  if (shouldSign) {
+  if (argv.sign) {
     // Sign and send transaction
     const privateKey = process.env.SUI_PRIVATE_KEY;
     if (!privateKey) {

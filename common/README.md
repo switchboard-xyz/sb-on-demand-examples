@@ -22,6 +22,14 @@ The `streaming/` directory contains chain-agnostic real-time price streaming exa
 - **Chain-agnostic** - Works with any blockchain
 - **Full documentation** - See [streaming/README.md](./streaming/README.md)
 
+### Twitter Follower Count Example
+The `twitter-follower-count/` directory demonstrates fetching social media metrics via authenticated APIs:
+- **`getFollowerCount.ts`** - Fetch real-time Twitter/X follower counts using Switchboard oracles
+- **Bearer Token authentication** - Simple app-only auth, no OAuth complexity
+- **No .env files** - Fully interactive with hidden token input for security
+- **Chain-agnostic** - Works across Solana, EVM, Sui, and any supported blockchain
+- **Full documentation** - See [twitter-follower-count/README.md](./twitter-follower-count/README.md)
+
 ## Why Job Testing is Chain-Agnostic
 
 Oracle job definitions use a universal format that works across all Switchboard-supported chains:
@@ -59,6 +67,17 @@ POLYGON_API_KEY=your_key bun run runJob.ts
 # Stream unsigned price data (requires API key)
 cd common/streaming
 SURGE_API_KEY=your_key bun run crossbarStream.ts
+```
+
+### Twitter Follower Count
+```bash
+# Fetch Twitter follower counts (interactive Bearer Token prompt)
+cd common/twitter-follower-count
+npm install
+npm start
+
+# Or specify a different username
+npm start username_here
 ```
 
 ## Related Examples

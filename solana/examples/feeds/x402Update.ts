@@ -99,8 +99,11 @@ const ORACLE_FEED: IOracleFeed = {
             headers: [
               {
                 key: "X-PAYMENT",
-                // Use variable placeholder - will be replaced by variable override
                 value: "${X402_PAYMENT_HEADER}",
+              },
+              {
+                key: "X-SWITCHBOARD-PAYMENT",
+                value: "${X402_SWITCHBOARD_PAYMENT_HEADER}",
               },
             ],
           },
@@ -161,14 +164,16 @@ const ORACLE_FEED: IOracleFeed = {
   const x402Manager = new X402FetchManager(paymentHandler);
   console.log("🔐 X402 manager initialized");
 
-  // Step 5: Derive X402 payment header for the paywalled RPC
-  // This header will be passed as a variable override to the oracle job
-  console.log("\n🔑 Deriving X402 payment header...");
-  const paymentHeader = await x402Manager.derivePaymentHeader(URL, {
+  // Step 5: Derive X402 payment headers for the paywalled RPC
+  // These headers will be passed as variable overrides to the oracle job
+  console.log("\n🔑 Deriving X402 payment headers...");
+  const paymentHeaders = await x402Manager.derivePaymentHeaders(URL, {
     method: "POST",
     body: buildJsonRpcBody(RPC_METHOD),
   });
-  console.log("✅ X402 payment header generated");
+  const paymentHeader = paymentHeaders.xPaymentHeader;
+  const switchboardPaymentHeader = paymentHeaders.xSwitchboardPayment;
+  console.log("✅ X402 payment headers generated");
 
   // Step 6: Load Switchboard queue
   const queue = await sb.Queue.loadDefault(program!);
@@ -185,18 +190,19 @@ const ORACLE_FEED: IOracleFeed = {
   // const simFeed = await crossbar.simulateFeed(ORACLE_FEED, true, { X402_PAYMENT_HEADER: paymentHeader });
   // console.log(simFeed);
 
-  // Step 9: Fetch managed update instructions with X402 header as variable override
-  console.log("\n📋 Fetching managed update instructions with X402 variable override...");
+  // Step 9: Fetch managed update instructions with X402 headers as variable overrides
+  console.log("\n📋 Fetching managed update instructions with X402 variable overrides...");
   const instructions = await queue.fetchManagedUpdateIxs(
     crossbar,
     [ORACLE_FEED],
     {
       // NOTE: NUM_SIGNATURES MUST BE 1 FOR x402 REQUESTS
       numSignatures: 1,
-      // Pass the X402 payment header as a variable override
-      // This replaces ${X402_PAYMENT_HEADER} in the job definition
+      // Pass the X402 payment headers as variable overrides
+      // These replace ${X402_PAYMENT_HEADER} and ${X402_SWITCHBOARD_PAYMENT_HEADER} in the job definition
       variableOverrides: {
         X402_PAYMENT_HEADER: paymentHeader,
+        X402_SWITCHBOARD_PAYMENT_HEADER: switchboardPaymentHeader,
       },
       instructionIdx: 0,
       payer: keypair.publicKey,
@@ -206,7 +212,7 @@ const ORACLE_FEED: IOracleFeed = {
   console.log("✅ Generated instructions:", instructions.length);
   console.log("   - Ed25519 signature verification");
   console.log("   - Quote program verified_update");
-  console.log("   - Variable override: X402_PAYMENT_HEADER");
+  console.log("   - Variable overrides: X402_PAYMENT_HEADER, X402_SWITCHBOARD_PAYMENT_HEADER");
 
   // Step 10: Load basic program and create read instruction
   const basicProgram = await loadBasicProgram(program!.provider);

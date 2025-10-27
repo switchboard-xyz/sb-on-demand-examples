@@ -4,6 +4,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@faremeter/payment-solana@0.10.0':
+    hash: af86c00a45edc55af96ce0f5f07f0517fb5e273db5ef1b1f09716739d98a6d62
+    path: patches/@faremeter__payment-solana@0.10.0.patch
+  '@faremeter/payment-solana@0.8.0':
+    hash: 56561cbf8d273eefce83086ddbd6bc7f363f4ca5c95321098d7d513443071a1e
+    path: patches/@faremeter__payment-solana@0.8.0.patch
+
 importers:
 
   .:
@@ -16,7 +24,7 @@ importers:
         version: 0.8.0
       '@faremeter/payment-solana':
         specifier: ^0.8.0
-        version: 0.8.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 0.8.0(patch_hash=56561cbf8d273eefce83086ddbd6bc7f363f4ca5c95321098d7d513443071a1e)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@faremeter/types':
         specifier: ^0.9.0
         version: 0.9.0
@@ -39,8 +47,8 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/x402-utils':
-        specifier: 0.1.2
-        version: 0.1.2(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.2.1
+        version: 0.2.1(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -154,11 +162,23 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  '@faremeter/fetch@0.10.0':
+    resolution: {integrity: sha512-M3kGJeJiP7/cp5rtIjTdoHc73C/qTyuAgpGSzalca1cpmC2kGTRsEnlp7jsLSZQ7qDOwFsuRrMCePvV0sE9CVw==}
+
   '@faremeter/fetch@0.8.0':
     resolution: {integrity: sha512-RwFPEN1tIadXwAWyP3um9bWLoCv1tqQOkOBZZlR7gitmuR9VWiT0EjECMa6izLeAi5nVqKkZXvMPlfxRdKu2cQ==}
 
+  '@faremeter/info@0.10.0':
+    resolution: {integrity: sha512-Q3InKSHH3W6d3xoEkYxxVGEFfATeKYgCl55AVcqgSItN9PZvympiQqM+4h7gIX0FaJjKLK+eizm837DT6ctsHQ==}
+
+  '@faremeter/payment-solana@0.10.0':
+    resolution: {integrity: sha512-OwP69umLhF0YxP97+workD4mFnF/OXkCDk3ij7W11gSkA46t5j5Gzssjz+2Qu7Tg8bHhs7yzLWGCJ0mjn05pGg==}
+
   '@faremeter/payment-solana@0.8.0':
     resolution: {integrity: sha512-APt7xm5twtF3r0HTYMMaBFlbsAmBaxbk7yXvYnUuupLK3N7NcGOs1VYKu05/A7ceDSCcu5rxk5yIXi+l5PRLrg==}
+
+  '@faremeter/types@0.10.0':
+    resolution: {integrity: sha512-frln5ybW/2xLXcDsXvE+6ccJXCTj8bKNhQDv6+EmpTg9eFwV0bAULODHe+VYR+d61AXNx9MzEHkLy+0V9e1TKQ==}
 
   '@faremeter/types@0.2.3':
     resolution: {integrity: sha512-Yl6ElGaDjF8tbkr9sgtxmGsvfe9VQID7UbaLRvfNTK+ByTM92uL+n1IkpsHLicnrRnNID3hbHYtpd/I3LS5rmw==}
@@ -168,6 +188,9 @@ packages:
 
   '@faremeter/types@0.9.0':
     resolution: {integrity: sha512-/KbH4ILmTDzmIvmleGdy2nartQwD5WNFtYtBivKJnKsbegPzqZvCmBp61pFRzHnLxVp53FeROsFrW6HwBgh9vg==}
+
+  '@faremeter/wallet-solana@0.10.0':
+    resolution: {integrity: sha512-w9YEQ1KH078EE0E0u7hjtZAVRsCV1SILnuhemt0y/kVxezPipyZnbyJyAJaJazv6arVeu5YZH4cUKqzYI7tEhA==}
 
   '@faremeter/wallet-solana@0.8.0':
     resolution: {integrity: sha512-QYW5vGeskLFOgr52Ydd0W1zpwVbtyAUEia5wKjESg4nXbODLX+q4+uOn7rrBI07PVSb8yAZJFJz0sTZsnwAaSA==}
@@ -601,8 +624,8 @@ packages:
     resolution: {integrity: sha512-/+Fejih9LoSvMYYvIwV0tGrwRC6WyPqkDAxTDsqwXYdhxndN4zC/m24knNl7j1R23T9lXMqDTQTj1SxMRkxSUg==}
     engines: {node: '>= 18'}
 
-  '@switchboard-xyz/x402-utils@0.1.2':
-    resolution: {integrity: sha512-rtPpVirtu37/cd34WuVo5zNWwyNHByDz8Q6BeGGXoDSQ+WMZmMj5uwB+uGKGV/q2fUV/EdoYIJ4P0RsbPV+W+w==}
+  '@switchboard-xyz/x402-utils@0.2.1':
+    resolution: {integrity: sha512-mqnVg4KWTUOS3aGx0TsGwSd/6xSIOKmXnh9uHAWIuM5fmTOcLyfLl4/7FL1D9JCeSWuQPyHoh4MhUHVoiqDzYA==}
     engines: {node: '>=21'}
 
   '@types/bn.js@5.2.0':
@@ -1664,12 +1687,43 @@ snapshots:
 
   '@ethereumjs/rlp@5.0.2': {}
 
+  '@faremeter/fetch@0.10.0':
+    dependencies:
+      '@faremeter/types': 0.10.0
+      arktype: 2.1.21
+
   '@faremeter/fetch@0.8.0':
     dependencies:
       '@faremeter/types': 0.8.0
       arktype: 2.1.21
 
-  '@faremeter/payment-solana@0.8.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@faremeter/info@0.10.0':
+    dependencies:
+      '@faremeter/types': 0.10.0
+      arktype: 2.1.21
+
+  '@faremeter/payment-solana@0.10.0(patch_hash=af86c00a45edc55af96ce0f5f07f0517fb5e273db5ef1b1f09716739d98a6d62)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@faremeter/info': 0.10.0
+      '@faremeter/types': 0.10.0
+      '@logtape/logtape': 1.0.4
+      '@solana-program/compute-budget': 0.8.0(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
+      '@solana-program/token': 0.5.1(@solana/kit@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))
+      '@solana/kit': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@solana/rpc-types': 3.0.3(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)
+      '@solana/spl-token': 0.4.13(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      '@solana/transactions': 2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)
+      '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      arktype: 2.1.21
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - fastestsmallesttextencoderdecoder
+      - typescript
+      - utf-8-validate
+      - ws
+
+  '@faremeter/payment-solana@0.8.0(patch_hash=56561cbf8d273eefce83086ddbd6bc7f363f4ca5c95321098d7d513443071a1e)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
       '@faremeter/types': 0.8.0
       '@logtape/logtape': 1.0.4
@@ -1689,6 +1743,10 @@ snapshots:
       - utf-8-validate
       - ws
 
+  '@faremeter/types@0.10.0':
+    dependencies:
+      arktype: 2.1.21
+
   '@faremeter/types@0.2.3':
     dependencies:
       arktype: 2.1.23
@@ -1700,6 +1758,15 @@ snapshots:
   '@faremeter/types@0.9.0':
     dependencies:
       arktype: 2.1.21
+
+  '@faremeter/wallet-solana@0.10.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - typescript
+      - utf-8-validate
 
   '@faremeter/wallet-solana@0.8.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
@@ -2380,12 +2447,12 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@switchboard-xyz/x402-utils@0.1.2(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@switchboard-xyz/x402-utils@0.2.1(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
-      '@faremeter/fetch': 0.8.0
-      '@faremeter/payment-solana': 0.8.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@faremeter/types': 0.9.0
-      '@faremeter/wallet-solana': 0.8.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      '@faremeter/fetch': 0.10.0
+      '@faremeter/payment-solana': 0.10.0(patch_hash=af86c00a45edc55af96ce0f5f07f0517fb5e273db5ef1b1f09716739d98a6d62)(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@faremeter/types': 0.10.0
+      '@faremeter/wallet-solana': 0.10.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - encoding

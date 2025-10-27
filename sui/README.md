@@ -6,9 +6,9 @@ This directory contains examples for using Switchboard On-Demand feeds on the Su
 
 ```
 sui/
-├── examples/          # TypeScript client examples
-│   ├── quotes.ts     # Oracle Quotes - Simple on-demand feed updates
-│   └── surge.ts      # Surge WebSocket streaming
+├── examples/
+│   ├── quotes.ts     # Oracle Quotes for Sui contracts
+│   └── surge.ts      # Real-time price streaming
 ├── package.json
 └── README.md
 ```
@@ -17,10 +17,10 @@ sui/
 
 The `examples/` directory contains two concise examples for Switchboard on Sui:
 
-- **`quotes.ts`** - Oracle Quotes example showing zero-setup, on-demand oracle data fetching
-- **`surge.ts`** - Surge WebSocket streaming for real-time price updates with sub-100ms latency
+- **`quotes.ts`** - Oracle Quotes example showing zero-setup, on-demand oracle data for Sui contracts
+- **`surge.ts`** - Surge WebSocket streaming for real-time price monitoring (display only)
 
-These examples demonstrate the modern, recommended approaches for integrating Switchboard oracles in your Sui applications.
+The `quotes.ts` example demonstrates the recommended approach for integrating Switchboard oracles in your Sui applications. The `surge.ts` example shows how to stream and monitor real-time prices.
 
 ## Table of Contents
 
@@ -44,11 +44,11 @@ Switchboard provides decentralized oracle data on Sui with two modern approaches
 - Multi-oracle verification for security
 - Pay only when you use data
 
-**Surge WebSocket Streaming** - Real-time price updates:
+**Surge WebSocket Streaming** - Real-time price monitoring:
 - Sub-100ms latency WebSocket streaming
 - Subscribe to 1000+ trading pairs
-- Cryptographically signed price updates
-- Ideal for high-frequency applications
+- Ideal for dashboards and price monitoring
+- Use Oracle Quotes for on-chain Sui transactions
 
 ### Active Deployments
 
@@ -274,29 +274,28 @@ tsx examples/quotes.ts --help
 
 ### Surge WebSocket Streaming Example
 
-Real-time price updates with sub-100ms latency via WebSocket:
+Stream real-time price updates with sub-100ms latency for monitoring and display:
 
 ```bash
 # Get a Surge API key from https://explorer.switchboard.xyz
 export SURGE_API_KEY="sb_live_your_api_key_here"
 
-# Run with default feeds (BTC/USD, ETH/USD)
+# Stream for 10 seconds (default)
 npm run surge
 
 # Subscribe to specific feeds
 npm run surge -- --feeds BTC/USD,ETH/USD,SOL/USD
 
-# Sign and send transaction
-export SUI_PRIVATE_KEY="your_private_key_here"
-npm run surge -- --sign
+# Stream for 30 seconds
+npm run surge -- --duration 30
 
-# Use a custom queue ID
-npm run surge -- --queueId 0x1234...
+# Stream continuously (until Ctrl+C)
+npm run surge -- --duration 0
 
 # Or run directly with tsx
 tsx examples/surge.ts
-tsx examples/surge.ts --feeds BTC/USD,SOL/USD --sign
-tsx examples/surge.ts --feeds ETH/USD --queueId 0x1234... --sign
+tsx examples/surge.ts --feeds BTC/USD,SOL/USD --duration 60
+tsx examples/surge.ts --feeds ETH/USD --duration 0
 
 # View all options
 tsx examples/surge.ts --help
@@ -305,14 +304,15 @@ tsx examples/surge.ts --help
 **What it does:**
 - Connects to Switchboard Surge WebSocket service
 - Subscribes to real-time price feeds for specified symbols
-- Receives live price updates with cryptographic signatures
-- Converts Surge updates to Sui quote format
-- Shows how to use streaming data in Sui transactions
+- Displays live price updates with formatted prices
+- Shows latency metrics for each update
+- Great for monitoring prices and testing Surge connectivity
 
 **Options:**
-- `--sign` - Sign and send the transaction (requires SUI_PRIVATE_KEY)
 - `--feeds` - Comma-separated list of feed symbols (default: BTC/USD,ETH/USD)
-- `--queueId` - Queue ID for the oracle network (default: mainnet queue)
+- `--duration` - How long to stream in seconds (default: 10, use 0 for continuous)
+
+**Note:** This example is for price monitoring only. For Sui oracle integration, use the Oracle Quotes example above.
 
 **What is Surge?**
 
@@ -323,51 +323,49 @@ Surge is a WebSocket-based streaming service that provides:
 - **Flexible subscription** - Subscribe to specific symbols/sources or all available feeds
 - **Built-in verification** - All prices are cryptographically signed by Switchboard oracles
 
-#### Surge Integration with Sui Quotes
+#### Using Surge for Price Monitoring
 
 The example shows how to:
 
 1. **Connect to Surge**
    ```typescript
    const surge = new Surge({
-     apiKey: API_KEY,
+     apiKey: SURGE_API_KEY,
      network: "mainnet",
-     verbose: true,
+     verbose: false,
    });
    await surge.connect();
    ```
 
 2. **Subscribe to feeds**
    ```typescript
-   await surge.subscribe([
+   const subscriptions = [
      { symbol: "BTC/USD", source: "WEIGHTED" },
      { symbol: "ETH/USD", source: "WEIGHTED" }
-   ]);
+   ];
+   await surge.subscribe(subscriptions);
    ```
 
 3. **Listen for price updates**
    ```typescript
-   surge.on('signedPriceUpdate', (priceUpdate) => {
-     // Process price update
+   surge.on('signedPriceUpdate', (update) => {
+     // Display formatted prices
+     const prices = update.getFormattedPrices();
+     console.log(prices);
+
+     // Get latency metrics
+     const latency = update.getLatencyMetrics();
+     console.log(`Latency: ${latency.endToEnd}`);
    });
    ```
 
-4. **Convert to Sui quotes**
+4. **Stream for a duration**
    ```typescript
-   const quoteData = await convertSurgeUpdateToQuotes(
-     priceUpdate,
-     QUEUE_ID
-   );
-   ```
+   // Stream for 30 seconds
+   await new Promise((resolve) => setTimeout(resolve, 30000));
 
-5. **Use in a Sui transaction**
-   ```typescript
-   // You now have formatted quote data ready for Sui contracts:
-   // - feedHashes: Array of feed identifiers
-   // - values: 18-decimal price values
-   // - valuesNeg: Boolean array for negative values
-   // - timestampSeconds: Oracle timestamp
-   // - slot: Current slot number
+   // Disconnect when done
+   surge.disconnect();
    ```
 
 #### Available Feed Symbols
@@ -391,38 +389,42 @@ console.log(feedInfo); // Shows available sources
 #### Example Output
 
 ```
-Switchboard Surge Example for Sui
-Feeds: BTC/USD, ETH/USD
-Mode: Simulate Only
+🚀 Switchboard Surge Streaming Example
+📊 Feeds: BTC/USD, ETH/USD
+⏱️  Duration: 10s
 
-Connecting to Surge...
-Connected to Surge!
+📡 Connecting to Surge...
+✅ Connected to Surge!
 
-Subscribing to feeds: BTC/USD, ETH/USD
-Successfully subscribed to 1 bundles
+📊 Subscribing to feeds: BTC/USD, ETH/USD
+✅ Subscribed successfully!
 
-Waiting for first price update from Surge...
-Received price update from Surge!
+⏳ Streaming real-time price updates...
 
-Converting Surge update to Sui quotes...
-Converted to quote format!
-Feed hashes: 0x5f8fb5...,0x6f9cc6...
-Values: 96245670000000000000,3245700000000000000
-Timestamp (seconds): 1704067200
+────────────────────────────────────────────────────────────────────────────────
 
-Price Data from Surge:
-  0x5f8fb5...: $96,245.67
-  0x6f9cc6...: $3,245.70
+📈 Update #1 at 2025-01-15T10:30:00.123Z
+   5f8fb5c3d2e1a4b8...: $96,245.67
+   6f9cc6d4e3f2b5c9...: $3,245.70
+   ⚡ End-to-end latency: 45ms
+   📊 Triggered by price change
 
-Simulating transaction...
-Transaction simulation successful!
-Gas costs: {
-  computation: '1000000',
-  storage: '2000000',
-  storageRebate: '0'
-}
+📈 Update #2 at 2025-01-15T10:30:05.456Z
+   5f8fb5c3d2e1a4b8...: $96,248.12
+   6f9cc6d4e3f2b5c9...: $3,246.33
+   ⚡ End-to-end latency: 52ms
 
-Example completed successfully!
+────────────────────────────────────────────────────────────────────────────────
+
+📊 Received 8 total updates
+
+🔌 Disconnecting from Surge...
+✅ Example completed successfully!
+
+💡 Tips:
+   - Use --duration 0 to stream continuously
+   - For Sui oracle integration, see examples/quotes.ts
+   - Example: tsx examples/surge.ts --feeds BTC/USD,SOL/USD --duration 30
 ```
 
 
@@ -439,8 +441,8 @@ Example completed successfully!
 1. **Connection** - Establish secure WebSocket to Surge gateway
 2. **Subscription** - Request specific feeds (symbol/source pairs)
 3. **Streaming** - Receive real-time price updates via WebSocket
-4. **Conversion** - Transform SurgeUpdate to Sui quote format
-5. **On-chain Usage** - Integrate quotes into Sui contracts/transactions
+4. **Display** - Show formatted prices and latency metrics
+5. **Use Case** - Ideal for dashboards, monitoring, and price alerts
 
 ### Move Contract Integration
 

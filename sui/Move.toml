@@ -1,0 +1,16 @@
+[package]
+name = "example"
+edition = "2024.beta"
+version = "0.0.1"
+
+[dependencies.Switchboard]
+git = "https://github.com/switchboard-xyz/sui.git"
+subdir = "on_demand"
+rev = "mainnet"
+
+[addresses]
+example = "0x0"
+std = "0x1"
+sui = "0x2"
+switchboard = "0xa81086572822d67a1559942f23481de9a60c7709c08defafbb1ca8dffc44e210"
+

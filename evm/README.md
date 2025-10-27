@@ -7,191 +7,386 @@ This directory contains examples for using Switchboard On-Demand functionality o
 ```
 evm/
 ├── src/               # Solidity smart contracts
-│   └── Example.sol
+│   ├── SwitchboardPriceConsumer.sol  # Production-ready price consumer
+│   └── switchboard/                   # Switchboard interfaces & types
 ├── script/            # Foundry deployment scripts
-│   └── Deploy.s.sol
-├── examples/          # TypeScript client examples
+│   └── DeploySwitchboardPriceConsumer.s.sol
+├── scripts/           # TypeScript client examples
+│   └── run.ts         # Complete integration example
+├── examples/          # Additional examples
 │   ├── updateFeed.ts
 │   └── utils.ts
+├── legacy/            # Previous examples (for reference)
 ├── package.json
 └── README.md
 ```
 
-## Quick Start
-
-### Prerequisites
-
-- Node.js 16+ and npm/yarn/bun
-- [Foundry](https://book.getfoundry.sh/getting-started/installation) for Solidity development
-- An EVM wallet with testnet ETH (we'll use Hyperliquid)
-
-### Installation
-
-#### 1. Install Dependencies
+## 🚀 Quick Start (30 seconds to first price)
 
 ```bash
-# Install Node.js dependencies
+# Clone and install
+cd evm
 bun install
 
-# Install Foundry dependencies (if needed)
-forge install
-```
-
-#### 2. Set up Forge Remappings
-
-The project uses Switchboard's On-Demand Solidity SDK. For Forge to properly resolve imports, create a `remappings.txt` file (already included) with:
-
-```
-@switchboard-xyz/on-demand-solidity/=node_modules/@switchboard-xyz/on-demand-solidity/
-```
-
-This allows you to import Switchboard contracts like:
-```solidity
-import {ISwitchboard} from "@switchboard-xyz/on-demand-solidity/ISwitchboard.sol";
-import {Structs} from "@switchboard-xyz/on-demand-solidity/structs/Structs.sol";
-```
-
-#### 3. Verify Installation
-
-You can verify that Forge can find the Switchboard contracts:
-
-```bash
+# Build contracts
 forge build
+
+# Deploy (Monad Testnet example)
+forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+  --rpc-url https://testnet-rpc.monad.xyz \
+  --broadcast \
+  -vvvv
+
+# Run the complete example
+RPC_URL=https://testnet-rpc.monad.xyz \
+PRIVATE_KEY=0x... \
+CONTRACT_ADDRESS=0x... \
+NETWORK=monad-testnet \
+bun scripts/run.ts
 ```
 
-### Environment Setup
+That's it! You're now fetching and verifying real-time oracle prices on EVM. 🎉
 
-Create a `.env` file:
+## 📋 Prerequisites
 
-```bash
-# Your private key (with 0x prefix)
-PRIVATE_KEY=your_private_key_here
-
-# Aggregator ID for the price feed you want to use (bytes32 format)  
-AGGREGATOR_ID=0x354dc60a62426b6fb787b00ad0fb4d9a280f60e3ada8678cf2a6e940513100ea
-
-# Switchboard on-demand contract address (network dependent)
-# Hyperliquid: 0x316fbe540c719970e6427ccd8590d7e0a2814c5d
-# See https://docs.switchboard.xyz for other networks
-SWITCHBOARD_ADDRESS=0x316fbe540c719970e6427ccd8590d7e0a2814c5d
-
-# Contract address (will be set after deployment)
-EXAMPLE_ADDRESS=
-```
-
-Then run:
-```bash
-source .env
-```
-
-
-## Example Price Feed Integration
-
-This example demonstrates how to integrate Switchboard on-demand price feeds into your smart contracts.
-
-### 1. Deploy the Example Contract
-
-```bash
-# Deploy to Hyperliquid
-forge script script/Deploy.s.sol:DeployScript --rpc-url https://rpc.hyperliquid.xyz/evm --broadcast -vv
-```
-
-The deployment script will:
-- Deploy the `Example.sol` contract
-- Configure it with the Switchboard oracle address
-- Set up your chosen aggregator ID
-- Output the deployed contract address
-
-Then add `EXAMPLE_ADDRESS=0x...` with your deployed contract address to the environment file or export it. 
-
-```bash
-# add `EXAMPLE_ADDRESS=0x...` OR run `export EXAMPLE_ADDRESS=0x...`
-source .env
-```
-
-### 2. Run the Price Update Example
-
-```bash
-# Update .env with the deployed EXAMPLE_ADDRESS
-# Then run the price update script
-
-# Using npm script
-npm run update
-
-# Or directly with bun
-bun run examples/updateFeed.ts
-```
-
-This script demonstrates:
-- Fetching signed price data from Switchboard's Crossbar instance
-- Submitting the oracle update to your contract
-- Reading the updated price from the contract
-- Event parsing and logging
-
-### Finding and Verifying Feeds
-
-1. **Feed Builder**: Use [explorer.switchboardlabs.xyz/feed-builder](https://explorer.switchboardlabs.xyz/feed-builder) to:
-   - Build custom feed Oracle Quotes
-   - Verify feed checksums
-   - Test feed updates before integration
-
-2. **Explorer**: Visit [explorer.switchboard.xyz](https://explorer.switchboard.xyz) to:
-   - Browse all available feeds
-   - View feed configurations and history
-   - Verify feed integrity and performance
-
-3. **Network-Specific Feeds**: Find feeds for your network at:
-   - Hyperliquid: [https://beta.ondemand.switchboard.xyz/hyperevm/mainnet](https://beta.ondemand.switchboard.xyz/hyperevm/mainnet)
-   - Other networks: Use the explorer to filter by chain
+- **Node.js** 16+ and **Bun** (or npm/yarn)
+- **Foundry** for Solidity development
+- A wallet with native tokens (MON, ETH, etc.)
 
 ## 🌐 Supported Networks
 
 | Network | Chain ID | Switchboard Contract |
 |---------|----------|---------------------|
-| HyperEVM Mainnet | 999 | `0x316fbe540c719970e6427ccd8590d7e0a2814c5d` |
-| Arbitrum One | 42161 | `0xAd9b8604b6B97187CDe9E826cDeB7033C8C37198` |
-| Arbitrum Sepolia | 421614 | `0xA2a0425fA3C5669d384f4e6c8068dfCf64485b3b` |
-| Core Mainnet | 1116 | `0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C` |
-| Core Testnet2 | 1114 | `0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C` |
-| Monad Testnet | 10143 | `0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C` |
+| **Monad Mainnet** | 143 | `0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67` |
+| **Monad Testnet** | 10143 | `0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33` |
 
-**⚠️ Important**: Always verify the current contract addresses at [docs.switchboard.xyz](https://docs.switchboard.xyz/product-documentation/data-feeds/evm/contract-addresses) as they may be updated.
+> **Note**: For other EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/) which use the previous Switchboard implementation.
+
+## 🎯 What is Switchboard On-Demand?
+
+Switchboard On-Demand provides secure, verified oracle data for EVM smart contracts:
+
+- **Cryptographic Verification**: Oracle signatures verified on-chain
+- **Multi-Oracle Consensus**: Aggregate data from multiple oracle sources
+- **Configurable Security**: Set staleness limits and price deviation thresholds
+- **Gas Efficient**: Optimized for low transaction costs
+
+## 📊 Example: Price Consumer Contract
+
+The `SwitchboardPriceConsumer.sol` contract demonstrates production-ready oracle integration:
+
+```solidity
+contract SwitchboardPriceConsumer {
+    ISwitchboard public immutable switchboard;
+    mapping(bytes32 => PriceData) public prices;
+    
+    // Update prices with oracle data
+    function updatePrices(bytes[] calldata updates) external payable {
+        uint256 fee = switchboard.getFee(updates);
+        require(msg.value >= fee, "Insufficient fee");
+        
+        // Verify signatures and update
+        switchboard.updateFeeds{value: fee}(updates);
+        
+        // Process and store verified prices
+        // ... validation logic ...
+    }
+    
+    // Get current price
+    function getPrice(bytes32 feedId) external view 
+        returns (int128 value, uint256 timestamp, uint64 slotNumber);
+    
+    // Business logic helpers
+    function calculateCollateralRatio(...) external view returns (uint256);
+    function shouldLiquidate(...) external view returns (bool);
+}
+```
+
+**Key Features:**
+- Price deviation validation (prevents manipulation)
+- Staleness checks (configurable max age)
+- Multi-feed support
+- Business logic examples (collateral ratios, liquidations)
+- Comprehensive events and error handling
+
+## 🛠️ Environment Setup
+
+### Configure Environment
+
+Create a `.env` file or export variables:
+
+```bash
+# Required
+export PRIVATE_KEY=0xyour_private_key_here
+export RPC_URL=https://your_rpc_url_here
+
+# Optional
+export SWITCHBOARD_ADDRESS=0x...  # Override default
+export NETWORK=monad-testnet      # Network name
+export CONTRACT_ADDRESS=0x...     # Deployed contract
+```
+
+### Network-Specific RPC URLs
+
+**Monad:**
+- Testnet: `https://testnet-rpc.monad.xyz`
+- Mainnet: `https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY`
 
 ## 📂 Examples Overview
 
-The `examples/` directory contains TypeScript client code for interacting with Switchboard On-Demand:
+### `/scripts/run.ts` - Complete Integration Example
 
-- **`updateFeed.ts`** - Complete example of fetching and submitting oracle updates
-- **`utils.ts`** - Shared utility functions and constants
+Full end-to-end demonstration:
+- Deploy or connect to existing contract
+- Fetch oracle data from Crossbar
+- Submit price updates on-chain
+- Query and verify prices
+- Demonstrate business logic
 
-These examples demonstrate the client-side integration patterns you'll use in your applications.
+```bash
+# Run with environment variables
+RPC_URL=$RPC_URL \
+PRIVATE_KEY=$PRIVATE_KEY \
+CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
+NETWORK=monad-testnet \
+bun scripts/run.ts
+```
 
-## Advanced Usage
+### `/examples/updateFeed.ts` - Legacy Update Example
 
-### Custom Feed Integration
+Basic price update example (legacy):
 
-1. Find your desired feed at [ondemand.switchboard.xyz](https://ondemand.switchboard.xyz)
-2. Copy the aggregator ID
-3. Update your contract to use the new feed
-4. Modify the examples to fetch your specific feed
+```bash
+# Set environment variables
+export PRIVATE_KEY=0x...
+export EXAMPLE_ADDRESS=0x...
 
-### Error Handling
+# Run update
+bun examples/updateFeed.ts
+```
 
-The example includes basic error handling:
-- Insufficient fee errors
-- Invalid result validation
-- Transaction simulation before submission
+## 🏃‍♂️ Getting Started
 
-## 📚 Resources
+### Step 1: Build the Contract
 
-- [EVM Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/evm)
+```bash
+# Install Foundry dependencies
+forge install
+
+# Build contracts
+forge build
+```
+
+Expected output:
+```
+[⠊] Compiling...
+[⠒] Compiling 3 files with 0.8.22
+[⠢] Solc 0.8.22 finished in 1.23s
+Compiler run successful!
+```
+
+### Step 2: Deploy the Contract
+
+#### Option A: Using Foundry Script (Recommended)
+
+```bash
+# Monad Testnet
+forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+  --rpc-url https://testnet.monad.xyz \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  -vvvv
+
+# Monad Mainnet
+forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+  --rpc-url $MONAD_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  -vvvv
+```
+
+#### Option B: Using npm Scripts
+
+```bash
+# Monad Testnet
+bun run deploy:monad-testnet
+
+# Monad Mainnet
+MONAD_RPC_URL=https://... bun run deploy:monad-mainnet
+```
+
+#### Option C: Direct Forge Create
+
+```bash
+forge create src/SwitchboardPriceConsumer.sol:SwitchboardPriceConsumer \
+  --rpc-url $RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --constructor-args 0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33  # Monad Testnet
+```
+
+**Save the deployed contract address!**
+
+### Step 3: Run the Example
+
+```bash
+# Complete example with deployment, update, and queries
+RPC_URL=$RPC_URL \
+PRIVATE_KEY=$PRIVATE_KEY \
+CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
+NETWORK=monad-testnet \
+bun scripts/run.ts
+```
+
+## 📊 Available Feeds
+
+| Asset | Feed Hash |
+|-------|-----------|
+| BTC/USD | `0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812` |
+| ETH/USD | `0xa0950ee5ee117b2e2c30f154a69e17bfb489a7610c508dc5f67eb2a14616d8ea` |
+| SOL/USD | `0x822512ee9add93518eca1c105a38422841a76c590db079eebb283deb2c14caa9` |
+| SUI/USD | `0x7ceef94f404e660925ea4b33353ff303effaf901f224bdee50df3a714c1299e9` |
+
+Find more feeds at: [https://explorer.switchboard.xyz](https://explorer.switchboard.xyz)
+
+## 💡 TypeScript SDK Usage
+
+### Fetching and Submitting Updates
+
+```typescript
+import { ethers } from 'ethers';
+import { CrossbarClient } from '@switchboard-xyz/common';
+
+// Setup
+const provider = new ethers.JsonRpcProvider(rpcUrl);
+const signer = new ethers.Wallet(privateKey, provider);
+const contract = new ethers.Contract(contractAddress, ABI, signer);
+
+// Fetch oracle data
+const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
+const response = await crossbar.fetchOracleQuote(
+  [feedHash],
+  'mainnet'
+);
+
+// Get fee and submit
+const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
+const fee = await switchboard.getFee([response.encoded]);
+
+const tx = await contract.updatePrices([response.encoded], { value: fee });
+await tx.wait();
+
+// Query updated price
+const [value, timestamp, slotNumber] = await contract.getPrice(feedId);
+console.log(`Price: ${ethers.formatUnits(value, 18)}`);
+```
+
+## 🔧 Customizing for Your Use Case
+
+### Example: Lending Protocol
+
+```solidity
+contract LendingProtocol {
+    SwitchboardPriceConsumer public priceConsumer;
+    
+    function borrow(
+        bytes32 collateralFeedId,
+        uint256 collateralAmount,
+        uint256 borrowAmount
+    ) external {
+        // Check collateral ratio
+        uint256 ratio = priceConsumer.calculateCollateralRatio(
+            collateralFeedId,
+            collateralAmount,
+            borrowAmount
+        );
+        
+        require(ratio >= 15000, "Insufficient collateral"); // 150% minimum
+        
+        // Process borrow...
+    }
+    
+    function liquidate(
+        address borrower,
+        bytes32 collateralFeedId
+    ) external {
+        // Check if liquidation is needed
+        bool shouldLiq = priceConsumer.shouldLiquidate(
+            collateralFeedId,
+            positions[borrower].collateral,
+            positions[borrower].debt,
+            11000 // 110% threshold
+        );
+        
+        require(shouldLiq, "Position is healthy");
+        
+        // Process liquidation...
+    }
+}
+```
+
+### Example: DEX Price Oracle
+
+```solidity
+contract DEX {
+    SwitchboardPriceConsumer public priceConsumer;
+    
+    function getSwapRate(
+        bytes32 tokenAFeedId,
+        bytes32 tokenBFeedId
+    ) external view returns (uint256) {
+        (int128 priceA,,) = priceConsumer.getPrice(tokenAFeedId);
+        (int128 priceB,,) = priceConsumer.getPrice(tokenBFeedId);
+        
+        require(priceConsumer.isPriceFresh(tokenAFeedId), "Stale price A");
+        require(priceConsumer.isPriceFresh(tokenBFeedId), "Stale price B");
+        
+        return (uint128(priceA) * 1e18) / uint128(priceB);
+    }
+}
+```
+
+## 🐛 Troubleshooting
+
+### "Insufficient fee"
+- The update fee is dynamic based on oracle responses
+- Always query `switchboard.getFee(updates)` before submitting
+- Send exact fee amount or slightly more (excess is refunded)
+
+### "Price deviation too high"
+- Price changed > 10% from last update (default)
+- Normal during high volatility
+- Adjust `maxDeviationBps` via `updateConfig()` if needed
+
+### "Price too old"
+- Data is older than `maxPriceAge` (default: 5 minutes)
+- Fetch fresh data before calling functions that check freshness
+- Adjust `maxPriceAge` via `updateConfig()` if needed
+
+### Build Errors
+```bash
+# Clean and rebuild
+forge clean
+forge build
+
+# Update dependencies
+forge update
+```
+
+## 📚 Additional Resources
+
+- [Switchboard Documentation](https://docs.switchboard.xyz)
+- [Switchboard Explorer](https://explorer.switchboard.xyz)
+- [Feed Builder Tool](https://explorer.switchboard.xyz/feed-builder)
 - [Solidity SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand-solidity)
-- [TypeScript SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand)
-- [Contract Addresses](https://docs.switchboard.xyz/product-documentation/data-feeds/evm/contract-addresses)
-- [Available Feeds](https://ondemand.switchboard.xyz)
-
-## 🤝 Support
-
-- [Discord](https://discord.gg/switchboard)
+- [Discord Community](https://discord.gg/switchboardxyz)
 - [GitHub Issues](https://github.com/switchboard-xyz/evm-on-demand/issues)
-- [Documentation](https://docs.switchboard.xyz)
+
+## 📖 Advanced Topics
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions and production checklist.
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
+
+---
+
+For more examples and documentation, visit [docs.switchboard.xyz](https://docs.switchboard.xyz)

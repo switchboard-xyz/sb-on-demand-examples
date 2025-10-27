@@ -1,16 +1,33 @@
 {
   "name": "sui-switchboard-examples",
   "version": "1.0.0",
-  "description": "Sui examples for Switchboard On-Demand functionality",
+  "description": "Sui examples for Switchboard On-Demand functionality with Quote Verifier",
   "type": "module",
   "scripts": {
     "quotes": "tsx examples/quotes.ts",
-    "surge": "tsx examples/surge.ts"
+    "surge": "tsx examples/surge.ts",
+    "example": "tsx scripts/run.ts",
+    "build": "sui move build",
+    "build:testnet": "cp Move.testnet.toml Move.toml && sui move build",
+    "build:mainnet": "cp Move.toml.bak Move.toml && sui move build || cp Move.toml.bak Move.toml",
+    "test": "sui move test",
+    "deploy": "sui client publish --gas-budget 100000000",
+    "deploy:testnet": "cp Move.testnet.toml Move.toml && sui client publish --gas-budget 100000000",
+    "deploy:mainnet": "sui client publish --gas-budget 100000000"
   },
+  "keywords": [
+    "switchboard",
+    "oracle",
+    "sui",
+    "defi",
+    "price-feeds",
+    "quote-verifier"
+  ],
+  "author": "Switchboard",
+  "license": "MIT",
   "dependencies": {
     "@mysten/sui": "^1.38.0",
-    "@switchboard-xyz/common": "link:/Users/mgild/projects/sbv3/javascript/common",
-    "@switchboard-xyz/on-demand": "link:/Users/mgild/projects/sbv3/javascript/on-demand",
+    "@switchboard-xyz/on-demand": "^1.0.0",
     "@switchboard-xyz/sui-sdk": "^0.1.9",
     "yargs": "^17.7.2"
   },

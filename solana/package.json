@@ -50,7 +50,7 @@
     "@solana/spl-token": "^0.4.13",
     "@solana/web3.js": "^1.98.0",
     "@switchboard-xyz/common": "^5.1.0",
-    "@switchboard-xyz/on-demand": "^3.1.1",
+    "@switchboard-xyz/on-demand": "^3.1.2",
     "@switchboard-xyz/x402-utils": "0.2.1",
     "assert": "^2.1.0",
     "axios": "^1.8.4",
@@ -75,11 +75,5 @@
     "prettier": "^2.8.8",
     "ts-mocha": "^10.1.0",
     "typescript": "^4.9.5"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "@faremeter/payment-solana@0.10.0": "patches/@faremeter__payment-solana@0.10.0.patch",
-      "@faremeter/payment-solana@0.8.0": "patches/@faremeter__payment-solana@0.8.0.patch"
-    }
   }
 }

@@ -34,16 +34,14 @@ function calculateStatistics(latencies: number[]) {
   const queue = await sb.Queue.loadDefault(program!);
   const feedAccount = new sb.PullFeed(program!, argv.feed!);
   // const crossbar = new CrossbarClient("http://localhost:8080");
-  const crossbar = new CrossbarClient("http://crossbar.switchboard.xyz");
-  const gateway = await queue.fetchGatewayFromCrossbar(crossbar as any);
+  const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");
   await feedAccount.preHeatLuts();
   const latencies: number[] = [];
 
   while (true) {
     const start = Date.now();
     const [pullIx, responses, _ok, luts] = await feedAccount.fetchUpdateIx({
-      gateway: gateway.gatewayUrl,
-      crossbarClient: crossbar as any,
+      crossbarClient: crossbar,
     });
     const endTime = Date.now();
     for (const response of responses) {

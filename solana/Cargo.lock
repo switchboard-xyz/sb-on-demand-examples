@@ -15,7 +15,7 @@ dependencies = [
  "bs58",
  "bytemuck",
  "pinocchio",
- "switchboard-on-demand 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "switchboard-on-demand",
 ]
 
 [[package]]
@@ -504,7 +504,7 @@ dependencies = [
  "litesvm",
  "openssl",
  "solana-sdk",
- "switchboard-on-demand 0.10.2",
+ "switchboard-on-demand",
 ]
 
 [[package]]
@@ -2930,7 +2930,7 @@ dependencies = [
  "anchor-lang",
  "bytemuck",
  "solana-program",
- "switchboard-on-demand 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "switchboard-on-demand",
 ]
 
 [[package]]
@@ -5186,30 +5186,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "switchboard-on-demand"
-version = "0.10.2"
-dependencies = [
- "anchor-lang",
- "anyhow",
- "arrayref",
- "base64ct",
- "bincode",
- "borsh 1.5.7",
- "bytemuck",
- "cc",
- "faster-hex",
- "libsecp256k1 0.7.2",
- "rust_decimal",
- "serde",
- "sha2 0.10.9",
- "solana-program",
- "switchboard-protos",
-]
-
-[[package]]
-name = "switchboard-on-demand"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d72c403c87807efd323b0bd31bfa0d3c43036f6cac7947476358afbc1887146a"
+checksum = "1cc3cee039a2fed6c088099625df8786a16c10eacb9faf73bb16100d4008feec"
 dependencies = [
  "anchor-lang",
  "anyhow",

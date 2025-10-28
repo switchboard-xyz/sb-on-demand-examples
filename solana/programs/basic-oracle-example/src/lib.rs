@@ -33,7 +33,14 @@ pub mod basic_oracle_example {
         // The quote_account constraint validates it's the canonical account
         let feeds = &ctx.accounts.quote_account.feeds;
 
+        // Calculate staleness
+        let current_slot = ctx.accounts.sysvars.clock.slot;
+        let quote_slot = ctx.accounts.quote_account.slot;
+        let staleness = current_slot.saturating_sub(quote_slot);
+
         msg!("Number of feeds: {}", feeds.len());
+        msg!("📅 Quote slot: {}, Current slot: {}", quote_slot, current_slot);
+        msg!("⏰ Staleness: {} slots", staleness);
 
         // Process each feed
         for (i, feed) in feeds.iter().enumerate() {

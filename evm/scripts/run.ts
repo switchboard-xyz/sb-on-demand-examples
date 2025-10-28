@@ -83,7 +83,7 @@ const config = {
   contractAddress: process.env.CONTRACT_ADDRESS || '',
   
   // Feed configuration
-  feedHash: process.env.FEED_HASH || '4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812', // BTC/USD
+  feedHash: process.env.FEED_HASH || '0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812', // BTC/USD
   
   // Price consumer configuration
   maxPriceAge: parseInt(process.env.MAX_PRICE_AGE || '300'), // 5 minutes
@@ -96,7 +96,7 @@ const config = {
 
 const PRICE_CONSUMER_ABI = [
   'constructor(address _switchboard)',
-  'function updatePrices(bytes[] calldata updates) external payable returns (tuple(uint64 slotNumber, uint64 timestamp, tuple(bytes32 feedId, int128 value, uint8 minOracleSamples)[] feedInfos, bytes[] signatures))',
+  'function updatePrices(bytes[] calldata updates, bytes32[] calldata feedIds) external payable',
   'function getPrice(bytes32 feedId) external view returns (int128 value, uint256 timestamp, uint64 slotNumber)',
   'function isPriceFresh(bytes32 feedId) external view returns (bool)',
   'function getPriceAge(bytes32 feedId) external view returns (uint256)',
@@ -290,7 +290,8 @@ async function main() {
   console.log(`💰 Update fee: ${ethers.formatEther(fee)} ${networkConfig.name.includes('Monad') ? 'MON' : 'ETH'}`);
 
   console.log('\n📤 Submitting transaction...');
-  const tx = await contract.updatePrices([feedData.encoded], { value: fee });
+  const feedIdForUpdate = normalizeFeedHash(config.feedHash);
+  const tx = await contract.updatePrices([feedData.encoded], [feedIdForUpdate], { value: fee });
   console.log(`   Transaction hash: ${tx.hash}`);
   console.log(`   Waiting for confirmation...`);
 

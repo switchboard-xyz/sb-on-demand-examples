@@ -120,12 +120,13 @@ contract SwitchboardPriceConsumer {
      * @notice Update price feeds with oracle data
      * @dev This is the main entry point for updating prices
      * @param updates Encoded Switchboard updates with signatures
-     * @return updateData The parsed feed update data
+     * @param feedIds Array of feed IDs to process from the update
      */
     function updatePrices(
-        bytes[] calldata updates
-    ) external payable returns (SwitchboardTypes.FeedUpdateData memory updateData) {
-        // Get the required fee
+        bytes[] calldata updates,
+        bytes32[] calldata feedIds
+    ) external payable {
+        // Get the required fee (may be 0 on some networks)
         uint256 fee = switchboard.getFee(updates);
         if (msg.value < fee) {
             revert InsufficientFee(fee, msg.value);
@@ -134,22 +135,20 @@ contract SwitchboardPriceConsumer {
         // Submit updates to Switchboard (this verifies signatures)
         switchboard.updateFeeds{ value: fee }(updates);
 
-        // Process each feed in the update
-        for (uint256 i = 0; i < updates.length; i++) {
-            // Get the latest update for this feed
-            // This internally calls the Switchboard contract
-            updateData = abi.decode(updates[i], (SwitchboardTypes.FeedUpdateData));
+        // Process each feed ID
+        for (uint256 i = 0; i < feedIds.length; i++) {
+            bytes32 feedId = feedIds[i];
             
-            // Process each feed info in the update
-            for (uint256 j = 0; j < updateData.feedInfos.length; j++) {
-                SwitchboardTypes.FeedInfo memory feedInfo = updateData.feedInfos[j];
-                _processFeedUpdate(
-                    feedInfo.feedId,
-                    feedInfo.value,
-                    updateData.timestamp,
-                    updateData.slotNumber
-                );
-            }
+            // Get the latest verified update from Switchboard
+            SwitchboardTypes.LegacyUpdate memory update = switchboard.latestUpdate(feedId);
+            
+            // Process the feed update (convert timestamp to uint64)
+            _processFeedUpdate(
+                feedId,
+                update.result,
+                uint64(update.timestamp),
+                update.slotNumber
+            );
         }
 
         // Refund excess payment
@@ -157,8 +156,6 @@ contract SwitchboardPriceConsumer {
             (bool success, ) = msg.sender.call{ value: msg.value - fee }("");
             require(success, "Refund failed");
         }
-
-        return updateData;
     }
 
     /**

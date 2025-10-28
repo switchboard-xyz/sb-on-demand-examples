@@ -11,7 +11,7 @@ import "../src/SwitchboardPriceConsumer.sol";
  * Usage:
  *   # Monad Testnet
  *   forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
- *     --rpc-url https://testnet.monad.xyz \
+ *     --rpc-url https://testnet-rpc.monad.xyz \
  *     --broadcast \
  *     --verify \
  *     -vvvv

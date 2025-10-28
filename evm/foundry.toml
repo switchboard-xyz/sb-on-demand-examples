@@ -4,9 +4,3 @@ out = "out"
 libs = ["lib"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
-
-[rpc_endpoints]
-hyperliquid = "https://rpc.hyperliquid.xyz/evm"
-
-[etherscan]
-hyperliquid = { chain = 999, key = "", url = "https://api.hyperliquid.xyz/api" }

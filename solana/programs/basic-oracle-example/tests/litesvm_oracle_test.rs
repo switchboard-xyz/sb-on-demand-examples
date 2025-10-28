@@ -14,13 +14,12 @@
 /// - Deterministic testing with controlled feed values
 /// - Perfect for CI/CD and TDD workflows
 
-use anchor_lang::prelude::*;
 use anchor_lang::InstructionData;
 use litesvm::LiteSVM;
 use solana_sdk::{
     account::Account,
     instruction::{AccountMeta, Instruction},
-    pubkey::Pubkey as SolanaPubkey,
+    pubkey::Pubkey,
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
@@ -28,16 +27,6 @@ use switchboard_on_demand::{on_demand::oracle_quote::QuoteBuilder, default_queue
 
 // Re-export the program module so we can access instruction builders
 use basic_oracle_example;
-
-/// Helper to convert anchor Pubkey to solana_sdk Pubkey
-fn to_solana_pubkey(pubkey: &Pubkey) -> SolanaPubkey {
-    SolanaPubkey::from(pubkey.to_bytes())
-}
-
-/// Helper to convert solana_sdk Pubkey to anchor Pubkey
-fn to_anchor_pubkey(pubkey: &SolanaPubkey) -> Pubkey {
-    Pubkey::new_from_array(pubkey.to_bytes())
-}
 
 #[test]
 fn test_oracle_integration_with_litesvm() {
@@ -48,7 +37,7 @@ fn test_oracle_integration_with_litesvm() {
     let mut svm = LiteSVM::new();
 
     // Load the program
-    let program_id = to_solana_pubkey(&basic_oracle_example::ID);
+    let program_id = Pubkey::from(basic_oracle_example::ID.to_bytes());
     println!("📚 Loading program: {}", program_id);
     let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let program_path = manifest_dir
@@ -95,29 +84,31 @@ fn test_oracle_integration_with_litesvm() {
     println!("   Account data size: {} bytes", account_data.len());
     println!("   First 8 bytes (discriminator): {:?}", &account_data[0..8]);
 
-    // Step 5: Derive the canonical oracle account address
-    // This is where the quote program would store the verified oracle data
-    let (oracle_account, _bump) = SolanaPubkey::find_program_address(
-        &[queue_key.as_ref(), &feed_bytes],
-        &to_solana_pubkey(&QUOTE_PROGRAM_ID),
+    // Step 5: Derive the canonical oracle account address using the quote's canonical_key method
+    // This ensures we use the same derivation logic as the program
+    let quote_account = Pubkey::new_from_array(
+        quote.canonical_key(
+            &queue_key,
+            &Pubkey::from(QUOTE_PROGRAM_ID.to_bytes())
+        ).to_bytes()
     );
-    println!("\n📍 Oracle Account (PDA): {}", oracle_account);
+    println!("\n📍 Oracle Account (PDA): {}", quote_account);
 
     // Step 6: Create the oracle account in litesvm
     println!("   Creating account in litesvm...");
     svm.set_account(
-        oracle_account,
+        quote_account,
         Account {
             lamports: 1_000_000, // Rent-exempt amount
             data: account_data.clone(),
-            owner: to_solana_pubkey(&QUOTE_PROGRAM_ID),
+            owner: Pubkey::from(QUOTE_PROGRAM_ID.to_bytes()),
             executable: false,
             rent_epoch: 0,
         }
     ).expect("Failed to create oracle account");
 
     // Verify the account was created
-    let account_info = svm.get_account(&oracle_account).expect("Account should exist");
+    let account_info = svm.get_account(&quote_account).expect("Account should exist");
     println!("   ✓ Account created with {} bytes, owner: {}", account_info.data.len(), account_info.owner);
 
     // Step 7: Get sysvars required by the oracle program
@@ -133,12 +124,12 @@ fn test_oracle_integration_with_litesvm() {
     // Step 8: Create instruction to call the oracle program
     println!("\n📝 Creating program instruction...");
 
-    let program_id = to_solana_pubkey(&basic_oracle_example::ID);
+    let program_id = basic_oracle_example::ID.clone();
     println!("   Program ID: {}", program_id);
 
     // Build account metas manually (since Sysvars struct has lifetimes)
     let accounts = vec![
-        AccountMeta::new_readonly(oracle_account, false),  // quote_account
+        AccountMeta::new_readonly(quote_account, false),  // quote_account
         AccountMeta::new_readonly(clock_sysvar, false),    // sysvars.clock
         AccountMeta::new_readonly(slothashes_sysvar, false), // sysvars.slothashes
         AccountMeta::new_readonly(instructions_sysvar, false), // sysvars.instructions
@@ -206,7 +197,7 @@ fn test_multiple_feeds() {
     let mut svm = LiteSVM::new();
 
     // Load the program
-    let program_id = to_solana_pubkey(&basic_oracle_example::ID);
+    let program_id = Pubkey::from(basic_oracle_example::ID.to_bytes());
     let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let program_path = manifest_dir
         .parent()
@@ -250,18 +241,20 @@ fn test_multiple_feeds() {
 
     let account_data = quote.to_account_data().expect("Failed to serialize");
 
-    // Derive oracle account for this multi-feed quote
-    let (oracle_account, _) = SolanaPubkey::find_program_address(
-        &[queue_key.as_ref(), &btc_feed, &eth_feed],
-        &to_solana_pubkey(&QUOTE_PROGRAM_ID),
+    // Derive oracle account using the quote's canonical_key method
+    let quote_account = Pubkey::new_from_array(
+        quote.canonical_key(
+            &queue_key,
+            &Pubkey::from(QUOTE_PROGRAM_ID.to_bytes())
+        ).to_bytes()
     );
 
     svm.set_account(
-        oracle_account,
+        quote_account,
         Account {
             lamports: 1_000_000,
             data: account_data,
-            owner: to_solana_pubkey(&QUOTE_PROGRAM_ID),
+            owner: Pubkey::from(QUOTE_PROGRAM_ID.to_bytes()),
             executable: false,
             rent_epoch: 0,
         }
@@ -269,14 +262,14 @@ fn test_multiple_feeds() {
 
     // Call the program
     let accounts = vec![
-        AccountMeta::new_readonly(oracle_account, false),  // quote_account
+        AccountMeta::new_readonly(quote_account, false),  // quote_account
         AccountMeta::new_readonly(solana_sdk::sysvar::clock::id(), false),    // sysvars.clock
         AccountMeta::new_readonly(solana_sdk::sysvar::slot_hashes::id(), false), // sysvars.slothashes
         AccountMeta::new_readonly(solana_sdk::sysvar::instructions::id(), false), // sysvars.instructions
     ];
 
     let instruction = Instruction {
-        program_id: to_solana_pubkey(&basic_oracle_example::ID),
+        program_id: Pubkey::from(basic_oracle_example::ID.to_bytes()),
         accounts,
         data: basic_oracle_example::instruction::ReadOracleData {}.data(),
     };
@@ -314,7 +307,7 @@ fn test_price_extremes() {
     let mut svm = LiteSVM::new();
 
     // Load the program
-    let program_id = to_solana_pubkey(&basic_oracle_example::ID);
+    let program_id = Pubkey::from(basic_oracle_example::ID.to_bytes());
     let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let program_path = manifest_dir
         .parent()
@@ -343,31 +336,29 @@ fn test_price_extremes() {
 
     let account_data = quote.to_account_data().expect("Failed to serialize");
 
-    let (oracle_account, _) = SolanaPubkey::find_program_address(
-        &[queue_key.as_ref(), &feed_id],
-        &to_solana_pubkey(&QUOTE_PROGRAM_ID),
-    );
+    // Derive oracle account using the quote's canonical_key method
+    let quote_account = quote.canonical_key(&queue_key, &QUOTE_PROGRAM_ID);
 
     svm.set_account(
-        oracle_account,
+        quote_account,
         Account {
             lamports: 1_000_000,
             data: account_data,
-            owner: to_solana_pubkey(&QUOTE_PROGRAM_ID),
+            owner: Pubkey::from(QUOTE_PROGRAM_ID.to_bytes()),
             executable: false,
             rent_epoch: 0,
         }
     ).unwrap();
 
     let accounts = vec![
-        AccountMeta::new_readonly(oracle_account, false),  // quote_account
+        AccountMeta::new_readonly(quote_account, false),  // quote_account
         AccountMeta::new_readonly(solana_sdk::sysvar::clock::id(), false),    // sysvars.clock
         AccountMeta::new_readonly(solana_sdk::sysvar::slot_hashes::id(), false), // sysvars.slothashes
         AccountMeta::new_readonly(solana_sdk::sysvar::instructions::id(), false), // sysvars.instructions
     ];
 
     let instruction = Instruction {
-        program_id: to_solana_pubkey(&basic_oracle_example::ID),
+        program_id: Pubkey::from(basic_oracle_example::ID.to_bytes()),
         accounts,
         data: basic_oracle_example::instruction::ReadOracleData {}.data(),
     };

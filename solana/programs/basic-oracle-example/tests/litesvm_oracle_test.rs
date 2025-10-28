@@ -4,8 +4,8 @@
 /// of Switchboard oracle integrations without needing a validator.
 ///
 /// Key concepts:
-/// 1. Use QuoteBuilder to create mock oracle data
-/// 2. Set up the account in litesvm's in-memory ledger
+/// 1. Use QuoteBuilder to create mock quote data with oracle feeds
+/// 2. Set up the quote account in litesvm's in-memory ledger
 /// 3. Call your program that consumes oracle data
 /// 4. Verify results instantly
 ///
@@ -69,10 +69,15 @@ fn test_oracle_integration_with_litesvm() {
     ];
     let btc_price = 95000.0;
 
+    // Warp to slot 1000 to create the quote
+    svm.warp_to_slot(1000);
+    let quote_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
+    println!("   Quote slot: {}", quote_slot);
+
     // Build the quote with our test data
     let quote = QuoteBuilder::new(queue_key)
         .add_feed(&feed_bytes, btc_price)
-        .slot(1000)
+        .slot(quote_slot)
         .build()
         .expect("Failed to build quote");
 
@@ -84,7 +89,7 @@ fn test_oracle_integration_with_litesvm() {
     println!("   Account data size: {} bytes", account_data.len());
     println!("   First 8 bytes (discriminator): {:?}", &account_data[0..8]);
 
-    // Step 5: Derive the canonical oracle account address using the quote's canonical_key method
+    // Step 5: Derive the canonical quote account address using the quote's canonical_key method
     // This ensures we use the same derivation logic as the program
     let quote_account = Pubkey::new_from_array(
         quote.canonical_key(
@@ -92,10 +97,10 @@ fn test_oracle_integration_with_litesvm() {
             &Pubkey::from(QUOTE_PROGRAM_ID.to_bytes())
         ).to_bytes()
     );
-    println!("\n📍 Oracle Account (PDA): {}", quote_account);
+    println!("\n📍 Quote Account (PDA): {}", quote_account);
 
-    // Step 6: Create the oracle account in litesvm
-    println!("   Creating account in litesvm...");
+    // Step 6: Create the quote account in litesvm
+    println!("   Creating quote account in litesvm...");
     svm.set_account(
         quote_account,
         Account {
@@ -105,13 +110,18 @@ fn test_oracle_integration_with_litesvm() {
             executable: false,
             rent_epoch: 0,
         }
-    ).expect("Failed to create oracle account");
+    ).expect("Failed to create quote account");
 
     // Verify the account was created
     let account_info = svm.get_account(&quote_account).expect("Account should exist");
-    println!("   ✓ Account created with {} bytes, owner: {}", account_info.data.len(), account_info.owner);
+    println!("   ✓ Quote account created with {} bytes, owner: {}", account_info.data.len(), account_info.owner);
 
-    // Step 7: Get sysvars required by the oracle program
+    // Advance time to demonstrate staleness
+    svm.warp_to_slot(1050);
+    let current_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
+    println!("   ⏰ Advanced to slot: {} (quote is {} slots old)", current_slot, current_slot - quote_slot);
+
+    // Step 7: Get sysvars required by the program
     let clock_sysvar = solana_sdk::sysvar::clock::id();
     let slothashes_sysvar = solana_sdk::sysvar::slot_hashes::id();
     let instructions_sysvar = solana_sdk::sysvar::instructions::id();
@@ -161,7 +171,7 @@ fn test_oracle_integration_with_litesvm() {
             println!("   ✓ Transaction succeeded!");
             println!("   Compute units used: {:?}", metadata.compute_units_consumed);
 
-            // Check logs for our expected output
+            // Print all logs
             println!("\n📋 Program logs:");
             for log in &metadata.logs {
                 println!("   {}", log);
@@ -185,6 +195,13 @@ fn test_oracle_integration_with_litesvm() {
             println!("\n🎉 Test completed successfully!");
         }
         Err(e) => {
+            // Print logs even on failure
+            if let litesvm::types::FailedTransactionMetadata { meta, .. } = &e {
+                println!("\n📋 Program logs (from failed transaction):");
+                for log in &meta.logs {
+                    println!("   {}", log);
+                }
+            }
             panic!("❌ Transaction failed: {:?}", e);
         }
     }
@@ -232,10 +249,14 @@ fn test_multiple_feeds() {
     println!("   BTC/USD: $95000");
     println!("   ETH/USD: $3500");
 
+    // Get current slot from litesvm
+    let current_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
+    println!("   Current slot: {}", current_slot);
+
     let quote = QuoteBuilder::new(queue_key)
         .add_feed(&btc_feed, 95000.0)
         .add_feed(&eth_feed, 3500.0)
-        .slot(1000)
+        .slot(current_slot)
         .build()
         .expect("Failed to build quote");
 
@@ -286,13 +307,24 @@ fn test_multiple_feeds() {
     match result {
         Ok(metadata) => {
             println!("\n✅ Multiple feeds processed successfully!");
+            println!("   Compute units used: {:?}", metadata.compute_units_consumed);
+
+            println!("\n📋 Program logs:");
             for log in &metadata.logs {
+                println!("   {}", log);
                 if log.contains("Number of feeds: 2") {
                     println!("   ✓ Correctly processed 2 feeds");
                 }
             }
         }
         Err(e) => {
+            // Print logs even on failure
+            if let litesvm::types::FailedTransactionMetadata { meta, .. } = &e {
+                println!("\n📋 Program logs (from failed transaction):");
+                for log in &meta.logs {
+                    println!("   {}", log);
+                }
+            }
             panic!("❌ Transaction failed: {:?}", e);
         }
     }
@@ -328,9 +360,13 @@ fn test_price_extremes() {
     let extreme_price = 1_000_000.0;
     println!("📊 Testing with extreme price: ${}", extreme_price);
 
+    // Get current slot from litesvm
+    let current_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
+    println!("   Current slot: {}", current_slot);
+
     let quote = QuoteBuilder::new(queue_key)
         .add_feed(&feed_id, extreme_price)
-        .slot(1000)
+        .slot(current_slot)
         .build()
         .expect("Failed to build quote");
 
@@ -372,6 +408,25 @@ fn test_price_extremes() {
 
     let result = svm.send_transaction(transaction);
 
-    assert!(result.is_ok(), "Should handle extreme price values");
-    println!("✅ Extreme price handled correctly!");
+    match result {
+        Ok(metadata) => {
+            println!("\n✅ Extreme price handled correctly!");
+            println!("   Compute units used: {:?}", metadata.compute_units_consumed);
+
+            println!("\n📋 Program logs:");
+            for log in &metadata.logs {
+                println!("   {}", log);
+            }
+        }
+        Err(e) => {
+            // Print logs even on failure
+            if let litesvm::types::FailedTransactionMetadata { meta, .. } = &e {
+                println!("\n📋 Program logs (from failed transaction):");
+                for log in &meta.logs {
+                    println!("   {}", log);
+                }
+            }
+            panic!("❌ Should handle extreme price values. Transaction failed: {:?}", e);
+        }
+    }
 }

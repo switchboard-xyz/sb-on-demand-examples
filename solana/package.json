@@ -61,6 +61,7 @@
     "exact": "link:@faremeter/payment-solana/exact",
     "path": "^0.12.7",
     "solana": "link:@faremeter/info/solana",
+    "tweetnacl": "^1.0.3",
     "web3": "^4.16.0",
     "yargs": "^17.7.2"
   },

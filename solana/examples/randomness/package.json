@@ -19,7 +19,8 @@
     "@coral-xyz/anchor": "^0.31.1",
     "@solana/spl-token": "^0.4.9",
     "@solana/web3.js": "^1.98.2",
-    "@switchboard-xyz/on-demand": "^2.16.4",
+    "@switchboard-xyz/common": "^5.2.2",
+    "@switchboard-xyz/on-demand": "^3.1.2",
     "readline-sync": "^1.4.10",
     "tsx": "^4.19.1",
     "yargs": "^17.7.2"

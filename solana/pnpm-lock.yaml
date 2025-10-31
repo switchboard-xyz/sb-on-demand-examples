@@ -36,8 +36,8 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
-        specifier: ^3.1.2
-        version: 3.1.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: 3.2.0
+        version: 3.2.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/x402-utils':
         specifier: 0.2.1
         version: 0.2.1(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
@@ -612,8 +612,8 @@ packages:
     resolution: {integrity: sha512-cvxssAmQrYBhAi9DqtePpDcFkUG/KOhDWU8lRS8prOol5pQAYxXjbuzGUGt6ekEDlNTj15i7mOUdVjJ1e3r+Aw==}
     engines: {node: '>=20'}
 
-  '@switchboard-xyz/on-demand@3.1.2':
-    resolution: {integrity: sha512-epwCPYTxyiRjEcQmPvgYV8X7zPbMZ4K/EvYKDSBTpjzgSK1SVtjk+1FW2qz1g7y8NG6GF9znCFb4U0iuPjBrjw==}
+  '@switchboard-xyz/on-demand@3.2.0':
+    resolution: {integrity: sha512-PycvYN6ZCJxP3q7ZVb+Kg1e1fbz1st1Rq3vPgmhEAJDelkY9wlreDlpvr9tuzQt9jA60Aq+/jg3AW64hSy5xOw==}
     engines: {node: '>= 18'}
 
   '@switchboard-xyz/x402-utils@0.2.1':
@@ -2420,7 +2420,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@switchboard-xyz/on-demand@3.1.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+  '@switchboard-xyz/on-demand@3.2.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@coral-xyz/anchor-31': '@coral-xyz/anchor@0.31.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)'
       '@isaacs/ttlcache': 1.4.1

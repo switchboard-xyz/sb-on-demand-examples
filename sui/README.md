@@ -181,8 +181,9 @@ sui/
 ├── scripts/
 │   └── run.ts            # Complete TypeScript example
 ├── examples/
-│   ├── quotes.ts         # Simple quote fetching example
-│   └── surge.ts          # WebSocket streaming example
+│   ├── quotes.ts                # Simple quote fetching example
+│   ├── mainnet_surge_stream.ts  # Advanced mainnet streaming with Sui integration
+│   └── testnet_surge_stream.ts  # Advanced testnet streaming with Sui integration
 ├── package.json
 └── README.md
 ```
@@ -211,8 +212,11 @@ npm run example
 # Run simple quote fetching example
 npm run quotes
 
-# Run Surge WebSocket streaming example
-npm run surge
+# Run mainnet Surge streaming example
+npx tsx examples/mainnet_surge_stream.ts
+
+# Run testnet Surge streaming example  
+npx tsx examples/testnet_surge_stream.ts
 ```
 
 ## 📖 Detailed Examples
@@ -258,26 +262,35 @@ npm run quotes -- --numOracles 5
 npm run quotes -- --network testnet
 ```
 
-### 3. Surge WebSocket Streaming
+### 3. Surge Streaming with Sui Integration
 
-The `examples/surge.ts` file demonstrates real-time price monitoring:
+Real-time price streaming with full Sui blockchain integration:
 
+#### Mainnet Surge Streaming
 ```bash
-# Get a Surge API key from https://explorer.switchboard.xyz
+# Set up your Surge API key
 export SURGE_API_KEY="sb_live_your_api_key_here"
 
-# Stream for 10 seconds (default)
-npm run surge
-
-# Subscribe to specific feeds
-npm run surge -- --feeds BTC/USD,ETH/USD,SOL/USD
-
-# Stream for 30 seconds
-npm run surge -- --duration 30
-
-# Stream continuously (until Ctrl+C)
-npm run surge -- --duration 0
+# Run the mainnet surge streaming example
+npx tsx examples/mainnet_surge_stream.ts
 ```
+
+#### Testnet Surge Streaming
+```bash
+# Set up your Surge API key
+export SURGE_API_KEY="sb_live_your_api_key_here"
+
+# Run the testnet surge streaming example
+npx tsx examples/testnet_surge_stream.ts
+```
+
+These examples demonstrate:
+- ✅ Real-time BTC/USD price streaming via WebSocket
+- ✅ Oracle mapping and verification
+- ✅ Transaction queue management for Sui blockchain
+- ✅ Automatic retry and error handling
+- ✅ Latency statistics and performance monitoring
+- ✅ Full integration with Sui's `emitSurgeQuote` functionality
 
 ## 🔧 Customizing for Your Use Case
 

@@ -157,7 +157,7 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
 
     const sim = await connection.simulateTransaction(createRandomnessTx, txOpts);
     const sig1 = await connection.sendTransaction(createRandomnessTx, txOpts);
-    await connection.confirmTransaction(sig1, COMMITMENT);
+    await connection.confirmTransaction(sig1, "finalized");
     console.log(
       "  Transaction Signature for randomness account creation: ",
       sig1

@@ -1,6 +1,7 @@
 {
 	"type": "module",
 	"dependencies": {
+		"@switchboard-xyz/common": "^5.2.5",
 		"@switchboard-xyz/on-demand": "2.16.0"
 	}
 }

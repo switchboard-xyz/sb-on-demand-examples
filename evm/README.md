@@ -276,6 +276,28 @@ export EXAMPLE_ADDRESS=0x...
 bun examples/updateFeed.ts
 ```
 
+### `/examples/surgeToEvmConversion.ts` - Surge to EVM Format Converter
+
+Convert Switchboard Surge updates to EVM-compatible format:
+
+```bash
+# Basic conversion with sample data
+bun run surge-convert
+
+# With custom surge data file
+SURGE_DATA_FILE=path/to/surge-data.json bun run surge-convert
+```
+
+This utility demonstrates how to:
+- Convert Surge update responses to EVM format
+- Parse and validate the encoded data structure
+- Use the converted data with EVM smart contracts
+
+The conversion follows the tight-packed format:
+- Header: slot(8) + timestamp(8) + numFeeds(1) + numSigs(1)
+- Feed data: feedHash(32) + value(16) + minSamples(1) per feed
+- Signatures: signature(64) + recoveryId(1) per signature
+
 ## 🏃‍♂️ Getting Started
 
 ### Step 1: Build the Contract

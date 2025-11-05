@@ -62,6 +62,117 @@ That's it! You're now fetching and verifying real-time oracle prices on EVM. �
 
 > **Note**: For other EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/) which use the previous Switchboard implementation.
 
+## 🔥 Monad Integration
+
+Monad is a high-performance EVM-compatible blockchain optimized for speed and efficiency. Switchboard On-Demand provides native oracle support for Monad with the same security guarantees and ease of use as other EVM chains.
+
+### Network Information
+
+| Network | Chain ID | RPC URL | Switchboard Contract |
+|---------|----------|---------|---------------------|
+| **Monad Mainnet** | 143 | `https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY` | `0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67` |
+| **Monad Testnet** | 10143 | `https://testnet-rpc.monad.xyz` | `0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33` |
+
+### Quick Start on Monad
+
+#### 1. Setup Environment
+
+```bash
+# Monad Testnet
+export RPC_URL=https://testnet-rpc.monad.xyz
+export PRIVATE_KEY=0xyour_private_key_here
+export NETWORK=monad-testnet
+
+# Monad Mainnet
+export RPC_URL=https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY
+export PRIVATE_KEY=0xyour_private_key_here  
+export NETWORK=monad-mainnet
+```
+
+#### 2. Deploy Contract
+
+```bash
+# Monad Testnet deployment
+forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+  --rpc-url https://testnet-rpc.monad.xyz \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  -vvvv
+
+# Monad Mainnet deployment  
+forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+  --rpc-url https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  -vvvv
+```
+
+#### 3. Run Oracle Integration
+
+```bash
+# Complete example on Monad Testnet
+RPC_URL=https://testnet-rpc.monad.xyz \
+PRIVATE_KEY=$PRIVATE_KEY \
+CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
+NETWORK=monad-testnet \
+bun scripts/run.ts
+
+# Complete example on Monad Mainnet
+RPC_URL=https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY \
+PRIVATE_KEY=$PRIVATE_KEY \
+CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
+NETWORK=monad-mainnet \
+bun scripts/run.ts
+```
+
+### Monad-Specific Considerations
+
+- **Native Token**: MON (for gas fees)
+- **High Performance**: Monad's optimized execution enables faster oracle updates
+- **Low Fees**: Efficient gas usage for frequent price updates
+- **EVM Compatibility**: All existing Ethereum tooling works seamlessly
+
+### Getting MON Tokens
+
+**Testnet:**
+- Use the [Monad Testnet Faucet](https://faucet.monad.xyz) to get testnet MON
+- Connect your wallet and request tokens for testing
+
+**Mainnet:**
+- Acquire MON tokens through supported exchanges
+- Bridge from other networks using official Monad bridges
+
+### Example: DeFi Integration on Monad
+
+```typescript
+import { ethers } from 'ethers';
+import { CrossbarClient } from '@switchboard-xyz/common';
+
+// Monad-specific setup
+const provider = new ethers.JsonRpcProvider('https://testnet-rpc.monad.xyz');
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+
+// Switchboard contract on Monad Testnet
+const switchboardAddress = '0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33';
+const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
+
+// Your deployed price consumer contract
+const priceConsumer = new ethers.Contract(contractAddress, PRICE_CONSUMER_ABI, signer);
+
+// Fetch and update prices
+const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
+const feedHash = '0xa0950ee5ee117b2e2c30f154a69e17bfb489a7610c508dc5f67eb2a14616d8ea'; // ETH/USD
+
+const response = await crossbar.fetchOracleQuote([feedHash], 'mainnet');
+const fee = await switchboard.getFee([response.encoded]);
+
+// Submit update with Monad's fast finality
+const tx = await priceConsumer.updatePrices([response.encoded], { value: fee });
+const receipt = await tx.wait();
+
+console.log(`Price updated on Monad! Block: ${receipt.blockNumber}`);
+```
+
 ## 🎯 What is Switchboard On-Demand?
 
 Switchboard On-Demand provides secure, verified oracle data for EVM smart contracts:

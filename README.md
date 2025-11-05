@@ -47,9 +47,6 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 - **[📁 Feed Examples](./sui/examples/)** - Complete TypeScript examples for Sui integration
   - Oracle data fetching, feed reading, transaction simulation
   - No private key required for data reading and simulation
-- **[🌊 Surge Streaming Examples](./sui/examples/)** - Real-time price streaming with Sui integration
-  - **[Mainnet Surge Stream](./sui/examples/mainnet_surge_stream.ts)** - Live price streaming on Sui mainnet
-  - **[Testnet Surge Stream](./sui/examples/testnet_surge_stream.ts)** - Live price streaming on Sui testnet
 
 **Resources:**
 - [Sui Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/sui)
@@ -57,16 +54,16 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 
 ### EVM
 
-The EVM examples showcase Switchboard functionality on Ethereum and EVM-compatible chains:
+The EVM examples showcase Switchboard functionality on EVM-compatible chains:
 
 - **[📈 Price Feeds](./evm)** - Real-time price data for DeFi applications
 
 **Supported Networks:**
-- Ethereum, Hyperliquid, Arbitrum, Optimism, Base, Polygon, BNB Chain, Avalanche
+- Monad, Core, Arbitrum
 
 **Resources:**
 - [EVM Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/evm)
-- [Solidity SDK](https://www.npmjs.com/package/@switchboard-xyz/evm.js)
+- [Solidity SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand-solidity)
 
 ## 🌍 Chain-Agnostic Resources
 

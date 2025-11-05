@@ -47,6 +47,9 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 - **[📁 Feed Examples](./sui/examples/)** - Complete TypeScript examples for Sui integration
   - Oracle data fetching, feed reading, transaction simulation
   - No private key required for data reading and simulation
+- **[🌊 Surge Streaming Examples](./sui/examples/)** - Real-time price streaming with Sui integration
+  - **[Mainnet Surge Stream](./sui/examples/mainnet_surge_stream.ts)** - Live price streaming on Sui mainnet
+  - **[Testnet Surge Stream](./sui/examples/testnet_surge_stream.ts)** - Live price streaming on Sui testnet
 
 **Resources:**
 - [Sui Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/sui)

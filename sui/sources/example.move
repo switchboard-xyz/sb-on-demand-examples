@@ -1,3 +1,4 @@
+#[allow(unused_use)]
 /// # Switchboard Oracle Quote Consumer Example
 /// 
 /// This module demonstrates how to securely integrate Switchboard's on-demand oracle data

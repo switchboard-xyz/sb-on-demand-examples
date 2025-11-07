@@ -1,10 +1,10 @@
 import * as anchor from "@coral-xyz/anchor";
 import {
-  Connection,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Commitment,
+    Connection,
+    Keypair,
+    PublicKey,
+    SystemProgram,
+    Commitment,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
@@ -13,30 +13,30 @@ import * as reader from "readline-sync";
 const COMMITMENT = "confirmed";
 
 export async function myAnchorProgram(
-  provider: anchor.Provider,
-  keypath: string
+    provider: anchor.Provider,
+    keypath: string,
 ): Promise<anchor.Program> {
-  const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
-  const pid = myProgramKeypair.publicKey;
-  const idl = (await anchor.Program.fetchIdl(pid, provider))!;
-  if (idl == null) {
-    console.error("IDL not found for the program at", pid.toString());
-    process.exit(1);
-  }
-  if (idl?.address == undefined || idl?.address == null) {
-    idl.address = pid.toString();
-  }
-  const program = new anchor.Program(idl, provider);
-  return program;
+    const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
+    const pid = myProgramKeypair.publicKey;
+    const idl = (await anchor.Program.fetchIdl(pid, provider))!;
+    if (idl == null) {
+        console.error("IDL not found for the program at", pid.toString());
+        process.exit(1);
+    }
+    if (idl?.address == undefined || idl?.address == null) {
+        idl.address = pid.toString();
+    }
+    const program = new anchor.Program(idl, provider);
+    return program;
 }
 
 export async function loadSbProgram(
-  provider: anchor.Provider
+    provider: anchor.Provider,
 ): Promise<anchor.Program> {
-  const sbProgramId = await sb.getProgramId(provider.connection);
-  const sbIdl = await anchor.Program.fetchIdl(sbProgramId, provider);
-  const sbProgram = new anchor.Program(sbIdl!, provider);
-  return sbProgram;
+    const sbProgramId = await sb.getProgramId(provider.connection);
+    const sbIdl = await anchor.Program.fetchIdl(sbProgramId, provider);
+    const sbProgram = new anchor.Program(sbIdl!, provider);
+    return sbProgram;
 }
 
 // export async function loadSVMSwitchboardProgram(
@@ -49,56 +49,60 @@ export async function loadSbProgram(
 // }
 
 export async function initializeMyProgram(
-  provider: anchor.Provider
+    provider: anchor.Provider,
 ): Promise<anchor.Program> {
-  const myProgramPath =
-    "../target/deploy/sb_randomness-keypair.json";
-  const myProgram = await myAnchorProgram(provider, myProgramPath);
-  console.log("My program", myProgram.programId.toString());
-  return myProgram;
+    const myProgramPath = "../target/deploy/sb_randomness-keypair.json";
+    const myProgram = await myAnchorProgram(provider, myProgramPath);
+    console.log("My program", myProgram.programId.toString());
+    return myProgram;
 }
 
 export async function setupQueue(program: anchor.Program): Promise<PublicKey> {
-  const queueAccount = await sb.getDefaultQueue(
-    program.provider.connection.rpcEndpoint
-  );
-  console.log("Queue account", queueAccount.pubkey.toString());
-  try {
-    await queueAccount.loadData();
-  } catch (err) {
-    console.error("Queue not found, ensure you are using devnet in your env");
-    process.exit(1);
-  }
-  return queueAccount.pubkey;
+    const queueAccount = await sb.getDefaultQueue(
+        program.provider.connection.rpcEndpoint,
+    );
+    console.log("Queue account", queueAccount.pubkey.toString());
+    try {
+        await queueAccount.loadData();
+    } catch (err) {
+        console.error(
+            "Queue not found, ensure you are using devnet in your env",
+        );
+        process.exit(1);
+    }
+    return queueAccount.pubkey;
 }
 
 export async function setupSVMQueue(
-  program: anchor.Program,
-  queue: PublicKey
+    program: anchor.Program,
+    queue: PublicKey,
 ): Promise<PublicKey> {
-  const queuePDA = sb.Queue.queuePDA(program, queue);
-  console.log("Queue:", queuePDA.toString());
-  return queuePDA;
+    const queuePDA = sb.Queue.queuePDA(program, queue);
+    console.log("Queue:", queuePDA.toString());
+    return queuePDA;
 }
 
 export function getUserGuessFromCommandLine(): boolean {
-  // Extract the user's guess from the command line arguments
-  let userGuessInput = process.argv[2]; // The third argument is the user's input
-  if (!userGuessInput) {
-    userGuessInput = reader
-      .question("It is now time to make your prediction: Heads or tails... ")
-      .trim()
-      .toLowerCase();
-  }
+    // Extract the user's guess from the command line arguments
+    let userGuessInput = process.argv[2]; // The third argument is the user's input
+    if (!userGuessInput) {
+        userGuessInput = reader
+            .question(
+                "It is now time to make your prediction: Heads or tails... ",
+            )
+            .trim()
+            .toLowerCase();
+    }
 
-  // Validate and convert the input to a boolean (heads = true, tails = false)
-  const isValidGuess = userGuessInput === "heads" || userGuessInput === "tails";
-  if (!isValidGuess) {
-    console.error('Please provide a valid guess: "heads" or "tails".');
-    process.exit(1); // Exit the script with an error code
-  }
+    // Validate and convert the input to a boolean (heads = true, tails = false)
+    const isValidGuess =
+        userGuessInput === "heads" || userGuessInput === "tails";
+    if (!isValidGuess) {
+        console.error('Please provide a valid guess: "heads" or "tails".');
+        process.exit(1); // Exit the script with an error code
+    }
 
-  return userGuessInput === "heads"; // Convert "heads" to true, "tails" to false
+    return userGuessInput === "heads"; // Convert "heads" to true, "tails" to false
 }
 
 /**
@@ -112,60 +116,60 @@ export function getUserGuessFromCommandLine(): boolean {
  * @returns The transaction signature.
  */
 export async function handleTransaction(
-  sbProgram: anchor.Program,
-  connection: Connection,
-  ix: anchor.web3.TransactionInstruction[],
-  keypair: Keypair,
-  signers: Keypair[],
-  txOpts: any
+    sbProgram: anchor.Program,
+    connection: Connection,
+    ix: anchor.web3.TransactionInstruction[],
+    keypair: Keypair,
+    signers: Keypair[],
+    txOpts: any,
 ): Promise<string> {
-  const createTx = await sb.asV0Tx({
-    connection: sbProgram.provider.connection,
-    ixs: ix,
-    payer: keypair.publicKey,
-    signers: signers,
-    computeUnitPrice: 75_000,
-    computeUnitLimitMultiple: 1.3,
-  });
+    const createTx = await sb.asV0Tx({
+        connection: sbProgram.provider.connection,
+        ixs: ix,
+        payer: keypair.publicKey,
+        signers: signers,
+        computeUnitPrice: 75_000,
+        computeUnitLimitMultiple: 1.3,
+    });
 
-  const sim = await connection.simulateTransaction(createTx, txOpts);
-  const sig = await connection.sendTransaction(createTx, txOpts);
-  await connection.confirmTransaction(sig, COMMITMENT);
-  console.log("  Transaction Signature", sig);
-  return sig;
+    const sim = await connection.simulateTransaction(createTx, txOpts);
+    const sig = await connection.sendTransaction(createTx, txOpts);
+    await connection.confirmTransaction(sig, COMMITMENT);
+    console.log("  Transaction Signature", sig);
+    return sig;
 }
 
 export async function initializeGame(
-  myProgram: anchor.Program,
-  playerStateAccount: [anchor.web3.PublicKey, number],
-  escrowAccount: PublicKey,
-  keypair: Keypair,
-  sbProgram: anchor.Program,
-  connection: Connection
+    myProgram: anchor.Program,
+    playerStateAccount: [anchor.web3.PublicKey, number],
+    escrowAccount: PublicKey,
+    keypair: Keypair,
+    sbProgram: anchor.Program,
+    connection: Connection,
 ): Promise<void> {
-  const initIx = await myProgram.methods
-    .initialize()
-    .accounts({
-      playerState: playerStateAccount,
-      escrowAccount: escrowAccount,
-      user: keypair.publicKey,
-      systemProgram: SystemProgram.programId,
-    })
-    .instruction();
+    const initIx = await myProgram.methods
+        .initialize()
+        .accounts({
+            playerState: playerStateAccount,
+            escrowAccount: escrowAccount,
+            user: keypair.publicKey,
+            systemProgram: SystemProgram.programId,
+        })
+        .instruction();
 
-  const txOpts = {
-    commitment: "processed" as Commitment,
-    skipPreflight: true,
-    maxRetries: 0,
-  };
-  await handleTransaction(
-    sbProgram,
-    connection,
-    [initIx],
-    keypair,
-    [keypair],
-    txOpts
-  );
+    const txOpts = {
+        commitment: "processed" as Commitment,
+        skipPreflight: true,
+        maxRetries: 0,
+    };
+    await handleTransaction(
+        sbProgram,
+        connection,
+        [initIx],
+        keypair,
+        [keypair],
+        txOpts,
+    );
 }
 
 export /**
@@ -179,23 +183,23 @@ export /**
  * @returns The coin flip instruction.
  */
 async function createCoinFlipInstruction(
-  myProgram: anchor.Program,
-  rngKpPublicKey: PublicKey,
-  userGuess: boolean,
-  playerStateAccount: [anchor.web3.PublicKey, number],
-  keypair: Keypair,
-  escrowAccount: PublicKey
+    myProgram: anchor.Program,
+    rngKpPublicKey: PublicKey,
+    userGuess: boolean,
+    playerStateAccount: [anchor.web3.PublicKey, number],
+    keypair: Keypair,
+    escrowAccount: PublicKey,
 ): Promise<anchor.web3.TransactionInstruction> {
-  return await myProgram.methods
-    .coinFlip(rngKpPublicKey, userGuess)
-    .accounts({
-      playerState: playerStateAccount,
-      user: keypair.publicKey,
-      randomnessAccountData: rngKpPublicKey,
-      escrowAccount: escrowAccount,
-      systemProgram: SystemProgram.programId,
-    })
-    .instruction();
+    return await myProgram.methods
+        .coinFlip(userGuess)
+        .accounts({
+            playerState: playerStateAccount,
+            user: keypair.publicKey,
+            randomnessAccountData: rngKpPublicKey,
+            escrowAccount: escrowAccount,
+            systemProgram: SystemProgram.programId,
+        })
+        .instruction();
 }
 
 /**
@@ -209,64 +213,63 @@ async function createCoinFlipInstruction(
  * @returns The settle flip instruction.
  */
 export async function settleFlipInstruction(
-  myProgram: anchor.Program,
-  escrowBump: number,
-  playerStateAccount: [anchor.web3.PublicKey, number],
-  rngKpPublicKey: PublicKey,
-  escrowAccount: PublicKey,
-  keypair: Keypair
+    myProgram: anchor.Program,
+    escrowBump: number,
+    playerStateAccount: [anchor.web3.PublicKey, number],
+    rngKpPublicKey: PublicKey,
+    escrowAccount: PublicKey,
+    keypair: Keypair,
 ): Promise<anchor.web3.TransactionInstruction> {
-  return await myProgram.methods
-    .settleFlip(escrowBump)
-    .accounts({
-      playerState: playerStateAccount,
-      randomnessAccountData: rngKpPublicKey,
-      escrowAccount: escrowAccount,
-      user: keypair.publicKey,
-      systemProgram: SystemProgram.programId,
-    })
-    .instruction();
+    return await myProgram.methods
+        .settleFlip(escrowBump)
+        .accounts({
+            playerState: playerStateAccount,
+            randomnessAccountData: rngKpPublicKey,
+            escrowAccount: escrowAccount,
+            user: keypair.publicKey,
+            systemProgram: SystemProgram.programId,
+        })
+        .instruction();
 }
 
 export async function ensureEscrowFunded(
-  connection: Connection,
-  escrowAccount: PublicKey,
-  keypair: Keypair,
-  sbProgram: anchor.Program,
-  txOpts: any
+    connection: Connection,
+    escrowAccount: PublicKey,
+    keypair: Keypair,
+    sbProgram: anchor.Program,
+    txOpts: any,
 ): Promise<void> {
-  const accountBalance = await connection.getBalance(escrowAccount);
-  const minRentExemption = await connection.getMinimumBalanceForRentExemption(
-    0
-  );
+    const accountBalance = await connection.getBalance(escrowAccount);
+    const minRentExemption =
+        await connection.getMinimumBalanceForRentExemption(0);
 
-  const requiredBalance = minRentExemption;
-  if (accountBalance < requiredBalance) {
-    const amountToFund = requiredBalance - accountBalance;
-    console.log(
-      `Funding account with ${amountToFund} lamports to meet rent exemption threshold.`
-    );
+    const requiredBalance = minRentExemption;
+    if (accountBalance < requiredBalance) {
+        const amountToFund = requiredBalance - accountBalance;
+        console.log(
+            `Funding account with ${amountToFund} lamports to meet rent exemption threshold.`,
+        );
 
-    const transferIx = SystemProgram.transfer({
-      fromPubkey: keypair.publicKey,
-      toPubkey: escrowAccount,
-      lamports: amountToFund,
-    });
+        const transferIx = SystemProgram.transfer({
+            fromPubkey: keypair.publicKey,
+            toPubkey: escrowAccount,
+            lamports: amountToFund,
+        });
 
-    const transferTx = await sb.asV0Tx({
-      connection: sbProgram.provider.connection,
-      ixs: [transferIx],
-      payer: keypair.publicKey,
-      signers: [keypair],
-      computeUnitPrice: 75_000,
-      computeUnitLimitMultiple: 1.3,
-    });
+        const transferTx = await sb.asV0Tx({
+            connection: sbProgram.provider.connection,
+            ixs: [transferIx],
+            payer: keypair.publicKey,
+            signers: [keypair],
+            computeUnitPrice: 75_000,
+            computeUnitLimitMultiple: 1.3,
+        });
 
-    const sim3 = await connection.simulateTransaction(transferTx, txOpts);
-    const sig3 = await connection.sendTransaction(transferTx, txOpts);
-    await connection.confirmTransaction(sig3, COMMITMENT);
-    console.log("  Transaction Signature ", sig3);
-  } else {
-    console.log("  Escrow account funded already");
-  }
+        const sim3 = await connection.simulateTransaction(transferTx, txOpts);
+        const sig3 = await connection.sendTransaction(transferTx, txOpts);
+        await connection.confirmTransaction(sig3, COMMITMENT);
+        console.log("  Transaction Signature ", sig3);
+    } else {
+        console.log("  Escrow account funded already");
+    }
 }

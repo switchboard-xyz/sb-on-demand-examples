@@ -50,11 +50,7 @@ pub mod sb_randomness {
     }
 
     // Flip the coin; only callable by the allowed user
-    pub fn coin_flip(
-        ctx: Context<CoinFlip>,
-        randomness_account: Pubkey,
-        guess: bool,
-    ) -> Result<()> {
+    pub fn coin_flip(ctx: Context<CoinFlip>, guess: bool) -> Result<()> {
         let clock = Clock::get()?;
         let player_state = &mut ctx.accounts.player_state;
         // Record the user's guess
@@ -92,7 +88,7 @@ pub mod sb_randomness {
         )?;
 
         // Store flip commit
-        player_state.randomness_account = randomness_account;
+        player_state.randomness_account = ctx.accounts.randomness_account_data.key();
 
         // Log the result
         msg!("Coin flip initiated, randomness requested.");

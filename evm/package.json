@@ -6,6 +6,7 @@
   "scripts": {
     "example": "bun scripts/run.ts",
     "update": "bun examples/updateFeed.ts",
+    "surge-convert": "bun examples/surgeToEvmConversion.ts",
     "build": "forge build",
     "test": "forge test",
     "deploy": "forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --broadcast -vvvv",

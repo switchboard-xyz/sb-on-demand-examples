@@ -30,7 +30,7 @@
  *
  * Examples:
  *   # Monad Testnet
- *   RPC_URL=https://testnet.monad.xyz PRIVATE_KEY=0x... NETWORK=monad-testnet bun scripts/run.ts
+ *   RPC_URL=https://testnet-rpc.monad.xyz PRIVATE_KEY=0x... NETWORK=monad-testnet bun scripts/run.ts
  *
  *   # Monad Mainnet
  *   RPC_URL=https://rpc-mainnet.monadinfra.com/rpc/YOUR_KEY PRIVATE_KEY=0x... NETWORK=monad-mainnet bun scripts/run.ts

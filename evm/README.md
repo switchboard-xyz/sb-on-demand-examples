@@ -59,6 +59,8 @@ That's it! You're now fetching and verifying real-time oracle prices on EVM. �
 |---------|----------|---------------------|
 | **Monad Mainnet** | 143 | `0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67` |
 | **Monad Testnet** | 10143 | `0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33` |
+| **Hyperliquid Mainnet** | 999 | `0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347` |
+| **Hyperliquid Testnet** | 998 | TBD |
 
 > **Note**: For other EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/) which use the previous Switchboard implementation.
 
@@ -172,6 +174,126 @@ const receipt = await tx.wait();
 
 console.log(`Price updated on Monad! Block: ${receipt.blockNumber}`);
 ```
+
+## 🔷 HyperEVM (Hyperliquid) Integration
+
+Hyperliquid is a high-performance Layer 1 blockchain with native perpetual futures and spot trading. Switchboard On-Demand provides native oracle support for HyperEVM with the same security guarantees and ease of use as other EVM chains.
+
+### Network Information
+
+| Network | Chain ID | RPC URL | Switchboard Contract |
+|---------|----------|---------|---------------------|
+| **Hyperliquid Mainnet** | 999 | `https://rpc.hyperliquid.xyz/evm` | `0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347` |
+| **Hyperliquid Testnet** | 998 | `https://rpc.hyperliquid-testnet.xyz/evm` | TBD |
+
+### Quick Start on Hyperliquid
+
+#### 1. Setup Environment
+
+```bash
+# Hyperliquid Mainnet
+export RPC_URL=https://rpc.hyperliquid.xyz/evm
+export PRIVATE_KEY=0xyour_private_key_here
+export NETWORK=hyperliquid-mainnet
+
+# Hyperliquid Testnet
+export RPC_URL=https://rpc.hyperliquid-testnet.xyz/evm
+export PRIVATE_KEY=0xyour_private_key_here  
+export NETWORK=hyperliquid-testnet
+```
+
+#### 2. Deploy Contract
+
+```bash
+# Hyperliquid Mainnet deployment
+forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+  --rpc-url https://rpc.hyperliquid.xyz/evm \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  -vvvv
+
+# Hyperliquid Testnet deployment  
+forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+  --rpc-url https://rpc.hyperliquid-testnet.xyz/evm \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  -vvvv
+```
+
+#### 3. Run Oracle Integration
+
+```bash
+# Complete example on Hyperliquid Mainnet
+RPC_URL=https://rpc.hyperliquid.xyz/evm \
+PRIVATE_KEY=$PRIVATE_KEY \
+CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
+NETWORK=hyperliquid-mainnet \
+bun scripts/run.ts
+
+# Complete example on Hyperliquid Testnet
+RPC_URL=https://rpc.hyperliquid-testnet.xyz/evm \
+PRIVATE_KEY=$PRIVATE_KEY \
+CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
+NETWORK=hyperliquid-testnet \
+bun scripts/run.ts
+```
+
+### Hyperliquid-Specific Considerations
+
+- **Native Token**: ETH (for gas fees)
+- **High Performance**: Hyperliquid's optimized execution enables ultra-fast oracle updates
+- **Low Fees**: Efficient gas usage for frequent price updates
+- **EVM Compatibility**: All existing Ethereum tooling works seamlessly
+- **DeFi Native**: Built-in perpetual futures and spot trading
+
+### Example: Perpetual Futures Integration on Hyperliquid
+
+```typescript
+import { ethers } from 'ethers';
+import { CrossbarClient } from '@switchboard-xyz/common';
+
+// Hyperliquid-specific setup
+const provider = new ethers.JsonRpcProvider('https://rpc.hyperliquid.xyz/evm');
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+
+// Switchboard contract on Hyperliquid Mainnet
+const switchboardAddress = '0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347';
+const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
+
+// Your deployed price consumer contract
+const priceConsumer = new ethers.Contract(contractAddress, PRICE_CONSUMER_ABI, signer);
+
+// Fetch and update prices for perpetual futures
+const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
+const btcFeedHash = '0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812'; // BTC/USD
+
+const response = await crossbar.fetchOracleQuote([btcFeedHash], 'mainnet');
+const fee = await switchboard.getFee([response.encoded]);
+
+// Submit update with Hyperliquid's fast finality
+const tx = await priceConsumer.updatePrices([response.encoded], { value: fee });
+const receipt = await tx.wait();
+
+console.log(`Price updated on Hyperliquid! Block: ${receipt.blockNumber}`);
+
+// Query the updated price
+const [value, timestamp, slotNumber] = await priceConsumer.getPrice(btcFeedHash);
+console.log(`BTC/USD Price: $${ethers.formatUnits(value, 18)}`);
+```
+
+### Getting Started with Hyperliquid
+
+**Documentation:**
+- [Hyperliquid Docs](https://hyperliquid.gitbook.io/hyperliquid-docs)
+- [HyperEVM Documentation](https://hyperliquid.gitbook.io/hyperliquid-docs/hyperevm)
+
+**Testnet:**
+- Use the Hyperliquid testnet to test your integration
+- Request testnet tokens through the official faucet
+
+**Mainnet:**
+- Bridge ETH to Hyperliquid using the official bridge
+- Start with small amounts to test your integration
 
 ## 🎯 What is Switchboard On-Demand?
 
@@ -325,7 +447,7 @@ Compiler run successful!
 ```bash
 # Monad Testnet
 forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url https://testnet.monad.xyz \
+  --rpc-url https://testnet-rpc.monad.xyz \
   --private-key $PRIVATE_KEY \
   --broadcast \
   -vvvv

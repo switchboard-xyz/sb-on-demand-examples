@@ -238,14 +238,6 @@ NETWORK=hyperliquid-testnet \
 bun scripts/run.ts
 ```
 
-### Hyperliquid-Specific Considerations
-
-- **Native Token**: ETH (for gas fees)
-- **High Performance**: Hyperliquid's optimized execution enables ultra-fast oracle updates
-- **Low Fees**: Efficient gas usage for frequent price updates
-- **EVM Compatibility**: All existing Ethereum tooling works seamlessly
-- **DeFi Native**: Built-in perpetual futures and spot trading
-
 ### Example: Perpetual Futures Integration on Hyperliquid
 
 ```typescript
@@ -334,13 +326,6 @@ contract SwitchboardPriceConsumer {
     function shouldLiquidate(...) external view returns (bool);
 }
 ```
-
-**Key Features:**
-- Price deviation validation (prevents manipulation)
-- Staleness checks (configurable max age)
-- Multi-feed support
-- Business logic examples (collateral ratios, liquidations)
-- Comprehensive events and error handling
 
 ## 🛠️ Environment Setup
 

@@ -267,3 +267,5 @@ if (!keypair) {
     '📡 Listening for price updates (will simulate after 10 seconds)...'
   );
 })();
+
+

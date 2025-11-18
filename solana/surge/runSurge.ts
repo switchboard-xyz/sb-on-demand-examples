@@ -1,11 +1,12 @@
 import * as sb from "@switchboard-xyz/on-demand";
-import { CrossbarClient } from "@switchboard-xyz/common";
+import { OracleQuote } from "@switchboard-xyz/on-demand";
 import * as fs from "fs";
 import {
   TX_CONFIG,
-  myAnchorProgram,
-  oracleUpdateIx,
-  ADVANCED_PROGRAM_PATH,
+  loadBasicProgram,
+  basicReadOracleIx,
+  BASIC_PROGRAM_PATH,
+  DEFAULT_FEED_ID,
   calculateStatistics,
 } from "@/utils";
 
@@ -22,8 +23,10 @@ import {
   const { keypair, connection, program, crossbar, gateway, queue } =
     await sb.AnchorUtils.loadEnv();
   const lut = await queue.loadLookupTable();
-  const latencies: number[] = [];
+  const stalenessValues: number[] = [];
   let hasRunSimulation = false;
+  let clockOffset: number | null = null;
+  const startTime = Date.now();
 
   const surge = new sb.Surge({
     apiKey,
@@ -44,49 +47,74 @@ import {
   // Listen for price updates
   surge.on("signedPriceUpdate", async (response: sb.SurgeUpdate) => {
     const seenAt = Date.now();
-    const currentLatency = seenAt - response.data.source_ts_ms;
-    latencies.push(currentLatency);
+    const rawStaleness = seenAt - response.data.source_ts_ms;
 
-    const stats = calculateStatistics(latencies);
+    // Calculate clock offset from first update (assume network latency ~50ms)
+    if (clockOffset === null) {
+      clockOffset = rawStaleness < 0 ? rawStaleness - 50 : 0;
+      if (clockOffset !== 0) {
+        console.log(`🕐 Detected clock skew: ${Math.abs(clockOffset).toFixed(0)}ms (adjusting all staleness values)`);
+      }
+    }
+
+    // Adjust staleness for clock offset
+    const currentStaleness = rawStaleness - clockOffset;
+    stalenessValues.push(currentStaleness);
+
+    const stats = calculateStatistics(stalenessValues);
     const formattedPrices = response.getFormattedPrices();
     const currentPrice = Object.values(formattedPrices)[0] || "N/A";
     console.log(
-      `Update #${stats.count} | Seen at: ${new Date(seenAt).toISOString()} | Price: ${currentPrice}`
+      `Update #${stats.count} | Seen at: ${new Date(seenAt).toISOString()} | Staleness: ${currentStaleness.toFixed(0)}ms | Price: ${currentPrice}`
     );
 
     // Only run simulation once after 10 seconds
     if (!hasRunSimulation) return;
 
-    // Check if advanced program is deployed
-    if (!fs.existsSync(ADVANCED_PROGRAM_PATH)) {
+    // Check if basic program is deployed
+    if (!fs.existsSync(BASIC_PROGRAM_PATH)) {
+      const elapsedSeconds = (Date.now() - startTime) / 1000;
+      const samplesPerMin = (stats.count / elapsedSeconds) * 60;
+
       console.log("\n✅ Streaming demo completed!");
-      console.log("ℹ️  Skipping program simulation: advanced_oracle_example not deployed");
+      console.log("ℹ️  Skipping program simulation: basic_oracle_example not deployed");
       console.log("   To deploy and test the full simulation, run: anchor build && anchor deploy\n");
       console.log(`📈 Final streaming stats: ${stats.count} updates received`);
-      console.log(`   Average latency: ${stats.mean.toFixed(1)}ms`);
-      console.log(`   Min latency: ${stats.min}ms`);
-      console.log(`   Max latency: ${stats.max}ms`);
+      console.log(`   Average staleness: ${stats.mean.toFixed(1)}ms`);
+      console.log(`   Min staleness: ${stats.min}ms`);
+      console.log(`   Max staleness: ${stats.max}ms`);
+      console.log(`   Est. samples/min: ${samplesPerMin.toFixed(1)}`);
       console.log(`   Latest price: ${currentPrice}`);
       console.log("\n🎉 Surge streaming works perfectly! Oracle data is being delivered in real-time.");
       surge.disconnect();
       process.exit(0);
     }
 
-    const result = response.toQuoteIx();
-    const sigVerifyIx = Array.isArray(result) ? result[0] : result;
-    const testProgram = await myAnchorProgram(
-      program!.provider,
-      ADVANCED_PROGRAM_PATH
+    // Derive the canonical oracle account for managed updates
+    const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [DEFAULT_FEED_ID]);
+
+    // Use managed update instructions instead of direct quote instruction
+    const managedUpdateIxs = await queue.fetchManagedUpdateIxs(
+      crossbar,
+      [DEFAULT_FEED_ID],
+      {
+        variableOverrides: {},
+        instructionIdx: 0,
+        payer: keypair.publicKey,
+      }
     );
-    const testIx = await oracleUpdateIx(
-      testProgram,
+
+    const basicProgram = await loadBasicProgram(program!.provider);
+    const readOracleIx = await basicReadOracleIx(
+      basicProgram,
+      quoteAccount,
       queue.pubkey,
       keypair.publicKey
     );
 
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [sigVerifyIx, testIx],
+      ixs: [...managedUpdateIxs, readOracleIx],
       signers: [keypair],
       computeUnitPrice: 20_000,
       computeUnitLimitMultiple: 1.3,
@@ -121,10 +149,13 @@ import {
         });
       }
 
+      const elapsedSeconds = (Date.now() - startTime) / 1000;
+      const samplesPerMin = (stats.count / elapsedSeconds) * 60;
+
       console.log(
         `\n📈 Final stats: ${stats.count} updates, ${stats.mean.toFixed(
           1
-        )}ms avg latency`
+        )}ms avg staleness, ${samplesPerMin.toFixed(1)} samples/min`
       );
       console.log("🎉 Demo completed successfully!");
       surge.disconnect();

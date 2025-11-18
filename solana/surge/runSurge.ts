@@ -1,5 +1,6 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { CrossbarClient } from "@switchboard-xyz/common";
+import * as fs from "fs";
 import {
   TX_CONFIG,
   myAnchorProgram,
@@ -34,7 +35,7 @@ import {
     verbose: false,
   });
 
-  await surge.connectAndSubscribe([{ symbol: "BTC/USD" }]);
+  await surge.connectAndSubscribe([{ symbol: "BTC/USD" }], 10);
 
   // Run simulation after 10 seconds
   setTimeout(async () => {
@@ -62,6 +63,21 @@ import {
 
     // Only run simulation once after 10 seconds
     if (!hasRunSimulation) return;
+
+    // Check if advanced program is deployed
+    if (!fs.existsSync(ADVANCED_PROGRAM_PATH)) {
+      console.log("\n✅ Streaming demo completed!");
+      console.log("ℹ️  Skipping program simulation: advanced_oracle_example not deployed");
+      console.log("   To deploy and test the full simulation, run: anchor build && anchor deploy\n");
+      console.log(`📈 Final streaming stats: ${stats.count} updates received`);
+      console.log(`   Average latency: ${stats.mean.toFixed(1)}ms`);
+      console.log(`   Min latency: ${stats.min}ms`);
+      console.log(`   Max latency: ${stats.max}ms`);
+      console.log(`   Latest price: ${currentPrice}`);
+      console.log("\n🎉 Surge streaming works perfectly! Oracle data is being delivered in real-time.");
+      surge.disconnect();
+      process.exit(0);
+    }
 
     const result = response.toQuoteIx();
     const sigVerifyIx = Array.isArray(result) ? result[0] : result;
@@ -92,10 +108,11 @@ import {
 
       if (sim.value.err) {
         console.error("❌ Simulation failed:", sim.value.err);
-        return;
+        surge.disconnect();
+        process.exit(1);
       }
 
-      console.log("✅ Simulation succeeded!");
+      console.log("\n✅ Simulation succeeded!");
 
       // Display program logs that show feed values
       if (sim.value.logs) {
@@ -116,9 +133,12 @@ import {
           1
         )}ms avg latency`
       );
+      console.log("🎉 Demo completed successfully!");
+      surge.disconnect();
       process.exit(0);
     } catch (error) {
       console.error("💥 Transaction error:", error);
+      surge.disconnect();
       process.exit(1);
     }
   });

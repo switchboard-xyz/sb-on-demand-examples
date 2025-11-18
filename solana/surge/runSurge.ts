@@ -99,11 +99,11 @@ import {
     const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [DEFAULT_FEED_ID]);
 
     // Use the signed price from the Surge stream to create instructions
-    const result = response.toQuoteIx();
-    const streamIxs = Array.isArray(result) ? result : [result];
+    const crankIxs = response.toQuoteIx(queue.pubkey, keypair.publicKey);
 
+    let readOracleIx = undefined;
     const basicProgram = await loadBasicProgram(program!.provider);
-    const readOracleIx = await basicReadOracleIx(
+    readOracleIx = await basicReadOracleIx(
       basicProgram,
       quoteAccount,
       queue.pubkey,
@@ -112,7 +112,7 @@ import {
 
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [...streamIxs, readOracleIx],
+      ixs: [...crankIxs, readOracleIx],
       signers: [keypair],
       computeUnitPrice: 20_000,
       computeUnitLimitMultiple: 1.3,

@@ -33,14 +33,14 @@ importers:
         specifier: ^1.98.0
         version: 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/common':
-        specifier: ^5.2.2
-        version: 5.2.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: ^5.3.1
+        version: 5.3.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/on-demand':
-        specifier: 3.2.0
-        version: 3.2.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+        specifier: ^3.4.0
+        version: 3.4.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)
       '@switchboard-xyz/x402-utils':
-        specifier: 0.2.1
-        version: 0.2.1(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        specifier: 0.3.0
+        version: 0.3.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -105,6 +105,9 @@ importers:
       ts-mocha:
         specifier: ^10.1.0
         version: 10.1.0(mocha@9.2.2)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
@@ -611,16 +614,16 @@ packages:
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
 
-  '@switchboard-xyz/common@5.2.2':
-    resolution: {integrity: sha512-cvxssAmQrYBhAi9DqtePpDcFkUG/KOhDWU8lRS8prOol5pQAYxXjbuzGUGt6ekEDlNTj15i7mOUdVjJ1e3r+Aw==}
+  '@switchboard-xyz/common@5.3.1':
+    resolution: {integrity: sha512-oNf/NZULRFjDH4cGHeQ17Jkx/iCQn/H5uDRENVgi0Cz3MciLk+NnWzdoHWu/ZXYn0OIC/qzHNz+T/fiMvQXoyA==}
     engines: {node: '>=20'}
 
-  '@switchboard-xyz/on-demand@3.2.0':
-    resolution: {integrity: sha512-PycvYN6ZCJxP3q7ZVb+Kg1e1fbz1st1Rq3vPgmhEAJDelkY9wlreDlpvr9tuzQt9jA60Aq+/jg3AW64hSy5xOw==}
+  '@switchboard-xyz/on-demand@3.4.0':
+    resolution: {integrity: sha512-aPREo9CmgHmvWC3hmKH3DuV9YmSiPhICIfQdHkskFyh1ba38JSBxBX+/PisfSwZfHVPrjCwa7pVAu2zLlX8Qxg==}
     engines: {node: '>= 18'}
 
-  '@switchboard-xyz/x402-utils@0.2.1':
-    resolution: {integrity: sha512-mqnVg4KWTUOS3aGx0TsGwSd/6xSIOKmXnh9uHAWIuM5fmTOcLyfLl4/7FL1D9JCeSWuQPyHoh4MhUHVoiqDzYA==}
+  '@switchboard-xyz/x402-utils@0.3.0':
+    resolution: {integrity: sha512-KidDQ/zpoiZ+pcZJ9PJZvtNzSujh5dS6mCljmj+TW8uTRgpnLM6YHRrxCGWGC5DcvDxlrZVqvkc+4+BlYIn6DA==}
     engines: {node: '>=21'}
 
   '@types/bn.js@5.2.0':
@@ -664,9 +667,6 @@ packages:
 
   '@ungap/promise-all-settled@1.1.2':
     resolution: {integrity: sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==}
-
-  '@zod/core@0.11.6':
-    resolution: {integrity: sha512-03Bv82fFSfjDAvMfdHHdGSS6SOJs0iCcJlWJv1kJHRtoTT02hZpyip/2Lk6oo4l4FtjuwTrsEQTwg/LD8I7dJA==}
 
   abitype@0.7.1:
     resolution: {integrity: sha512-VBkRHTDZf9Myaek/dO3yMmOzB/y2s3Zo6nVU7yaw1G+TvCHAjwaJzNGN9yo4K5D8bU/VZXKP1EJpRhFr862PlQ==}
@@ -1184,6 +1184,11 @@ packages:
     resolution: {integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==}
     hasBin: true
 
+  json5@2.2.3:
+    resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
+    engines: {node: '>=6'}
+    hasBin: true
+
   locate-path@6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
@@ -1427,6 +1432,10 @@ packages:
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
 
+  tsconfig-paths@4.2.0:
+    resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
+    engines: {node: '>=6'}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -1591,11 +1600,6 @@ packages:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
 
-  yaml@2.8.1:
-    resolution: {integrity: sha512-lcYcMxX2PO9XMGvAJkJ3OsNMw+/7FKes7/hgerGUYWIoWu5j/+YQqcZr5JnPZWzOsEBgMbSbiSTn/dv/69Mkpw==}
-    engines: {node: '>= 14.6'}
-    hasBin: true
-
   yargs-parser@20.2.4:
     resolution: {integrity: sha512-WOkpgNhPTlE73h4VFAFsOnomJVaovO8VqLDzy5saChRBFQFBoMYirowyW+Q9HB4HFF4Z7VZTiG3iSzJJA29yRA==}
     engines: {node: '>=10'}
@@ -1626,9 +1630,6 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
-  zod@4.0.0-beta.20250505T195954:
-    resolution: {integrity: sha512-iB8WvxkobVIXMARvQu20fKvbS7mUTiYRpcD8OQV1xjRhxO0EEpYIRJBk6yfBzHAHEdOSDh3SxDITr5Eajr2vtg==}
 
 snapshots:
 
@@ -2406,7 +2407,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@switchboard-xyz/common@5.2.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+  '@switchboard-xyz/common@5.3.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       axios: 1.12.2
@@ -2417,8 +2418,6 @@ snapshots:
       decimal.js: 10.6.0
       js-sha256: 0.11.1
       protobufjs: 7.5.4
-      yaml: 2.8.1
-      zod: 4.0.0-beta.20250505T195954
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -2426,26 +2425,30 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@switchboard-xyz/on-demand@3.2.0(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)':
+  '@switchboard-xyz/on-demand@3.4.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@coral-xyz/anchor-31': '@coral-xyz/anchor@0.31.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)'
       '@isaacs/ttlcache': 1.4.1
-      '@switchboard-xyz/common': 5.2.2(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      '@solana/spl-token': 0.4.14(@solana/web3.js@1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
+      '@switchboard-xyz/common': 5.3.1(bufferutil@4.0.9)(typescript@4.9.5)(utf-8-validate@5.0.10)
       axios: 1.12.2
       bs58: 6.0.0
       buffer: 6.0.3
       events: 3.3.0
       isomorphic-ws: 5.0.0(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       js-yaml: 4.1.0
+      tweetnacl: 1.0.3
       ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - debug
       - encoding
+      - fastestsmallesttextencoderdecoder
       - typescript
       - utf-8-validate
 
-  '@switchboard-xyz/x402-utils@0.2.1(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+  '@switchboard-xyz/x402-utils@0.3.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
       '@faremeter/fetch': 0.10.0
       '@faremeter/payment-solana': 0.10.0(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@4.9.5)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
@@ -2501,8 +2504,6 @@ snapshots:
       '@types/yargs-parser': 21.0.3
 
   '@ungap/promise-all-settled@1.1.2': {}
-
-  '@zod/core@0.11.6': {}
 
   abitype@0.7.1(typescript@4.9.5)(zod@3.25.76):
     dependencies:
@@ -3019,6 +3020,8 @@ snapshots:
       minimist: 1.2.8
     optional: true
 
+  json5@2.2.3: {}
+
   locate-path@6.0.0:
     dependencies:
       p-locate: 5.0.0
@@ -3235,8 +3238,7 @@ snapshots:
     dependencies:
       ansi-regex: 5.0.1
 
-  strip-bom@3.0.0:
-    optional: true
+  strip-bom@3.0.0: {}
 
   strip-json-comments@3.1.1: {}
 
@@ -3287,6 +3289,12 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
     optional: true
+
+  tsconfig-paths@4.2.0:
+    dependencies:
+      json5: 2.2.3
+      minimist: 1.2.8
+      strip-bom: 3.0.0
 
   tslib@2.8.1: {}
 
@@ -3587,8 +3595,6 @@ snapshots:
 
   y18n@5.0.8: {}
 
-  yaml@2.8.1: {}
-
   yargs-parser@20.2.4: {}
 
   yargs-parser@21.1.1: {}
@@ -3625,7 +3631,3 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   zod@3.25.76: {}
-
-  zod@4.0.0-beta.20250505T195954:
-    dependencies:
-      '@zod/core': 0.11.6

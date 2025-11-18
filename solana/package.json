@@ -49,9 +49,9 @@
     "@faremeter/x-solana-settlement": "^0.2.1",
     "@solana/spl-token": "^0.4.13",
     "@solana/web3.js": "^1.98.0",
-    "@switchboard-xyz/common": "^5.2.2",
-    "@switchboard-xyz/on-demand": "3.2.0",
-    "@switchboard-xyz/x402-utils": "0.2.1",
+    "@switchboard-xyz/common": "^5.3.1",
+    "@switchboard-xyz/on-demand": "^3.4.0",
+    "@switchboard-xyz/x402-utils": "0.3.0",
     "assert": "^2.1.0",
     "axios": "^1.8.4",
     "big.js": "^6.2.2",
@@ -75,6 +75,7 @@
     "mocha": "^9.2.2",
     "prettier": "^2.8.8",
     "ts-mocha": "^10.1.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^4.9.5"
   }
 }

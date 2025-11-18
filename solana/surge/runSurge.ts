@@ -6,7 +6,7 @@ import {
   oracleUpdateIx,
   ADVANCED_PROGRAM_PATH,
   calculateStatistics,
-} from "../utils";
+} from "@/utils";
 
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
@@ -58,7 +58,7 @@ import {
     // Only run simulation once after 10 seconds
     if (!hasRunSimulation) return;
 
-    const result = response.toOracleQuoteIx();
+    const result = response.toQuoteIx();
     const sigVerifyIx = Array.isArray(result) ? result[0] : result;
     const testIx = await oracleUpdateIx(
       testProgram,

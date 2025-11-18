@@ -3,6 +3,7 @@
     "target": "es2022",
     "module": "nodenext",
     "lib": ["es2022", "dom"],
+    "baseUrl": "./",
     "rootDir": "./",
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -12,11 +13,19 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "types": ["node"],
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      "@/utils": ["examples/utils"]
+    }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   },
   "include": [
     "scripts/**/*",
-    "tests/**/*"
+    "tests/**/*",
+    "surge/**/*",
+    "examples/**/*"
   ],
   "exclude": [
     "node_modules",

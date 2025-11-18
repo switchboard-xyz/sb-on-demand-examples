@@ -11,7 +11,12 @@ import {
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
 
-  const apiKey = process.env.SURGE_API_KEY!;
+  const apiKey = process.env.SURGE_API_KEY;
+  if (!apiKey) {
+    console.error("❌ Error: SURGE_API_KEY environment variable is not set");
+    console.error("Please set SURGE_API_KEY before running this script");
+    process.exit(1);
+  }
 
   const { keypair, connection, program, crossbar, gateway, queue } =
     await sb.AnchorUtils.loadEnv();

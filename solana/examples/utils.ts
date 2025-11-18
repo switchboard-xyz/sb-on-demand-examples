@@ -853,3 +853,53 @@ export async function loadAdvancedProgram(): Promise<PublicKey> {
   );
   return programKeypair.publicKey;
 }
+
+/**
+ * Default feed ID for BTC/USD Surge feed
+ * Used when no --feedId flag is provided
+ */
+export const DEFAULT_FEED_ID = "4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812";
+
+/**
+ * Logs feed ID information, indicating whether default or custom feed is used
+ *
+ * @param {string} feedId - The feed ID being used
+ */
+export function logFeedId(feedId: string): void {
+  if (!process.argv.includes("--feedId")) {
+    console.log("ℹ️  No --feedId flag passed, using default BTC/USD Surge feed:");
+    console.log(`   Feed ID: ${feedId}`);
+    console.log(`   Explorer: https://explorer.switchboardlabs.xyz/`);
+  } else {
+    console.log("Using feed ID:", feedId);
+  }
+}
+
+/**
+ * Handles simulation errors with helpful diagnostics
+ *
+ * Provides specific guidance for common errors like AccountNotFound (insufficient balance)
+ *
+ * @param {any} error - The simulation error
+ * @param {Connection} connection - Solana connection for balance checks
+ * @param {PublicKey} payer - The payer public key
+ */
+export async function handleSimulationError(
+  error: any,
+  connection: Connection,
+  payer: PublicKey
+): Promise<void> {
+  console.error("❌ Simulation failed:", error);
+
+  // Check if it's an AccountNotFound error (likely insufficient balance)
+  const errStr = JSON.stringify(error);
+  if (errStr.includes("AccountNotFound")) {
+    console.error("\n💡 Tip: This error usually means your payer account has no SOL balance.");
+    console.error(`   Payer: ${payer.toBase58()}`);
+    console.error("   Please fund your account with SOL and try again.");
+
+    // Show balance
+    const balance = await connection.getBalance(payer);
+    console.error(`   Current balance: ${balance / 1e9} SOL`);
+  }
+}

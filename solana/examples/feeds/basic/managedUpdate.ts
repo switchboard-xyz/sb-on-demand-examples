@@ -2,9 +2,15 @@ import * as sb from "@switchboard-xyz/on-demand";
 import { OracleQuote, isMainnetConnection } from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
 import * as fs from "fs";
-import { TX_CONFIG, loadBasicProgram, basicReadOracleIx, BASIC_PROGRAM_PATH } from "../../utils";
-
-const DEFAULT_FEED_ID = "4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812";
+import {
+  TX_CONFIG,
+  loadBasicProgram,
+  basicReadOracleIx,
+  BASIC_PROGRAM_PATH,
+  DEFAULT_FEED_ID,
+  logFeedId,
+  handleSimulationError,
+} from "@/utils";
 
 const argv = yargs(process.argv)
   .options({
@@ -42,13 +48,7 @@ const argv = yargs(process.argv)
   const { program, keypair, connection, crossbar, queue, isMainnet } =
     await sb.AnchorUtils.loadEnv();
 
-  if (!process.argv.includes("--feedId")) {
-    console.log("ℹ️  No --feedId flag passed, using default BTC/USD Surge feed:");
-    console.log(`   Feed ID: ${DEFAULT_FEED_ID}`);
-    console.log(`   Explorer: https://explorer.switchboardlabs.xyz/`);
-  } else {
-    console.log("Using feed ID:", argv.feedId);
-  }
+  logFeedId(argv.feedId);
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
   console.log("🔧 Crossbar network:", crossbar.getNetwork());
 
@@ -112,19 +112,7 @@ const argv = yargs(process.argv)
     const sim = await connection.simulateTransaction(tx);
     console.log(sim.value.logs?.join("\n"));
     if (sim.value.err) {
-      console.error("❌ Simulation failed:", sim.value.err);
-
-      // Check if it's an AccountNotFound error (likely insufficient balance)
-      const errStr = JSON.stringify(sim.value.err);
-      if (errStr.includes("AccountNotFound")) {
-        console.error("\n💡 Tip: This error usually means your payer account has no SOL balance.");
-        console.error(`   Payer: ${keypair.publicKey.toBase58()}`);
-        console.error("   Please fund your account with SOL and try again.");
-
-        // Show balance
-        const balance = await connection.getBalance(keypair.publicKey);
-        console.error(`   Current balance: ${balance / 1e9} SOL`);
-      }
+      await handleSimulationError(sim.value.err, connection, keypair.publicKey);
       return;
     }
   } catch (error) {

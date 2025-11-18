@@ -2,6 +2,7 @@ import * as sb from "@switchboard-xyz/on-demand";
 import { OracleQuote } from "@switchboard-xyz/on-demand";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import yargs from "yargs";
+import * as fs from "fs";
 import {
   TX_CONFIG,
   sleep,
@@ -11,13 +12,18 @@ import {
   advancedInitStateIx,
   advancedInitOracleIx,
   calculateStatistics,
-} from "../../utils";
+  ADVANCED_PROGRAM_PATH,
+  DEFAULT_FEED_ID,
+  logFeedId,
+  handleSimulationError,
+} from "@/utils";
 
 const argv = yargs(process.argv)
   .options({
     feedId: {
       type: "string",
-      required: true,
+      required: false,
+      default: DEFAULT_FEED_ID,
       description: "The hexadecimal ID of the price feed (get from Switchboard Explorer)",
     },
   })
@@ -49,10 +55,43 @@ const argv = yargs(process.argv)
   const { program, keypair, connection, crossbar, queue, isMainnet } =
     await sb.AnchorUtils.loadEnv();
 
+  logFeedId(argv.feedId);
+
   // Display network detection results
   console.log("🌐 Network detected:", isMainnet ? "mainnet" : "devnet");
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
   console.log("🔧 Crossbar network:", crossbar.getNetwork());
+
+  // Check if advanced program is deployed
+  if (!fs.existsSync(ADVANCED_PROGRAM_PATH)) {
+    console.log("ℹ️  Skipping advanced program: not deployed");
+    console.log("   To deploy, run: anchor build && anchor deploy");
+    console.log("\n🔄 Fetching oracle quote only (without crank)...\n");
+
+    // Just fetch and display the quote without program interaction
+    const start = Date.now();
+    const instruction = await queue.fetchQuoteIx(crossbar, [argv.feedId], {
+      variableOverrides: {},
+      instructionIdx: 0,
+    });
+    const latency = Date.now() - start;
+
+    const decodedQuote = OracleQuote.decode(instruction.data);
+    console.log("\n📊 Decoded Oracle Quote:");
+    console.log("  Version:", decodedQuote.version);
+    console.log("  Slot:", decodedQuote.slot.toString());
+    console.log("  Signed Slothash:", decodedQuote.signedSlothash.toString("hex"));
+    console.log("  Oracle Indexes:", decodedQuote.oracleIdxs);
+    console.log("\n  Feeds:");
+    decodedQuote.feeds.forEach((feed, idx) => {
+      console.log(`    Feed ${idx}:`);
+      console.log(`      Feed Hash: ${feed.feedHash.toString("hex")}`);
+      console.log(`      Value: ${feed.value}`);
+      console.log(`      Min Oracle Samples: ${feed.minOracleSamples}`);
+    });
+    console.log(`\n📊 Quote fetch latency: ${latency}ms`);
+    return;
+  }
 
   // Load the advanced oracle example program ID (Pinocchio version)
   const advancedProgramId = await loadAdvancedProgram();
@@ -235,7 +274,7 @@ const argv = yargs(process.argv)
     const sim = await connection.simulateTransaction(tx);
     console.log(sim.value.logs?.join("\n"));
     if (sim.value.err) {
-      console.error("❌ Simulation failed:", sim.value.err);
+      await handleSimulationError(sim.value.err, connection, keypair.publicKey);
       return;
     }
   } catch (error) {

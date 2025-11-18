@@ -26,7 +26,7 @@ import {
   const stalenessValues: number[] = [];
   let hasRunSimulation = false;
   let clockOffset: number | null = null;
-  const startTime = Date.now();
+  let firstUpdateTime: number | null = null;
 
   const surge = new sb.Surge({
     apiKey,
@@ -34,7 +34,7 @@ import {
     verbose: false,
   });
 
-  await surge.connectAndSubscribe([{ symbol: "BTC/USD" }], 10);
+  await surge.connectAndSubscribe([{ symbol: "ZEC/USD" }], 10);
 
   // Run simulation after 10 seconds
   setTimeout(async () => {
@@ -48,6 +48,11 @@ import {
   surge.on("signedPriceUpdate", async (response: sb.SurgeUpdate) => {
     const seenAt = Date.now();
     const rawStaleness = seenAt - response.data.source_ts_ms;
+
+    // Track first update time for accurate samples/min calculation
+    if (firstUpdateTime === null) {
+      firstUpdateTime = seenAt;
+    }
 
     // Calculate clock offset from first update (assume network latency ~50ms)
     if (clockOffset === null) {
@@ -73,8 +78,8 @@ import {
 
     // Check if basic program is deployed
     if (!fs.existsSync(BASIC_PROGRAM_PATH)) {
-      const elapsedSeconds = (Date.now() - startTime) / 1000;
-      const samplesPerMin = (stats.count / elapsedSeconds) * 60;
+      const elapsedSeconds = firstUpdateTime ? (Date.now() - firstUpdateTime) / 1000 : 0;
+      const samplesPerMin = elapsedSeconds > 0 ? (stats.count / elapsedSeconds) * 60 : 0;
 
       console.log("\n✅ Streaming demo completed!");
       console.log("ℹ️  Skipping program simulation: basic_oracle_example not deployed");
@@ -149,8 +154,8 @@ import {
         });
       }
 
-      const elapsedSeconds = (Date.now() - startTime) / 1000;
-      const samplesPerMin = (stats.count / elapsedSeconds) * 60;
+      const elapsedSeconds = firstUpdateTime ? (Date.now() - firstUpdateTime) / 1000 : 0;
+      const samplesPerMin = elapsedSeconds > 0 ? (stats.count / elapsedSeconds) * 60 : 0;
 
       console.log(
         `\n📈 Final stats: ${stats.count} updates, ${stats.mean.toFixed(

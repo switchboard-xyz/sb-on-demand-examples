@@ -11,10 +11,6 @@ import {
 
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
-  console.log("\n⏰ IMPORTANT: If you experience clock-related issues, sync your system clock:");
-  console.log("   macOS:  sudo systemsetup -setusingnetworktime off && sudo systemsetup -setusingnetworktime on && sudo sntp -sS time.nist.gov");
-  console.log("   Linux:  sudo ntpdate -s time.nist.gov");
-  console.log("   (or):   sudo timedatectl set-ntp true\n");
 
   const apiKey = process.env.SURGE_API_KEY;
   if (!apiKey) {
@@ -47,18 +43,15 @@ import {
 
   // Listen for price updates
   surge.on("signedPriceUpdate", async (response: sb.SurgeUpdate) => {
-    const currentLatency = Date.now() - response.data.source_ts_ms;
+    const seenAt = Date.now();
+    const currentLatency = seenAt - response.data.source_ts_ms;
     latencies.push(currentLatency);
 
     const stats = calculateStatistics(latencies);
     const formattedPrices = response.getFormattedPrices();
     const currentPrice = Object.values(formattedPrices)[0] || "N/A";
     console.log(
-      `📊 Update #${
-        stats.count
-      } | Price: ${currentPrice} | Latency: ${currentLatency}ms | Avg: ${stats.mean.toFixed(
-        1
-      )}ms`
+      `Update #${stats.count} | Seen at: ${new Date(seenAt).toISOString()} | Price: ${currentPrice}`
     );
 
     // Only run simulation once after 10 seconds

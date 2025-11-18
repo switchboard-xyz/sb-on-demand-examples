@@ -98,16 +98,9 @@ import {
     // Derive the canonical oracle account for managed updates
     const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [DEFAULT_FEED_ID]);
 
-    // Use managed update instructions instead of direct quote instruction
-    const managedUpdateIxs = await queue.fetchManagedUpdateIxs(
-      crossbar,
-      [DEFAULT_FEED_ID],
-      {
-        variableOverrides: {},
-        instructionIdx: 0,
-        payer: keypair.publicKey,
-      }
-    );
+    // Use the signed price from the Surge stream to create instructions
+    const result = response.toQuoteIx();
+    const streamIxs = Array.isArray(result) ? result : [result];
 
     const basicProgram = await loadBasicProgram(program!.provider);
     const readOracleIx = await basicReadOracleIx(
@@ -119,7 +112,7 @@ import {
 
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [...managedUpdateIxs, readOracleIx],
+      ixs: [...streamIxs, readOracleIx],
       signers: [keypair],
       computeUnitPrice: 20_000,
       computeUnitLimitMultiple: 1.3,

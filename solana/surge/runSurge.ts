@@ -11,7 +11,7 @@ import {
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
   console.log("\n⏰ IMPORTANT: If you experience clock-related issues, sync your system clock:");
-  console.log("   macOS:  sudo sntp -sS time.apple.com");
+  console.log("   macOS:  sudo systemsetup -setusingnetworktime off && sudo systemsetup -setusingnetworktime on && sudo sntp -sS time.nist.gov");
   console.log("   Linux:  sudo ntpdate -s time.nist.gov");
   console.log("   (or):   sudo timedatectl set-ntp true\n");
 

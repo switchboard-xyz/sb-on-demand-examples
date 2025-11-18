@@ -15,10 +15,6 @@ import {
 
   const { keypair, connection, program, crossbar, gateway, queue } =
     await sb.AnchorUtils.loadEnv();
-  const testProgram = await myAnchorProgram(
-    program!.provider,
-    ADVANCED_PROGRAM_PATH
-  );
   const lut = await queue.loadLookupTable();
   const latencies: number[] = [];
   let hasRunSimulation = false;
@@ -60,6 +56,10 @@ import {
 
     const result = response.toQuoteIx();
     const sigVerifyIx = Array.isArray(result) ? result[0] : result;
+    const testProgram = await myAnchorProgram(
+      program!.provider,
+      ADVANCED_PROGRAM_PATH
+    );
     const testIx = await oracleUpdateIx(
       testProgram,
       queue.pubkey,

@@ -1,13 +1,17 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { OracleQuote, isMainnetConnection } from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
-import { TX_CONFIG, loadBasicProgram, basicReadOracleIx } from "../../utils";
+import * as fs from "fs";
+import { TX_CONFIG, loadBasicProgram, basicReadOracleIx, BASIC_PROGRAM_PATH } from "../../utils";
+
+const DEFAULT_FEED_ID = "4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812";
 
 const argv = yargs(process.argv)
   .options({
     feedId: {
       type: "string",
-      required: true,
+      required: false,
+      default: DEFAULT_FEED_ID,
       description: "The hexadecimal ID of the price feed (get from Switchboard Explorer)",
     },
   })
@@ -37,7 +41,14 @@ const argv = yargs(process.argv)
   // Note: loadEnv automatically sets the crossbar network based on the detected RPC connection
   const { program, keypair, connection, crossbar, queue, isMainnet } =
     await sb.AnchorUtils.loadEnv();
-  console.log("Using feed ID:", argv.feedId);
+
+  if (!process.argv.includes("--feedId")) {
+    console.log("ℹ️  No --feedId flag passed, using default BTC/USD Surge feed:");
+    console.log(`   Feed ID: ${DEFAULT_FEED_ID}`);
+    console.log(`   Explorer: https://explorer.switchboardlabs.xyz/`);
+  } else {
+    console.log("Using feed ID:", argv.feedId);
+  }
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
   console.log("🔧 Crossbar network:", crossbar.getNetwork());
 
@@ -70,22 +81,27 @@ const argv = yargs(process.argv)
   // Step 3: Create your program instruction to read the oracle data
   // This instruction will read from the quote account that was just updated
   // Load the basic oracle example program
-  const basicProgram = await loadBasicProgram(program!.provider);
+  const ixs = [...instructions];
 
-  const readOracleIx = await basicReadOracleIx(
-    basicProgram,
-    quoteAccount,
-    queue.pubkey,
-    keypair.publicKey
-  );
+  if (fs.existsSync(BASIC_PROGRAM_PATH)) {
+    const basicProgram = await loadBasicProgram(program!.provider);
+    const readOracleIx = await basicReadOracleIx(
+      basicProgram,
+      quoteAccount,
+      queue.pubkey,
+      keypair.publicKey
+    );
+    ixs.push(readOracleIx);
+    console.log("  - Basic oracle program crank instruction");
+  } else {
+    console.log("ℹ️  Skipping crank: basic_oracle_example program not deployed");
+    console.log("   To deploy, run: anchor build && anchor deploy");
+  }
 
   // Step 4: Build and send the transaction
   const tx = await sb.asV0Tx({
     connection,
-    ixs: [
-      ...instructions, // Managed update instructions
-      readOracleIx, // Your program instruction to consume the data
-    ],
+    ixs,
     signers: [keypair],
     computeUnitPrice: 20_000, // Priority fee
     computeUnitLimitMultiple: 1.1, // 10% buffer
@@ -97,6 +113,18 @@ const argv = yargs(process.argv)
     console.log(sim.value.logs?.join("\n"));
     if (sim.value.err) {
       console.error("❌ Simulation failed:", sim.value.err);
+
+      // Check if it's an AccountNotFound error (likely insufficient balance)
+      const errStr = JSON.stringify(sim.value.err);
+      if (errStr.includes("AccountNotFound")) {
+        console.error("\n💡 Tip: This error usually means your payer account has no SOL balance.");
+        console.error(`   Payer: ${keypair.publicKey.toBase58()}`);
+        console.error("   Please fund your account with SOL and try again.");
+
+        // Show balance
+        const balance = await connection.getBalance(keypair.publicKey);
+        console.error(`   Current balance: ${balance / 1e9} SOL`);
+      }
       return;
     }
   } catch (error) {

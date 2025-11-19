@@ -1,6 +1,8 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { OracleQuote } from "@switchboard-xyz/on-demand";
 import * as fs from "fs";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 import {
   TX_CONFIG,
   loadBasicProgram,
@@ -11,6 +13,21 @@ import {
 
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
+
+  // Parse command line arguments
+  const argv = await yargs(hideBin(process.argv))
+    .option('ticker', {
+      alias: 't',
+      type: 'string',
+      description: 'Trading pair symbol (USD quote assumed)',
+      default: 'BTC'
+    })
+    .help()
+    .argv;
+
+  // Always assume USD quote if not specified
+  const ticker = argv.ticker.includes('/') ? argv.ticker : `${argv.ticker}/USD`;
+  console.log(`📊 Using ticker: ${ticker}`);
 
   const apiKey = process.env.SURGE_API_KEY;
   if (!apiKey) {
@@ -34,7 +51,7 @@ import {
     verbose: false,
   });
   
-  await surge.connectAndSubscribe([{ symbol: "SOL/USD" }]);
+  await surge.connectAndSubscribe([{ symbol: ticker }]);
 
   // Run simulation after 10 seconds
   setTimeout(async () => {

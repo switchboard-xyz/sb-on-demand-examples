@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::accounts::RandomnessAccountData;
+use switchboard_on_demand::get_switchboard_on_demand_program_id;
 
 declare_id!("93tkpep2PYDxweHHi2vQBpi7eTBF23y8LGdiLMt5R9f2");
 
@@ -58,6 +59,13 @@ pub mod sb_randomness {
         let player_state = &mut ctx.accounts.player_state;
         // Record the user's guess
         player_state.current_guess = guess;
+
+        // Ensure that the randomness account is owned by the official switchboard program
+        require_keys_eq!(
+            *ctx.accounts.randomness_account_data.owner,
+            get_switchboard_on_demand_program_id(),
+        );
+
         let randomness_data =
             RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow())
                 .unwrap();

@@ -3,7 +3,8 @@
   "module": "index.ts",
   "scripts": {
     "start": "NODE_OPTIONS='--no-warnings' ts-node index.ts",
-    "start-eclipse": "NODE_OPTIONS='--no-warnings' ts-node eclipse.ts"
+    "start-eclipse": "NODE_OPTIONS='--no-warnings' ts-node eclipse.ts",
+    "start-gill": "NODE_OPTIONS='--no-warnings' ts-node gill.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -21,6 +22,7 @@
     "@solana/web3.js": "^1.98.2",
     "@switchboard-xyz/common": "^5.2.2",
     "@switchboard-xyz/on-demand": "^3.2.0",
+    "gill": "^0.14.0",
     "readline-sync": "^1.4.10",
     "tsx": "^4.19.1",
     "yargs": "^17.7.2"

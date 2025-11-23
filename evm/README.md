@@ -479,12 +479,87 @@ bun scripts/run.ts
 
 ## 📊 Available Feeds
 
-| Asset | Feed Hash |
-|-------|-----------|
-| BTC/USD | `0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812` |
-| ETH/USD | `0xa0950ee5ee117b2e2c30f154a69e17bfb489a7610c508dc5f67eb2a14616d8ea` |
-| SOL/USD | `0x822512ee9add93518eca1c105a38422841a76c590db079eebb283deb2c14caa9` |
-| SUI/USD | `0x7ceef94f404e660925ea4b33353ff303effaf901f224bdee50df3a714c1299e9` |
+> **Note**: All feeds listed below are **sponsored on Monad**, meaning oracle updates are subsidized and require no payment from users on the Monad network.
+
+### Major Cryptocurrencies
+| Asset | Feed ID |
+|-------|---------|
+| BTC/USD | `0xc982e4a199a32e2af854a0611fff614037d1227dbae9695a571d11c545821465` |
+| ETH/USD | `0x53e74e6243e0ca032df64f3aaa824b63b45ede4a8cc74b8a5e2bceacdd8dc527` |
+| SOL/USD | `0x87d45df168bbb669a0dfdb40d7f3fa783636f76ecdae84f5f429e81f6cf84dd2` |
+| SUI/USD | `0xcb318ebfa28939342bf346cbd312c6198d018fc0bee0056ed69212bc84fc3d50` |
+| XRP/USD | `0x5d63074ce9c2ee63884aa68a3afd18644e5fbee96eb3d1448264c90f2662b75e` |
+| BNB/USD | `0xfb2e5814aa90b8cac7783a34e2eff9fb1c3d4c484e6954774b9963c66c5b5e2e` |
+| DOGE/USD | `0x8e50f21c80712dd4983eff17f297f15e1fa972c7b41226f0c813153d72441e22` |
+| ADA/USD | `0xed9b64610bd3c2810dee07eb5edc4409fd8e8500293232aac70920733bd3403a` |
+| AVAX/USD | `0x3fa3bf1adf503c346665a2e85ea4e12a5bce54ccb3e2e18357a414d6044f6288` |
+
+### Layer 1 & Layer 2
+| Asset | Feed ID |
+|-------|---------|
+| TIA/USD | `0xfcb5e7dd8384afb4799e935120fe5138b94f1b91ecb1e1126e193dce38868a7f` |
+| OP/USD | `0xa15bca0dd91090b8a339412ce41abd0e628bb9ff277ba1f7529a6653cba8efde` |
+| ARB/USD | `0xc554fc5f64599e0dfdd1142af7a6290f2f83f9e878362032e7b414247a48fd37` |
+| APT/USD | `0xba09209cbe07a26cfab693b7ff69492cd70ff8afe3c2a167efed0229f64aa9a2` |
+| SEI/USD | `0x90b4d4ec44fa91e01479ff8daced948a5df4a4758c6e7f2fb1a7b27ee04b9ddd` |
+| POL/USD | `0x19a4d3859540bcef14d41cdd1292331af58658ffde851515626993a75489ec49` |
+| BERA/USD | `0xc5bd5c327228920191e2d6e0110ccc102c0a3e513d4247b1869b5b85dd13e993` |
+| HYPE/USD | `0x63e105a067be323be6114d3b6c6d96293203c4b8ad3d0dee5e159ea2af77b59c` |
+| S/USD | `0x0e2600ac0fc377ca808f50dc3f28a08615e3be40db54204c6d0c57946da9e97e` |
+
+### Stablecoins
+| Asset | Feed ID |
+|-------|---------|
+| USDT/USD | `0xf20148550722dac1457ec620799712be61ada7b7b7667190f57ad4cb785664dd` |
+| USDC/USD | `0x3ecc9b8580e1505918ec457f48de663606b4dfbe6a0b573e4f14aecb92188288` |
+| DAI/USD | `0x5bfcabdc3836d7e16038d225deac28f3ebd6275d6585a906dada1e3bab69ace7` |
+| USDS/USD | `0xf2b757149298533cd4e27fe07ef5ef999a4b3383e3888f14bb28cf12a1e6a2c7` |
+| PYUSD/USD | `0x9ac21ccc4e8778c25119fa13a1e876f24a4bc42ca4f5912a05bec75759fa66d9` |
+| USDE/USD | `0xa1453c8e2454c1cb51b529e48f96cc86f7ca3e249aa5d8c9b5dc048d11e43fa3` |
+| FDUSD/USD | `0xbed6981367231efa695de20057cf2fdb3dfb65f03024f514a333ad4a52a8968b` |
+| AUSD/USD | `0x11ab2a6544fd8c4db4299dfd0ac30089cb2d0aac9752e57e816ccc5ab67549fe` |
+| USR/USD | `0x1f5a6ebeb522f5ba544cb89697a58b96f19f4929da34a26587b4e3e344504066` |
+
+### Wrapped & Liquid Staking Tokens
+| Asset | Feed ID |
+|-------|---------|
+| WBTC/USD | `0x0b83fcfc4e041a3154d015f32aa08e07486c108bd5e87512ec914f88eed9e38b` |
+| LBTC/USD | `0x16f88b6d98fa4b6be9109571db6ae27077d771fd838a2d74be54167086d1c5c2` |
+| cbBTC/USD | `0x37e7b4a51ba4ee125be1d6b05705199490f5fcc250687357c57cd2ae57b088a6` |
+| solvBTC/USD | `0xffc7b7f3fe02719f2deb324504d19ad3c801a2c16ac91d7a7e19e6a565d18065` |
+| WETH/USD | `0x0defbb4974f1afc44e41b96e6d6e8feff8a4ada01307a0a189d90ca6557b2719` |
+| STETH/USD | `0x75d4d4262e456396a66c780c0862ccaf759c568dcf42c41e70ced26dc78dbb75` |
+| wstETH/USD | `0x865eb735e3fcf06f1ab4df86154dbc0c6e3fdcb7ccd3200f9e1c2fff7977e999` |
+| WEETH/USD | `0x17ab4d2ed95630cc9936f5cb37624194ffb4fc0bda387cd2a682c3e0ecd04578` |
+| rsETH/USD | `0xc75bd8c010fbfffa832a5827051b92cf02b2ce121fbd860bca5aa27289ad11f3` |
+| ezETH/USD | `0x2bd5044aadddce1d28f96ff011b12ea59c565f1ae93505b23714957e81f76bb6` |
+| STONE/USD | `0xf228c11fbee4509822ed4d880993040b608ea66e73c6b20e4223a0dcafe2eeab` |
+| sUSDS/USD | `0x9e7412b2b399b4b5304a41ed18076bd15195e99d86e4fdeba5d75842c932bf94` |
+| sUSDe/USD | `0x024505bcd3408298c7ecc9b4fa1ec227ff8149ec2226db14e37ed2a1bfd81874` |
+
+### DeFi Tokens
+| Asset | Feed ID |
+|-------|---------|
+| LINK/USD | `0x5716f423bdd0977a24384520982a6156feabb734255a486346ce97eba4db9bb5` |
+| UNI/USD | `0xab3a6a71ebf9e08f2e5613a2da857fd3718cabd649566400c25f1339b0de5b23` |
+| AAVE/USD | `0x2a279cd969e475234690072a3aedd24ea227653306d4ee13a03591c13eddf4d1` |
+| CAKE/USD | `0x88ecdee5d25396097c6b07eae577d5e9db264baad344e50a5fbdcad68a72f9cf` |
+| PYTH/USD | `0x66994123d22aa7d936047f2b30a947dc5380d33af34a0d8a510deda8b2b1de39` |
+
+### Bridge & Cross-Chain
+| Asset | Feed ID |
+|-------|---------|
+| AXL/USD | `0x308ae8b637663ffe5196d156a0f06b27f667e087c0050848d87aa5d68f4ebde9` |
+| ZRO/USD | `0xec8ed9d9b5449a175ff357a38e08007699b628df5bea308afc5a279edd02ac02` |
+| STG/USD | `0xfd7a2e4bac42db5ca96a8a50592aedbe5101c87ca46bb8da1565fe9a99102056` |
+| W/USD | `0x7cef43e612e03552f9a106d258b45286b99c4d8d021acfc3fc362486e0e53fec` |
+| RED/USD | `0x687f58993ff7cc81f9a025ba7d8397f9cb7655ca780bd2013c57ce8e6f153e91` |
+
+### Commodities
+| Asset | Feed ID |
+|-------|---------|
+| XAU/USD (Gold) | `0x8ba9dd33ff5a0c241d9868f019156f2fa7a6b35ff84c52826fcd86734a606b0d` |
+| XAG/USD (Silver) | `0x806f186a854239b8f35576770333e169d0ea74712bd18acbe99466d79e49fcb4` |
 
 Find more feeds at: [https://explorer.switchboard.xyz](https://explorer.switchboard.xyz)
 

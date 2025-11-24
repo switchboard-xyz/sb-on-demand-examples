@@ -536,6 +536,7 @@ bun scripts/run.ts
 | STONE/USD | `0xf228c11fbee4509822ed4d880993040b608ea66e73c6b20e4223a0dcafe2eeab` |
 | sUSDS/USD | `0x9e7412b2b399b4b5304a41ed18076bd15195e99d86e4fdeba5d75842c932bf94` |
 | sUSDe/USD | `0x024505bcd3408298c7ecc9b4fa1ec227ff8149ec2226db14e37ed2a1bfd81874` |
+| GMON/USD | `0xde52e2cdb87ee05a1a2a8b2f937c9b691d7278216aa6b4ae7992d72d5344d9ee` |
 
 ### DeFi Tokens
 | Asset | Feed ID |

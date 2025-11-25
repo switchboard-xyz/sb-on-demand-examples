@@ -49,7 +49,7 @@ pub fn init_quote_account_if_needed(
     }
 
     // Prepare seeds for invoke_signed
-    let mut seeds = Vec::with_capacity(feed_ids.len() + 1);
+    let mut seeds = Vec::with_capacity(feed_ids.len() + 2);
     seeds.push(Seed::from(queue_account.key().as_ref()));
     for feed_id in &feed_ids {
         seeds.push(Seed::from(feed_id.as_ref()));

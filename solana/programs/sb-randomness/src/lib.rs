@@ -61,10 +61,14 @@ pub mod sb_randomness {
         let randomness_data =
             RandomnessAccountData::parse(ctx.accounts.randomness_account_data.data.borrow())
                 .unwrap();
-
+        // check if randomness is fresh
         if randomness_data.seed_slot != clock.slot - 1 {
             msg!("seed_slot: {}", randomness_data.seed_slot);
             msg!("slot: {}", clock.slot);
+            return Err(ErrorCode::RandomnessExpired.into());
+        }
+        // make sure randomness is not already revealed
+        if !randomness_data.get_value(clock.slot).is_err() {
             return Err(ErrorCode::RandomnessAlreadyRevealed.into());
         }
         // Track the player's commited values so you know they don't request randomness

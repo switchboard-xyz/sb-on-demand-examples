@@ -62,5 +62,9 @@ To run this example coin-flip game:
 
 `pnpm start {YOUR_GUESS}`
 
+Using the Gill Solana client instead of `@solana/web3.js`:
+
+`pnpm start-gill {YOUR_GUESS}`
+
 
 For a full explanation of the code, please see our gitbook tutorial [here!](https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness/getting-started)

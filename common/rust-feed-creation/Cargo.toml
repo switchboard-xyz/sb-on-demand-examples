@@ -1,0 +1,13 @@
+[package]
+name = "rust-feed-creation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+switchboard-on-demand-client = { path = "../../../sbv3/rust/switchboard-on-demand-client" }
+tokio = { version = "1.0", features = ["full"] }
+serde_json = "1.0"
+anyhow = "1.0"
+solana-sdk = "2.0"
+reqwest = { version = "0.11", features = ["json"] }
+rust_decimal = "1.0"

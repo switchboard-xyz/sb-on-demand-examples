@@ -1,0 +1,15 @@
+{
+  "name": "@switchboard-xyz/common-examples",
+  "version": "1.0.0",
+  "description": "Chain-agnostic Switchboard examples",
+  "type": "module",
+  "scripts": {
+    "job": "bun run job-testing/runJob.ts",
+    "stream": "bun run streaming/crossbarStream.ts",
+    "twitter": "bun run twitter-follower-count/getFollowerCount.ts"
+  },
+  "dependencies": {
+    "@switchboard-xyz/common": "^5.4.0",
+    "yaml": "^2.8.2"
+  }
+}

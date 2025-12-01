@@ -484,6 +484,7 @@ bun scripts/run.ts
 ### Major Cryptocurrencies
 | Asset | Feed ID |
 |-------|---------|
+| MON/USD | `0x2d5f0a89b34b1df59445c51474b6ec540e975b790207bfa4b4c4512bfe63ec47` |
 | BTC/USD | `0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812` |
 | ETH/USD | `0xa0950ee5ee117b2e2c30f154a69e17bfb489a7610c508dc5f67eb2a14616d8ea` |
 | SOL/USD | `0x822512ee9add93518eca1c105a38422841a76c590db079eebb283deb2c14caa9` |

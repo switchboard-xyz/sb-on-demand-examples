@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-switchboard-on-demand-client = { path = "../../../sbv3/rust/switchboard-on-demand-client" }
+# switchboard-on-demand = { version = "0.11.2", features = ["client"] } # Uncomment when published
+switchboard-on-demand = { git = "https://github.com/switchboard-xyz/sbv3", branch = "feat/on-demand-v2-methods", features = ["client"] }
 tokio = { version = "1.0", features = ["full"] }
 serde_json = "1.0"
 anyhow = "1.0"

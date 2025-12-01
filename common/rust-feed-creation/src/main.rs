@@ -1,7 +1,7 @@
 use anyhow::Result;
 use solana_sdk::pubkey::Pubkey;
 use std::str::FromStr;
-use switchboard_on_demand_client::CrossbarClient;
+use switchboard_on_demand::client::CrossbarClient;
 
 #[tokio::main]
 async fn main() -> Result<()> {

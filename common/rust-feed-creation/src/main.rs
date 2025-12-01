@@ -50,7 +50,6 @@ async fn run_example() -> Result<()> {
     let store_resp = client.store_oracle_feed(&feed_def).await?;
     
     println!("Store Response:");
-    println!("  CID: {}", store_resp.cid);
     println!("  Feed ID: {}", store_resp.feedId);
 
     // Simulate the Feed (v2)
@@ -98,8 +97,8 @@ mod tests {
 
         println!("Testing V2 Feed Storage...");
         let store_resp = client.store_oracle_feed(&feed_def).await?;
+        println!("Stored Feed ID: {}", store_resp.feedId);
         assert!(!store_resp.feedId.is_empty(), "Feed ID should not be empty");
-        assert!(!store_resp.cid.is_empty(), "CID should not be empty");
 
         println!("Testing V2 Feed Simulation...");
         let sim_resp = client.simulate_proto(&store_resp.feedId, false, Some("mainnet")).await?;
@@ -129,6 +128,7 @@ mod tests {
 
         println!("Testing V2 Value Feed Storage...");
         let val_store_resp = client.store_oracle_feed(&value_feed).await?;
+        println!("Stored Value Feed ID: {}", val_store_resp.feedId);
         
         println!("Testing V2 Value Feed Simulation...");
         let val_sim_resp = client.simulate_proto(&val_store_resp.feedId, false, Some("mainnet")).await?;

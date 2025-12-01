@@ -12,6 +12,7 @@ const YELLOW = "\x1b[33m";
 const CYAN = "\x1b[36m";
 const RED = "\x1b[31m";
 const DIM = "\x1b[2m";
+const MAGENTA = "\x1b[35m";
 
 export interface DisplayState {
   feedKey: string;
@@ -40,6 +41,7 @@ export function render(state: DisplayState): void {
   lines.push(`${BOLD}${CYAN}          SWITCHBOARD FEED MONITOR${RESET}`);
   lines.push(`${BOLD}${CYAN}══════════════════════════════════════════════════════════════${RESET}`);
   lines.push("");
+
 
   // Feed Info
   lines.push(`${DIM}Feed:${RESET}   ${feedKey}`);

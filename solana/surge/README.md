@@ -2,10 +2,9 @@
 
 ## Overview
 
-This directory contains **Solana-specific** streaming examples that integrate real-time price data with Solana transactions:
+This directory contains a **Solana-specific** streaming example that integrates real-time price data with Solana transactions:
 
-1. **`runSurge.ts`** - Surge API streaming with latency tracking and transaction simulation
-2. **`stream.ts`** - Full streaming implementation with on-chain transaction submission
+- **`runSurge.ts`** - Surge API streaming with latency tracking and transaction simulation
 
 For a **chain-agnostic** streaming example (unsigned price data), see: **[`../../common/streaming/crossbarStream.ts`](../../common/streaming/)**
 
@@ -76,13 +75,6 @@ npx ts-node surge/runSurge.ts
 ✅ Simulation succeeded!
 📈 Final stats: 15 updates, 43.2ms avg latency
 ```
-
-## Choosing the Right Script
-
-| Script | Use Case | Transaction | Latency | Best For |
-|--------|----------|-------------|---------|----------|
-| `runSurge.ts` | Demo & customer presentations | Single simulation after 10s | 50-200ms | Demonstrations, testing |
-| [`../../common/streaming/crossbarStream.ts`](../../common/streaming/) | Frontend displays | None (unsigned) | 50-150ms | UIs, dashboards, monitoring (chain-agnostic) |
 
 ## Event Handling
 

@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
+import {IRandomness} from "@switchboard-xyz/on-demand-solidity/interfaces/IRandomness.sol";
+import {ISwitchboard} from "@switchboard-xyz/on-demand-solidity/interfaces/ISwitchboard.sol";
+import {SwitchboardTypes} from "@switchboard-xyz/on-demand-solidity/libraries/SwitchboardTypes.sol";
+
 /**
  * @title RandomnessConsumer
  * @notice Example contract demonstrating Switchboard randomness on Monad Testnet
@@ -15,64 +19,10 @@ pragma solidity ^0.8.22;
  * - DeFi: Random winner selection, lottery systems
  * - DAOs: Random committee selection
  */
-
-// ========== Inline Interfaces (avoiding SDK import path issues) ==========
-
-/**
- * @notice Randomness result structure
- */
-struct RandomnessResult {
-    bytes32 oracleId;
-    address oracleAuthority;
-    uint256 value;
-    uint256 settledAt;
-}
-
-/**
- * @notice Full randomness structure
- */
-struct Randomness {
-    bytes32 randId;
-    bytes32 queueId;
-    uint256 createdAt;
-    address authority;
-    uint256 rollTimestamp;
-    uint64 minSettlementDelay;
-    RandomnessResult result;
-}
-
-/**
- * @notice Interface for Switchboard randomness module
- */
-interface ISwitchboardRandomness {
-    function requestRandomness(
-        bytes32 randomnessId,
-        address authority,
-        bytes32 queueId,
-        uint64 minSettlementDelay
-    ) external;
-
-    function requestRandomness(
-        bytes32 randomnessId,
-        address authority,
-        bytes32 queueId,
-        uint64 minSettlementDelay,
-        bytes32 oracleId
-    ) external;
-
-    function rerollRandomness(bytes32 randomnessId) external;
-
-    function getRandomness(bytes32 randomnessId) external view returns (Randomness memory);
-
-    function updateFeeds(bytes[] calldata updates) external payable;
-}
-
-// ========== Main Contract ==========
-
 contract RandomnessConsumer {
     // ========== State Variables ==========
 
-    /// @notice The Switchboard contract address
+    /// @notice The Switchboard contract address (implements both ISwitchboard and IRandomness)
     address public immutable SWITCHBOARD;
 
     /// @notice Queue ID for randomness requests
@@ -160,7 +110,7 @@ contract RandomnessConsumer {
         randomValue = 0;
 
         // Request randomness from Switchboard
-        ISwitchboardRandomness(SWITCHBOARD).requestRandomness(
+        IRandomness(SWITCHBOARD).requestRandomness(
             randomnessId,
             address(this),  // authority - this contract manages the randomness
             QUEUE_ID,
@@ -193,7 +143,7 @@ contract RandomnessConsumer {
         randomValue = 0;
 
         // Request randomness from specific oracle
-        ISwitchboardRandomness(SWITCHBOARD).requestRandomness(
+        IRandomness(SWITCHBOARD).requestRandomness(
             randomnessId,
             address(this),
             QUEUE_ID,
@@ -215,10 +165,10 @@ contract RandomnessConsumer {
         if (isResolved) revert RandomnessAlreadyResolved();
 
         // Submit the oracle updates to Switchboard
-        ISwitchboardRandomness(SWITCHBOARD).updateFeeds(updates);
+        ISwitchboard(SWITCHBOARD).updateFeeds(updates);
 
         // Get the randomness result
-        Randomness memory randomness = ISwitchboardRandomness(SWITCHBOARD).getRandomness(randomnessId);
+        SwitchboardTypes.Randomness memory randomness = IRandomness(SWITCHBOARD).getRandomness(randomnessId);
 
         // Verify randomness was settled
         if (randomness.result.settledAt == 0) revert RandomnessNotSettled();
@@ -242,7 +192,7 @@ contract RandomnessConsumer {
         randomValue = 0;
 
         // Request reroll
-        ISwitchboardRandomness(SWITCHBOARD).rerollRandomness(randomnessId);
+        IRandomness(SWITCHBOARD).rerollRandomness(randomnessId);
 
         emit RandomnessRerolled(randomnessId);
     }
@@ -261,9 +211,9 @@ contract RandomnessConsumer {
      * @notice Get the full randomness state from Switchboard
      * @return The Randomness struct from Switchboard
      */
-    function getRandomnessState() external view returns (Randomness memory) {
+    function getRandomnessState() external view returns (SwitchboardTypes.Randomness memory) {
         if (randomnessId == bytes32(0)) revert RandomnessNotRequested();
-        return ISwitchboardRandomness(SWITCHBOARD).getRandomness(randomnessId);
+        return IRandomness(SWITCHBOARD).getRandomness(randomnessId);
     }
 
     // ========== Utility Functions for Using Randomness ==========

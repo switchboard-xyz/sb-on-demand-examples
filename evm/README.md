@@ -407,22 +407,14 @@ The conversion follows the tight-packed format:
 
 ## 🏃‍♂️ Getting Started
 
-### Step 1: Build the Contract
+### Step 1: Install & Build
 
 ```bash
-# Install Foundry dependencies
-forge install
+# Install all dependencies (JS + Solidity)
+bun install
 
 # Build contracts
 forge build
-```
-
-Expected output:
-```
-[⠊] Compiling...
-[⠒] Compiling 3 files with 0.8.22
-[⠢] Solc 0.8.22 finished in 1.23s
-Compiler run successful!
 ```
 
 ### Step 2: Deploy the Contract

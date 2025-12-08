@@ -38,6 +38,8 @@
     "@switchboard-xyz/on-demand-solidity": "^0.0.4",
     "@types/yargs": "^17.0.33",
     "ethers": "^6.13.1",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "qrcode-terminal": "^0.12.0",
     "yargs": "^18.0.0"
   }
 }

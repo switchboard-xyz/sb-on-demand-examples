@@ -149,9 +149,10 @@ async function fetchFeedData(feedHash: string) {
 
   try {
     const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
+    const networkType = config.network.includes('testnet') ? 'testnet' : 'mainnet';
     const response = await crossbar.fetchOracleQuote(
       [feedHashForCrossbar],
-      'mainnet'
+      networkType
     );
 
     if (!response.encoded) {

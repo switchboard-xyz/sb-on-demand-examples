@@ -26,7 +26,7 @@ contract SwitchboardPriceConsumer {
     // ========== State Variables ==========
 
     /// @notice The Switchboard contract interface
-    ISwitchboard public immutable switchboard;
+    ISwitchboard public immutable SWITCHBOARD;
 
     /// @notice Stored price data for each feed
     mapping(bytes32 => PriceData) public prices;
@@ -103,15 +103,19 @@ contract SwitchboardPriceConsumer {
      */
     constructor(address _switchboard) {
         if (_switchboard == address(0)) revert InvalidConfiguration();
-        switchboard = ISwitchboard(_switchboard);
+        SWITCHBOARD = ISwitchboard(_switchboard);
         owner = msg.sender;
     }
 
     // ========== Modifiers ==========
 
     modifier onlyOwner() {
-        if (msg.sender != owner) revert Unauthorized();
+        _checkOwner();
         _;
+    }
+
+    function _checkOwner() internal view {
+        if (msg.sender != owner) revert Unauthorized();
     }
 
     // ========== External Functions ==========
@@ -125,7 +129,7 @@ contract SwitchboardPriceConsumer {
         bytes calldata update
     ) external payable {
         // Submit update to Switchboard and get parsed data back
-        SwitchboardTypes.FeedUpdateData memory updateData = switchboard.updateFeeds{ value: msg.value }(update);
+        SwitchboardTypes.FeedUpdateData memory updateData = SWITCHBOARD.updateFeeds{ value: msg.value }(update);
 
         // Process each feed in the update
         for (uint256 i = 0; i < updateData.feedInfos.length; i++) {
@@ -151,20 +155,20 @@ contract SwitchboardPriceConsumer {
         bytes32[] calldata feedIds
     ) external payable {
         // Get the required fee (may be 0 on some networks)
-        uint256 fee = switchboard.getFee(updates);
+        uint256 fee = SWITCHBOARD.getFee(updates);
         if (msg.value < fee) {
             revert InsufficientFee(fee, msg.value);
         }
 
         // Submit updates to Switchboard (this verifies signatures)
-        switchboard.updateFeeds{ value: fee }(updates);
+        SWITCHBOARD.updateFeeds{ value: fee }(updates);
 
         // Process each feed ID
         for (uint256 i = 0; i < feedIds.length; i++) {
             bytes32 feedId = feedIds[i];
 
             // Get the latest verified update from Switchboard
-            SwitchboardTypes.LegacyUpdate memory update = switchboard.latestUpdate(feedId);
+            SwitchboardTypes.LegacyUpdate memory update = SWITCHBOARD.latestUpdate(feedId);
 
             // Process the feed update (convert timestamp to uint64)
             _processFeedUpdate(
@@ -354,7 +358,11 @@ contract SwitchboardPriceConsumer {
     ) internal pure returns (uint256 deviation) {
         if (oldValue == 0) return 0;
 
+        // Safe casts: int128 fits in uint128 when taking absolute value
+        // The negation of int128.min would overflow, but prices should never be that extreme
+        // forge-lint: disable-next-line(unsafe-typecast)
         uint128 absOld = oldValue < 0 ? uint128(-oldValue) : uint128(oldValue);
+        // forge-lint: disable-next-line(unsafe-typecast)
         uint128 absNew = newValue < 0 ? uint128(-newValue) : uint128(newValue);
 
         uint128 diff = absNew > absOld ? absNew - absOld : absOld - absNew;
@@ -368,7 +376,7 @@ contract SwitchboardPriceConsumer {
      * @return address The Switchboard contract address
      */
     function getSwitchboardAddress() external view returns (address) {
-        return address(switchboard);
+        return address(SWITCHBOARD);
     }
 
     /**

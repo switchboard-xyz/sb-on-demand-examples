@@ -6,12 +6,14 @@
   "scripts": {
     "example": "bun scripts/run.ts",
     "update": "bun examples/updateFeed.ts",
+    "randomness": "bun examples/requestRandomness.ts",
     "surge-convert": "bun examples/surgeToEvmConversion.ts",
     "build": "forge build",
     "test": "forge test",
     "deploy": "forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --broadcast -vvvv",
-    "deploy:monad-testnet": "forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url https://testnet.monad.xyz --broadcast -vvvv",
+    "deploy:monad-testnet": "forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url https://testnet-rpc.monad.xyz --broadcast -vvvv",
     "deploy:monad-mainnet": "forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url $MONAD_RPC_URL --broadcast -vvvv",
+    "deploy:randomness": "forge script script/DeployRandomnessConsumer.s.sol:DeployRandomnessConsumer --rpc-url https://testnet-rpc.monad.xyz --broadcast -vvvv",
     "verify": "forge verify-contract --chain-id $CHAIN_ID --watch $CONTRACT_ADDRESS src/SwitchboardPriceConsumer.sol:SwitchboardPriceConsumer"
   },
   "keywords": [

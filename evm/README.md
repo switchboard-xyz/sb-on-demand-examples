@@ -1,60 +1,8 @@
 # EVM On-Demand Examples
 
-This directory contains examples for using Switchboard On-Demand functionality on EVM-compatible chains.
+Switchboard On-Demand oracle functionality for EVM-compatible chains.
 
-## 📁 Directory Structure
-
-```
-evm/
-├── src/               # Solidity smart contracts
-│   ├── SwitchboardPriceConsumer.sol  # Production-ready price consumer
-│   └── switchboard/                   # Switchboard interfaces & types
-├── script/            # Foundry deployment scripts
-│   └── DeploySwitchboardPriceConsumer.s.sol
-├── scripts/           # TypeScript client examples
-│   └── run.ts         # Complete integration example
-├── examples/          # Additional examples
-│   ├── updateFeed.ts
-│   ├── randomness.ts
-│   └── utils.ts
-├── legacy/            # Previous examples (for reference)
-├── package.json
-└── README.md
-```
-
-## 🚀 Quick Start (30 seconds to first price)
-
-```bash
-# Clone and install
-cd evm
-bun install
-
-# Build contracts
-forge build
-
-# Deploy (Monad Testnet example)
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url https://testnet-rpc.monad.xyz \
-  --broadcast \
-  -vvvv
-
-# Run the complete example
-RPC_URL=https://testnet-rpc.monad.xyz \
-PRIVATE_KEY=0x... \
-CONTRACT_ADDRESS=0x... \
-NETWORK=monad-testnet \
-bun scripts/run.ts
-```
-
-That's it! You're now fetching and verifying real-time oracle prices on EVM. 🎉
-
-## 📋 Prerequisites
-
-- **Node.js** 16+ and **Bun** (or npm/yarn)
-- **Foundry** for Solidity development
-- A wallet with native tokens (MON, ETH, etc.)
-
-## 🌐 Supported Networks
+## 📍 Contract Addresses
 
 | Network | Chain ID | Switchboard Contract |
 |---------|----------|---------------------|
@@ -63,542 +11,101 @@ That's it! You're now fetching and verifying real-time oracle prices on EVM. �
 | **Hyperliquid Mainnet** | 999 | `0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347` |
 | **Hyperliquid Testnet** | 998 | TBD |
 
-> **Note**: For other EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/) which use the previous Switchboard implementation.
+> For legacy EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/).
 
-## 🔥 Monad Integration
+## 🌐 Network Guides
 
-Monad is a high-performance EVM-compatible blockchain optimized for speed and efficiency. Switchboard On-Demand provides native oracle support for Monad with the same security guarantees and ease of use as other EVM chains.
+Detailed setup and integration guides for each network:
 
-### Network Information
+- **[Monad](./docs/MONAD.md)** - High-performance EVM blockchain
+- **[Hyperliquid](./docs/HYPERLIQUID.md)** - Layer 1 with native perpetual futures
 
-| Network | Chain ID | RPC URL | Switchboard Contract |
-|---------|----------|---------|---------------------|
-| **Monad Mainnet** | 143 | `https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY` | `0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67` |
-| **Monad Testnet** | 10143 | `https://testnet-rpc.monad.xyz` | `0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33` |
-
-### Quick Start on Monad
-
-#### 1. Setup Environment
+## 🚀 Quick Start
 
 ```bash
-# Monad Testnet
-export RPC_URL=https://testnet-rpc.monad.xyz
-export PRIVATE_KEY=0xyour_private_key_here
-export NETWORK=monad-testnet
+# Install dependencies
+cd evm && bun install
 
-# Monad Mainnet
-export RPC_URL=https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY
-export PRIVATE_KEY=0xyour_private_key_here  
-export NETWORK=monad-mainnet
-```
+# Build contracts
+forge build
 
-#### 2. Deploy Contract
-
-```bash
-# Monad Testnet deployment
+# Deploy (Monad Testnet example)
 forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url https://testnet-rpc.monad.xyz \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  -vvvv
+  --rpc-url https://testnet-rpc.monad.xyz --broadcast -vvvv
 
-# Monad Mainnet deployment  
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  -vvvv
+# Run price feed example
+PRIVATE_KEY=0x... CONTRACT_ADDRESS=0x... NETWORK=monad-testnet bun scripts/run.ts
+
+# Run randomness example
+PRIVATE_KEY=0x... NETWORK=monad-testnet bun run randomness
 ```
 
-#### 3. Run Oracle Integration
+## 📁 Directory Structure
 
-```bash
-# Complete example on Monad Testnet
-RPC_URL=https://testnet-rpc.monad.xyz \
-PRIVATE_KEY=$PRIVATE_KEY \
-CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
-NETWORK=monad-testnet \
-bun scripts/run.ts
-
-# Complete example on Monad Mainnet
-RPC_URL=https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY \
-PRIVATE_KEY=$PRIVATE_KEY \
-CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
-NETWORK=monad-mainnet \
-bun scripts/run.ts
+```
+evm/
+├── src/               # Solidity smart contracts
+│   └── SwitchboardPriceConsumer.sol
+├── script/            # Foundry deployment scripts
+├── scripts/           # TypeScript integration examples
+│   └── run.ts
+├── examples/          # Feature examples
+│   ├── updateFeed.ts
+│   ├── randomness.ts
+│   └── utils.ts
+├── docs/              # Network-specific guides
+│   ├── MONAD.md
+│   └── HYPERLIQUID.md
+└── legacy/            # Previous implementation examples
 ```
 
-### Monad-Specific Considerations
+## 📋 Prerequisites
 
-- **Native Token**: MON (for gas fees)
-- **High Performance**: Monad's optimized execution enables faster oracle updates
-- **Low Fees**: Efficient gas usage for frequent price updates
-- **EVM Compatibility**: All existing Ethereum tooling works seamlessly
+- **Bun** (or Node.js 16+)
+- **Foundry** for Solidity development
+- Native tokens for gas (MON, ETH, etc.)
 
-### Getting MON Tokens
+---
 
-**Testnet:**
-- Use the [Monad Testnet Faucet](https://faucet.monad.xyz) to get testnet MON
-- Connect your wallet and request tokens for testing
+## 📈 Price Feeds
 
-**Mainnet:**
-- Acquire MON tokens through supported exchanges
-- Bridge from other networks using official Monad bridges
-
-### Example: DeFi Integration on Monad
-
-```typescript
-import { ethers } from 'ethers';
-import { CrossbarClient } from '@switchboard-xyz/common';
-
-// Monad-specific setup
-const provider = new ethers.JsonRpcProvider('https://testnet-rpc.monad.xyz');
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
-
-// Switchboard contract on Monad Testnet
-const switchboardAddress = '0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33';
-const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
-
-// Your deployed price consumer contract
-const priceConsumer = new ethers.Contract(contractAddress, PRICE_CONSUMER_ABI, signer);
-
-// Fetch and update prices
-const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-const feedHash = '0xa0950ee5ee117b2e2c30f154a69e17bfb489a7610c508dc5f67eb2a14616d8ea'; // ETH/USD
-
-const response = await crossbar.fetchOracleQuote([feedHash], 'mainnet');
-const fee = await switchboard.getFee([response.encoded]);
-
-// Submit update with Monad's fast finality
-const tx = await priceConsumer.updatePrices([response.encoded], { value: fee });
-const receipt = await tx.wait();
-
-console.log(`Price updated on Monad! Block: ${receipt.blockNumber}`);
-```
-
-## 🔷 HyperEVM (Hyperliquid) Integration
-
-Hyperliquid is a high-performance Layer 1 blockchain with native perpetual futures and spot trading. Switchboard On-Demand provides native oracle support for HyperEVM with the same security guarantees and ease of use as other EVM chains.
-
-### Network Information
-
-| Network | Chain ID | RPC URL | Switchboard Contract |
-|---------|----------|---------|---------------------|
-| **Hyperliquid Mainnet** | 999 | `https://rpc.hyperliquid.xyz/evm` | `0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347` |
-| **Hyperliquid Testnet** | 998 | `https://rpc.hyperliquid-testnet.xyz/evm` | TBD |
-
-### Quick Start on Hyperliquid
-
-#### 1. Setup Environment
-
-```bash
-# Hyperliquid Mainnet
-export RPC_URL=https://rpc.hyperliquid.xyz/evm
-export PRIVATE_KEY=0xyour_private_key_here
-export NETWORK=hyperliquid-mainnet
-
-# Hyperliquid Testnet
-export RPC_URL=https://rpc.hyperliquid-testnet.xyz/evm
-export PRIVATE_KEY=0xyour_private_key_here  
-export NETWORK=hyperliquid-testnet
-```
-
-#### 2. Deploy Contract
-
-```bash
-# Hyperliquid Mainnet deployment
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url https://rpc.hyperliquid.xyz/evm \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  -vvvv
-
-# Hyperliquid Testnet deployment  
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url https://rpc.hyperliquid-testnet.xyz/evm \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  -vvvv
-```
-
-#### 3. Run Oracle Integration
-
-```bash
-# Complete example on Hyperliquid Mainnet
-RPC_URL=https://rpc.hyperliquid.xyz/evm \
-PRIVATE_KEY=$PRIVATE_KEY \
-CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
-NETWORK=hyperliquid-mainnet \
-bun scripts/run.ts
-
-# Complete example on Hyperliquid Testnet
-RPC_URL=https://rpc.hyperliquid-testnet.xyz/evm \
-PRIVATE_KEY=$PRIVATE_KEY \
-CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
-NETWORK=hyperliquid-testnet \
-bun scripts/run.ts
-```
-
-### Example: Perpetual Futures Integration on Hyperliquid
-
-```typescript
-import { ethers } from 'ethers';
-import { CrossbarClient } from '@switchboard-xyz/common';
-
-// Hyperliquid-specific setup
-const provider = new ethers.JsonRpcProvider('https://rpc.hyperliquid.xyz/evm');
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
-
-// Switchboard contract on Hyperliquid Mainnet
-const switchboardAddress = '0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347';
-const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
-
-// Your deployed price consumer contract
-const priceConsumer = new ethers.Contract(contractAddress, PRICE_CONSUMER_ABI, signer);
-
-// Fetch and update prices for perpetual futures
-const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-const btcFeedHash = '0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812'; // BTC/USD
-
-const response = await crossbar.fetchOracleQuote([btcFeedHash], 'mainnet');
-const fee = await switchboard.getFee([response.encoded]);
-
-// Submit update with Hyperliquid's fast finality
-const tx = await priceConsumer.updatePrices([response.encoded], { value: fee });
-const receipt = await tx.wait();
-
-console.log(`Price updated on Hyperliquid! Block: ${receipt.blockNumber}`);
-
-// Query the updated price
-const [value, timestamp, slotNumber] = await priceConsumer.getPrice(btcFeedHash);
-console.log(`BTC/USD Price: $${ethers.formatUnits(value, 18)}`);
-```
-
-### Getting Started with Hyperliquid
-
-**Documentation:**
-- [Hyperliquid Docs](https://hyperliquid.gitbook.io/hyperliquid-docs)
-- [HyperEVM Documentation](https://hyperliquid.gitbook.io/hyperliquid-docs/hyperevm)
-
-**Testnet:**
-- Use the Hyperliquid testnet to test your integration
-- Request testnet tokens through the official faucet
-
-**Mainnet:**
-- Bridge ETH to Hyperliquid using the official bridge
-- Start with small amounts to test your integration
-
-## 🎲 On-Chain Verifiable Randomness
-
-Switchboard On-Demand provides cryptographically secure verifiable randomness for EVM smart contracts. The randomness flow works as follows:
-
-1. **Request**: Your contract creates a randomness request with a unique ID
-2. **Commitment**: An oracle is assigned and commits to the randomness
-3. **Reveal**: After the settlement delay, the oracle reveals the random value
-4. **Verification**: The contract verifies the oracle's signature and stores the result
-
-### Quick Start
-
-```bash
-# Run the randomness example on Monad Testnet
-PRIVATE_KEY=0x... bun run randomness
-
-# Run on other networks
-PRIVATE_KEY=0x... NETWORK=monad-mainnet bun run randomness
-PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun run randomness
-```
+Real-time oracle price data for DeFi applications.
 
 ### Integration Example
 
 ```typescript
 import { ethers } from 'ethers';
+import { CrossbarClient } from '@switchboard-xyz/common';
 
-// Setup
-const provider = new ethers.JsonRpcProvider('https://testnet-rpc.monad.xyz');
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+const provider = new ethers.JsonRpcProvider(rpcUrl);
+const signer = new ethers.Wallet(privateKey, provider);
+
+// Fetch oracle data
+const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
+const response = await crossbar.fetchOracleQuote([feedHash], 'mainnet');
+
+// Submit update
 const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
-
-// 1. Create randomness request
-const randomnessId = ethers.keccak256(ethers.toUtf8Bytes(`game-${gameId}-round-${roundId}`));
-const minSettlementDelay = 5; // seconds
-
-const tx = await switchboard.createRandomness(randomnessId, minSettlementDelay);
+const fee = await switchboard.getFee([response.encoded]);
+const tx = await contract.updatePrices([response.encoded], { value: fee });
 await tx.wait();
 
-// 2. Get assigned oracle from event
-const data = await switchboard.getRandomness(randomnessId);
-console.log('Assigned Oracle:', data.oracle);
-
-// 3. Wait for settlement delay + fetch reveal from Crossbar
-const response = await fetch('https://crossbar.switchboard.xyz/randomness/evm', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    chain_id: '10143',
-    randomness_id: randomnessId,
-    timestamp: Number(data.rollTimestamp),
-    min_staleness_seconds: Number(data.minSettlementDelay),
-    oracle: data.oracle.toLowerCase(),
-  }),
-});
-const { data: { encoded } } = await response.json();
-
-// 4. Settle randomness on-chain
-const fee = await switchboard.updateFee();
-await switchboard.settleRandomness(encoded, { value: fee });
-
-// 5. Read the verified random value
-const result = await switchboard.getRandomness(randomnessId);
-console.log('Random Value:', result.value);
-
-// Use for your application
-const diceRoll = Number((result.value % 6n) + 1n);
-const coinFlip = result.value % 2n === 0n ? 'Heads' : 'Tails';
+// Query price
+const [value, timestamp, slotNumber] = await contract.getPrice(feedId);
+console.log(`Price: ${ethers.formatUnits(value, 18)}`);
 ```
 
-### Use Cases
+### Available Feeds
 
-| Application | Example |
-|-------------|---------|
-| **Gaming** | Fair loot drops, random encounters, card shuffling |
-| **NFTs** | Random trait generation, blind box reveals |
-| **DeFi** | Random liquidation selection, lottery mechanisms |
-| **Governance** | Random jury selection, fair ordering |
+> All feeds below are **sponsored on Monad** — oracle updates require no payment from users.
 
-### Supported Networks
+<details>
+<summary><b>Major Cryptocurrencies</b></summary>
 
-| Network | Chain ID | Status |
-|---------|----------|--------|
-| Monad Testnet | 10143 | ✅ Live |
-| Monad Mainnet | 143 | ✅ Live |
-| Hyperliquid Mainnet | 999 | ✅ Live |
-
-## 🎯 What is Switchboard On-Demand?
-
-Switchboard On-Demand provides secure, verified oracle data for EVM smart contracts:
-
-- **Cryptographic Verification**: Oracle signatures verified on-chain
-- **Multi-Oracle Consensus**: Aggregate data from multiple oracle sources
-- **Configurable Security**: Set staleness limits and price deviation thresholds
-- **Gas Efficient**: Optimized for low transaction costs
-
-## 📊 Example: Price Consumer Contract
-
-The `SwitchboardPriceConsumer.sol` contract demonstrates production-ready oracle integration:
-
-```solidity
-contract SwitchboardPriceConsumer {
-    ISwitchboard public immutable switchboard;
-    mapping(bytes32 => PriceData) public prices;
-    
-    // Update prices with oracle data
-    function updatePrices(bytes[] calldata updates) external payable {
-        uint256 fee = switchboard.getFee(updates);
-        require(msg.value >= fee, "Insufficient fee");
-        
-        // Verify signatures and update
-        switchboard.updateFeeds{value: fee}(updates);
-        
-        // Process and store verified prices
-        // ... validation logic ...
-    }
-    
-    // Get current price
-    function getPrice(bytes32 feedId) external view 
-        returns (int128 value, uint256 timestamp, uint64 slotNumber);
-    
-    // Business logic helpers
-    function calculateCollateralRatio(...) external view returns (uint256);
-    function shouldLiquidate(...) external view returns (bool);
-}
-```
-
-## 🛠️ Environment Setup
-
-### Configure Environment
-
-Create a `.env` file or export variables:
-
-```bash
-# Required
-export PRIVATE_KEY=0xyour_private_key_here
-export RPC_URL=https://your_rpc_url_here
-
-# Optional
-export SWITCHBOARD_ADDRESS=0x...  # Override default
-export NETWORK=monad-testnet      # Network name
-export CONTRACT_ADDRESS=0x...     # Deployed contract
-```
-
-### Network-Specific RPC URLs
-
-**Monad:**
-- Testnet: `https://testnet-rpc.monad.xyz`
-- Mainnet: `https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY`
-
-## 📂 Examples Overview
-
-### `/scripts/run.ts` - Complete Integration Example
-
-Full end-to-end demonstration:
-- Deploy or connect to existing contract
-- Fetch oracle data from Crossbar
-- Submit price updates on-chain
-- Query and verify prices
-- Demonstrate business logic
-
-```bash
-# Run with environment variables
-RPC_URL=$RPC_URL \
-PRIVATE_KEY=$PRIVATE_KEY \
-CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
-NETWORK=monad-testnet \
-bun scripts/run.ts
-```
-
-### `/examples/updateFeed.ts` - Legacy Update Example
-
-Basic price update example (legacy):
-
-```bash
-# Set environment variables
-export PRIVATE_KEY=0x...
-export EXAMPLE_ADDRESS=0x...
-
-# Run update
-bun examples/updateFeed.ts
-```
-
-### `/examples/randomness.ts` - On-Chain Verifiable Randomness
-
-Complete example for requesting and settling verifiable random numbers:
-
-```bash
-# On Monad Testnet (default)
-PRIVATE_KEY=0x... bun run randomness
-
-# On Monad Mainnet
-PRIVATE_KEY=0x... NETWORK=monad-mainnet bun run randomness
-
-# On Hyperliquid Mainnet
-PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun run randomness
-```
-
-This example demonstrates:
-- Creating a randomness request (auto-selects an oracle)
-- Waiting for the settlement delay period
-- Fetching the cryptographic reveal from Crossbar
-- Settling the randomness on-chain
-- Using the verified random value for different applications
-
-**Use Cases:**
-- Gaming: Fair loot drops, random encounters, card shuffling
-- NFTs: Random trait generation, blind box reveals
-- DeFi: Random liquidation selection, lottery mechanisms
-
-### `/examples/surgeToEvmConversion.ts` - Surge to EVM Format Converter
-
-Convert Switchboard Surge updates to EVM-compatible format:
-
-```bash
-# Basic conversion with sample data
-bun run surge-convert
-
-# With custom surge data file
-SURGE_DATA_FILE=path/to/surge-data.json bun run surge-convert
-```
-
-This utility demonstrates how to:
-- Convert Surge update responses to EVM format
-- Parse and validate the encoded data structure
-- Use the converted data with EVM smart contracts
-
-The conversion follows the tight-packed format:
-- Header: slot(8) + timestamp(8) + numFeeds(1) + numSigs(1)
-- Feed data: feedHash(32) + value(16) + minSamples(1) per feed
-- Signatures: signature(64) + recoveryId(1) per signature
-
-## 🏃‍♂️ Getting Started
-
-### Step 1: Build the Contract
-
-```bash
-# Install Foundry dependencies
-forge install
-
-# Build contracts
-forge build
-```
-
-Expected output:
-```
-[⠊] Compiling...
-[⠒] Compiling 3 files with 0.8.22
-[⠢] Solc 0.8.22 finished in 1.23s
-Compiler run successful!
-```
-
-### Step 2: Deploy the Contract
-
-#### Option A: Using Foundry Script (Recommended)
-
-```bash
-# Monad Testnet
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url https://testnet-rpc.monad.xyz \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  -vvvv
-
-# Monad Mainnet
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url $MONAD_RPC_URL \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  -vvvv
-```
-
-#### Option B: Using npm Scripts
-
-```bash
-# Monad Testnet
-bun run deploy:monad-testnet
-
-# Monad Mainnet
-MONAD_RPC_URL=https://... bun run deploy:monad-mainnet
-```
-
-#### Option C: Direct Forge Create
-
-```bash
-forge create src/SwitchboardPriceConsumer.sol:SwitchboardPriceConsumer \
-  --rpc-url $RPC_URL \
-  --private-key $PRIVATE_KEY \
-  --constructor-args 0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33  # Monad Testnet
-```
-
-**Save the deployed contract address!**
-
-### Step 3: Run the Example
-
-```bash
-# Complete example with deployment, update, and queries
-RPC_URL=$RPC_URL \
-PRIVATE_KEY=$PRIVATE_KEY \
-CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
-NETWORK=monad-testnet \
-bun scripts/run.ts
-```
-
-## 📊 Available Feeds
-
-> **Note**: All feeds listed below are **sponsored on Monad**, meaning oracle updates are subsidized and require no payment from users on the Monad network.
-
-### Major Cryptocurrencies
 | Asset | Feed ID |
 |-------|---------|
 | MON/USD | `0x2d5f0a89b34b1df59445c51474b6ec540e975b790207bfa4b4c4512bfe63ec47` |
-| BTC/USD | `0x4cd1cad9624256it81af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812` |
+| BTC/USD | `0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812` |
 | ETH/USD | `0xa0950ee5ee117b2e2c30f154a69e17bfb489a7610c508dc5f67eb2a14616d8ea` |
 | SOL/USD | `0x822512ee9add93518eca1c105a38422841a76c590db079eebb283deb2c14caa9` |
 | SUI/USD | `0x7ceef94f404e660925ea4b33353ff303effaf901f224bdee50df3a714c1299e9` |
@@ -608,7 +115,11 @@ bun scripts/run.ts
 | ADA/USD | `0x695237a767cd572030dfecaf163b1e396fc622b739e4bf5b18429e96c7759392` |
 | AVAX/USD | `0x816c9411e88fbaecb344754c55cb325db1923c37c2c58980da7c3287d3206697` |
 
-### Layer 1 & Layer 2
+</details>
+
+<details>
+<summary><b>Layer 1 & Layer 2</b></summary>
+
 | Asset | Feed ID |
 |-------|---------|
 | TIA/USD | `0x4a6072c172fcafd15e393b4428fea473135dafa52108870e8da12531ce44ce02` |
@@ -621,7 +132,11 @@ bun scripts/run.ts
 | HYPE/USD | `0x63e105a067be323be6114d3b6c6d96293203c4b8ad3d0dee5e159ea2af77b59c` |
 | S/USD | `0x7cffc1d82ed8f73b33e06830bb5979e63db793f9bfee7dd0e9a026ad96c2dc7b` |
 
-### Stablecoins
+</details>
+
+<details>
+<summary><b>Stablecoins</b></summary>
+
 | Asset | Feed ID |
 |-------|---------|
 | USDT/USD | `0x8327414619366bc88545bf72da9fb072d1c324fcd94deeea0bd189c8229e5bc9` |
@@ -634,7 +149,11 @@ bun scripts/run.ts
 | AUSD/USD | `0x11ab2a6544fd8c4db4299dfd0ac30089cb2d0aac9752e57e816ccc5ab67549fe` |
 | USR/USD | `0x1f5a6ebeb522f5ba544cb89697a58b96f19f4929da34a26587b4e3e344504066` |
 
-### Wrapped & Liquid Staking Tokens
+</details>
+
+<details>
+<summary><b>Wrapped & Liquid Staking Tokens</b></summary>
+
 | Asset | Feed ID |
 |-------|---------|
 | WBTC/USD | `0x0b83fcfc4e041a3154d015f32aa08e07486c108bd5e87512ec914f88eed9e38b` |
@@ -652,7 +171,11 @@ bun scripts/run.ts
 | sUSDe/USD | `0x024505bcd3408298c7ecc9b4fa1ec227ff8149ec2226db14e37ed2a1bfd81874` |
 | GMON/USD | `0x3569d06cfdcdfe181841d5582e09b264402bb49fe377b58ca644438fa59389e7` |
 
-### DeFi Tokens
+</details>
+
+<details>
+<summary><b>DeFi & Bridge Tokens</b></summary>
+
 | Asset | Feed ID |
 |-------|---------|
 | LINK/USD | `0x8f4abf107a287e17fdd20055d328d74a30d4b636471552508dfb7c5432d4b7d5` |
@@ -660,163 +183,110 @@ bun scripts/run.ts
 | AAVE/USD | `0x19c581a14f071f9cabab21166d37450203fff792c7937631d30372b3dcd15ad2` |
 | CAKE/USD | `0x88ecdee5d25396097c6b07eae577d5e9db264baad344e50a5fbdcad68a72f9cf` |
 | PYTH/USD | `0x50189d4b424c7ae432e4d050b4a7bca8816e9e6806932fee04efa79cc9cb9c46` |
-
-### Bridge & Cross-Chain
-| Asset | Feed ID |
-|-------|---------|
 | AXL/USD | `0x308ae8b637663ffe5196d156a0f06b27f667e087c0050848d87aa5d68f4ebde9` |
 | ZRO/USD | `0xdaae1b232c2f41a2ebbe9add6644b10fb9535ab32f688d90364b0b3831c1801f` |
 | STG/USD | `0xfd7a2e4bac42db5ca96a8a50592aedbe5101c87ca46bb8da1565fe9a99102056` |
 | W/USD | `0xfbc53ad1560f56b5125607ae214950868cc7a45d7953d48175bcaccfdff362bb` |
 | RED/USD | `0xe5fd72332a1e82394cba6527295cc7ec6b88985a825cba9e27f3050a649fdba0` |
 
-### Commodities
+</details>
+
+<details>
+<summary><b>Commodities</b></summary>
+
 | Asset | Feed ID |
 |-------|---------|
 | XAU/USD (Gold) | `0xce87065d6e7a7e7913fe01ffc1026500634e753e16df2afe593627aee57f06cf` |
 | XAG/USD (Silver) | `0xc67736821132a0cd34c1d7fbc872868c808606666d1e54385dc8a6d60e437546` |
 
-Find more feeds at: [https://explorer.switchboard.xyz](https://explorer.switchboard.xyz)
+</details>
 
-## 💡 TypeScript SDK Usage
+Find more feeds at: [explorer.switchboard.xyz](https://explorer.switchboard.xyz)
 
-### Fetching and Submitting Updates
+---
+
+## 🎲 On-Chain Randomness
+
+Cryptographically secure verifiable randomness for gaming, NFTs, and DeFi.
+
+### How It Works
+
+1. **Request** — Create a randomness request with unique ID
+2. **Commitment** — Oracle is assigned and commits to randomness
+3. **Reveal** — After settlement delay, oracle reveals the value
+4. **Verification** — Contract verifies signature and stores result
+
+### Quick Start
+
+```bash
+# Monad Testnet (default)
+PRIVATE_KEY=0x... bun run randomness
+
+# Other networks
+PRIVATE_KEY=0x... NETWORK=monad-mainnet bun run randomness
+PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun run randomness
+```
+
+### Integration Example
 
 ```typescript
 import { ethers } from 'ethers';
 import { CrossbarClient } from '@switchboard-xyz/common';
 
-// Setup
-const provider = new ethers.JsonRpcProvider(rpcUrl);
-const signer = new ethers.Wallet(privateKey, provider);
-const contract = new ethers.Contract(contractAddress, ABI, signer);
-
-// Fetch oracle data
-const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-const response = await crossbar.fetchOracleQuote(
-  [feedHash],
-  'mainnet'
-);
-
-// Get fee and submit
 const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
-const fee = await switchboard.getFee([response.encoded]);
+const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
 
-const tx = await contract.updatePrices([response.encoded], { value: fee });
-await tx.wait();
+// 1. Create randomness request
+const randomnessId = ethers.keccak256(ethers.toUtf8Bytes(`game-${gameId}`));
+await switchboard.createRandomness(randomnessId, 5); // 5 second delay
 
-// Query updated price
-const [value, timestamp, slotNumber] = await contract.getPrice(feedId);
-console.log(`Price: ${ethers.formatUnits(value, 18)}`);
+// 2. Get assigned oracle
+const data = await switchboard.getRandomness(randomnessId);
+
+// 3. Fetch reveal from Crossbar (after delay)
+const { encoded } = await crossbar.resolveEVMRandomness({
+  chainId: 10143,
+  randomnessId,
+  timestamp: Number(data.rollTimestamp),
+  minStalenessSeconds: Number(data.minSettlementDelay),
+  oracle: data.oracle,
+});
+
+// 4. Settle on-chain
+const fee = await switchboard.updateFee();
+await switchboard.settleRandomness(encoded, { value: fee });
+
+// 5. Use the random value
+const result = await switchboard.getRandomness(randomnessId);
+const diceRoll = Number((result.value % 6n) + 1n);
 ```
 
-## 🔧 Customizing for Your Use Case
+### Use Cases
 
-### Example: Lending Protocol
-
-```solidity
-contract LendingProtocol {
-    SwitchboardPriceConsumer public priceConsumer;
-    
-    function borrow(
-        bytes32 collateralFeedId,
-        uint256 collateralAmount,
-        uint256 borrowAmount
-    ) external {
-        // Check collateral ratio
-        uint256 ratio = priceConsumer.calculateCollateralRatio(
-            collateralFeedId,
-            collateralAmount,
-            borrowAmount
-        );
-        
-        require(ratio >= 15000, "Insufficient collateral"); // 150% minimum
-        
-        // Process borrow...
-    }
-    
-    function liquidate(
-        address borrower,
-        bytes32 collateralFeedId
-    ) external {
-        // Check if liquidation is needed
-        bool shouldLiq = priceConsumer.shouldLiquidate(
-            collateralFeedId,
-            positions[borrower].collateral,
-            positions[borrower].debt,
-            11000 // 110% threshold
-        );
-        
-        require(shouldLiq, "Position is healthy");
-        
-        // Process liquidation...
-    }
-}
-```
-
-### Example: DEX Price Oracle
-
-```solidity
-contract DEX {
-    SwitchboardPriceConsumer public priceConsumer;
-    
-    function getSwapRate(
-        bytes32 tokenAFeedId,
-        bytes32 tokenBFeedId
-    ) external view returns (uint256) {
-        (int128 priceA,,) = priceConsumer.getPrice(tokenAFeedId);
-        (int128 priceB,,) = priceConsumer.getPrice(tokenBFeedId);
-        
-        require(priceConsumer.isPriceFresh(tokenAFeedId), "Stale price A");
-        require(priceConsumer.isPriceFresh(tokenBFeedId), "Stale price B");
-        
-        return (uint128(priceA) * 1e18) / uint128(priceB);
-    }
-}
-```
-
-## 🐛 Troubleshooting
-
-### "Insufficient fee"
-- The update fee is dynamic based on oracle responses
-- Always query `switchboard.getFee(updates)` before submitting
-- Send exact fee amount or slightly more (excess is refunded)
-
-### "Price deviation too high"
-- Price changed > 10% from last update (default)
-- Normal during high volatility
-- Adjust `maxDeviationBps` via `updateConfig()` if needed
-
-### "Price too old"
-- Data is older than `maxPriceAge` (default: 5 minutes)
-- Fetch fresh data before calling functions that check freshness
-- Adjust `maxPriceAge` via `updateConfig()` if needed
-
-### Build Errors
-```bash
-# Clean and rebuild
-forge clean
-forge build
-
-# Update dependencies
-forge update
-```
-
-## 📚 Additional Resources
-
-- [Switchboard Documentation](https://docs.switchboard.xyz)
-- [Switchboard Explorer](https://explorer.switchboard.xyz)
-- [Feed Builder Tool](https://explorer.switchboard.xyz/feed-builder)
-- [Solidity SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand-solidity)
-- [Discord Community](https://discord.gg/switchboardxyz)
-- [GitHub Issues](https://github.com/switchboard-xyz/evm-on-demand/issues)
-
-## 📖 Advanced Topics
-
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions and production checklist.
-
-See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
+| Application | Example |
+|-------------|---------|
+| **Gaming** | Fair loot drops, random encounters, card shuffling |
+| **NFTs** | Random trait generation, blind box reveals |
+| **DeFi** | Random liquidation selection, lottery mechanisms |
+| **Governance** | Random jury selection, fair ordering |
 
 ---
 
-For more examples and documentation, visit [docs.switchboard.xyz](https://docs.switchboard.xyz)
+## 🐛 Troubleshooting
+
+| Error | Solution |
+|-------|----------|
+| "Insufficient fee" | Query `switchboard.getFee(updates)` before submitting |
+| "Price deviation too high" | Normal during volatility; adjust `maxDeviationBps` if needed |
+| "Price too old" | Fetch fresh data; adjust `maxPriceAge` if needed |
+| Build errors | Run `forge clean && forge build` |
+
+---
+
+## 📚 Resources
+
+- [Switchboard Documentation](https://docs.switchboard.xyz)
+- [Switchboard Explorer](https://explorer.switchboard.xyz)
+- [Feed Builder](https://explorer.switchboard.xyz/feed-builder)
+- [Solidity SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand-solidity)
+- [Discord](https://discord.gg/switchboardxyz)

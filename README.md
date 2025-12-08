@@ -57,9 +57,11 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 The EVM examples showcase Switchboard functionality on EVM-compatible chains:
 
 - **[📈 Price Feeds](./evm)** - Real-time price data for DeFi applications
+- **[🎲 On-Demand Randomness](./evm/examples/randomness.ts)** - Verifiable Random Function (VRF)
 
 **Supported Networks:**
-- Monad, Core, Arbitrum
+- Monad (Mainnet & Testnet)
+- Hyperliquid (Mainnet)
 
 **Resources:**
 - [EVM Documentation](https://docs.switchboard.xyz/product-documentation/data-feeds/evm)

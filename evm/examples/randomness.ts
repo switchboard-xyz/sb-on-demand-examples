@@ -20,6 +20,7 @@
  */
 
 import { ethers } from 'ethers';
+import { CrossbarClient } from '@switchboard-xyz/common';
 import { sleep } from './utils';
 
 // =============================================================================
@@ -214,32 +215,17 @@ async function main() {
 
   console.log(`   Fetching from Crossbar...`);
 
-  const response = await fetch(`${crossbarUrl}/randomness/evm`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chain_id: network.chainId.toString(),
-      randomness_id: randomnessId,
-      timestamp: Number(randomnessData.rollTimestamp),
-      min_staleness_seconds: Number(randomnessData.minSettlementDelay),
-      oracle: randomnessData.oracle.toLowerCase(),
-    }),
+  const crossbar = new CrossbarClient(crossbarUrl);
+  const { encoded: encodedRandomness, response: crossbarResponse } = await crossbar.resolveEVMRandomness({
+    chainId: network.chainId,
+    randomnessId,
+    timestamp: Number(randomnessData.rollTimestamp),
+    minStalenessSeconds: Number(randomnessData.minSettlementDelay),
+    oracle: randomnessData.oracle,
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Crossbar error: ${response.status} - ${error}`);
-  }
-
-  const crossbarResult = await response.json();
-
-  if (!crossbarResult.success) {
-    throw new Error(`Crossbar failed: ${crossbarResult.error}`);
-  }
-
-  const encodedRandomness = crossbarResult.data.encoded;
   console.log(`   ✅ Received encoded randomness`);
-  console.log(`   Preview value: ${crossbarResult.data.response.value}`);
+  console.log(`   Preview value: ${crossbarResponse.value}`);
 
   // =========================================================================
   // STEP 4: Settle Randomness On-Chain

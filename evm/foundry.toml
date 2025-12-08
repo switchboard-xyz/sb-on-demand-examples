@@ -1,10 +1,13 @@
 [profile.default]
 src = "src"
-out = "out"
+out = "out/artifacts"
+cache_path = "out/cache"
+broadcast = "out/broadcast"
 libs = ["node_modules", "lib"]
 
 remappings = [
     "forge-std/=node_modules/forge-std/src/",
+    "@switchboard-xyz/on-demand-solidity/=node_modules/@switchboard-xyz/on-demand-solidity/",
 ]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

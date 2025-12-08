@@ -1,3 +1,2 @@
-broadcast/
-cache/
 out/
+.env

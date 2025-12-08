@@ -34,8 +34,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@switchboard-xyz/common": "^5",
-    "@switchboard-xyz/on-demand-solidity": "^0.0.4",
+    "@switchboard-xyz/common": "^5.5.0",
+    "@switchboard-xyz/on-demand": "^3.7.3",
+    "@switchboard-xyz/on-demand-solidity": "^1.0.0",
     "@types/yargs": "^17.0.33",
     "ethers": "^6.13.1",
     "forge-std": "github:foundry-rs/forge-std#v1.9.4",

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import { ISwitchboard } from "./switchboard/interfaces/ISwitchboard.sol";
-import { SwitchboardTypes } from "./switchboard/libraries/SwitchboardTypes.sol";
+import { ISwitchboard } from "@switchboard-xyz/on-demand-solidity/interfaces/ISwitchboard.sol";
+import { SwitchboardTypes } from "@switchboard-xyz/on-demand-solidity/libraries/SwitchboardTypes.sol";
 
 /**
  * @title SwitchboardPriceConsumer
@@ -117,12 +117,36 @@ contract SwitchboardPriceConsumer {
     // ========== External Functions ==========
 
     /**
-     * @notice Update price feeds with oracle data
+     * @notice Update price feeds with oracle data (new API)
      * @dev This is the main entry point for updating prices
+     * @param update Single encoded Switchboard update with signatures
+     */
+    function updatePrices(
+        bytes calldata update
+    ) external payable {
+        // Submit update to Switchboard and get parsed data back
+        SwitchboardTypes.FeedUpdateData memory updateData = switchboard.updateFeeds{ value: msg.value }(update);
+
+        // Process each feed in the update
+        for (uint256 i = 0; i < updateData.feedInfos.length; i++) {
+            SwitchboardTypes.FeedInfo memory feedInfo = updateData.feedInfos[i];
+
+            _processFeedUpdate(
+                feedInfo.feedId,
+                feedInfo.value,
+                updateData.timestamp,
+                updateData.slotNumber
+            );
+        }
+    }
+
+    /**
+     * @notice Update price feeds with oracle data (legacy API)
+     * @dev This is for backwards compatibility
      * @param updates Encoded Switchboard updates with signatures
      * @param feedIds Array of feed IDs to process from the update
      */
-    function updatePrices(
+    function updatePricesLegacy(
         bytes[] calldata updates,
         bytes32[] calldata feedIds
     ) external payable {
@@ -138,10 +162,10 @@ contract SwitchboardPriceConsumer {
         // Process each feed ID
         for (uint256 i = 0; i < feedIds.length; i++) {
             bytes32 feedId = feedIds[i];
-            
+
             // Get the latest verified update from Switchboard
             SwitchboardTypes.LegacyUpdate memory update = switchboard.latestUpdate(feedId);
-            
+
             // Process the feed update (convert timestamp to uint64)
             _processFeedUpdate(
                 feedId,

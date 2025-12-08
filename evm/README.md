@@ -58,8 +58,8 @@ That's it! You're now fetching and verifying real-time oracle prices on EVM. ðŸŽ
 | Network | Chain ID | Switchboard Contract |
 |---------|----------|---------------------|
 | **Monad Mainnet** | 143 | `0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67` |
-| **Monad Testnet** | 10143 | `0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33` |
-| **Hyperliquid Mainnet** | 999 | `0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347` |
+| **Monad Testnet** | 10143 | `0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C` |
+| **HyperEVM Mainnet** | 999 | `0x316fbe540c719970e6427ccd8590d7e0a2814c5d` |
 | **Hyperliquid Testnet** | 998 | TBD |
 
 > **Note**: For other EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/) which use the previous Switchboard implementation.
@@ -73,7 +73,7 @@ Monad is a high-performance EVM-compatible blockchain optimized for speed and ef
 | Network | Chain ID | RPC URL | Switchboard Contract |
 |---------|----------|---------|---------------------|
 | **Monad Mainnet** | 143 | `https://rpc-mainnet.monadinfra.com/rpc/YOUR_API_KEY` | `0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67` |
-| **Monad Testnet** | 10143 | `https://testnet-rpc.monad.xyz` | `0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33` |
+| **Monad Testnet** | 10143 | `https://testnet-rpc.monad.xyz` | `0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C` |
 
 ### Quick Start on Monad
 
@@ -183,7 +183,7 @@ Hyperliquid is a high-performance Layer 1 blockchain with native perpetual futur
 
 | Network | Chain ID | RPC URL | Switchboard Contract |
 |---------|----------|---------|---------------------|
-| **Hyperliquid Mainnet** | 999 | `https://rpc.hyperliquid.xyz/evm` | `0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347` |
+| **HyperEVM Mainnet** | 999 | `https://rpc.hyperliquid.xyz/evm` | `0x316fbe540c719970e6427ccd8590d7e0a2814c5d` |
 | **Hyperliquid Testnet** | 998 | `https://rpc.hyperliquid-testnet.xyz/evm` | TBD |
 
 ### Quick Start on Hyperliquid
@@ -248,8 +248,8 @@ import { CrossbarClient } from '@switchboard-xyz/common';
 const provider = new ethers.JsonRpcProvider('https://rpc.hyperliquid.xyz/evm');
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
-// Switchboard contract on Hyperliquid Mainnet
-const switchboardAddress = '0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347';
+// Switchboard contract on HyperEVM Mainnet
+const switchboardAddress = '0x316fbe540c719970e6427ccd8590d7e0a2814c5d';
 const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
 
 // Your deployed price consumer contract

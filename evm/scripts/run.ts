@@ -44,6 +44,10 @@ import { CrossbarClient } from '@switchboard-xyz/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// Parse command line arguments
+const args = process.argv.slice(2);
+const sendTx = args.includes('--sendTx');
+
 // ============================================================================
 // Network Configurations
 // ============================================================================
@@ -53,22 +57,35 @@ interface NetworkConfig {
   chainId: number;
   explorer: string;
   switchboard: string;
+  crossbarNetwork: string; // 'mainnet' or 'testnet' for crossbar API
   verifier?: string;
   queue?: string;
 }
 
-const NETWORKS: Record<string, NetworkConfig> = {
-  'monad-testnet': {
+const NETWORKS: Record<number, NetworkConfig> = {
+  // Monad Testnet
+  10143: {
     name: 'Monad Testnet',
     chainId: 10143,
     explorer: 'https://testnet.monadscan.io',
-    switchboard: '0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33',
+    switchboard: '0x33A5066f65f66161bEb3f827A3e40fce7d7A2e6C', // From docs.switchboard.xyz
+    crossbarNetwork: 'monad-testnet',
   },
-  'monad-mainnet': {
+  // Monad Mainnet
+  143: {
     name: 'Monad Mainnet',
     chainId: 143,
     explorer: 'https://mainnet-beta.monvision.io',
     switchboard: '0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67',
+    crossbarNetwork: 'monad-mainnet',
+  },
+  // HyperEVM Mainnet
+  999: {
+    name: 'HyperEVM Mainnet',
+    chainId: 999,
+    explorer: 'https://hyperliquid.xyz',
+    switchboard: '0x316fbe540c719970e6427ccd8590d7e0a2814c5d', // From docs.switchboard.xyz
+    crossbarNetwork: 'hyperliquid-mainnet',
   },
 };
 
@@ -79,12 +96,11 @@ const NETWORKS: Record<string, NetworkConfig> = {
 const config = {
   rpcUrl: process.env.RPC_URL || '',
   privateKey: process.env.PRIVATE_KEY || '',
-  network: (process.env.NETWORK || 'monad-testnet') as keyof typeof NETWORKS,
   contractAddress: process.env.CONTRACT_ADDRESS || '',
-  
+
   // Feed configuration
   feedHash: process.env.FEED_HASH || '0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812', // BTC/USD
-  
+
   // Price consumer configuration
   maxPriceAge: parseInt(process.env.MAX_PRICE_AGE || '300'), // 5 minutes
   maxDeviationBps: parseInt(process.env.MAX_DEVIATION_BPS || '1000'), // 10%
@@ -96,7 +112,8 @@ const config = {
 
 const PRICE_CONSUMER_ABI = [
   'constructor(address _switchboard)',
-  'function updatePrices(bytes[] calldata updates, bytes32[] calldata feedIds) external payable',
+  'function updatePrices(bytes calldata update) external payable',  // New API - single bytes
+  'function updatePricesLegacy(bytes[] calldata updates, bytes32[] calldata feedIds) external payable',  // Legacy API
   'function getPrice(bytes32 feedId) external view returns (int128 value, uint256 timestamp, uint64 slotNumber)',
   'function isPriceFresh(bytes32 feedId) external view returns (bool)',
   'function getPriceAge(bytes32 feedId) external view returns (uint256)',
@@ -138,7 +155,7 @@ function formatValue(value: bigint, decimals: number = 18): string {
   return `${whole}.${trimmed}`;
 }
 
-async function fetchFeedData(feedHash: string) {
+async function fetchFeedData(feedHash: string, crossbarNetwork: string) {
   const normalizedHash = normalizeFeedHash(feedHash);
   const feedHashForCrossbar = normalizedHash.startsWith('0x')
     ? normalizedHash.slice(2)
@@ -146,12 +163,13 @@ async function fetchFeedData(feedHash: string) {
 
   console.log('📡 Fetching feed data from Switchboard Crossbar...');
   console.log(`   Feed: ${normalizedHash}`);
+  console.log(`   Network: ${crossbarNetwork}`);
 
   try {
     const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
     const response = await crossbar.fetchOracleQuote(
       [feedHashForCrossbar],
-      'mainnet'
+      crossbarNetwork
     );
 
     if (!response.encoded) {
@@ -184,16 +202,16 @@ async function fetchFeedData(feedHash: string) {
 
 async function deployContract(signer: ethers.Wallet, networkConfig: NetworkConfig) {
   console.log('\n📝 Deploying SwitchboardPriceConsumer...');
-  
+
   // Read the compiled contract
-  const artifactPath = path.join(__dirname, '../out/SwitchboardPriceConsumer.sol/SwitchboardPriceConsumer.json');
-  
+  const artifactPath = path.join(__dirname, '../out/artifacts/SwitchboardPriceConsumer.sol/SwitchboardPriceConsumer.json');
+
   if (!fs.existsSync(artifactPath)) {
     throw new Error('Contract not compiled. Run: forge build');
   }
 
   const artifact = JSON.parse(fs.readFileSync(artifactPath, 'utf8'));
-  
+
   const factory = new ethers.ContractFactory(
     artifact.abi,
     artifact.bytecode.object,
@@ -228,9 +246,15 @@ async function main() {
     throw new Error('PRIVATE_KEY environment variable is required');
   }
 
-  const networkConfig = NETWORKS[config.network];
+  // Auto-detect network from RPC
+  console.log('🔍 Detecting network...');
+  const tempProvider = new ethers.JsonRpcProvider(config.rpcUrl);
+  const { chainId } = await tempProvider.getNetwork();
+  const chainIdNum = Number(chainId);
+
+  const networkConfig = NETWORKS[chainIdNum];
   if (!networkConfig) {
-    throw new Error(`Unknown network: ${config.network}`);
+    throw new Error(`Unsupported chain ID: ${chainIdNum}. Supported: ${Object.keys(NETWORKS).join(', ')}`);
   }
 
   console.log('Configuration:');
@@ -251,16 +275,6 @@ async function main() {
   const balance = await provider.getBalance(signer.address);
   console.log(`   Balance: ${ethers.formatEther(balance)} ${networkConfig.name.includes('Monad') ? 'MON' : 'ETH'}\n`);
 
-  // Deploy or use existing contract
-  let contractAddress = config.contractAddress;
-  if (!contractAddress) {
-    contractAddress = await deployContract(signer, networkConfig);
-  } else {
-    console.log(`📋 Using existing contract: ${contractAddress}\n`);
-  }
-
-  const contract = new ethers.Contract(contractAddress, PRICE_CONSUMER_ABI, signer);
-
   // ============================================================================
   // Step 1: Fetch Oracle Data
   // ============================================================================
@@ -269,7 +283,7 @@ async function main() {
   console.log('Step 1: Fetching Oracle Data');
   console.log('='.repeat(80) + '\n');
 
-  const feedData = await fetchFeedData(config.feedHash);
+  const feedData = await fetchFeedData(config.feedHash, networkConfig.crossbarNetwork);
 
   // ============================================================================
   // Step 2: Update Price On-Chain
@@ -287,115 +301,59 @@ async function main() {
   );
 
   const fee = await switchboard.getFee([feedData.encoded]);
-  console.log(`💰 Update fee: ${ethers.formatEther(fee)} ${networkConfig.name.includes('Monad') ? 'MON' : 'ETH'}`);
 
-  console.log('\n📤 Submitting transaction...');
-  const feedIdForUpdate = normalizeFeedHash(config.feedHash);
-  const tx = await contract.updatePrices([feedData.encoded], [feedIdForUpdate], { value: fee });
-  console.log(`   Transaction hash: ${tx.hash}`);
-  console.log(`   Waiting for confirmation...`);
+  if (sendTx) {
+    console.log('📤 Submitting update to Switchboard...');
+    const tx = await switchboard.updateFeeds([feedData.encoded], { value: fee });
+    console.log(`   Transaction hash: ${tx.hash}`);
+    console.log(`   Waiting for confirmation...`);
 
-  const receipt = await tx.wait();
-  console.log('\n✅ Transaction confirmed:');
-  console.log(`   Block: ${receipt.blockNumber}`);
-  console.log(`   Gas used: ${receipt.gasUsed.toString()}`);
-  console.log(`   Status: ${receipt.status === 1 ? 'Success' : 'Failed'}`);
-
-  // Parse events
-  console.log('\n📢 Events:');
-  for (const log of receipt.logs) {
-    try {
-      const parsed = contract.interface.parseLog({
-        topics: log.topics as string[],
-        data: log.data,
-      });
-      
-      if (parsed?.name === 'PriceUpdated') {
-        console.log(`   🎯 PriceUpdated:`);
-        console.log(`      Feed ID: ${parsed.args.feedId}`);
-        console.log(`      Old Price: ${parsed.args.oldPrice === 0n ? 'N/A' : formatValue(parsed.args.oldPrice)}`);
-        console.log(`      New Price: ${formatValue(parsed.args.newPrice)}`);
-        console.log(`      Timestamp: ${new Date(Number(parsed.args.timestamp) * 1000).toISOString()}`);
-        console.log(`      Slot: ${parsed.args.slotNumber}`);
-      }
-    } catch (e) {
-      // Skip logs we can't parse
-    }
+    const receipt = await tx.wait();
+    const gasPrice = receipt.gasPrice ?? tx.gasPrice ?? 0n;
+    const gasCost = receipt.gasUsed * gasPrice;
+    console.log('\n✅ Transaction confirmed:');
+    console.log(`   Block: ${receipt.blockNumber}`);
+    console.log(`   Gas used: ${receipt.gasUsed.toString()}`);
+    console.log(`   Gas cost: ${ethers.formatEther(gasCost)} ${networkConfig.name.includes('Monad') ? 'MON' : 'ETH'}`);
+    console.log(`   Status: ${receipt.status === 1 ? 'Success' : 'Failed'}`);
+    console.log(`   Explorer: ${networkConfig.explorer}/tx/${tx.hash}`);
+  } else {
+    console.log('🔍 Simulating update (use --sendTx to submit on-chain)...');
+    const gasEstimate = await switchboard.updateFeeds.estimateGas([feedData.encoded], { value: fee });
+    console.log(`   Estimated gas: ${gasEstimate.toString()}`);
+    console.log('\n✅ Simulation successful - transaction would succeed');
   }
-
-  // ============================================================================
-  // Step 3: Query and Verify
-  // ============================================================================
-
-  console.log('\n' + '='.repeat(80));
-  console.log('Step 3: Querying and Verifying Price');
-  console.log('='.repeat(80) + '\n');
-
-  const feedId = normalizeFeedHash(config.feedHash);
-  const [value, timestamp, slotNumber] = await contract.getPrice(feedId);
-  const isFresh = await contract.isPriceFresh(feedId);
-  const age = await contract.getPriceAge(feedId);
-
-  console.log('📊 On-Chain Price Data:');
-  console.log(`   Feed ID: ${feedId}`);
-  console.log(`   Value: ${formatValue(value)}`);
-  console.log(`   Timestamp: ${new Date(Number(timestamp) * 1000).toISOString()}`);
-  console.log(`   Slot: ${slotNumber}`);
-  console.log(`   Fresh: ${isFresh ? '✅ Yes' : '❌ No'}`);
-  console.log(`   Age: ${age} seconds`);
-
-  // ============================================================================
-  // Step 4: Example Business Logic
-  // ============================================================================
-
-  console.log('\n' + '='.repeat(80));
-  console.log('Step 4: Example Business Logic');
-  console.log('='.repeat(80) + '\n');
-
-  // Example: Calculate collateral ratio
-  const collateralAmount = ethers.parseEther('1'); // 1 BTC
-  const debtAmount = ethers.parseEther('50000'); // $50,000 debt
-
-  const ratio = await contract.calculateCollateralRatio(
-    feedId,
-    collateralAmount,
-    debtAmount
-  );
-
-  console.log('💼 Collateral Ratio Example:');
-  console.log(`   Collateral: ${ethers.formatEther(collateralAmount)} BTC`);
-  console.log(`   Debt: $${ethers.formatEther(debtAmount)}`);
-  console.log(`   Ratio: ${Number(ratio) / 100}%`);
-
-  // Example: Check liquidation
-  const liquidationThreshold = 11000n; // 110%
-  const shouldLiq = await contract.shouldLiquidate(
-    feedId,
-    collateralAmount,
-    debtAmount,
-    liquidationThreshold
-  );
-
-  console.log(`\n🔍 Liquidation Check:`);
-  console.log(`   Threshold: ${Number(liquidationThreshold) / 100}%`);
-  console.log(`   Should Liquidate: ${shouldLiq ? '⚠️  Yes' : '✅ No'}`);
 
   // ============================================================================
   // Summary
   // ============================================================================
 
   console.log('\n' + '='.repeat(80));
-  console.log('✨ Example Completed Successfully!');
+  console.log('Oracle Price Data');
+  console.log('='.repeat(80) + '\n');
+
+  console.log(`   Feed ID: ${feedData.feedHash}`);
+  console.log(`   Value: $${formatValue(BigInt(feedData.value))}`);
+  console.log(`   Timestamp: ${new Date(feedData.timestamp * 1000).toISOString()}`);
+  console.log(`   Slot: ${feedData.slot}`);
+  console.log(`   Oracles: ${feedData.numOracles}`);
+
+  console.log('\n' + '='.repeat(80));
+  console.log(sendTx ? 'Transaction Submitted!' : 'Simulation Complete!');
   console.log('='.repeat(80));
-  console.log('\nWhat just happened:');
-  console.log('1. ✅ Deployed/Connected to SwitchboardPriceConsumer contract');
-  console.log('2. ✅ Fetched real-time oracle data from Crossbar');
-  console.log('3. ✅ Submitted and verified price update on-chain');
-  console.log('4. ✅ Demonstrated business logic with price data');
-  console.log('\nYour contract now has access to verified, real-time oracle data!');
-  console.log(`\nContract: ${contractAddress}`);
-  console.log(`Explorer: ${networkConfig.explorer}/address/${contractAddress}`);
-  console.log(`Transaction: ${networkConfig.explorer}/tx/${tx.hash}`);
+  if (sendTx) {
+    console.log('\nWhat happened:');
+    console.log('1. Fetched real-time oracle data from Crossbar');
+    console.log('2. Submitted signed oracle update to Switchboard on-chain');
+    console.log('3. Switchboard verified oracle signatures cryptographically');
+    console.log('\nThe price data is now available on-chain for your smart contracts!');
+  } else {
+    console.log('\nWhat happened:');
+    console.log('1. Fetched real-time oracle data from Crossbar');
+    console.log('2. Simulated submitting to Switchboard (dry run)');
+    console.log('\nRun with --sendTx to submit on-chain.');
+  }
+  console.log(`\nSwitchboard: ${networkConfig.switchboard}`);
 }
 
 // Run the script

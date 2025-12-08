@@ -7,7 +7,7 @@
       "dependencies": {
         "@switchboard-xyz/common": "^5.5.0",
         "@switchboard-xyz/on-demand": "^3.7.3",
-        "@switchboard-xyz/on-demand-solidity": "^1.0.0",
+        "@switchboard-xyz/on-demand-solidity": "1.0.1-alpha0.0.0",
         "@types/yargs": "^17.0.33",
         "ethers": "^6.13.1",
         "forge-std": "github:foundry-rs/forge-std#v1.9.4",
@@ -92,7 +92,7 @@
 
     "@switchboard-xyz/on-demand": ["@switchboard-xyz/on-demand@3.7.3", "", { "dependencies": { "@coral-xyz/anchor-31": "npm:@coral-xyz/anchor@0.31.1", "@isaacs/ttlcache": "^1.4.1", "@solana/spl-token": "^0.4.14", "@solana/web3.js": "^1.98.4", "@switchboard-xyz/common": "^5.2.9", "axios": "^1.9", "bs58": "^6.0.0", "buffer": "^6.0.3", "events": "^3.3.0", "isomorphic-ws": "^5.0.0", "js-yaml": "^4.1.0", "tweetnacl": "^1.0.3", "ws": "^8.18.1" } }, "sha512-sG9errSwjYlQbIlQl0iptUQcbKrPe7QVxX20+qXuucG3qIWlA/w6sXGnITeYbt+BERyBYdfue0viBjmjOsCZrg=="],
 
-    "@switchboard-xyz/on-demand-solidity": ["@switchboard-xyz/on-demand-solidity@1.0.1", "", {}, "sha512-0z2dyWbDIs2Xks70ZNz9hBHqDfnsCzS8EcYcQwJXiNEa64nnx0MKdQEk35QhxOMiJpW7OWjNQ+Bwg0180GXcAw=="],
+    "@switchboard-xyz/on-demand-solidity": ["@switchboard-xyz/on-demand-solidity@1.0.1-alpha0.0.0", "", {}, "sha512-k9wo9bwdJpYPEOgK+8SgzLmRqpq/l44cChA+anza8uO0bw9EqBpFIYAcYF1AAWpRmxfm63qETo/gXfB5atDRlw=="],
 
     "@types/bun": ["@types/bun@1.2.17", "", { "dependencies": { "bun-types": "1.2.17" } }, "sha512-l/BYs/JYt+cXA/0+wUhulYJB6a6p//GTPiJ7nV+QHa8iiId4HZmnu/3J/SowP5g0rTiERY2kfGKXEK5Ehltx4Q=="],
 

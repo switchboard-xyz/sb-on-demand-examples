@@ -6,6 +6,7 @@
   "scripts": {
     "example": "bun scripts/run.ts",
     "update": "bun examples/updateFeed.ts",
+    "randomness": "bun examples/randomness.ts",
     "surge-convert": "bun examples/surgeToEvmConversion.ts",
     "build": "forge build",
     "test": "forge test",

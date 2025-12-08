@@ -15,6 +15,7 @@ evm/
 │   └── run.ts         # Complete integration example
 ├── examples/          # Additional examples
 │   ├── updateFeed.ts
+│   ├── randomness.ts
 │   └── utils.ts
 ├── legacy/            # Previous examples (for reference)
 ├── package.json
@@ -287,6 +288,91 @@ console.log(`BTC/USD Price: $${ethers.formatUnits(value, 18)}`);
 - Bridge ETH to Hyperliquid using the official bridge
 - Start with small amounts to test your integration
 
+## 🎲 On-Chain Verifiable Randomness
+
+Switchboard On-Demand provides cryptographically secure verifiable randomness for EVM smart contracts. The randomness flow works as follows:
+
+1. **Request**: Your contract creates a randomness request with a unique ID
+2. **Commitment**: An oracle is assigned and commits to the randomness
+3. **Reveal**: After the settlement delay, the oracle reveals the random value
+4. **Verification**: The contract verifies the oracle's signature and stores the result
+
+### Quick Start
+
+```bash
+# Run the randomness example on Monad Testnet
+PRIVATE_KEY=0x... bun run randomness
+
+# Run on other networks
+PRIVATE_KEY=0x... NETWORK=monad-mainnet bun run randomness
+PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun run randomness
+```
+
+### Integration Example
+
+```typescript
+import { ethers } from 'ethers';
+
+// Setup
+const provider = new ethers.JsonRpcProvider('https://testnet-rpc.monad.xyz');
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
+
+// 1. Create randomness request
+const randomnessId = ethers.keccak256(ethers.toUtf8Bytes(`game-${gameId}-round-${roundId}`));
+const minSettlementDelay = 5; // seconds
+
+const tx = await switchboard.createRandomness(randomnessId, minSettlementDelay);
+await tx.wait();
+
+// 2. Get assigned oracle from event
+const data = await switchboard.getRandomness(randomnessId);
+console.log('Assigned Oracle:', data.oracle);
+
+// 3. Wait for settlement delay + fetch reveal from Crossbar
+const response = await fetch('https://crossbar.switchboard.xyz/randomness/evm', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    chain_id: '10143',
+    randomness_id: randomnessId,
+    timestamp: Number(data.rollTimestamp),
+    min_staleness_seconds: Number(data.minSettlementDelay),
+    oracle: data.oracle.toLowerCase(),
+  }),
+});
+const { data: { encoded } } = await response.json();
+
+// 4. Settle randomness on-chain
+const fee = await switchboard.updateFee();
+await switchboard.settleRandomness(encoded, { value: fee });
+
+// 5. Read the verified random value
+const result = await switchboard.getRandomness(randomnessId);
+console.log('Random Value:', result.value);
+
+// Use for your application
+const diceRoll = Number((result.value % 6n) + 1n);
+const coinFlip = result.value % 2n === 0n ? 'Heads' : 'Tails';
+```
+
+### Use Cases
+
+| Application | Example |
+|-------------|---------|
+| **Gaming** | Fair loot drops, random encounters, card shuffling |
+| **NFTs** | Random trait generation, blind box reveals |
+| **DeFi** | Random liquidation selection, lottery mechanisms |
+| **Governance** | Random jury selection, fair ordering |
+
+### Supported Networks
+
+| Network | Chain ID | Status |
+|---------|----------|--------|
+| Monad Testnet | 10143 | ✅ Live |
+| Monad Mainnet | 143 | ✅ Live |
+| Hyperliquid Mainnet | 999 | ✅ Live |
+
 ## 🎯 What is Switchboard On-Demand?
 
 Switchboard On-Demand provides secure, verified oracle data for EVM smart contracts:
@@ -382,6 +468,33 @@ export EXAMPLE_ADDRESS=0x...
 # Run update
 bun examples/updateFeed.ts
 ```
+
+### `/examples/randomness.ts` - On-Chain Verifiable Randomness
+
+Complete example for requesting and settling verifiable random numbers:
+
+```bash
+# On Monad Testnet (default)
+PRIVATE_KEY=0x... bun run randomness
+
+# On Monad Mainnet
+PRIVATE_KEY=0x... NETWORK=monad-mainnet bun run randomness
+
+# On Hyperliquid Mainnet
+PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun run randomness
+```
+
+This example demonstrates:
+- Creating a randomness request (auto-selects an oracle)
+- Waiting for the settlement delay period
+- Fetching the cryptographic reveal from Crossbar
+- Settling the randomness on-chain
+- Using the verified random value for different applications
+
+**Use Cases:**
+- Gaming: Fair loot drops, random encounters, card shuffling
+- NFTs: Random trait generation, blind box reveals
+- DeFi: Random liquidation selection, lottery mechanisms
 
 ### `/examples/surgeToEvmConversion.ts` - Surge to EVM Format Converter
 
@@ -485,7 +598,7 @@ bun scripts/run.ts
 | Asset | Feed ID |
 |-------|---------|
 | MON/USD | `0x2d5f0a89b34b1df59445c51474b6ec540e975b790207bfa4b4c4512bfe63ec47` |
-| BTC/USD | `0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812` |
+| BTC/USD | `0x4cd1cad9624256it81af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812` |
 | ETH/USD | `0xa0950ee5ee117b2e2c30f154a69e17bfb489a7610c508dc5f67eb2a14616d8ea` |
 | SOL/USD | `0x822512ee9add93518eca1c105a38422841a76c590db079eebb283deb2c14caa9` |
 | SUI/USD | `0x7ceef94f404e660925ea4b33353ff303effaf901f224bdee50df3a714c1299e9` |

@@ -8,6 +8,8 @@
     "test": "test"
   },
   "scripts": {
+    "start": "bun run server.ts",
+    "flip": "bun run scripts/flip-the-coin.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

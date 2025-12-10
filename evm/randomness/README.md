@@ -237,19 +237,13 @@ A simple browser-based UI is included for interacting with the deployed contract
 
 ### Running the UI
 
-Serve the `ui/` folder with any static file server:
+Start the server:
 
 ```bash
-bunx serve ui
+bun start
 ```
 
-Or use Python:
-
-```bash
-python3 -m http.server 8080 -d ui
-```
-
-Then open [http://localhost:8080](http://localhost:8080) in your browser.
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Using the UI
 

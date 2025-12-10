@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Switchboard Coin Flip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --accent: #00ff88;
+      --accent-dim: #00cc6a;
+      --accent-glow: rgba(0, 255, 136, 0.15);
+      --text-primary: #ffffff;
+      --text-secondary: #8a8a9a;
+      --text-muted: #5a5a6a;
+      --border: #2a2a3a;
+      --error: #ff4466;
+      --warning: #ffaa00;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background-image: 
+        radial-gradient(ellipse at 50% 0%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(0, 100, 255, 0.05) 0%, transparent 40%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .logo svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 400;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .coin-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      perspective: 1000px;
+    }
+
+    .coin {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+
+    .coin.flipping {
+      animation: flip 2s ease-in-out;
+    }
+
+    .coin.heads {
+      transform: rotateY(0deg);
+    }
+
+    .coin.tails {
+      transform: rotateY(180deg);
+    }
+
+    @keyframes flip {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(1800deg); }
+    }
+
+    .coin-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      backface-visibility: hidden;
+      border: 4px solid;
+    }
+
+    .coin-heads {
+      background: linear-gradient(145deg, #00ff88, #00cc6a);
+      border-color: #00aa55;
+      color: #003322;
+      box-shadow: 
+        0 8px 32px rgba(0, 255, 136, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    }
+
+    .coin-tails {
+      background: linear-gradient(145deg, #ff4466, #cc3355);
+      border-color: #aa2244;
+      color: #330011;
+      transform: rotateY(180deg);
+      box-shadow: 
+        0 8px 32px rgba(255, 68, 102, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    }
+
+    .wager-info {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wager-label {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .wager-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-dim);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--bg-card);
+      border-color: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .btn svg {
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .status.info {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .status.error {
+      background: rgba(255, 68, 102, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(255, 68, 102, 0.2);
+    }
+
+    .status.warning {
+      background: rgba(255, 170, 0, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(255, 170, 0, 0.2);
+    }
+
+    .result {
+      text-align: center;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-top: 1rem;
+    }
+
+    .result.win {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .result.lose {
+      background: rgba(255, 68, 102, 0.1);
+      border: 1px solid rgba(255, 68, 102, 0.3);
+    }
+
+    .result-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .result.win .result-title {
+      color: var(--accent);
+    }
+
+    .result.lose .result-title {
+      color: var(--error);
+    }
+
+    .result-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .wallet-info {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wallet-address {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .wallet-balance {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+
+    .config-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .config-section label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .config-section input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+    }
+
+    .config-section input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .config-section input::placeholder {
+      color: var(--text-muted);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .step {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .step.active {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .step.completed {
+      background: var(--accent-dim);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" fill="none" style="color: var(--accent)"/>
+          <path d="M16 8v16M10 12l6-4 6 4M10 20l6 4 6-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent)"/>
+        </svg>
+        <h1>Coin Flip</h1>
+      </div>
+      <p class="subtitle">Powered by Switchboard Randomness</p>
+    </header>
+
+    <!-- Connect Wallet View -->
+    <div id="connect-view" class="card">
+      <div class="config-section">
+        <label>Contract Address</label>
+        <input type="text" id="contract-address" placeholder="0x...">
+      </div>
+      <button id="connect-btn" class="btn btn-primary">
+        Connect Wallet
+      </button>
+    </div>
+
+    <!-- Game View -->
+    <div id="game-view" class="card hidden">
+      <div class="wallet-info">
+        <span class="wallet-address" id="wallet-address">0x...</span>
+        <span class="wallet-balance" id="wallet-balance">0 ETH</span>
+      </div>
+
+      <div class="step-indicator">
+        <div class="step" id="step-1"></div>
+        <div class="step" id="step-2"></div>
+        <div class="step" id="step-3"></div>
+      </div>
+
+      <div class="coin-container">
+        <div class="coin" id="coin">
+          <div class="coin-face coin-heads">H</div>
+          <div class="coin-face coin-tails">T</div>
+        </div>
+      </div>
+
+      <div class="wager-info">
+        <span class="wager-label">Wager Amount</span>
+        <span class="wager-amount">1 ETH</span>
+      </div>
+
+      <button id="flip-btn" class="btn btn-primary">
+        Flip the Coin
+      </button>
+
+      <button id="settle-btn" class="btn btn-secondary hidden">
+        Settle & Reveal
+      </button>
+
+      <button id="reset-btn" class="btn btn-secondary hidden">
+        Play Again
+      </button>
+
+      <div id="status" class="status info hidden"></div>
+      <div id="result" class="result hidden"></div>
+    </div>
+
+    <footer>
+      Built with <a href="https://switchboard.xyz" target="_blank">Switchboard</a>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.11.1/+esm';
+
+    const CROSSBAR_URL = 'https://crossbar.switchboard.xyz';
+    const CHAIN_ID = 143; // Monad
+
+    const COIN_FLIP_ABI = [
+      'function coinFlip() public payable',
+      'function settleFlip(bytes calldata encodedRandomness) public',
+      'function getWagerRandomnessId(address user) public view returns (bytes32)',
+      'function getWagerData(address user) public view returns (address oracle, uint256 rollTimestamp, uint256 minSettlementDelay)',
+      'function wagers(address) public view returns (uint256 amount, address user, bytes32 randomnessId, uint256 flipTimestamp)',
+      'function MIN_FLIP_AMOUNT() public view returns (uint256)',
+      'event CoinFlipped(address indexed user, bytes32 randomnessId, uint256 amount)',
+      'event FlipSettled(address indexed user, bool won, uint256 payout, uint256 randomValue)'
+    ];
+
+    let provider, signer, contract;
+
+    // DOM Elements
+    const connectView = document.getElementById('connect-view');
+    const gameView = document.getElementById('game-view');
+    const connectBtn = document.getElementById('connect-btn');
+    const flipBtn = document.getElementById('flip-btn');
+    const settleBtn = document.getElementById('settle-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const contractAddressInput = document.getElementById('contract-address');
+    const walletAddressEl = document.getElementById('wallet-address');
+    const walletBalanceEl = document.getElementById('wallet-balance');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+    const coinEl = document.getElementById('coin');
+
+    // Step indicators
+    const steps = [
+      document.getElementById('step-1'),
+      document.getElementById('step-2'),
+      document.getElementById('step-3')
+    ];
+
+    function updateSteps(current) {
+      steps.forEach((step, i) => {
+        step.classList.remove('active', 'completed');
+        if (i < current) step.classList.add('completed');
+        if (i === current) step.classList.add('active');
+      });
+    }
+
+    function showStatus(message, type = 'info') {
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+      statusEl.classList.remove('hidden');
+    }
+
+    function hideStatus() {
+      statusEl.classList.add('hidden');
+    }
+
+    function showResult(won) {
+      resultEl.innerHTML = won 
+        ? '<div class="result-title">🎉 You Won!</div><div class="result-subtitle">+1 ETH profit</div>'
+        : '<div class="result-title">😔 You Lost</div><div class="result-subtitle">Better luck next time</div>';
+      resultEl.className = `result ${won ? 'win' : 'lose'}`;
+      resultEl.classList.remove('hidden');
+      
+      coinEl.classList.remove('flipping');
+      coinEl.classList.add(won ? 'heads' : 'tails');
+    }
+
+    function setLoading(btn, loading, text) {
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = `<div class="spinner"></div> ${text}`;
+      } else {
+        btn.disabled = false;
+        btn.textContent = text;
+      }
+    }
+
+    async function updateBalance() {
+      const balance = await provider.getBalance(await signer.getAddress());
+      walletBalanceEl.textContent = `${parseFloat(ethers.formatEther(balance)).toFixed(4)} ETH`;
+    }
+
+    async function checkExistingWager() {
+      const address = await signer.getAddress();
+      const wager = await contract.wagers(address);
+      return wager.amount > 0n;
+    }
+
+    // Connect wallet
+    connectBtn.addEventListener('click', async () => {
+      try {
+        const contractAddress = contractAddressInput.value.trim();
+        if (!contractAddress || !ethers.isAddress(contractAddress)) {
+          showStatus('Please enter a valid contract address', 'error');
+          return;
+        }
+
+        setLoading(connectBtn, true, 'Connecting...');
+
+        // Prefer Phantom's EVM provider, fall back to other injected wallets
+        const phantomProvider = window.phantom?.ethereum;
+        const injectedProvider = phantomProvider || window.ethereum;
+
+        if (!injectedProvider) {
+          throw new Error('Please install Phantom wallet');
+        }
+
+        if (!phantomProvider) {
+          console.warn('Phantom not detected, using fallback provider');
+        }
+
+        provider = new ethers.BrowserProvider(injectedProvider);
+        await provider.send('eth_requestAccounts', []);
+        signer = await provider.getSigner();
+        contract = new ethers.Contract(contractAddress, COIN_FLIP_ABI, signer);
+
+        const address = await signer.getAddress();
+        walletAddressEl.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+        await updateBalance();
+
+        connectView.classList.add('hidden');
+        gameView.classList.remove('hidden');
+
+        // Check for existing wager
+        if (await checkExistingWager()) {
+          updateSteps(1);
+          flipBtn.classList.add('hidden');
+          settleBtn.classList.remove('hidden');
+          showStatus('You have a pending flip. Click to settle.', 'warning');
+        } else {
+          updateSteps(0);
+        }
+
+      } catch (err) {
+        showStatus(err.message, 'error');
+      } finally {
+        setLoading(connectBtn, false, 'Connect Phantom');
+      }
+    });
+
+    // Flip the coin
+    flipBtn.addEventListener('click', async () => {
+      try {
+        hideStatus();
+        resultEl.classList.add('hidden');
+        coinEl.classList.remove('heads', 'tails');
+        setLoading(flipBtn, true, 'Flipping...');
+        updateSteps(0);
+
+        const tx = await contract.coinFlip({ value: ethers.parseEther('1') });
+        showStatus('Transaction sent. Waiting for confirmation...', 'info');
+        await tx.wait();
+
+        await updateBalance();
+        updateSteps(1);
+        showStatus('Coin flipped! Waiting for randomness...', 'info');
+
+        flipBtn.classList.add('hidden');
+        settleBtn.classList.remove('hidden');
+
+      } catch (err) {
+        showStatus(err.reason || err.message, 'error');
+        setLoading(flipBtn, false, 'Flip the Coin');
+      }
+    });
+
+    // Settle the flip
+    settleBtn.addEventListener('click', async () => {
+      try {
+        setLoading(settleBtn, true, 'Resolving...');
+        updateSteps(1);
+
+        const address = await signer.getAddress();
+        const randomnessId = await contract.getWagerRandomnessId(address);
+        const wagerData = await contract.getWagerData(address);
+
+        showStatus('Fetching randomness from Switchboard...', 'info');
+
+        // Resolve randomness via Crossbar
+        const response = await fetch(`${CROSSBAR_URL}/updates/evm/randomness`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chainId: CHAIN_ID,
+            randomnessId: randomnessId,
+            timestamp: Number(wagerData.rollTimestamp),
+            minStalenessSeconds: Number(wagerData.minSettlementDelay),
+            oracle: wagerData.oracle
+          })
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Randomness not ready: ${text}`);
+        }
+
+        const { encoded } = await response.json();
+
+        updateSteps(2);
+        showStatus('Settling on-chain...', 'info');
+        
+        coinEl.classList.add('flipping');
+
+        const tx = await contract.settleFlip(encoded);
+        const receipt = await tx.wait();
+        await updateBalance();
+
+        // Parse the FlipSettled event to determine win/lose
+        let won = false;
+        for (const log of receipt.logs) {
+          try {
+            const parsed = contract.interface.parseLog(log);
+            if (parsed?.name === 'FlipSettled') {
+              won = parsed.args.won;
+              break;
+            }
+          } catch {}
+        }
+
+        setTimeout(() => {
+          hideStatus();
+          showResult(won);
+          settleBtn.classList.add('hidden');
+          resetBtn.classList.remove('hidden');
+        }, 2000);
+
+      } catch (err) {
+        showStatus(err.reason || err.message, 'error');
+        coinEl.classList.remove('flipping');
+        setLoading(settleBtn, false, 'Settle & Reveal');
+      }
+    });
+
+    // Reset game
+    resetBtn.addEventListener('click', async () => {
+      hideStatus();
+      resultEl.classList.add('hidden');
+      coinEl.classList.remove('heads', 'tails', 'flipping');
+      resetBtn.classList.add('hidden');
+      flipBtn.classList.remove('hidden');
+      setLoading(flipBtn, false, 'Flip the Coin');
+      updateSteps(0);
+      await updateBalance();
+    });
+  </script>
+</body>
+</html>
+

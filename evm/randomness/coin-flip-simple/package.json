@@ -1,0 +1,21 @@
+{
+  "name": "randomness",
+  "version": "1.0.0",
+  "description": "**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "start": "bun run server.ts",
+    "flip": "bun run scripts/flip-the-coin.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@switchboard-xyz/common": "^5.5.1",
+    "@switchboard-xyz/on-demand-solidity": "^1.1.0"
+  }
+}

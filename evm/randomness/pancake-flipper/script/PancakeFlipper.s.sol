@@ -6,6 +6,8 @@ import {PancakeFlipper} from "../src/PancakeFlipper.sol";
 
 contract PancakeFlipperScript is Script {
 
+    // Mainnet: 0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67
+    // Testnet: 0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33
     address public constant SWITCHBOARD_ADDRESS = 0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67;
 
     PancakeFlipper public pancakeFlipper;

@@ -10,6 +10,7 @@ contract PancakeFlipper {
     event PancakeFlipRequested(address indexed user, bytes32 randomnessId);
     event PancakeLanded(address indexed user, uint256 newStackHeight);
     event StackKnockedOver(address indexed user);
+    event SettlementFailed(address indexed user);
 
     // Pending flip randomness ID for each user (bytes32(0) = no pending flip)
     mapping(address => bytes32) public pendingFlips;
@@ -41,30 +42,40 @@ contract PancakeFlipper {
         bytes32 randomnessId = pendingFlips[msg.sender];
         require(randomnessId != bytes32(0), "No pending flip");
 
-        // Settle the randomness on-chain
-        switchboard.settleRandomness(encodedRandomness);
+        // Try to settle the randomness on-chain
+        try switchboard.settleRandomness(encodedRandomness) {
+            // Settlement succeeded, now get the randomness value
+            SwitchboardTypes.Randomness memory randomness = switchboard.getRandomness(randomnessId);
 
-        // Get the randomness value
-        SwitchboardTypes.Randomness memory randomness = switchboard.getRandomness(randomnessId);
-        require(randomness.value != 0, "Randomness not resolved");
+            if (randomness.value == 0) {
+                // Randomness not resolved yet - clear flip so user can retry
+                delete pendingFlips[msg.sender];
+                return false;
+            }
 
-        // 80% chance to land (roll 0-79), 20% chance to knock over (roll 80-99)
-        landed = uint256(randomness.value) % 100 < 80;
+            // 2/3 chance to land (roll 0-1), 1/3 chance to knock over (roll 2)
+            landed = uint256(randomness.value) % 3 < 2;
 
-        if (landed) {
-            // Pancake lands! Increment stack
-            stackHeight[msg.sender]++;
-            emit PancakeLanded(msg.sender, stackHeight[msg.sender]);
-        } else {
-            // Stack knocked over!
-            stackHeight[msg.sender] = 0;
-            emit StackKnockedOver(msg.sender);
+            if (landed) {
+                // Pancake lands! Increment stack
+                stackHeight[msg.sender]++;
+                emit PancakeLanded(msg.sender, stackHeight[msg.sender]);
+            } else {
+                // Stack knocked over!
+                stackHeight[msg.sender] = 0;
+                emit StackKnockedOver(msg.sender);
+            }
+
+            // Clear the request
+            delete pendingFlips[msg.sender];
+
+            return landed;
+        } catch {
+            // Settlement failed - clear the pending flip so user can try again
+            delete pendingFlips[msg.sender];
+            emit SettlementFailed(msg.sender);
+            return false;
         }
-
-        // Clear the request
-        delete pendingFlips[msg.sender];
-
-        return landed;
     }
 
     // View function to get data needed for off-chain resolution

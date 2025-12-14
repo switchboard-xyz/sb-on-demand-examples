@@ -3,24 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Switchboard Coin Flip</title>
+  <title>Pancake Stacker - Switchboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #0a0a0f;
-      --bg-secondary: #12121a;
-      --bg-card: #1a1a24;
-      --accent: #00ff88;
-      --accent-dim: #00cc6a;
-      --accent-glow: rgba(0, 255, 136, 0.15);
-      --text-primary: #ffffff;
-      --text-secondary: #8a8a9a;
-      --text-muted: #5a5a6a;
-      --border: #2a2a3a;
-      --error: #ff4466;
-      --warning: #ffaa00;
+      /* Dark Theme Color Palette */
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #252525;
+      --bg-card: #2a2a2a;
+
+      /* Pancake Colors */
+      --pancake-top: #DEB887;
+      --pancake-side: #D2691E;
+
+      /* Switchboard Brand - Gradient Colors */
+      --sb-yellow: #FFD700;
+      --sb-orange: #FF6B35;
+      --sb-red: #FF4757;
+      --sb-pink: #FF69B4;
+      --sb-blue: #5B9BD5;
+      --sb-purple: #9B59B6;
+      --sb-green: #00FF88;
+      --sb-green-dim: #00CC6A;
+
+      /* Gradient for accents - matches logo: yellow → orange → red → pink → purple */
+      --gradient-accent: linear-gradient(135deg, #FFD700 0%, #FF6B35 25%, #FF4757 45%, #FF69B4 70%, #9B59B6 100%);
+
+      /* UI Colors */
+      --text-primary: #F0F0F0;
+      --text-secondary: #999999;
+      --border-dark: #444444;
+      --border-light: #555555;
+
+      /* Status Colors */
+      --success: #00FF88;
+      --success-dark: #00CC6A;
+      --error: #FF6B6B;
+      --error-dark: #FF4757;
+      --warning: #FFD700;
+
+      /* Button Colors */
+      --btn-primary: #9B59B6;
+      --btn-primary-hover: #B06EC9;
+      --btn-secondary: #FF69B4;
+      --btn-catch: #00FF88;
     }
 
     * {
@@ -30,7 +58,7 @@
     }
 
     body {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Press Start 2P', cursive;
       background: var(--bg-primary);
       color: var(--text-primary);
       min-height: 100vh;
@@ -38,424 +66,1105 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
-      background-image:
-        radial-gradient(ellipse at 50% 0%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 20% 80%, rgba(0, 100, 255, 0.05) 0%, transparent 40%);
+      padding: 1rem;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
     }
 
     .container {
       width: 100%;
-      max-width: 420px;
+      max-width: 600px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .logo svg {
-      width: 32px;
-      height: 32px;
-    }
-
-    h1 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-
-    .subtitle {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      font-weight: 400;
-    }
-
-    .card {
+    /* Pixel Border Style */
+    .pixel-border {
+      border: 4px solid var(--border-dark);
+      box-shadow:
+        4px 4px 0 rgba(0,0,0,0.4),
+        inset -4px -4px 0 var(--border-light),
+        inset 4px 4px 0 rgba(255,255,255,0.1);
       background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      margin-bottom: 1rem;
     }
 
-    .coin-container {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2rem;
-      perspective: 1000px;
-    }
-
-    .coin {
-      width: 120px;
-      height: 120px;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease-out;
-    }
-
-    .coin.flipping {
-      animation: flip 2s ease-in-out;
-    }
-
-    .coin.heads {
-      transform: rotateY(0deg);
-    }
-
-    .coin.tails {
-      transform: rotateY(180deg);
-    }
-
-    @keyframes flip {
-      0% { transform: rotateY(0deg); }
-      100% { transform: rotateY(1800deg); }
-    }
-
-    .coin-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      font-weight: 700;
-      backface-visibility: hidden;
-      border: 4px solid;
-    }
-
-    .coin-heads {
-      background: linear-gradient(145deg, #00ff88, #00cc6a);
-      border-color: #00aa55;
-      color: #003322;
-      box-shadow:
-        0 8px 32px rgba(0, 255, 136, 0.3),
-        inset 0 2px 4px rgba(255, 255, 255, 0.3);
-    }
-
-    .coin-tails {
-      background: linear-gradient(145deg, #ff4466, #cc3355);
-      border-color: #aa2244;
-      color: #330011;
-      transform: rotateY(180deg);
-      box-shadow:
-        0 8px 32px rgba(255, 68, 102, 0.3),
-        inset 0 2px 4px rgba(255, 255, 255, 0.3);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 1rem 1.5rem;
-      border: none;
-      border-radius: 12px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
+    .pixel-btn {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      padding: 12px 20px;
+      border: 4px solid var(--border-dark);
+      background: var(--btn-primary);
+      color: white;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
       cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
+      transition: transform 0.1s;
+      box-shadow:
+        inset -4px -4px 0 rgba(0,0,0,0.3),
+        inset 4px 4px 0 rgba(255,255,255,0.3),
+        4px 4px 0 rgba(0,0,0,0.2);
     }
 
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
+    .pixel-btn:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow:
+        inset -4px -4px 0 rgba(0,0,0,0.3),
+        inset 4px 4px 0 rgba(255,255,255,0.3),
+        2px 2px 0 rgba(0,0,0,0.2);
     }
 
-    .btn-primary:hover:not(:disabled) {
-      background: var(--accent-dim);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+    .pixel-btn:active:not(:disabled) {
+      transform: translate(4px, 4px);
+      box-shadow:
+        inset -4px -4px 0 rgba(0,0,0,0.3),
+        inset 4px 4px 0 rgba(255,255,255,0.3);
     }
 
-    .btn-secondary {
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: var(--bg-card);
-      border-color: var(--accent);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
+    .pixel-btn:disabled {
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
-    .btn .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid transparent;
-      border-top-color: currentColor;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .pixel-btn.secondary {
+      background: var(--btn-secondary);
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .pixel-btn.catch-btn,
+    #flip-btn {
+      background: var(--btn-catch);
     }
 
-    .status {
-      text-align: center;
-      padding: 1rem;
-      border-radius: 12px;
-      margin-top: 1rem;
-      font-size: 0.9rem;
+    #flip-btn {
+      margin-top: -4px;
+      margin-left: 8px;
     }
 
-    .status.info {
-      background: rgba(0, 255, 136, 0.1);
-      color: var(--accent);
-      border: 1px solid rgba(0, 255, 136, 0.2);
+    #catch-btn {
+      margin-left: auto;
+      margin-top: -4px;
+      margin-right: 8px;
     }
 
-    .status.error {
-      background: rgba(255, 68, 102, 0.1);
-      color: var(--error);
-      border: 1px solid rgba(255, 68, 102, 0.2);
+    .pixel-input {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 8px;
+      padding: 10px 12px;
+      border: 4px solid var(--border-dark);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      width: 100%;
+      box-shadow:
+        inset -4px -4px 0 var(--border-light),
+        inset 4px 4px 0 rgba(0,0,0,0.1);
     }
 
-    .status.warning {
-      background: rgba(255, 170, 0, 0.1);
-      color: var(--warning);
-      border: 1px solid rgba(255, 170, 0, 0.2);
+    .pixel-input:focus {
+      outline: none;
+      border-color: var(--sb-purple);
     }
 
-    .result {
-      text-align: center;
-      padding: 1.5rem;
-      border-radius: 12px;
-      margin-top: 1rem;
-    }
-
-    .result.heads {
-      background: rgba(0, 255, 136, 0.1);
-      border: 1px solid rgba(0, 255, 136, 0.3);
-    }
-
-    .result.tails {
-      background: rgba(255, 68, 102, 0.1);
-      border: 1px solid rgba(255, 68, 102, 0.3);
-    }
-
-    .result-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-
-    .result.heads .result-title {
-      color: var(--accent);
-    }
-
-    .result.tails .result-title {
-      color: var(--error);
-    }
-
-    .result-subtitle {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-
-    .wallet-info {
-      background: var(--bg-secondary);
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .wallet-address {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+    .pixel-input::placeholder {
       color: var(--text-secondary);
     }
 
-    .wallet-balance {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      color: var(--accent);
-    }
-
-    .config-section {
+    /* Header */
+    header {
+      text-align: center;
       margin-bottom: 1.5rem;
+    }
+
+    .pixel-title {
+      font-size: 20px;
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5));
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 8px;
+      color: var(--text-secondary);
+    }
+
+    /* Card */
+    .card {
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Config Section */
+    .config-section {
+      margin-bottom: 1.25rem;
     }
 
     .config-section label {
       display: block;
-      color: var(--text-secondary);
-      font-size: 0.8rem;
-      margin-bottom: 0.5rem;
+      font-size: 8px;
+      color: #CCCCCC;
+      margin-bottom: 8px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .config-section input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-    }
-
-    .config-section input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .config-section input::placeholder {
-      color: var(--text-muted);
     }
 
     .rpc-presets {
       display: flex;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
+      gap: 8px;
+      margin-top: 8px;
     }
 
     .preset-btn {
       flex: 1;
-      padding: 0.5rem 0.75rem;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 6px;
+      padding: 8px;
       background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      border: 3px solid var(--border-dark);
       color: var(--text-secondary);
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.75rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
     }
 
     .preset-btn:hover {
-      background: var(--bg-card);
+      background: #3d3d3d;
       color: var(--text-primary);
-      border-color: var(--accent);
     }
 
     .preset-btn.active {
-      background: var(--accent-glow);
-      border-color: var(--accent);
-      color: var(--accent);
+      background: var(--sb-purple);
+      color: white;
+      border-color: #7B449B;
     }
 
+    /* Wallet Buttons */
     .wallet-buttons {
       display: flex;
-      gap: 0.75rem;
+      gap: 12px;
     }
 
     .btn-wallet {
       flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 8px;
+      padding: 12px;
       background: var(--bg-secondary);
-      border: 1px solid var(--border);
+      border: 4px solid var(--border-dark);
       color: var(--text-primary);
-      padding: 0.875rem 1rem;
-      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow:
+        inset -3px -3px 0 rgba(0,0,0,0.1),
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        3px 3px 0 rgba(0,0,0,0.15);
     }
 
     .btn-wallet:hover:not(:disabled) {
-      background: var(--bg-card);
-      border-color: var(--accent);
+      background: #3d3d3d;
+      border-color: var(--sb-purple);
+    }
+
+    .btn-wallet:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .btn-wallet svg {
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
     }
 
+    /* Status Messages */
+    .status-box {
+      font-size: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      border: 3px solid;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .status-box.info {
+      background: rgba(155, 89, 182, 0.2);
+      border-color: var(--sb-purple);
+      color: var(--sb-pink);
+    }
+
+    .status-box.error {
+      background: rgba(255, 107, 107, 0.2);
+      border-color: var(--error-dark);
+      color: var(--error);
+    }
+
+    .status-box.warning {
+      background: rgba(255, 215, 0, 0.2);
+      border-color: var(--warning);
+      color: var(--sb-yellow);
+    }
+
+    .status-box.success {
+      background: rgba(0, 255, 136, 0.2);
+      border-color: var(--success-dark);
+      color: var(--success);
+    }
+
+    /* Footer */
     footer {
       text-align: center;
-      margin-top: 2rem;
-      color: var(--text-muted);
-      font-size: 0.8rem;
+      margin-top: 1rem;
     }
 
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
+    .made-with {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 8px;
+      color: var(--text-secondary);
     }
 
-    footer a:hover {
-      text-decoration: underline;
+    .switchboard-logo {
+      display: none;
+    }
+
+    .switchboard-text {
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .hidden {
       display: none !important;
     }
 
-    .step-indicator {
-      display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
+    /* ==================== GAME VIEW ==================== */
+
+    /* Game view card - no padding, top-bar handles its own */
+    #game-view .card {
+      padding: 0;
     }
 
-    .step {
+    /* Hide game status messages */
+    #game-status {
+      display: none !important;
+    }
+
+    /* Top Bar - Single line with all info */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      background: var(--bg-secondary);
+      border-bottom: 3px solid var(--border-light);
+    }
+
+    .wallet-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 8px;
+    }
+
+    .wallet-address {
+      color: var(--text-secondary);
+    }
+
+    .wallet-balance {
+      color: var(--sb-green-dim);
+      font-weight: bold;
+    }
+
+    .stack-count {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stack-count .label {
+      font-size: 8px;
+      color: var(--text-secondary);
+    }
+
+    .stack-count .value {
+      font-size: 14px;
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: bold;
+    }
+
+    .sound-toggle {
+      width: 28px;
+      height: 28px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      opacity: 0.7;
+      transition: all 0.2s;
+    }
+
+    .sound-toggle:hover {
+      opacity: 1;
+    }
+
+    .sound-toggle.muted {
+      opacity: 0.4;
+    }
+
+    /* Score Display - now integrated into top bar, hide standalone */
+    .score-display {
+      display: none;
+    }
+
+    /* Game Arena */
+    .game-arena {
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, #1f1f1f 0%, var(--bg-card) 100%);
+      border: 4px solid var(--border-dark);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-characters {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 80px 16px 0px 16px;
+    }
+
+    .mascot-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 120px;
+      position: relative;
+    }
+
+    /* Pixel Art Mascot - Switchboard Robot Style */
+    .mascot {
+      width: 100px;
+      height: 110px;
+      position: relative;
+      image-rendering: pixelated;
+    }
+
+    /* Robot Head - Square/boxy like the reference */
+    .mascot-head {
+      width: 60px;
+      height: 50px;
+      background: linear-gradient(135deg, #8FC4E8 0%, #5B9BD5 60%, #4A7FB8 100%);
+      border: 3px solid #4A7FB8;
+      border-radius: 8px;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: inset 2px 2px 8px rgba(255,255,255,0.3), inset -2px -2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* Corner bolts on head */
+    .mascot-head::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 5px;
+      height: 5px;
+      background: #4A7FB8;
+      border-radius: 50%;
+      box-shadow:
+        44px 0 0 #4A7FB8,
+        0 36px 0 #4A7FB8,
+        44px 36px 0 #4A7FB8;
+    }
+
+    /* Eyebrows */
+    .mascot-eyebrows {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+    }
+
+    .mascot-eyebrow {
+      width: 10px;
+      height: 4px;
+      border-top: 3px solid #4A7FB8;
+      border-radius: 50%;
+    }
+
+    /* Eyes - Simple open style */
+    .mascot-eyes {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 14px;
+    }
+
+    .mascot-eye {
       width: 8px;
       height: 8px;
+      background: #2a2a2a;
       border-radius: 50%;
-      background: var(--border);
-      transition: all 0.3s ease;
+      position: relative;
     }
 
-    .step.active {
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
+    /* Small highlight dot */
+    .mascot-eye::after {
+      content: '';
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: 3px;
+      height: 3px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
     }
 
-    .step.completed {
-      background: var(--accent-dim);
+    /* Red oval cheeks */
+    .mascot-cheeks {
+      position: absolute;
+      top: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 32px;
+    }
+
+    .mascot-cheek {
+      width: 8px;
+      height: 6px;
+      background: #FF6B6B;
+      border-radius: 50%;
+    }
+
+    /* Red oval mouth */
+    .mascot-mouth {
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 8px;
+      background: #E74C3C;
+      border-radius: 50%;
+      border: 2px solid #C0392B;
+    }
+
+    /* No antenna - head is clean */
+    .mascot-antenna {
+      display: none;
+    }
+
+    /* Body - Blue rectangle with lightning logo */
+    .mascot-body {
+      width: 44px;
+      height: 32px;
+      background: linear-gradient(180deg, #5B9BD5 0%, #4A7FB8 100%);
+      border: 3px solid #4A7FB8;
+      border-radius: 4px;
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: inset 2px 2px 6px rgba(255,255,255,0.2);
+    }
+
+    /* Side glow lines on body */
+    .mascot-body::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 2px;
+      width: 3px;
+      height: 20px;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+      border-radius: 2px;
+      box-shadow: 30px 0 0 linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+    }
+
+    /* Lightning bolt logo on chest */
+    .mascot-body::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 18px;
+      background: linear-gradient(180deg, var(--lightning-yellow) 0%, var(--lightning-orange) 50%, var(--lightning-pink) 100%);
+      clip-path: polygon(60% 0%, 100% 40%, 55% 40%, 70% 100%, 0% 55%, 45% 55%, 30% 0%);
+      filter: drop-shadow(0 0 3px var(--lightning-orange));
+    }
+
+    /* Arms - Gray mechanical */
+    .mascot-arm {
+      width: 10px;
+      height: 26px;
+      background: linear-gradient(180deg, #888 0%, #666 50%, #555 100%);
+      border: 2px solid #444;
+      border-radius: 4px;
+      position: absolute;
+      top: 50px;
+    }
+
+    .mascot-arm.left {
+      left: 21px;
+      transform-origin: top center;
+      transform: rotate(40deg);
+    }
+
+    .mascot-arm.right {
+      right: 21px;
+      transform-origin: top center;
+      transform: rotate(-40deg);
+    }
+
+    /* Hand - Dark gray mechanical */
+    .mascot-hand {
+      width: 14px;
+      height: 12px;
+      background: linear-gradient(180deg, #555 0%, #333 100%);
+      border: 2px solid #222;
+      border-radius: 4px;
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Legs - Gray mechanical */
+    .mascot-legs {
+      position: absolute;
+      top: 81px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+    }
+
+    .mascot-leg {
+      width: 14px;
+      height: 20px;
+      background: linear-gradient(180deg, #777 0%, #555 100%);
+      border: 2px solid #444;
+      border-radius: 3px;
+      position: relative;
+    }
+
+    /* Feet - Gray blocky */
+    .mascot-leg::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: -3px;
+      width: 18px;
+      height: 8px;
+      background: linear-gradient(180deg, #666 0%, #444 100%);
+      border-radius: 3px;
+      border: 2px solid #333;
+    }
+
+    /* Flipper mascot - right arm holds pan */
+    .flipper-mascot .mascot-arm.left {
+      transform: rotate(30deg);
+    }
+
+    .flipper-mascot .mascot-arm.right {
+      transform: rotate(-65deg);
+    }
+
+    /* Catcher mascot - left arm holds plate (viewer's left) */
+    .catcher-mascot .mascot-arm.left {
+      transform: rotate(65deg);
+    }
+
+    .catcher-mascot .mascot-arm.right {
+      transform: rotate(-30deg);
+    }
+
+    /* Catcher mascot feet point left */
+    .catcher-mascot .mascot-leg::after {
+      left: auto;
+      right: -3px;
+    }
+
+    .mascot.celebrating .mascot-head {
+      /* no animation */
+    }
+
+    .mascot.celebrating .mascot-eye {
+      background: #2a2a2a;
+      box-shadow: 0 0 6px 2px rgba(255, 215, 0, 0.6);
+    }
+
+    .mascot.celebrating .mascot-mouth {
+      width: 14px;
+      height: 8px;
+      border-radius: 0 0 50% 50%;
+      border: 2px solid #C0392B;
+      border-top: none;
+      background: #E74C3C;
+    }
+
+    .mascot.sad .mascot-mouth {
+      width: 10px;
+      height: 6px;
+      border-radius: 50% 50% 0 0;
+      border: 2px solid #C0392B;
+      border-bottom: none;
+      background: transparent;
+    }
+
+    @keyframes head-bob {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-6px); }
+    }
+
+    @keyframes head-shake {
+      0%, 100% { transform: translateX(-50%) rotate(0deg); }
+      25% { transform: translateX(-50%) rotate(-4deg); }
+      75% { transform: translateX(-50%) rotate(4deg); }
+    }
+
+    /* Frying Pan - held by right arm (viewer's right) */
+    .frying-pan {
+      width: 60px;
+      height: 20px;
+      position: absolute;
+      right: 5px;
+      top: 48px;
+      transform: scaleX(-1);
+      transform-origin: right center;
+    }
+
+    .pan-handle {
+      width: 18px;
+      height: 6px;
+      background: linear-gradient(90deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+      border: 2px solid #5D3A1A;
+      border-radius: 2px;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .pan-surface {
+      width: 40px;
+      height: 12px;
+      background: linear-gradient(180deg, #555 0%, #333 50%, #222 100%);
+      border-radius: 50%;
+      border: 2px solid #111;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 3px 0 #111;
+    }
+
+    .frying-pan.flipping {
+      animation: pan-flip 0.5s ease-out;
+    }
+
+    @keyframes pan-flip {
+      0% { transform: scaleX(-1) rotate(0deg); }
+      30% { transform: scaleX(-1) rotate(40deg); }
+      60% { transform: scaleX(-1) rotate(-10deg); }
+      100% { transform: scaleX(-1) rotate(0deg); }
+    }
+
+    /* Pancake on Pan */
+    .pancake-on-pan {
+      width: 34px;
+      height: 7px;
+      background: linear-gradient(180deg, var(--pancake-top) 0%, var(--pancake-side) 100%);
+      border-radius: 50%;
+      position: absolute;
+      left: 3px;
+      top: 50%;
+      transform: translateY(-100%);
+      box-shadow: 0 2px 0 var(--pancake-side);
+    }
+
+    /* Flying Pancake Zone */
+    .pancake-flight-zone {
+      flex: 1;
+      position: relative;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flying-pancake {
+      width: 38px;
+      height: 7px;
+      background: linear-gradient(180deg, var(--pancake-top) 0%, var(--pancake-side) 100%);
+      border-radius: 50%;
+      position: absolute;
+      box-shadow: 0 2px 0 var(--pancake-side);
+    }
+
+    .flying-pancake.spinning {
+      animation: pancake-spin 0.5s linear infinite;
+    }
+
+    .flying-pancake.bouncing {
+      left: 50%;
+      animation: pancake-bounce 1s linear infinite;
+    }
+
+    .flying-pancake.floating {
+      left: 50%;
+      top: 5%;
+      animation: pancake-float 1s linear infinite;
+    }
+
+    .flying-pancake.launching {
+      animation: pancake-launch 0.6s ease-out forwards;
+    }
+
+    .flying-pancake.landing {
+      left: 50%;
+      top: 5%;
+      animation: pancake-land 1s linear infinite;
+    }
+
+    .flying-pancake.to-plate {
+      animation: pancake-to-plate 0.6s ease-in-out forwards;
+    }
+
+    .flying-pancake.falling {
+      animation: pancake-miss 0.8s ease-in forwards;
+    }
+
+    @keyframes pancake-spin {
+      0% { transform: rotateX(0deg); }
+      100% { transform: rotateX(360deg); }
+    }
+
+    @keyframes pancake-bounce {
+      0% { top: 5%; transform: translateX(-50%) rotateX(0deg); }
+      25% { top: 0%; transform: translateX(-50%) rotateX(90deg); }
+      50% { top: -5%; transform: translateX(-50%) rotateX(180deg); }
+      75% { top: 0%; transform: translateX(-50%) rotateX(270deg); }
+      100% { top: 5%; transform: translateX(-50%) rotateX(360deg); }
+    }
+
+    @keyframes pancake-float {
+      0% { transform: translateX(-50%) translateY(0) rotateX(0deg); }
+      25% { transform: translateX(-50%) translateY(-5px) rotateX(90deg); }
+      50% { transform: translateX(-50%) translateY(-10px) rotateX(180deg); }
+      75% { transform: translateX(-50%) translateY(-5px) rotateX(270deg); }
+      100% { transform: translateX(-50%) translateY(0) rotateX(360deg); }
+    }
+
+    @keyframes pancake-launch {
+      0% { left: 15%; top: 65%; opacity: 1; transform: scale(0.8); }
+      50% { left: 30%; top: -10%; transform: scale(1.1) rotateX(360deg); }
+      100% { left: 50%; top: 5%; opacity: 1; transform: translateX(-50%) scale(1) rotateX(720deg); }
+    }
+
+    @keyframes pancake-land {
+      0% { transform: translateX(-50%) rotateX(0deg); }
+      25% { transform: translateX(-50%) rotateX(90deg); }
+      50% { transform: translateX(-50%) rotateX(180deg); }
+      75% { transform: translateX(-50%) rotateX(270deg); }
+      100% { transform: translateX(-50%) rotateX(360deg); }
+    }
+
+    @keyframes pancake-to-plate {
+      0% {
+        left: 50%;
+        top: 5%;
+        transform: translateX(-50%) rotateX(0deg);
+      }
+      40% {
+        left: 68%;
+        top: -5%;
+        transform: translateX(-50%) rotateX(180deg);
+      }
+      100% {
+        left: 102%;
+        top: 40%;
+        transform: translateX(-50%) rotateX(360deg);
+      }
+    }
+
+    @keyframes pancake-miss {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(200px) rotate(720deg); opacity: 0; }
+    }
+
+    /* Randomness Indicator */
+    .randomness-indicator {
+      font-size: 8px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .dots span {
+      animation: dots-pulse 1.4s infinite both;
+    }
+
+    .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dots-pulse {
+      0%, 80%, 100% { opacity: 0.3; }
+      40% { opacity: 1; }
+    }
+
+    /* Plate and Stack - positioned in catcher's left hand (viewer's left) */
+    .plate-stack {
+      position: absolute;
+      width: 50px;
+      height: 60px;
+      left: -28px;
+      top: 8px;
+    }
+
+    .plate {
+      width: 50px;
+      height: 14px;
+      background: linear-gradient(180deg, #F8F8F8 0%, #E8E8E8 50%, #DDD 100%);
+      border-radius: 50%;
+      border: 2px solid #BBB;
+      position: absolute;
+      bottom: 0;
+      box-shadow: 0 3px 0 #AAA, inset 0 2px 4px rgba(255,255,255,0.5);
+      z-index: 1;
+    }
+
+    .pancake-stack {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .stacked-pancake {
+      width: 38px;
+      height: 7px;
+      background: linear-gradient(180deg, var(--pancake-top) 0%, var(--pancake-side) 100%);
+      border-radius: 50%;
+      margin-bottom: -2px;
+      box-shadow: 0 2px 0 var(--pancake-side);
+      position: relative;
+    }
+
+    .stacked-pancake.new {
+      animation: stack-land 0.3s ease-out;
+    }
+
+    .stacked-pancake.falling {
+      animation: stack-fall 0.6s ease-in forwards;
+    }
+
+    @keyframes stack-land {
+      0% { transform: translateY(-30px) scale(1.2); opacity: 0; }
+      70% { transform: translateY(3px) scale(0.95); }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes stack-fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(150px) translateX(var(--fall-x, 0)) rotate(var(--fall-rotation, 360deg)); opacity: 0; }
+    }
+
+    /* Action Buttons Bar */
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      min-height: 68px;
+      background: var(--bg-secondary);
+      border-top: 4px solid var(--border-dark);
+      margin-top: auto;
+    }
+
+    .action-btn {
+      min-width: 100px;
+      height: 44px;
+    }
+
+    /* Result Overlay */
+    .result-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .result-content {
+      background: var(--bg-card);
+      border: 6px solid var(--border-dark);
+      padding: 32px;
+      text-align: center;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
+    }
+
+    .result-text {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .result-text.success {
+      color: var(--success);
+    }
+
+    .result-text.failure {
+      color: var(--error);
+    }
+
+    .result-subtitle {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 99;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      animation: confetti-fall 2s ease-out forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* Screen Shake */
+    .screen-shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 3px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .pixel-title {
+        font-size: 14px;
+      }
+
+      .game-arena {
+        min-height: 240px;
+      }
+
+      .game-characters {
+        padding: 12px 8px;
+      }
+
+      .mascot-container {
+        width: 90px;
+      }
+
+      .mascot {
+        transform: scale(0.75);
+        transform-origin: top center;
+      }
+
+      .action-buttons {
+        padding: 12px;
+        gap: 12px;
+      }
+
+      .pixel-btn {
+        font-size: 8px;
+        padding: 10px 14px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <div class="logo">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2" fill="none" style="color: var(--accent)"/>
-          <path d="M16 8v16M10 12l6-4 6 4M10 20l6 4 6-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent)"/>
-        </svg>
-        <h1>Coin Flip</h1>
-      </div>
-      <p class="subtitle">Powered by Switchboard Randomness</p>
+      <h1 class="pixel-title">PANCAKE STACKER</h1>
     </header>
 
-    <!-- Connect Wallet View -->
-    <div id="connect-view" class="card">
+    <!-- Connect View -->
+    <div id="connect-view" class="card pixel-border">
       <div class="config-section">
         <label>RPC Endpoint</label>
-        <input type="text" id="rpc-url" placeholder="https://..." value="https://testnet-rpc.monad.xyz">
+        <input type="text" id="rpc-url" class="pixel-input" placeholder="https://..." value="https://testnet-rpc.monad.xyz">
         <div class="rpc-presets">
           <button type="button" class="preset-btn" data-rpc="https://testnet-rpc.monad.xyz">Monad Testnet</button>
           <button type="button" class="preset-btn" data-rpc="https://rpc.monad.xyz">Monad Mainnet</button>
         </div>
       </div>
+
       <div class="config-section">
         <label>Contract Address</label>
-        <input type="text" id="contract-address" placeholder="0x...">
+        <input type="text" id="contract-address" class="pixel-input" placeholder="0x...">
       </div>
+
       <div class="config-section">
-        <label>Select Wallet</label>
+        <label>Connect Wallet</label>
         <div class="wallet-buttons">
-          <button id="connect-metamask" class="btn btn-wallet">
-            <svg width="24" height="24" viewBox="0 0 35 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <button id="connect-metamask" class="btn-wallet">
+            <svg viewBox="0 0 35 33" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M32.958 1L19.514 11.218l2.482-5.877L32.958 1z" fill="#E17726" stroke="#E17726" stroke-width=".25"/>
               <path d="M2.042 1l13.316 10.313-2.354-5.972L2.042 1zM28.146 23.642l-3.575 5.476 7.65 2.105 2.196-7.456-6.271-.125zM.6 23.767l2.18 7.456 7.634-2.105-3.559-5.476L.6 23.767z" fill="#E27625" stroke="#E27625" stroke-width=".25"/>
               <path d="M10.056 14.558l-2.13 3.218 7.586.346-.253-8.162-5.203 4.598zM24.944 14.558l-5.268-4.693-.172 8.257 7.57-.346-2.13-3.218zM10.414 29.118l4.568-2.232-3.945-3.08-.623 5.312zM20.018 26.886l4.568 2.232-.624-5.312-3.944 3.08z" fill="#E27625" stroke="#E27625" stroke-width=".25"/>
@@ -471,8 +1180,8 @@
             </svg>
             MetaMask
           </button>
-          <button id="connect-phantom" class="btn btn-wallet">
-            <svg width="24" height="24" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <button id="connect-phantom" class="btn-wallet">
+            <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="64" cy="64" r="64" fill="url(#pg)"/>
               <path d="M110.5 64.9H99.1c0-23.1-19-41.9-42.4-41.9-23.1 0-41.9 18.3-42.4 40.9-.5 23.5 21.5 43.9 45.2 40.9 1.1-.1 1.7-1.4 1.1-2.3-2.6-3.7-4.1-8.1-4.1-12.9 0-12.1 9.6-21.8 21.5-21.8h32.5c1.9 0 3.4-1.6 3.4-3.5 0-2-.5.5-3.4.5z" fill="#fff"/>
               <circle cx="77" cy="52" r="7" fill="#534BB1"/>
@@ -483,114 +1192,307 @@
           </button>
         </div>
       </div>
-      <div id="connect-status" class="status info hidden"></div>
+
+      <div id="connect-status" class="status-box info hidden"></div>
     </div>
 
     <!-- Game View -->
-    <div id="game-view" class="card hidden">
-      <div class="wallet-info">
-        <span class="wallet-address" id="wallet-address">0x...</span>
-        <span class="wallet-balance" id="wallet-balance">0 ETH</span>
-      </div>
-
-      <div class="step-indicator">
-        <div class="step" id="step-1"></div>
-        <div class="step" id="step-2"></div>
-        <div class="step" id="step-3"></div>
-      </div>
-
-      <div class="coin-container">
-        <div class="coin" id="coin">
-          <div class="coin-face coin-heads">H</div>
-          <div class="coin-face coin-tails">T</div>
+    <div id="game-view" class="hidden">
+      <div class="card pixel-border">
+        <div class="top-bar">
+          <div class="wallet-info">
+            <span class="wallet-address" id="wallet-address">0x...</span>
+            <span class="wallet-balance" id="wallet-balance">0 MON</span>
+          </div>
+          <div class="stack-count">
+            <span class="label">STACK:</span>
+            <span class="value" id="stack-height">0</span>
+          </div>
+          <button id="sound-toggle" class="sound-toggle" title="Toggle Sound">
+            <span id="sound-icon">&#128266;</span>
+          </button>
         </div>
+
+        <div class="game-arena">
+          <div class="game-characters">
+            <!-- Left Mascot - Flipper -->
+            <div class="mascot-container">
+              <div class="mascot flipper-mascot" id="flipper-mascot">
+                <div class="mascot-head">
+                  <div class="mascot-eyebrows">
+                    <div class="mascot-eyebrow"></div>
+                    <div class="mascot-eyebrow"></div>
+                  </div>
+                  <div class="mascot-eyes">
+                    <div class="mascot-eye"></div>
+                    <div class="mascot-eye"></div>
+                  </div>
+                  <div class="mascot-cheeks">
+                    <div class="mascot-cheek"></div>
+                    <div class="mascot-cheek"></div>
+                  </div>
+                  <div class="mascot-mouth"></div>
+                </div>
+                <div class="mascot-body"></div>
+                <div class="mascot-arm left">
+                  <div class="mascot-hand"></div>
+                </div>
+                <div class="mascot-arm right">
+                  <div class="mascot-hand"></div>
+                </div>
+                <div class="mascot-legs">
+                  <div class="mascot-leg"></div>
+                  <div class="mascot-leg"></div>
+                </div>
+                <div class="frying-pan" id="frying-pan">
+                  <div class="pan-handle"></div>
+                  <div class="pan-surface"></div>
+                  <div class="pancake-on-pan" id="pancake-on-pan"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Center - Flying Pancake Zone -->
+            <div class="pancake-flight-zone">
+              <div class="flying-pancake hidden" id="flying-pancake"></div>
+              <div class="randomness-indicator hidden" id="randomness-indicator">
+                <span>WAITING FOR RANDOMNESS</span>
+                <div class="dots">
+                  <span>.</span><span>.</span><span>.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Mascot - Catcher -->
+            <div class="mascot-container">
+              <div class="mascot catcher-mascot" id="catcher-mascot">
+                <div class="mascot-head">
+                  <div class="mascot-eyebrows">
+                    <div class="mascot-eyebrow"></div>
+                    <div class="mascot-eyebrow"></div>
+                  </div>
+                  <div class="mascot-eyes">
+                    <div class="mascot-eye"></div>
+                    <div class="mascot-eye"></div>
+                  </div>
+                  <div class="mascot-cheeks">
+                    <div class="mascot-cheek"></div>
+                    <div class="mascot-cheek"></div>
+                  </div>
+                  <div class="mascot-mouth"></div>
+                </div>
+                <div class="mascot-body"></div>
+                <div class="mascot-arm left">
+                  <div class="mascot-hand"></div>
+                </div>
+                <div class="mascot-arm right">
+                  <div class="mascot-hand"></div>
+                </div>
+                <div class="mascot-legs">
+                  <div class="mascot-leg"></div>
+                  <div class="mascot-leg"></div>
+                </div>
+                <div class="plate-stack" id="plate-stack">
+                  <div class="pancake-stack" id="pancake-stack"></div>
+                  <div class="plate"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button id="flip-btn" class="pixel-btn action-btn">FLIP!</button>
+            <button id="catch-btn" class="pixel-btn catch-btn action-btn hidden">CATCH!</button>
+          </div>
+        </div>
+
+        <div id="game-status" class="status-box info hidden"></div>
       </div>
-
-      <button id="flip-btn" class="btn btn-primary">
-        Flip the Coin
-      </button>
-
-      <button id="settle-btn" class="btn btn-secondary hidden">
-        Settle & Reveal
-      </button>
-
-      <button id="reset-btn" class="btn btn-secondary hidden">
-        Flip Again
-      </button>
-
-      <div id="status" class="status info hidden"></div>
-      <div id="result" class="result hidden"></div>
     </div>
 
+    <!-- Result Overlay -->
+    <div id="result-overlay" class="result-overlay hidden">
+      <div class="result-content">
+        <div class="result-text" id="result-text"></div>
+        <div class="result-subtitle" id="result-subtitle"></div>
+        <button id="play-again-btn" class="pixel-btn catch-btn">PLAY AGAIN</button>
+      </div>
+    </div>
+
+    <!-- Confetti Container -->
+    <div id="confetti-container" class="confetti-container hidden"></div>
+
     <footer>
-      Built with <a href="https://switchboard.xyz" target="_blank">Switchboard</a>
+      <div class="made-with">
+        <span>Made with</span>
+        <span class="switchboard-logo"></span>
+        <span class="switchboard-text">Switchboard</span>
+      </div>
     </footer>
   </div>
 
   <script type="module">
     import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@6.11.1/+esm';
 
+    // ==================== CONSTANTS ====================
     const CROSSBAR_URL = 'https://crossbar.switchboard.xyz';
-    let chainId = 10143; // Default to Monad Testnet
+    const POLL_INTERVAL = 2000; // 2 seconds
 
-    const COIN_FLIP_ABI = [
-      'function flipCoin() public',
-      'function settleFlip(bytes calldata encodedRandomness) public returns (bool isHeads)',
-      'function getFlipRandomnessId(address user) public view returns (bytes32)',
-      'function getFlipData(address user) public view returns (address oracle, uint256 rollTimestamp, uint256 minSettlementDelay)',
-      'function flipRequests(address) public view returns (address user, bytes32 randomnessId, uint256 requestTimestamp)',
-      'event CoinFlipRequested(address indexed user, bytes32 randomnessId)',
-      'event CoinFlipSettled(address indexed user, bool isHeads, uint256 randomValue)'
+    const PANCAKE_FLIPPER_ABI = [
+      'function flipPancake() public',
+      'function catchPancake(bytes calldata encodedRandomness) public returns (bool landed)',
+      'function getFlipData(address user) public view returns (bytes32 randomnessId, address oracle, uint256 rollTimestamp, uint256 minSettlementDelay)',
+      'function getPlayerStats(address user) public view returns (uint256 currentStack, bool hasPendingFlip)',
+      'function pendingFlips(address) public view returns (bytes32)',
+      'function stackHeight(address) public view returns (uint256)',
+      'event PancakeFlipRequested(address indexed user, bytes32 randomnessId)',
+      'event PancakeLanded(address indexed user, uint256 newStackHeight)',
+      'event StackKnockedOver(address indexed user)',
+      'event SettlementFailed(address indexed user)'
     ];
 
+    // ==================== GAME STATE ====================
+    const GameState = {
+      DISCONNECTED: 'disconnected',
+      IDLE: 'idle',
+      FLIPPING: 'flipping',
+      WAITING_RANDOMNESS: 'waiting_randomness',
+      READY_TO_CATCH: 'ready_to_catch',
+      CATCHING: 'catching',
+      SUCCESS: 'success',
+      FAILURE: 'failure'
+    };
+
+    let currentState = GameState.DISCONNECTED;
+    let stackHeight = 0;
+    let encodedRandomness = null;
+    let pollIntervalId = null;
+    let chainId = 10143;
+
+    // Contract
     let provider, signer, contract;
 
-    // DOM Elements
+    // ==================== SOUND MANAGER ====================
+    class SoundManager {
+      constructor() {
+        this.audioContext = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.audioContext) {
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+
+      playBeep(frequency, duration, type = 'square', volume = 0.3) {
+        if (!this.enabled || !this.audioContext) return;
+
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+
+        gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        oscillator.start();
+        oscillator.stop(this.audioContext.currentTime + duration);
+      }
+
+      playFlip() {
+        this.playBeep(200, 0.1);
+        setTimeout(() => this.playBeep(400, 0.1), 50);
+        setTimeout(() => this.playBeep(600, 0.15), 100);
+      }
+
+      playWaiting() {
+        this.playBeep(330, 0.05, 'sine', 0.1);
+      }
+
+      playReady() {
+        this.playBeep(800, 0.15);
+        setTimeout(() => this.playBeep(1000, 0.1), 100);
+      }
+
+      playSuccess() {
+        this.playBeep(523, 0.1); // C5
+        setTimeout(() => this.playBeep(659, 0.1), 100); // E5
+        setTimeout(() => this.playBeep(784, 0.15), 200); // G5
+        setTimeout(() => this.playBeep(1047, 0.3), 300); // C6
+      }
+
+      playCatch() {
+        this.playBeep(150, 0.2, 'triangle');
+        this.playBeep(100, 0.15, 'square', 0.2);
+      }
+
+      playFailure() {
+        this.playBeep(400, 0.15);
+        setTimeout(() => this.playBeep(350, 0.15), 150);
+        setTimeout(() => this.playBeep(300, 0.15), 300);
+        setTimeout(() => this.playBeep(200, 0.3), 450);
+      }
+
+      playStackFall() {
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            this.playBeep(100 - i * 10, 0.1, 'triangle', 0.2);
+          }, i * 80);
+        }
+      }
+
+      toggle() {
+        this.enabled = !this.enabled;
+        return this.enabled;
+      }
+    }
+
+    const soundManager = new SoundManager();
+
+    // ==================== DOM ELEMENTS ====================
     const connectView = document.getElementById('connect-view');
     const gameView = document.getElementById('game-view');
     const connectMetamaskBtn = document.getElementById('connect-metamask');
     const connectPhantomBtn = document.getElementById('connect-phantom');
-    const flipBtn = document.getElementById('flip-btn');
-    const settleBtn = document.getElementById('settle-btn');
-    const resetBtn = document.getElementById('reset-btn');
     const rpcUrlInput = document.getElementById('rpc-url');
     const contractAddressInput = document.getElementById('contract-address');
     const presetBtns = document.querySelectorAll('.preset-btn');
+    const connectStatusEl = document.getElementById('connect-status');
+
     const walletAddressEl = document.getElementById('wallet-address');
     const walletBalanceEl = document.getElementById('wallet-balance');
-    const statusEl = document.getElementById('status');
-    const connectStatusEl = document.getElementById('connect-status');
-    const resultEl = document.getElementById('result');
-    const coinEl = document.getElementById('coin');
+    const stackHeightEl = document.getElementById('stack-height');
+    const soundToggleBtn = document.getElementById('sound-toggle');
+    const soundIconEl = document.getElementById('sound-icon');
 
-    // Step indicators
-    const steps = [
-      document.getElementById('step-1'),
-      document.getElementById('step-2'),
-      document.getElementById('step-3')
-    ];
+    const flipBtn = document.getElementById('flip-btn');
+    const catchBtn = document.getElementById('catch-btn');
+    const gameStatusEl = document.getElementById('game-status');
 
-    function updateSteps(current) {
-      steps.forEach((step, i) => {
-        step.classList.remove('active', 'completed');
-        if (i < current) step.classList.add('completed');
-        if (i === current) step.classList.add('active');
-      });
-    }
+    const flipperMascot = document.getElementById('flipper-mascot');
+    const catcherMascot = document.getElementById('catcher-mascot');
+    const fryingPan = document.getElementById('frying-pan');
+    const pancakeOnPan = document.getElementById('pancake-on-pan');
+    const flyingPancake = document.getElementById('flying-pancake');
+    const randomnessIndicator = document.getElementById('randomness-indicator');
+    const pancakeStack = document.getElementById('pancake-stack');
 
-    function showStatus(message, type = 'info') {
-      statusEl.textContent = message;
-      statusEl.className = `status ${type}`;
-      statusEl.classList.remove('hidden');
-    }
+    const resultOverlay = document.getElementById('result-overlay');
+    const resultText = document.getElementById('result-text');
+    const resultSubtitle = document.getElementById('result-subtitle');
+    const playAgainBtn = document.getElementById('play-again-btn');
+    const confettiContainer = document.getElementById('confetti-container');
 
-    function hideStatus() {
-      statusEl.classList.add('hidden');
-    }
-
+    // ==================== UI HELPERS ====================
     function showConnectStatus(message, type = 'info') {
       connectStatusEl.textContent = message;
-      connectStatusEl.className = `status ${type}`;
+      connectStatusEl.className = `status-box ${type}`;
       connectStatusEl.classList.remove('hidden');
     }
 
@@ -598,24 +1500,35 @@
       connectStatusEl.classList.add('hidden');
     }
 
-    function showResult(isHeads) {
-      resultEl.innerHTML = isHeads
-        ? '<div class="result-title">HEADS!</div><div class="result-subtitle">The coin landed on heads</div>'
-        : '<div class="result-title">TAILS!</div><div class="result-subtitle">The coin landed on tails</div>';
-      resultEl.className = `result ${isHeads ? 'heads' : 'tails'}`;
-      resultEl.classList.remove('hidden');
+    function showGameStatus(message, type = 'info') {
+      gameStatusEl.textContent = message;
+      gameStatusEl.className = `status-box ${type}`;
+      gameStatusEl.classList.remove('hidden');
+    }
 
-      coinEl.classList.remove('flipping');
-      coinEl.classList.add(isHeads ? 'heads' : 'tails');
+    function hideGameStatus() {
+      gameStatusEl.classList.add('hidden');
     }
 
     function setLoading(btn, loading, text) {
       if (loading) {
         btn.disabled = true;
-        btn.innerHTML = `<div class="spinner"></div> ${text}`;
+        btn.innerHTML = `<span class="spinner"></span>${text}`;
       } else {
         btn.disabled = false;
         btn.textContent = text;
+      }
+    }
+
+    function updateStackDisplay() {
+      stackHeightEl.textContent = stackHeight;
+
+      // Update visual stack
+      pancakeStack.innerHTML = '';
+      for (let i = 0; i < stackHeight; i++) {
+        const pancake = document.createElement('div');
+        pancake.className = 'stacked-pancake';
+        pancakeStack.appendChild(pancake);
       }
     }
 
@@ -623,27 +1536,430 @@
       try {
         const address = await signer.getAddress();
         const balance = await provider.getBalance(address);
-        walletBalanceEl.textContent = `${parseFloat(ethers.formatEther(balance)).toFixed(4)} ETH`;
+        walletBalanceEl.textContent = `${parseFloat(ethers.formatEther(balance)).toFixed(4)} MON`;
       } catch (err) {
         console.warn('Failed to fetch balance:', err.message);
-        walletBalanceEl.textContent = '-- ETH';
+        walletBalanceEl.textContent = '-- MON';
       }
     }
 
-    async function checkExistingFlip() {
+    // ==================== ANIMATIONS ====================
+    function showConfetti() {
+      confettiContainer.classList.remove('hidden');
+      const colors = ['#FFD700', '#FF6B35', '#FF69B4', '#9B59B6', '#00FF88'];
+
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+        confetti.style.animationDuration = `${1.5 + Math.random()}s`;
+        confettiContainer.appendChild(confetti);
+      }
+
+      setTimeout(() => {
+        confettiContainer.classList.add('hidden');
+        confettiContainer.innerHTML = '';
+      }, 2500);
+    }
+
+    function shakeScreen() {
+      document.body.classList.add('screen-shake');
+      setTimeout(() => document.body.classList.remove('screen-shake'), 500);
+    }
+
+    function scatterStack() {
+      const pancakes = pancakeStack.querySelectorAll('.stacked-pancake');
+      pancakes.forEach((pancake, i) => {
+        pancake.classList.add('falling');
+        pancake.style.setProperty('--fall-x', `${(Math.random() - 0.5) * 100}px`);
+        pancake.style.setProperty('--fall-rotation', `${Math.random() * 720 - 360}deg`);
+        pancake.style.animationDelay = `${i * 0.05}s`;
+      });
+    }
+
+    // ==================== STATE MACHINE ====================
+    function setState(newState) {
+      const oldState = currentState;
+      currentState = newState;
+      console.log('State changed:', oldState, '->', newState);
+      updateUIForState(oldState, newState);
+    }
+
+    function updateUIForState(oldState, newState) {
+      // Clear mascot and pan animations
+      flipperMascot.classList.remove('celebrating', 'sad');
+      catcherMascot.classList.remove('celebrating', 'sad');
+      fryingPan.classList.remove('flipping');
+      // Don't touch pancake classes when entering CATCHING - keep it floating
+      if (newState !== GameState.CATCHING) {
+        flyingPancake.classList.remove('spinning', 'bouncing', 'floating', 'launching', 'landing', 'to-plate', 'falling');
+      }
+
+      switch (newState) {
+        case GameState.IDLE:
+          hideGameStatus();
+          flipBtn.classList.remove('hidden');
+          catchBtn.classList.add('hidden');
+          pancakeOnPan.classList.remove('hidden');
+          flyingPancake.classList.add('hidden');
+          randomnessIndicator.classList.add('hidden');
+          setLoading(flipBtn, false, 'FLIP!');
+          break;
+
+        case GameState.FLIPPING:
+          setLoading(flipBtn, true, 'FLIPPING...');
+          showGameStatus('Waiting for wallet approval...', 'info');
+          break;
+
+        case GameState.WAITING_RANDOMNESS:
+          // Play sound and animate pan flip now that tx is confirmed
+          soundManager.playFlip();
+          fryingPan.classList.add('flipping');
+          pancakeOnPan.classList.add('hidden');
+          flyingPancake.classList.remove('hidden');
+          flyingPancake.classList.add('launching');
+
+          setTimeout(() => {
+            flyingPancake.classList.remove('launching');
+            flyingPancake.classList.add('bouncing');
+          }, 600);
+
+          randomnessIndicator.classList.remove('hidden');
+          flipBtn.classList.add('hidden');
+          catchBtn.classList.add('hidden');
+          showGameStatus('Waiting for randomness...', 'info');
+          break;
+
+        case GameState.READY_TO_CATCH:
+          soundManager.playReady();
+          flyingPancake.classList.remove('spinning', 'bouncing');
+          flyingPancake.classList.add('floating');
+          randomnessIndicator.classList.add('hidden');
+          catchBtn.classList.remove('hidden');
+          setLoading(catchBtn, false, 'CATCH!');
+          hideGameStatus();
+          break;
+
+        case GameState.CATCHING:
+          setLoading(catchBtn, true, 'CATCHING...');
+          // Pancake keeps floating until tx confirms - animation triggered in catchPancake()
+          showGameStatus('Waiting for wallet approval...', 'info');
+          break;
+
+        case GameState.SUCCESS:
+          soundManager.playSuccess();
+          flipperMascot.classList.add('celebrating');
+          catcherMascot.classList.add('celebrating');
+
+          // Add new pancake to stack with animation
+          const newPancake = document.createElement('div');
+          newPancake.className = 'stacked-pancake new';
+          pancakeStack.appendChild(newPancake);
+
+          flyingPancake.classList.add('hidden');
+          showConfetti();
+
+          // Auto-reset to idle after brief celebration
+          setTimeout(() => {
+            flipperMascot.classList.remove('celebrating');
+            catcherMascot.classList.remove('celebrating');
+            setState(GameState.IDLE);
+          }, 1500);
+          break;
+
+        case GameState.FAILURE:
+          soundManager.playStackFall();
+          setTimeout(() => soundManager.playFailure(), 400);
+
+          flipperMascot.classList.add('sad');
+          catcherMascot.classList.add('sad');
+          flyingPancake.classList.add('hidden');
+
+          shakeScreen();
+          scatterStack();
+
+          setTimeout(() => {
+            resultText.textContent = 'OH NO!';
+            resultText.className = 'result-text failure';
+            resultSubtitle.textContent = 'Stack knocked over!';
+            resultOverlay.classList.remove('hidden');
+          }, 800);
+          break;
+      }
+    }
+
+    // ==================== POLLING ====================
+    async function checkRandomnessReady() {
       try {
         const address = await signer.getAddress();
-        const request = await contract.flipRequests(address);
-        return request.randomnessId !== '0x0000000000000000000000000000000000000000000000000000000000000000';
+        const flipData = await contract.getFlipData(address);
+
+        if (flipData.oracle === '0x0000000000000000000000000000000000000000') {
+          return { ready: false };
+        }
+
+        const response = await fetch(`${CROSSBAR_URL}/randomness/evm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chain_id: chainId.toString(),
+            randomness_id: flipData.randomnessId,
+            timestamp: Number(flipData.rollTimestamp),
+            min_staleness_seconds: Number(flipData.minSettlementDelay),
+            oracle: flipData.oracle.toLowerCase()
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const encoded = data.data?.encoded || data.encoded;
+          if (encoded) {
+            return { ready: true, encoded };
+          }
+        }
+        return { ready: false };
       } catch (err) {
-        console.warn('Failed to check existing flip:', err.message);
-        return false;
+        console.warn('Polling check failed:', err);
+        return { ready: false };
       }
     }
 
-    // Connect wallet helper
+    function startPolling() {
+      stopPolling();
+
+      const poll = async () => {
+        if (currentState !== GameState.WAITING_RANDOMNESS) return;
+
+        soundManager.playWaiting();
+        const result = await checkRandomnessReady();
+
+        if (result.ready) {
+          stopPolling();
+          encodedRandomness = result.encoded;
+          setState(GameState.READY_TO_CATCH);
+        }
+      };
+
+      poll(); // Immediate first check
+      pollIntervalId = setInterval(poll, POLL_INTERVAL);
+    }
+
+    function stopPolling() {
+      if (pollIntervalId) {
+        clearInterval(pollIntervalId);
+        pollIntervalId = null;
+      }
+    }
+
+    // ==================== CONTRACT INTERACTION ====================
+    async function flipPancake() {
+      console.log('flipPancake called');
+      setState(GameState.FLIPPING);
+
+      try {
+        console.log('Calling contract.flipPancake()...');
+        const tx = await contract.flipPancake();
+        console.log('Transaction sent:', tx.hash);
+        showGameStatus('Transaction sent, waiting for confirmation...', 'info');
+        await tx.wait();
+
+        await updateBalance();
+        setState(GameState.WAITING_RANDOMNESS);
+        startPolling();
+
+      } catch (err) {
+        console.error('Flip error:', err);
+        showGameStatus(err.reason || err.message, 'error');
+        setState(GameState.IDLE);
+      }
+    }
+
+    async function catchPancake() {
+      console.log('catchPancake called');
+      setState(GameState.CATCHING);
+
+      try {
+        // Always fetch fresh randomness before catching
+        showGameStatus('Fetching fresh randomness...', 'info');
+        const address = await signer.getAddress();
+        const flipData = await contract.getFlipData(address);
+        console.log('Flip data:', {
+          randomnessId: flipData.randomnessId,
+          oracle: flipData.oracle,
+          rollTimestamp: Number(flipData.rollTimestamp),
+          minSettlementDelay: Number(flipData.minSettlementDelay)
+        });
+
+        // Check if there's actually a pending flip
+        if (flipData.randomnessId === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+          console.log('No pending flip found, returning to IDLE');
+          setState(GameState.IDLE);
+          return;
+        }
+
+        if (flipData.oracle === '0x0000000000000000000000000000000000000000') {
+          throw new Error('No oracle assigned yet');
+        }
+
+        const crossbarParams = {
+          chain_id: chainId.toString(),
+          randomness_id: flipData.randomnessId,
+          timestamp: Number(flipData.rollTimestamp),
+          min_staleness_seconds: Number(flipData.minSettlementDelay),
+          oracle: flipData.oracle.toLowerCase()
+        };
+        console.log('Crossbar request params:', crossbarParams);
+
+        const response = await fetch(`${CROSSBAR_URL}/randomness/evm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(crossbarParams)
+        });
+
+        const responseText = await response.text();
+        console.log('Crossbar response status:', response.status);
+        console.log('Crossbar response body:', responseText);
+
+        if (!response.ok) {
+          throw new Error(`Crossbar error (${response.status}): ${responseText}`);
+        }
+
+        const data = JSON.parse(responseText);
+        const freshEncodedRandomness = data.data?.encoded || data.encoded;
+        console.log('Fresh encoded randomness:', freshEncodedRandomness ? `${freshEncodedRandomness.substring(0, 50)}...` : 'missing');
+
+        if (!freshEncodedRandomness) {
+          throw new Error('No encoded randomness in response');
+        }
+
+        console.log('Calling contract.catchPancake...');
+        const tx = await contract.catchPancake(freshEncodedRandomness);
+        console.log('Catch tx sent:', tx.hash);
+        showGameStatus('Settling on-chain...', 'info');
+        const receipt = await tx.wait();
+        console.log('Catch tx confirmed, logs:', receipt.logs.length);
+
+        await updateBalance();
+
+        // Parse events FIRST to determine outcome before animation
+        let landed = false;
+        let newStack = 0;
+        let eventFound = false;
+        let settlementFailed = false;
+
+        for (const log of receipt.logs) {
+          try {
+            const parsed = contract.interface.parseLog(log);
+            console.log('Parsed log:', parsed?.name, parsed?.args);
+            if (parsed?.name === 'PancakeLanded') {
+              landed = true;
+              eventFound = true;
+              newStack = Number(parsed.args.newStackHeight);
+              break;
+            } else if (parsed?.name === 'StackKnockedOver') {
+              landed = false;
+              eventFound = true;
+              break;
+            } else if (parsed?.name === 'SettlementFailed') {
+              settlementFailed = true;
+              eventFound = true;
+              break;
+            }
+          } catch (e) {
+            // Not our event, skip
+          }
+        }
+
+        console.log('Event parsing result - found:', eventFound, 'landed:', landed, 'settlementFailed:', settlementFailed, 'newStack:', newStack);
+        encodedRandomness = null;
+
+        // Handle settlement failure BEFORE animation - show error and return to idle
+        if (settlementFailed) {
+          console.log('Settlement failed, showing error and returning to IDLE state');
+          showGameStatus('Settlement failed - please try again', 'error');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          hideGameStatus();
+          setState(GameState.IDLE);
+          return;
+        }
+
+        if (!eventFound) {
+          console.error('No PancakeLanded, StackKnockedOver, or SettlementFailed event found!');
+          // Default to success if no event found but tx succeeded
+          landed = true;
+          const stats = await contract.getPlayerStats(await signer.getAddress());
+          newStack = Number(stats.currentStack);
+          console.log('Fetched stack from contract:', newStack);
+        }
+
+        // Only play animation for actual game outcomes (success/failure)
+        soundManager.playCatch();
+        flyingPancake.classList.remove('floating');
+        flyingPancake.classList.add('to-plate');
+        hideGameStatus();
+
+        // Wait for animation to complete (0.6s)
+        await new Promise(resolve => setTimeout(resolve, 650));
+
+        if (landed) {
+          stackHeight = newStack;
+          stackHeightEl.textContent = stackHeight;
+          setState(GameState.SUCCESS);
+        } else {
+          stackHeight = 0;
+          setState(GameState.FAILURE);
+        }
+
+      } catch (err) {
+        console.error('Catch error:', err);
+        // Check if there's still a pending flip on-chain
+        try {
+          const address = await signer.getAddress();
+          const stats = await contract.getPlayerStats(address);
+          if (stats.hasPendingFlip) {
+            // Still have pending flip, can retry
+            setState(GameState.READY_TO_CATCH);
+          } else {
+            // No pending flip, go back to idle
+            console.log('No pending flip on-chain, returning to IDLE');
+            setState(GameState.IDLE);
+          }
+        } catch (e) {
+          // If we can't check, go to idle to be safe
+          setState(GameState.IDLE);
+        }
+      }
+    }
+
+    async function checkAndRestoreState() {
+      try {
+        const address = await signer.getAddress();
+        console.log('Checking state for address:', address);
+        const stats = await contract.getPlayerStats(address);
+        console.log('Player stats:', { currentStack: Number(stats.currentStack), hasPendingFlip: stats.hasPendingFlip });
+
+        stackHeight = Number(stats.currentStack);
+        updateStackDisplay();
+
+        if (stats.hasPendingFlip) {
+          showGameStatus('You have a pancake in the air! Checking randomness...', 'warning');
+          setState(GameState.WAITING_RANDOMNESS);
+          startPolling();
+        } else {
+          setState(GameState.IDLE);
+        }
+      } catch (err) {
+        console.error('Failed to restore state:', err);
+        setState(GameState.IDLE);
+      }
+    }
+
+    // ==================== WALLET CONNECTION ====================
     async function connectWallet(walletProvider, btn, walletName) {
       hideConnectStatus();
+      soundManager.init();
 
       try {
         const rpcUrl = rpcUrlInput.value.trim();
@@ -665,7 +1981,7 @@
 
         setLoading(btn, true, 'Connecting...');
 
-        // Get chain ID from the RPC
+        // Get chain ID from RPC
         const rpcProvider = new ethers.JsonRpcProvider(rpcUrl);
         const rpcNetwork = await rpcProvider.getNetwork();
         chainId = Number(rpcNetwork.chainId);
@@ -682,24 +1998,21 @@
             });
             await new Promise(resolve => setTimeout(resolve, 500));
           } catch (switchError) {
-            if (switchError.code === 4902 || switchError.message?.includes('Unrecognized chain')) {
-              try {
-                await walletProvider.request({
-                  method: 'wallet_addEthereumChain',
-                  params: [{
-                    chainId: '0x' + chainId.toString(16),
-                    chainName: chainId === 143 ? 'Monad' : 'Monad Testnet',
-                    nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
-                    rpcUrls: [rpcUrl],
-                    blockExplorerUrls: [chainId === 143 ? 'https://explorer.monad.xyz' : 'https://testnet.monadexplorer.com']
-                  }]
-                });
-                await new Promise(resolve => setTimeout(resolve, 500));
-              } catch (addError) {
-                throw new Error(`Failed to add network: ${addError.message}`);
-              }
-            } else {
-              throw new Error(`Please switch your wallet to chain ID ${chainId}`);
+            // Try to add the chain if switch fails (works for most wallets)
+            try {
+              await walletProvider.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: '0x' + chainId.toString(16),
+                  chainName: chainId === 143 ? 'Monad' : 'Monad Testnet',
+                  nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
+                  rpcUrls: [rpcUrl],
+                  blockExplorerUrls: [chainId === 143 ? 'https://explorer.monad.xyz' : 'https://testnet.monadexplorer.com']
+                }]
+              });
+              await new Promise(resolve => setTimeout(resolve, 500));
+            } catch (addError) {
+              throw new Error(`Please add Monad Testnet to your wallet manually (Chain ID: ${chainId})`);
             }
           }
         }
@@ -710,7 +2023,7 @@
         const address = await signer.getAddress();
 
         provider = browserProvider;
-        contract = new ethers.Contract(contractAddress, COIN_FLIP_ABI, signer);
+        contract = new ethers.Contract(contractAddress, PANCAKE_FLIPPER_ABI, signer);
 
         walletAddressEl.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
@@ -718,17 +2031,8 @@
         connectView.classList.add('hidden');
         gameView.classList.remove('hidden');
 
-        updateBalance();
-
-        // Check for existing flip request
-        if (await checkExistingFlip()) {
-          updateSteps(1);
-          flipBtn.classList.add('hidden');
-          settleBtn.classList.remove('hidden');
-          showStatus('You have a pending flip. Click to settle.', 'warning');
-        } else {
-          updateSteps(0);
-        }
+        await updateBalance();
+        await checkAndRestoreState();
 
       } catch (err) {
         console.error('Connection error:', err);
@@ -738,7 +2042,9 @@
       }
     }
 
-    // RPC preset buttons
+    // ==================== EVENT LISTENERS ====================
+
+    // RPC presets
     presetBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const rpc = btn.dataset.rpc;
@@ -755,136 +2061,61 @@
       }
     });
 
-    // MetaMask connect
+    // Helper to find MetaMask specifically (avoids Phantom hijacking window.ethereum)
+    function getMetaMaskProvider() {
+      // Check for MetaMask in providers array (EIP-5749 multi-provider)
+      if (window.ethereum?.providers) {
+        return window.ethereum.providers.find(p => p.isMetaMask && !p.isPhantom);
+      }
+      // Check if ethereum is MetaMask and not Phantom pretending to be
+      if (window.ethereum?.isMetaMask && !window.ethereum?.isPhantom) {
+        return window.ethereum;
+      }
+      return null;
+    }
+
+    // Wallet connections
     connectMetamaskBtn.addEventListener('click', () => {
-      connectWallet(window.ethereum, connectMetamaskBtn, 'MetaMask');
+      connectWallet(getMetaMaskProvider(), connectMetamaskBtn, 'MetaMask');
     });
 
-    // Phantom connect
     connectPhantomBtn.addEventListener('click', () => {
       const phantomProvider = window.phantom?.ethereum;
       connectWallet(phantomProvider, connectPhantomBtn, 'Phantom');
     });
 
-    // Flip the coin
+    // Sound toggle
+    soundToggleBtn.addEventListener('click', () => {
+      soundManager.init();
+      const enabled = soundManager.toggle();
+      soundToggleBtn.classList.toggle('muted', !enabled);
+      soundIconEl.textContent = enabled ? '\u{1F50A}' : '\u{1F507}';
+    });
+
+    // Flip button
     flipBtn.addEventListener('click', async () => {
-      try {
-        hideStatus();
-        resultEl.classList.add('hidden');
-        coinEl.classList.remove('heads', 'tails');
-        setLoading(flipBtn, true, 'Flipping...');
-        updateSteps(0);
-
-        const tx = await contract.flipCoin();
-        showStatus('Transaction sent. Waiting for confirmation...', 'info');
-        await tx.wait();
-
-        await updateBalance();
-        updateSteps(1);
-        showStatus('Coin flipped! Click to settle and reveal.', 'info');
-
-        flipBtn.classList.add('hidden');
-        settleBtn.classList.remove('hidden');
-
-      } catch (err) {
-        showStatus(err.reason || err.message, 'error');
-        setLoading(flipBtn, false, 'Flip the Coin');
+      console.log('Flip button clicked, currentState:', currentState);
+      if (currentState === GameState.IDLE) {
+        await flipPancake();
+      } else {
+        console.log('Not in IDLE state, ignoring click');
       }
     });
 
-    // Settle the flip
-    settleBtn.addEventListener('click', async () => {
-      try {
-        setLoading(settleBtn, true, 'Resolving...');
-        updateSteps(1);
-
-        const address = await signer.getAddress();
-
-        const request = await contract.flipRequests(address);
-
-        if (request.randomnessId === '0x0000000000000000000000000000000000000000000000000000000000000000') {
-          throw new Error('No pending flip found');
-        }
-
-        const randomnessId = request.randomnessId;
-        const flipData = await contract.getFlipData(address);
-
-        if (flipData.oracle === '0x0000000000000000000000000000000000000000') {
-          throw new Error('No oracle assigned yet');
-        }
-
-        showStatus('Fetching randomness from Switchboard...', 'info');
-
-        const crossbarResponse = await fetch(`${CROSSBAR_URL}/randomness/evm`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chain_id: chainId.toString(),
-            randomness_id: randomnessId,
-            timestamp: Number(flipData.rollTimestamp),
-            min_staleness_seconds: Number(flipData.minSettlementDelay),
-            oracle: flipData.oracle.toLowerCase()
-          })
-        });
-
-        if (!crossbarResponse.ok) {
-          const errorText = await crossbarResponse.text();
-          throw new Error(`Crossbar error: ${errorText}`);
-        }
-
-        const crossbarData = await crossbarResponse.json();
-        const encoded = crossbarData.data?.encoded || crossbarData.encoded;
-
-        if (!encoded) {
-          throw new Error('No encoded randomness in response');
-        }
-
-        updateSteps(2);
-        showStatus('Settling on-chain...', 'info');
-
-        coinEl.classList.add('flipping');
-
-        const tx = await contract.settleFlip(encoded);
-        const receipt = await tx.wait();
-        await updateBalance();
-
-        // Parse the CoinFlipSettled event
-        let isHeads = false;
-        for (const log of receipt.logs) {
-          try {
-            const parsed = contract.interface.parseLog(log);
-            if (parsed?.name === 'CoinFlipSettled') {
-              isHeads = parsed.args.isHeads;
-              break;
-            }
-          } catch {}
-        }
-
-        setTimeout(() => {
-          hideStatus();
-          showResult(isHeads);
-          settleBtn.classList.add('hidden');
-          resetBtn.classList.remove('hidden');
-        }, 2000);
-
-      } catch (err) {
-        showStatus(err.reason || err.message, 'error');
-        coinEl.classList.remove('flipping');
-        setLoading(settleBtn, false, 'Settle & Reveal');
+    // Catch button
+    catchBtn.addEventListener('click', async () => {
+      if (currentState === GameState.READY_TO_CATCH) {
+        await catchPancake();
       }
     });
 
-    // Reset game
-    resetBtn.addEventListener('click', async () => {
-      hideStatus();
-      resultEl.classList.add('hidden');
-      coinEl.classList.remove('heads', 'tails', 'flipping');
-      resetBtn.classList.add('hidden');
-      settleBtn.classList.add('hidden');
-      flipBtn.classList.remove('hidden');
-      setLoading(flipBtn, false, 'Flip the Coin');
-      updateSteps(0);
-      await updateBalance();
+    // Play again button
+    playAgainBtn.addEventListener('click', () => {
+      resultOverlay.classList.add('hidden');
+      hideGameStatus();
+      stackHeight = Math.max(0, stackHeight); // Keep stack if success, already 0 if failure
+      updateStackDisplay();
+      setState(GameState.IDLE);
     });
   </script>
 </body>

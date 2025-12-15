@@ -22,6 +22,12 @@ import {
       description: 'Trading pair symbol (USD quote assumed)',
       default: 'BTC'
     })
+    .option('withProgram', {
+      alias: 'p',
+      type: 'boolean',
+      description: 'Include program read instruction in simulation',
+      default: false
+    })
     .help()
     .argv;
 
@@ -29,27 +35,33 @@ import {
   const ticker = argv.ticker.includes('/') ? argv.ticker : `${argv.ticker}/USD`;
   console.log(`📊 Using ticker: ${ticker}`);
 
-  const apiKey = process.env.SURGE_API_KEY;
-  if (!apiKey) {
-    console.error("❌ Error: SURGE_API_KEY environment variable is not set");
-    console.error("Please set SURGE_API_KEY before running this script");
-    process.exit(1);
-  }
   const { keypair, connection, program, crossbar, gateway, queue } =
     await sb.AnchorUtils.loadEnv();
+  console.log(`🔑 Loaded keypair: ${keypair.publicKey.toBase58()}`);
+  console.log(`🌐 Connected to cluster: ${connection.rpcEndpoint}`);
   const lut = await queue.loadLookupTable();
   let hasRunSimulation = false;
   let updateCount = 0;
 
   // Initialize Surge client
-  // Note: API key authentication will be deprecated in favor of on-chain subscription access.
-  // To use on-chain authentication, uncomment 'connection' and 'keypair', and comment out 'apiKey'.
-  const surge = new sb.Surge({
-    apiKey,
-    // connection,
-    // keypair,
+  // Authentication options:
+  //   - API key: { apiKey: process.env.SURGE_API_KEY }
+  //   - Keypair/connection: { connection, keypair }
+  const surgeConfig = {
+    // apiKey: process.env.SURGE_API_KEY,
+    connection,
+    keypair,
     verbose: false,
-  });
+  };
+
+  // Only validate API key if the config uses apiKey authentication
+  if ('apiKey' in surgeConfig && !surgeConfig.apiKey) {
+    console.error("❌ Error: SURGE_API_KEY environment variable is not set");
+    console.error("Please set SURGE_API_KEY before running this script");
+    process.exit(1);
+  }
+
+  const surge = new sb.Surge(surgeConfig);
   
   await surge.connectAndSubscribe([{ symbol: ticker }]);
 
@@ -106,21 +118,18 @@ import {
     // Derive the canonical oracle account for managed updates
     const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [DEFAULT_FEED_ID]);
 
-    // Use the signed price from the Surge stream to create instructions
+    // Build transaction: oracle quote update + optional program read
     const crankIxs = response.toQuoteIx(queue.pubkey, keypair.publicKey);
+    const ixs = [...crankIxs];
 
-    let readOracleIx = undefined;
-    const basicProgram = await loadBasicProgram(program!.provider);
-    readOracleIx = await basicReadOracleIx(
-      basicProgram,
-      quoteAccount,
-      queue.pubkey,
-      keypair.publicKey
-    );
+    if (argv.withProgram) {
+      const basicProgram = await loadBasicProgram(program!.provider);
+      ixs.push(await basicReadOracleIx(basicProgram, quoteAccount, queue.pubkey, keypair.publicKey));
+    }
 
     const tx = await sb.asV0Tx({
       connection,
-      ixs: [...crankIxs, readOracleIx],
+      ixs,
       signers: [keypair],
       computeUnitPrice: 20_000,
       computeUnitLimitMultiple: 1.3,

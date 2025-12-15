@@ -1339,9 +1339,17 @@
     const CROSSBAR_URL = 'https://crossbar.switchboard.xyz';
     const POLL_INTERVAL = 500; // 0.5 seconds
 
+    // Added: small buffer + helpers for settlement readiness gates
+    const SETTLEMENT_BUFFER_SECONDS = 0.1;
+    const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+    const ZERO_BYTES32 = '0x' + '0'.repeat(64);
+    const nowSec = () => Math.floor(Date.now() / 1000);
+    const readyAtSec = (rollTimestamp, minDelay) =>
+      Number(rollTimestamp) + Number(minDelay) + SETTLEMENT_BUFFER_SECONDS;
+
     const PANCAKE_FLIPPER_ABI = [
       'function flipPancake() public',
-      'function catchPancake(bytes calldata encodedRandomness) public returns (bool landed)',
+      'function catchPancake(bytes encodedRandomness) public',
       'function getFlipData(address user) public view returns (bytes32 randomnessId, address oracle, uint256 rollTimestamp, uint256 minSettlementDelay)',
       'function getPlayerStats(address user) public view returns (uint256 currentStack, bool hasPendingFlip)',
       'function pendingFlips(address) public view returns (bytes32)',
@@ -1368,6 +1376,7 @@
     let stackHeight = 0;
     let encodedRandomness = null;
     let pollIntervalId = null;
+    let pollInFlight = false;
     let chainId = 10143;
 
     // Contract
@@ -1582,6 +1591,12 @@
     // ==================== STATE MACHINE ====================
     function setState(newState) {
       const oldState = currentState;
+
+      // If leaving WAITING_RANDOMNESS, stop polling immediately
+      if (oldState === GameState.WAITING_RANDOMNESS && newState !== GameState.WAITING_RANDOMNESS) {
+        stopPolling();
+      }
+
       currentState = newState;
       console.log('State changed:', oldState, '->', newState);
       updateUIForState(oldState, newState);
@@ -1653,10 +1668,14 @@
           flipperMascot.classList.add('celebrating');
           catcherMascot.classList.add('celebrating');
 
-          // Add new pancake to stack with animation
-          const newPancake = document.createElement('div');
-          newPancake.className = 'stacked-pancake new';
-          pancakeStack.appendChild(newPancake);
+          // Rebuild entire stack to ensure visual matches stackHeight
+          pancakeStack.innerHTML = '';
+          for (let i = 0; i < stackHeight; i++) {
+            const pancake = document.createElement('div');
+            // Add 'new' animation class to the topmost pancake only
+            pancake.className = i === stackHeight - 1 ? 'stacked-pancake new' : 'stacked-pancake';
+            pancakeStack.appendChild(pancake);
+          }
 
           flyingPancake.classList.add('hidden');
           showConfetti();
@@ -1696,8 +1715,21 @@
         const address = await signer.getAddress();
         const flipData = await contract.getFlipData(address);
 
-        if (flipData.oracle === '0x0000000000000000000000000000000000000000') {
+        // No pending flip => stop waiting
+        if (flipData.randomnessId === ZERO_BYTES32) {
+          return { ready: false, noPending: true };
+        }
+
+        // Oracle not assigned yet => keep waiting
+        if (flipData.oracle === ZERO_ADDRESS) {
           return { ready: false };
+        }
+
+        // Too early => don't hit Crossbar yet
+        const tReady = readyAtSec(flipData.rollTimestamp, flipData.minSettlementDelay);
+        const now = nowSec();
+        if (now < tReady) {
+          return { ready: false, tooEarly: true, waitSeconds: tReady - now };
         }
 
         const response = await fetch(`${CROSSBAR_URL}/randomness/evm`, {
@@ -1719,6 +1751,7 @@
             return { ready: true, encoded };
           }
         }
+
         return { ready: false };
       } catch (err) {
         console.warn('Polling check failed:', err);
@@ -1731,14 +1764,26 @@
 
       const poll = async () => {
         if (currentState !== GameState.WAITING_RANDOMNESS) return;
+        if (pollInFlight) return;
 
-        soundManager.playWaiting();
-        const result = await checkRandomnessReady();
+        pollInFlight = true;
+        try {
+          soundManager.playWaiting();
+          const result = await checkRandomnessReady();
 
-        if (result.ready) {
-          stopPolling();
-          encodedRandomness = result.encoded;
-          setState(GameState.READY_TO_CATCH);
+          if (result.noPending) {
+            stopPolling();
+            setState(GameState.IDLE);
+            return;
+          }
+
+          if (result.ready) {
+            stopPolling();
+            encodedRandomness = result.encoded;
+            setState(GameState.READY_TO_CATCH);
+          }
+        } finally {
+          pollInFlight = false;
         }
       };
 
@@ -1751,6 +1796,7 @@
         clearInterval(pollIntervalId);
         pollIntervalId = null;
       }
+      pollInFlight = false;
     }
 
     // ==================== CONTRACT INTERACTION ====================
@@ -1793,14 +1839,27 @@
         });
 
         // Check if there's actually a pending flip
-        if (flipData.randomnessId === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+        if (flipData.randomnessId === ZERO_BYTES32) {
           console.log('No pending flip found, returning to IDLE');
           setState(GameState.IDLE);
           return;
         }
 
-        if (flipData.oracle === '0x0000000000000000000000000000000000000000') {
-          throw new Error('No oracle assigned yet');
+        if (flipData.oracle === ZERO_ADDRESS) {
+          // Not ready => go back to waiting + poll
+          showGameStatus('Waiting for oracle assignment...', 'warning');
+          setState(GameState.WAITING_RANDOMNESS);
+          startPolling();
+          return;
+        }
+
+        // Too early => don't hit Crossbar yet; go back to waiting
+        const tReady = readyAtSec(flipData.rollTimestamp, flipData.minSettlementDelay);
+        if (nowSec() < tReady) {
+          showGameStatus('Randomness not ready yet…', 'warning');
+          setState(GameState.WAITING_RANDOMNESS);
+          startPolling();
+          return;
         }
 
         const crossbarParams = {
@@ -1822,8 +1881,12 @@
         console.log('Crossbar response status:', response.status);
         console.log('Crossbar response body:', responseText);
 
+        // If Crossbar isn't ready (or transiently errors), go back to waiting + poll
         if (!response.ok) {
-          throw new Error(`Crossbar error (${response.status}): ${responseText}`);
+          showGameStatus('Randomness not ready yet…', 'warning');
+          setState(GameState.WAITING_RANDOMNESS);
+          startPolling();
+          return;
         }
 
         const data = JSON.parse(responseText);
@@ -1831,7 +1894,10 @@
         console.log('Fresh encoded randomness:', freshEncodedRandomness ? `${freshEncodedRandomness.substring(0, 50)}...` : 'missing');
 
         if (!freshEncodedRandomness) {
-          throw new Error('No encoded randomness in response');
+          showGameStatus('Randomness not ready yet…', 'warning');
+          setState(GameState.WAITING_RANDOMNESS);
+          startPolling();
+          return;
         }
 
         console.log('Calling contract.catchPancake...');
@@ -1847,23 +1913,24 @@
         let landed = false;
         let newStack = 0;
         let eventFound = false;
-        let settlementFailed = false;
+
+        const myAddr = (contract.target || '').toLowerCase();
 
         for (const log of receipt.logs) {
+          if ((log.address || '').toLowerCase() !== myAddr) continue;
+
           try {
             const parsed = contract.interface.parseLog(log);
             console.log('Parsed log:', parsed?.name, parsed?.args);
+
             if (parsed?.name === 'PancakeLanded') {
               landed = true;
               eventFound = true;
               newStack = Number(parsed.args.newStackHeight);
               break;
-            } else if (parsed?.name === 'StackKnockedOver') {
+            } else if (parsed?.name === 'StackKnockedOver' || parsed?.name === 'SettlementFailed') {
+              // Treat SettlementFailed the same as StackKnockedOver (gameplay: knocked over)
               landed = false;
-              eventFound = true;
-              break;
-            } else if (parsed?.name === 'SettlementFailed') {
-              settlementFailed = true;
               eventFound = true;
               break;
             }
@@ -1872,26 +1939,16 @@
           }
         }
 
-        console.log('Event parsing result - found:', eventFound, 'landed:', landed, 'settlementFailed:', settlementFailed, 'newStack:', newStack);
+        console.log('Event parsing result - found:', eventFound, 'landed:', landed, 'newStack:', newStack);
         encodedRandomness = null;
 
-        // Handle settlement failure BEFORE animation - show error and return to idle
-        if (settlementFailed) {
-          console.log('Settlement failed, showing error and returning to IDLE state');
-          showGameStatus('Settlement failed - please try again', 'error');
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          hideGameStatus();
-          setState(GameState.IDLE);
-          return;
-        }
-
+        // Option A: only chain-read if we couldn't parse events
         if (!eventFound) {
-          console.error('No PancakeLanded, StackKnockedOver, or SettlementFailed event found!');
-          // Default to success if no event found but tx succeeded
-          landed = true;
+          console.warn('No PancakeLanded/StackKnockedOver/SettlementFailed event found; falling back to chain state.');
           const stats = await contract.getPlayerStats(await signer.getAddress());
           newStack = Number(stats.currentStack);
-          console.log('Fetched stack from contract:', newStack);
+          landed = newStack > 0;
+          console.log('Fallback chain state:', { newStack, landed });
         }
 
         // Only play animation for actual game outcomes (success/failure)
@@ -1904,6 +1961,7 @@
         await new Promise(resolve => setTimeout(resolve, 650));
 
         if (landed) {
+          // If we had no event but chain says landed, use chain stack as truth
           stackHeight = newStack;
           stackHeightEl.textContent = stackHeight;
           setState(GameState.SUCCESS);
@@ -1914,15 +1972,17 @@
 
       } catch (err) {
         console.error('Catch error:', err);
-        // Check if there's still a pending flip on-chain
+
+        // On any error: check whether a flip is still pending; if so, go back to WAITING_RANDOMNESS and poll
         try {
           const address = await signer.getAddress();
           const stats = await contract.getPlayerStats(address);
+
           if (stats.hasPendingFlip) {
-            // Still have pending flip, can retry
-            setState(GameState.READY_TO_CATCH);
+            showGameStatus('Still waiting for randomness…', 'warning');
+            setState(GameState.WAITING_RANDOMNESS);
+            startPolling();
           } else {
-            // No pending flip, go back to idle
             console.log('No pending flip on-chain, returning to IDLE');
             setState(GameState.IDLE);
           }

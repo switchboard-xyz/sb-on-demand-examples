@@ -29,7 +29,7 @@ contract PancakeFlipper {
     function flipPancake() public {
         require(pendingFlips[msg.sender] == bytes32(0), "Already have pending flip");
 
-        bytes32 randomnessId = keccak256(abi.encodePacked(msg.sender, block.timestamp, stackHeight[msg.sender]));
+        bytes32 randomnessId = keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1)));
         switchboard.createRandomness(randomnessId, 1);
 
         pendingFlips[msg.sender] = randomnessId;
@@ -38,7 +38,7 @@ contract PancakeFlipper {
     }
 
     // Catch the pancake and see if it lands
-    function catchPancake(bytes calldata encodedRandomness) public returns (bool landed) {
+    function catchPancake(bytes calldata encodedRandomness) public {
         bytes32 randomnessId = pendingFlips[msg.sender];
         require(randomnessId != bytes32(0), "No pending flip");
 
@@ -47,14 +47,8 @@ contract PancakeFlipper {
             // Settlement succeeded, now get the randomness value
             SwitchboardTypes.Randomness memory randomness = switchboard.getRandomness(randomnessId);
 
-            if (randomness.value == 0) {
-                // Randomness not resolved yet - clear flip so user can retry
-                delete pendingFlips[msg.sender];
-                return false;
-            }
-
             // 2/3 chance to land (roll 0-1), 1/3 chance to knock over (roll 2)
-            landed = uint256(randomness.value) % 3 < 2;
+            bool landed = uint256(randomness.value) % 3 < 2;
 
             if (landed) {
                 // Pancake lands! Increment stack
@@ -69,12 +63,13 @@ contract PancakeFlipper {
             // Clear the request
             delete pendingFlips[msg.sender];
 
-            return landed;
         } catch {
-            // Settlement failed - clear the pending flip so user can try again
+            // Caution: could be an issue with the oracle or something else about malformed randomness
+            // to be safe we make the player reset their stack and start over
+            stackHeight[msg.sender] = 0;
             delete pendingFlips[msg.sender];
+            emit StackKnockedOver(msg.sender);
             emit SettlementFailed(msg.sender);
-            return false;
         }
     }
 

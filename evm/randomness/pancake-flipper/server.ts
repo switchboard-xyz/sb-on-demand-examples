@@ -25,5 +25,5 @@ serve({
   },
 });
 
-console.log(`🎰 Coin Flip UI running at http://localhost:${PORT}`);
+console.log(`Pancake Stacker UI running at http://localhost:${PORT}`);
 

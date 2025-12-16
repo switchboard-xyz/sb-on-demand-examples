@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
 
+// defines interface for the on-chain function we interact with
 const PANCAKE_FLIPPER_ABI = [
     "function flipPancake() public",
     "function catchPancake(bytes calldata encodedRandomness) public",
@@ -13,36 +14,41 @@ const PANCAKE_FLIPPER_ABI = [
 ];
 
 async function main() {
+
+    // load your private key for your wallet
     const privateKey = process.env.PRIVATE_KEY;
     if (!privateKey) {
         throw new Error("PRIVATE_KEY is not set");
     }
 
+    // load on-chain contract address
     const contractAddress = process.env.PANCAKE_FLIPPER_CONTRACT_ADDRESS;
     if (!contractAddress) {
         throw new Error("PANCAKE_FLIPPER_CONTRACT_ADDRESS is not set");
     }
 
+    // initialize RPC, wallet, crossbar server
     const provider = new ethers.JsonRpcProvider("https://rpc.monad.xyz");
     const wallet = new ethers.Wallet(privateKey, provider);
     const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");
 
+    // initialize contract instance to call
     const contract = new ethers.Contract(contractAddress, PANCAKE_FLIPPER_ABI, wallet);
 
-    // Get current stats before flip
+    // call contract to get current stats before flip
     const [currentStack] = await contract.getPlayerStats(wallet.address);
     console.log(`\nCurrent stack: ${currentStack} pancakes`);
 
-    // Flip a pancake
+    // call contract to flip a pancake
     console.log("\nFlipping pancake...");
     const tx = await contract.flipPancake();
     await tx.wait();
     console.log("Flip requested:", tx.hash);
 
-    // Get randomness data
+    // get data of the randomness you requested
     const flipData = await contract.getFlipData(wallet.address);
 
-    // Resolve randomness via Crossbar
+    // ask crossbar to talk to oracle and retrieve randomness
     console.log("Resolving randomness...");
     const { encoded } = await crossbar.resolveEVMRandomness({
         chainId: 143,
@@ -52,7 +58,7 @@ async function main() {
         oracle: flipData.oracle,
     });
 
-    // Catch the pancake
+    // Call contract with randomness to catch the pancake
     console.log("Catching pancake...");
     const tx2 = await contract.catchPancake(encoded);
     const receipt = await tx2.wait();

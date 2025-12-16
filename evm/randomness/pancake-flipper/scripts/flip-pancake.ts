@@ -3,12 +3,13 @@ import { CrossbarClient } from "@switchboard-xyz/common";
 
 const PANCAKE_FLIPPER_ABI = [
     "function flipPancake() public",
-    "function catchPancake(bytes calldata encodedRandomness) public returns (bool landed)",
+    "function catchPancake(bytes calldata encodedRandomness) public",
     "function getFlipData(address user) public view returns (bytes32 randomnessId, address oracle, uint256 rollTimestamp, uint256 minSettlementDelay)",
     "function getPlayerStats(address user) public view returns (uint256 currentStack, bool hasPendingFlip)",
     "event PancakeFlipRequested(address indexed user, bytes32 randomnessId)",
     "event PancakeLanded(address indexed user, uint256 newStackHeight)",
     "event StackKnockedOver(address indexed user)",
+    "event SettlementFailed(address indexed user)",
 ];
 
 async function main() {
@@ -72,6 +73,13 @@ async function main() {
             if (parsed?.name === "StackKnockedOver") {
                 console.log("\n========================================");
                 console.log("STACK KNOCKED OVER!");
+                console.log("========================================\n");
+            }
+
+            if (parsed?.name === "SettlementFailed") {
+                console.log("\n========================================");
+                console.log("SETTLEMENT FAILED!");
+                console.log("Stack reset due to oracle/randomness issue");
                 console.log("========================================\n");
             }
         } catch {}

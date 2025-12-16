@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
 
-// defines interface for the on-chain function we interact with
+// defines interface for the pancake flipper contract we interact with
 const PANCAKE_FLIPPER_ABI = [
     "function flipPancake() public",
     "function catchPancake(bytes calldata encodedRandomness) public",

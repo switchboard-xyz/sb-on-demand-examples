@@ -18,7 +18,8 @@ contract PancakeFlipper {
     // Current stack height for each player
     mapping(address => uint256) public stackHeight;
 
-    // Switchboard contract
+    // declare and initialize switchboard as a parameter 
+    // that holds the switchboard contract address
     ISwitchboard public switchboard;
 
     constructor(address _switchboard) {
@@ -27,11 +28,17 @@ contract PancakeFlipper {
 
     // Flip a pancake onto the stack
     function flipPancake() public {
+        // check no pending flip exists
         require(pendingFlips[msg.sender] == bytes32(0), "Already have pending flip");
-
+        
+        // generate randomnessID with sender address and last blockhash
         bytes32 randomnessId = keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1)));
+        
+        // ask switchboard contract to create a new randomness request 
+        // with 1 second settlement delay
         switchboard.createRandomness(randomnessId, 1);
 
+        // store the randomness request as a pending flip for the sender
         pendingFlips[msg.sender] = randomnessId;
 
         emit PancakeFlipRequested(msg.sender, randomnessId);
@@ -39,15 +46,19 @@ contract PancakeFlipper {
 
     // Catch the pancake and see if it lands
     function catchPancake(bytes calldata encodedRandomness) public {
+
+        // make sure caller has a pending flip
         bytes32 randomnessId = pendingFlips[msg.sender];
         require(randomnessId != bytes32(0), "No pending flip");
 
-        // Try to settle the randomness on-chain
+        // give the randomness object to the switchboard contract
+        // and ask it to verify that it's correct
         try switchboard.settleRandomness(encodedRandomness) {
-            // Settlement succeeded, now get the randomness value
+
+            // verification succeeded, now get the randomness value
             SwitchboardTypes.Randomness memory randomness = switchboard.getRandomness(randomnessId);
 
-            // 2/3 chance to land (roll 0-1), 1/3 chance to knock over (roll 2)
+            // 2/3 chance to land (roll 0-1), 1/3 chance to knock over 
             bool landed = uint256(randomness.value) % 3 < 2;
 
             if (landed) {
@@ -62,9 +73,10 @@ contract PancakeFlipper {
 
             // Clear the request
             delete pendingFlips[msg.sender];
-
+        
+        // if switchboard failed to parse the encoded randomness
         } catch {
-            // Caution: could be an issue with the oracle or something else about malformed randomness
+            // Caution: could be an issue with the oracle or malformed randomness for another reason
             // to be safe we make the player reset their stack and start over
             stackHeight[msg.sender] = 0;
             delete pendingFlips[msg.sender];

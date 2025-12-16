@@ -725,7 +725,27 @@
             // Wait a moment for the switch to complete
             await new Promise(resolve => setTimeout(resolve, 500));
           } catch (switchError) {
-            throw new Error(`Please switch your wallet to chain ID ${chainId}. Currently on ${currentChainIdNum}.`);
+            // If network doesn't exist, try to add it
+            if (switchError.code === 4902 || switchError.message?.includes('Unrecognized chain')) {
+              console.log('Network not found, adding it...');
+              try {
+                await walletProvider.request({
+                  method: 'wallet_addEthereumChain',
+                  params: [{
+                    chainId: '0x' + chainId.toString(16),
+                    chainName: chainId === 143 ? 'Monad' : 'Monad Testnet',
+                    nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
+                    rpcUrls: [rpcUrl],
+                    blockExplorerUrls: [chainId === 143 ? 'https://explorer.monad.xyz' : 'https://testnet.monadexplorer.com']
+                  }]
+                });
+                await new Promise(resolve => setTimeout(resolve, 500));
+              } catch (addError) {
+                throw new Error(`Failed to add network: ${addError.message}`);
+              }
+            } else {
+              throw new Error(`Please switch your wallet to chain ID ${chainId}. Currently on ${currentChainIdNum}.`);
+            }
           }
         }
         
@@ -958,6 +978,7 @@
       resultEl.classList.add('hidden');
       coinEl.classList.remove('heads', 'tails', 'flipping');
       resetBtn.classList.add('hidden');
+      settleBtn.classList.add('hidden');
       flipBtn.classList.remove('hidden');
       setLoading(flipBtn, false, 'Flip the Coin');
       updateSteps(0);

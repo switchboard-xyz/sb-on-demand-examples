@@ -22,41 +22,39 @@ Detailed setup and integration guides for each network:
 
 ## 🚀 Quick Start
 
+Each example is a standalone Foundry project. Navigate to the specific example and follow its README.
+
 ```bash
-# Install dependencies
-cd evm && bun install
+# Price Feeds Example
+cd evm/price-feeds
+bun install && forge build
+PRIVATE_KEY=0x... NETWORK=monad-testnet bun run example
 
-# Build contracts
-forge build
-
-# Deploy (Monad Testnet example)
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
-  --rpc-url https://testnet-rpc.monad.xyz --broadcast -vvvv
-
-# Run price feed example
-PRIVATE_KEY=0x... CONTRACT_ADDRESS=0x... NETWORK=monad-testnet bun scripts/run.ts
-
-# Run randomness example
-PRIVATE_KEY=0x... NETWORK=monad-testnet bun run randomness
+# Randomness Examples
+cd evm/randomness/coin-flip-simple   # or coin-flip-advanced, pancake-flipper
+bun install && forge build
+PRIVATE_KEY=0x... bun run flip
 ```
 
 ## 📁 Directory Structure
 
 ```
 evm/
-├── src/               # Solidity smart contracts
-│   └── SwitchboardPriceConsumer.sol
-├── script/            # Foundry deployment scripts
-├── scripts/           # TypeScript integration examples
-│   └── run.ts
-├── examples/          # Feature examples
-│   ├── updateFeed.ts
-│   ├── randomness.ts
-│   └── utils.ts
-├── docs/              # Network-specific guides
+├── price-feeds/                # Switchboard price consumer example
+│   ├── src/                    # Solidity contracts
+│   ├── deploy/                 # Foundry deploy scripts
+│   └── scripts/                # TypeScript examples
+│
+├── randomness/                 # Randomness examples
+│   ├── coin-flip-simple/       # Basic coin flip
+│   ├── coin-flip-advanced/     # Coin flip with wagering
+│   └── pancake-flipper/        # Pancake stacking game
+│
+├── docs/                       # Network-specific guides
 │   ├── MONAD.md
 │   └── HYPERLIQUID.md
-└── legacy/            # Previous implementation examples
+│
+└── legacy/                     # Archived implementation
 ```
 
 ## 📋 Prerequisites
@@ -219,12 +217,12 @@ Cryptographically secure verifiable randomness for gaming, NFTs, and DeFi.
 ### Quick Start
 
 ```bash
-# Monad Testnet (default)
-PRIVATE_KEY=0x... bun run randomness
+# Navigate to a randomness example
+cd evm/randomness/coin-flip-simple  # or coin-flip-advanced, pancake-flipper
+bun install && forge build
 
-# Other networks
-PRIVATE_KEY=0x... NETWORK=monad-mainnet bun run randomness
-PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun run randomness
+# Run the example
+PRIVATE_KEY=0x... bun run flip
 ```
 
 ### Integration Example

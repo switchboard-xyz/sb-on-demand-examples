@@ -20,12 +20,16 @@ git clone https://github.com/switchboard-xyz/sb-on-demand-examples.git
 cd solana
 bun install
 
+# Navigate to the basic feeds example
+cd feeds/basic
+npm install
+
 # Get a feed ID from https://explorer.switchboardlabs.xyz/
-# Run the JavaScript client example (replace with your feed ID)
-bun run examples/feeds/basic/managedUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
+# Run the example (replace with your feed ID)
+npx ts-node scripts/managedUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433e200eb31a8558521b0015a09867630
 ```
 
-> 💡 **New to client-side integration?** The `examples/` directory contains all the JavaScript/TypeScript code you need!
+> 💡 **Each example is a standalone project!** Navigate to the example folder you want to use.
 
 That's it! You're now fetching real-time oracle prices. 🎉
 
@@ -96,7 +100,7 @@ The easiest way to use Switchboard On-Demand is with **Oracle Quotes** - no need
 
 This repository includes two example programs demonstrating different integration approaches:
 
-#### 🛠️ Basic Example (`programs/basic-oracle-example/`) - **Anchor Framework**
+#### 🛠️ Basic Example (`feeds/basic/`) - **Anchor Framework**
 - **Framework**: **Anchor Framework** for ease of development and safety
 - **Use Case**: Learning, prototyping, and standard DeFi applications
 - **Performance**: ~2,000 CU with Anchor overhead
@@ -104,7 +108,7 @@ This repository includes two example programs demonstrating different integratio
 - **Security**: Complete account validation and type safety
 - **Development**: Beginner-friendly with extensive guardrails
 
-#### ⚡ Advanced Example (`programs/advanced-oracle-example/`) - **Pinocchio Framework**
+#### ⚡ Advanced Example (`feeds/advanced/`) - **Pinocchio Framework**
 - **Framework**: **Pinocchio Framework** for maximum optimization and minimal overhead
 - **Use Case**: **Highly optimized oracle programs such as oracle AMMs and MEV-sensitive applications**
 - **Performance**: **Ultra-optimized compute units (~190 CU total: ~90 CU feed crank + ~100 CU framework overhead)**
@@ -160,7 +164,7 @@ anchor idl init --filepath target/idl/basic_oracle_example.json BASIC_PROGRAM_AD
 # The advanced program uses Pinocchio and doesn't require IDL initialization
 ```
 
-*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files. The examples include basic oracle integration (`examples/feeds/basic/managedUpdate.ts`) and optimized cranking (`examples/feeds/advanced/runUpdate.ts`).
+*Note:* Use `anchor keys list` to view your program addresses, then update them in the respective program source files. The examples include basic oracle integration (`feeds/basic/scripts/managedUpdate.ts`) and optimized cranking (`feeds/advanced/scripts/runUpdate.ts`).
 
 ### Step 2: Get a Feed ID
 
@@ -172,13 +176,16 @@ Run the update script with your feed ID:
 
 #### Basic Example (Anchor Framework)
 ```bash
-bun install
-bun run examples/feeds/basic/managedUpdate.ts --feedId YOUR_FEED_ID
+cd feeds/basic
+npm install
+npx ts-node scripts/managedUpdate.ts --feedId YOUR_FEED_ID
 ```
 
 #### Advanced Example (Pinocchio Framework - Optimized)
 ```bash
-bun run examples/feeds/advanced/runUpdate.ts --feedId YOUR_FEED_ID
+cd feeds/advanced
+npm install
+npx ts-node scripts/runUpdate.ts --feedId YOUR_FEED_ID
 ```
 
 The examples demonstrate different integration approaches:
@@ -193,57 +200,68 @@ Both programs show how to:
 
 ## 🔧 JavaScript/TypeScript Client Code
 
-**Looking for client-side code?** All JavaScript/TypeScript examples are located in the **`/examples/`** directory. This includes:
+**Looking for client-side code?** Each standalone example contains a `scripts/` directory with TypeScript examples:
 
-- **Complete working examples** for all Switchboard On-Demand features
-- **Production-ready client code** for integration into your applications
-- **Utilities and helpers** for common operations
-- **Testing and benchmarking tools**
+- **`feeds/basic/scripts/`** - Basic feed integration examples
+- **`feeds/advanced/scripts/`** - Advanced optimized examples
+- **`randomness/scripts/`** - Randomness/gaming examples
+- **`prediction-market/scripts/`** - Prediction market integration
+- **`x402/scripts/`** - Paywalled data source examples
+- **`surge/scripts/`** - Real-time WebSocket streaming
 
-Simply navigate to `./examples/` to find all client-side implementation examples.
+Each example is a standalone project with its own `package.json` and dependencies.
 
-## 📁 Example Organization
+## 📁 Directory Structure
 
-The examples are organized into categories based on their functionality:
+Each example is a **standalone project** with its own Cargo.toml, Anchor.toml, and package.json:
 
-### `/examples/feeds/` - Oracle Feed Operations
-- **`basic/managedUpdate.ts`** - Basic oracle integration with Anchor Framework
-- **`advanced/runUpdate.ts`** - Optimized oracle integration with Pinocchio Framework
-- **`x402Update.ts`** - X402 authentication with inline feed definition (like prediction market)
+```
+solana/
+├── feeds/
+│   ├── basic/              # Anchor Framework example
+│   │   ├── programs/       # Rust program
+│   │   ├── scripts/        # TypeScript examples
+│   │   ├── Cargo.toml
+│   │   ├── Anchor.toml
+│   │   └── package.json
+│   │
+│   └── advanced/           # Pinocchio Framework example
+│       ├── programs/
+│       ├── scripts/
+│       └── ...
+│
+├── randomness/             # On-chain randomness/VRF
+├── prediction-market/      # Prediction market feeds
+├── x402/                   # Paywalled data sources
+├── surge/                  # Real-time WebSocket streaming
+└── legacy/                 # Archived examples
+```
 
-### `/surge/` - Real-time Price Streaming
-- **`runSurge.ts`** - WebSocket streaming with Surge API for ultra-low latency
-- See **[`../common/streaming/crossbarStream.ts`](../common/streaming/)** - Chain-agnostic unsigned price streaming for UI/monitoring
+### `/feeds/` - Oracle Feed Operations
+- **`basic/`** - Anchor Framework integration (beginner-friendly)
+- **`advanced/`** - Pinocchio Framework integration (performance-optimized)
 
-### `/examples/benchmarks/` - Performance Testing
-- **`benchmark.ts`** - Compare latency across different oracle providers
-- **`benchmarkCU.ts`** - Measure compute unit consumption for various configurations
+### `/randomness/` - VRF Examples
+- Verifiable random function (VRF) integration for games
 
-### `/examples/randomness/` - VRF Examples
-- Verifiable random function (VRF) integration examples
-- See [randomness README](./examples/randomness/README.md) for details
+### `/prediction-market/` - Prediction Markets
+- Kalshi prediction market feed verification
 
-### `/examples/utils.ts` - Shared Utilities
-Common functions and configurations used across all examples.
+### `/x402/` - Paywalled Data Sources
+- X402 micropayment protocol for premium data sources
 
-### `../../common/variable-overrides/` - Credential Management ⭐
-- **`testVariableOverrides.ts`** - Chain-agnostic variable override examples
-- **Security best practices** - Only use variables for API keys/auth tokens
-- **[Complete Guide](../../common/variable-overrides/README.md)** - Comprehensive documentation for secure credential management
-- **Chain-agnostic** - Works identically on Solana, EVM, and Sui
+### `/surge/` - Real-time Streaming
+- WebSocket streaming with Surge API for ultra-low latency
 
-### `../../common/job-testing/` - Job Testing & Development ⭐
-- **`runJob.ts`** - Test custom job definitions with variable substitution and API integrations
-- **[Complete Testing Guide](../../common/job-testing/README.md)** - Comprehensive documentation for job testing workflows
-- **Chain-agnostic** - Works across Solana, EVM, and Sui
-
-Each directory contains its own README with detailed documentation for the examples within.
+### `../common/` - Chain-Agnostic Tools
+- **[Variable Overrides](../common/variable-overrides/)** - Secure credential management
+- **[Job Testing](../common/job-testing/)** - Test custom job definitions
 
 ## Understanding the Oracle Quote Method
 
 ### What Makes Oracle Quotes Efficient?
 
-The oracle quote method (e.g., `examples/feeds/advanced/runUpdate.ts`) is significantly more efficient than traditional feed updates for several key reasons:
+The oracle quote method (e.g., `feeds/advanced/scripts/runUpdate.ts`) is significantly more efficient than traditional feed updates for several key reasons:
 
 #### 1. **No Write Locks on Data Feeds**
 - Traditional feed updates require write locks on feed accounts, limiting parallelization

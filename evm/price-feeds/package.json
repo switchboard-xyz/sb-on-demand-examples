@@ -1,0 +1,42 @@
+{
+  "name": "price-consumer-example",
+  "version": "2.0.0",
+  "description": "Switchboard price feed consumer example for EVM chains",
+  "type": "module",
+  "scripts": {
+    "example": "bun scripts/run.ts",
+    "surge-convert": "bun scripts/surgeToEvmConversion.ts",
+    "build": "forge build",
+    "test": "forge test",
+    "deploy": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --broadcast -vvvv",
+    "deploy:monad-testnet": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url https://testnet.monad.xyz --broadcast -vvvv",
+    "deploy:monad-mainnet": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url $MONAD_RPC_URL --broadcast -vvvv",
+    "verify": "forge verify-contract --chain-id $CHAIN_ID --watch $CONTRACT_ADDRESS src/SwitchboardPriceConsumer.sol:SwitchboardPriceConsumer"
+  },
+  "keywords": [
+    "switchboard",
+    "oracle",
+    "evm",
+    "ethereum",
+    "monad",
+    "arbitrum",
+    "defi",
+    "price-feeds"
+  ],
+  "author": "Switchboard Labs",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@switchboard-xyz/common": "^5.5.1",
+    "@switchboard-xyz/on-demand-solidity": "^0.0.4",
+    "@types/yargs": "^17.0.33",
+    "ethers": "^6.13.1",
+    "yargs": "^18.0.0"
+  }
+}

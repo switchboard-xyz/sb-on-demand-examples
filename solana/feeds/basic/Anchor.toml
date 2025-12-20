@@ -1,0 +1,18 @@
+[toolchain]
+
+[features]
+resolution = true
+skip-lint = true
+
+[programs.devnet]
+basic_oracle_example = "4ZK7w1R7R4GJrFBSUZrNPnmzsUeG8bvVKvk6z7bvQ2zZ"
+
+[programs.mainnet]
+basic_oracle_example = "9kVBXoCrvZgKYWTJ74w3S8wAp7daEB7zpG7kwiXxkCVN"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"

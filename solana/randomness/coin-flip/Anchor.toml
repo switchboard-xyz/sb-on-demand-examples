@@ -1,0 +1,18 @@
+[toolchain]
+
+[features]
+resolution = true
+skip-lint = true
+
+[programs.devnet]
+sb_randomness = "44wNsyMPUQxCDhJpKqwNu8XGjqYbThqgRPUpQCARyrUc"
+
+[programs.mainnet]
+sb_randomness = "93tkpep2PYDxweHHi2vQBpi7eTBF23y8LGdiLMt5R9f2"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"

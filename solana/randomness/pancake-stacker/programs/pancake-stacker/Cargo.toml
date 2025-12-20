@@ -1,0 +1,24 @@
+[package]
+resolver = "2"
+name = "pancake-stacker"
+version = "0.1.0"
+description = "Pancake stacking game using Switchboard randomness"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "pancake_stacker"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build", "switchboard-on-demand/idl-build"]
+
+[dependencies]
+anchor-lang = "0.31.1"
+solana-program = ">=2,<3"
+bytemuck = "1.15.0"
+switchboard-on-demand = { version = "0.10.0", features = ["anchor"] }

@@ -1,11 +1,11 @@
 {
-  "name": "coin-flip-advanced",
+  "name": "pancake-stacker",
   "version": "1.0.0",
-  "description": "Advanced coin flip example with wagering using Switchboard randomness",
+  "description": "Pancake stacking game using Switchboard randomness",
   "type": "module",
   "scripts": {
     "start": "bun run server.ts",
-    "flip": "bun run scripts/flip-coin.ts",
+    "flip": "bun run scripts/stack-pancake.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Switchboard Labs",

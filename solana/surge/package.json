@@ -1,0 +1,25 @@
+{
+  "name": "surge-streaming-example",
+  "version": "1.0.0",
+  "description": "Real-time WebSocket streaming of signed Switchboard oracle prices",
+  "type": "module",
+  "scripts": {
+    "start": "ts-node scripts/runSurge.ts",
+    "stream": "ts-node scripts/runSurge.ts"
+  },
+  "author": "Switchboard Labs",
+  "license": "MIT",
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@solana/web3.js": "^1.98.0",
+    "@switchboard-xyz/common": "^5.3.1",
+    "@switchboard-xyz/on-demand": "^3.7.3",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/yargs": "^17.0.33",
+    "ts-node": "^10.9.2",
+    "typescript": "^4.9.5"
+  }
+}

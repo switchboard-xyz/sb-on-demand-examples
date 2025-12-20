@@ -1,10 +1,9 @@
 {
-  "name": "coin-flip-advanced",
+  "name": "coin-flip",
   "version": "1.0.0",
-  "description": "Advanced coin flip example with wagering using Switchboard randomness",
+  "description": "Coin flip example with wagering using Switchboard randomness",
   "type": "module",
   "scripts": {
-    "start": "bun run server.ts",
     "flip": "bun run scripts/flip-coin.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

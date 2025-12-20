@@ -142,7 +142,7 @@ function getWagerData(address user) public view returns (
 
 ### Off-Chain: Resolving Randomness with Crossbar
 
-The `scripts/flip-the-coin.ts` script demonstrates the complete off-chain flow:
+The `scripts/flip-coin.ts` script demonstrates the complete off-chain flow:
 
 #### 1. Setup the Crossbar Client
 
@@ -226,34 +226,8 @@ forge script script/CoinFlip.s.sol:CoinFlipScript \
 ```bash
 PRIVATE_KEY=<your_private_key> \
 COIN_FLIP_CONTRACT_ADDRESS=<deployed_contract_address> \
-bun run scripts/flip-the-coin.ts
+bun run scripts/flip-coin.ts
 ```
-
----
-
-## Web UI
-
-A simple browser-based UI is included for interacting with the deployed contract.
-
-### Running the UI
-
-Start the server:
-
-```bash
-bun start
-```
-
-Then open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Using the UI
-
-1. **Enter the deployed contract address** in the input field
-2. **Click "Connect Wallet"** — MetaMask will prompt you to connect
-3. **Click "Flip the Coin"** — sends 1 ETH to the contract and requests randomness
-4. **Click "Settle & Reveal"** — resolves randomness via Crossbar and settles on-chain
-5. **View the result** — win (heads) doubles your ETH, lose (tails) and the house keeps it
-
-> **Note:** The UI is configured for Monad (chain ID 143). Modify the `CHAIN_ID` constant in `ui/index.html` for other networks.
 
 ---
 

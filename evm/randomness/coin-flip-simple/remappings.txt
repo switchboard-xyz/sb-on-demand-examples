@@ -1,2 +1,0 @@
-@switchboard-xyz/on-demand-solidity/=node_modules/@switchboard-xyz/on-demand-solidity
-

@@ -17,6 +17,7 @@ contract CoinFlip {
     // Events
     event CoinFlipped(address indexed user, bytes32 randomnessId, uint256 amount);
     event FlipSettled(address indexed user, bool won, uint256 payout, uint256 randomValue);
+    event SettlementFailed(address indexed user);
 
     // minimum flip amount
     uint256 public constant MIN_FLIP_AMOUNT = 1 ether; 
@@ -37,7 +38,7 @@ contract CoinFlip {
     function coinFlip() public payable {
         require(msg.value == MIN_FLIP_AMOUNT, "Must send exactly 1 ETH");
         require(wagers[msg.sender].amount == 0, "Already flipped");
-        bytes32 randomnessId = keccak256(abi.encodePacked(block.timestamp));
+        bytes32 randomnessId = keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1)));
         switchboard.createRandomness(randomnessId, 1);
         wagers[msg.sender] = Wager({
             amount: msg.value,
@@ -51,31 +52,36 @@ contract CoinFlip {
 
     // settle the flip
     function settleFlip(bytes calldata encodedRandomness) public {
-
-        // Settle the randomness
-        switchboard.settleRandomness(encodedRandomness);
-
-        // Check that the flip is not already settled
+        // Check that the user has a pending wager
         Wager memory wager = wagers[msg.sender];
+        require(wager.amount > 0, "No pending wager");
 
-        // Check that randomness is resolved
-        SwitchboardTypes.Randomness memory randomness = switchboard.getRandomness(wager.randomnessId);
-        require(randomness.value != 0, "Randomness not resolved");
+        // Try to settle the randomness
+        try switchboard.settleRandomness(encodedRandomness) {
+            // Check that randomness is resolved
+            SwitchboardTypes.Randomness memory randomness = switchboard.getRandomness(wager.randomnessId);
+            require(randomness.value != 0, "Randomness not resolved");
 
-        // Determine win/lose: even = win, odd = lose
-        bool won = uint256(randomness.value) % 2 == 0;
-        uint256 payout = 0;
+            // Determine win/lose: even = win, odd = lose
+            bool won = uint256(randomness.value) % 2 == 0;
+            uint256 payout = 0;
 
-        // Pay out the winner
-        if (won) {
-            payout = wager.amount * 2;
-            (bool success, ) = wager.user.call{value: payout}("");
-            require(success, "Transfer failed");
+            // Pay out the winner
+            if (won) {
+                payout = wager.amount * 2;
+                (bool success, ) = wager.user.call{value: payout}("");
+                require(success, "Transfer failed");
+            }
+
+            emit FlipSettled(wager.user, won, payout, randomness.value);
+
+        } catch {
+            // Settlement failed - treat as a loss and clear the wager
+            // This could be due to oracle issues or malformed randomness
+            emit SettlementFailed(msg.sender);
         }
 
-        emit FlipSettled(wager.user, won, payout, randomness.value);
-
-        // Clear the wager
+        // Clear the wager regardless of outcome
         delete wagers[msg.sender];
     }
 

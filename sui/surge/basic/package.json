@@ -1,0 +1,34 @@
+{
+  "name": "sui-surge-basic",
+  "version": "1.0.0",
+  "description": "Sui Surge streaming example for real-time price updates",
+  "type": "module",
+  "scripts": {
+    "stream": "tsx scripts/stream.ts",
+    "stream:mainnet": "tsx scripts/stream.ts --network mainnet",
+    "stream:testnet": "tsx scripts/stream.ts --network testnet"
+  },
+  "keywords": [
+    "switchboard",
+    "oracle",
+    "sui",
+    "surge",
+    "websocket",
+    "streaming"
+  ],
+  "author": "Switchboard",
+  "license": "MIT",
+  "dependencies": {
+    "@mysten/sui": "^1.38.0",
+    "@switchboard-xyz/common": "^1.0.0",
+    "@switchboard-xyz/on-demand": "^1.0.0",
+    "@switchboard-xyz/sui-sdk": "^0.1.14",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/yargs": "^17.0.32",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

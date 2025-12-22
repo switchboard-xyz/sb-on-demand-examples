@@ -1,11 +1,10 @@
 {
-  "name": "sui-switchboard-examples",
+  "name": "sui-feeds-basic",
   "version": "1.0.0",
-  "description": "Sui examples for Switchboard On-Demand functionality with Quote Verifier",
+  "description": "Sui price feed example using Switchboard Quote Verifier",
   "type": "module",
   "scripts": {
-    "quotes": "tsx examples/quotes.ts",
-    "surge": "tsx examples/surge.ts",
+    "quotes": "tsx scripts/quotes.ts",
     "example": "tsx scripts/run.ts",
     "build": "sui move build",
     "build:testnet": "cp Move.testnet.toml Move.toml && sui move build",

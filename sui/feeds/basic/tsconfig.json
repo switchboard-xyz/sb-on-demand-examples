@@ -12,7 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
-  "include": ["scripts/**/*", "examples/**/*"],
+  "include": ["scripts/**/*"],
   "exclude": ["node_modules", "build"]
 }
-

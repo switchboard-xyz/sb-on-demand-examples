@@ -3,18 +3,43 @@ import { CrossbarClient } from '@switchboard-xyz/common';
 import { SuiClient } from '@mysten/sui/client';
 import {
   SwitchboardClient,
-  convertSurgeUpdateToQuotes,
   emitSurgeQuote,
 } from '@switchboard-xyz/sui-sdk';
 import { fromB64 } from '@mysten/bcs';
-import { fromHex, toBase58 } from '@mysten/bcs';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
 import { Transaction } from '@mysten/sui/transactions';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
-const suiClient = new SuiClient({ url: 'https://fullnode.testnet.sui.io:443' });
+// Parse command line arguments
+const argv = yargs(hideBin(process.argv))
+  .option('network', {
+    alias: 'n',
+    type: 'string',
+    description: 'Network to connect to',
+    choices: ['mainnet', 'testnet'],
+    default: 'mainnet',
+  })
+  .parseSync();
+
+const network = argv.network as 'mainnet' | 'testnet';
+
+// Network-specific configuration
+const config = {
+  mainnet: {
+    rpcUrl: 'https://fullnode.mainnet.sui.io:443',
+    oracleEndpoint: 'https://crossbar.switchboard.xyz/oracles/sui',
+  },
+  testnet: {
+    rpcUrl: 'https://fullnode.testnet.sui.io:443',
+    oracleEndpoint: 'https://crossbar.switchboard.xyz/oracles/sui/testnet',
+  },
+};
+
+const suiClient = new SuiClient({ url: config[network].rpcUrl });
 const switchboardClient = new SwitchboardClient(suiClient);
 
 // Oracle mapping cache
@@ -42,7 +67,7 @@ async function processTransactionQueue(): Promise<void> {
     const { rawResponse, timestamp } = queueItem;
 
     console.log(
-      `🔄 Processing transaction (queue length: ${rawResponseQueue.length})`
+      `Processing transaction (queue length: ${rawResponseQueue.length})`
     );
 
     // Create transaction only during processing stage
@@ -52,9 +77,9 @@ async function processTransactionQueue(): Promise<void> {
     try {
       await emitSurgeQuote(switchboardClient, transaction, rawResponse);
     } catch (error) {
-      console.error('❌ Error in emitSurgeQuote:', error);
+      console.error('Error in emitSurgeQuote:', error);
       console.log(
-        '🔍 Failed rawResponse oracle_pubkey:',
+        'Failed rawResponse oracle_pubkey:',
         rawResponse.oracle_response?.oracle_pubkey
       );
       throw error; // Re-throw to maintain error handling flow
@@ -72,10 +97,10 @@ async function processTransactionQueue(): Promise<void> {
     });
 
     const processingTime = Date.now() - timestamp;
-    console.log(`✅ Transaction completed in ${processingTime}ms`);
+    console.log(`Transaction completed in ${processingTime}ms`);
     console.log('Transaction result:', result);
   } catch (error) {
-    console.error('❌ Transaction failed:', error);
+    console.error('Transaction failed:', error);
   } finally {
     isTransactionProcessing = false;
 
@@ -95,9 +120,7 @@ async function fetchOracleMappings(): Promise<Map<string, string>> {
   }
 
   try {
-    const response = await fetch(
-      'https://crossbar.switchboard.xyz/oracles/sui/testnet'
-    );
+    const response = await fetch(config[network].oracleEndpoint);
     const oracles = (await response.json()) as Array<{
       oracle_id: string;
       oracle_key: string;
@@ -113,7 +136,7 @@ async function fetchOracleMappings(): Promise<Map<string, string>> {
     }
 
     lastOracleFetch = now;
-    console.log(`📋 Loaded ${oracleMapping.size} oracle mappings`);
+    console.log(`Loaded ${oracleMapping.size} oracle mappings`);
     return oracleMapping;
   } catch (error) {
     console.error('Failed to fetch oracle mappings:', error);
@@ -172,7 +195,7 @@ if (!keypair) {
 }
 
 (async function main() {
-  console.log('🚀 Starting Surge streaming demo (Testnet)...');
+  console.log(`Starting Surge streaming demo (${network})...`);
 
   const apiKey = process.env.SURGE_API_KEY!;
 
@@ -180,7 +203,7 @@ if (!keypair) {
 
   const surge = new sb.Surge({
     gatewayUrl: (
-      await CrossbarClient.default().fetchGateway('testnet')
+      await CrossbarClient.default().fetchGateway(network)
     ).endpoint(),
     apiKey,
     verbose: false,
@@ -192,7 +215,7 @@ if (!keypair) {
   // Run simulation after 10 seconds
   setTimeout(async () => {
     console.log(
-      '\n⏰ 10 seconds elapsed - running simulation with latest data...'
+      '\n10 seconds elapsed - running simulation with latest data...'
     );
   }, 10_000);
 
@@ -211,7 +234,7 @@ if (!keypair) {
     const formattedPrices = response.getFormattedPrices();
     const currentPrice = Object.values(formattedPrices)[0] || 'N/A';
     console.log(
-      `📊 Update #${
+      `Update #${
         stats.count
       } | Price: ${currentPrice} | Latency: ${currentLatency}ms | Avg: ${stats.mean.toFixed(
         1
@@ -228,24 +251,24 @@ if (!keypair) {
           oracleKeyHex = oracleKeyHex.slice(2);
         }
 
-        console.log(`🔑 Oracle key (hex): ${oracleKeyHex}`);
+        console.log(`Oracle key (hex): ${oracleKeyHex}`);
 
         const oracleId = oracleMapping.get(oracleKeyHex);
 
         if (oracleId) {
           console.log(
-            `🔑 Oracle mapping found: ${oracleKeyHex} -> ${oracleId}`
+            `Oracle mapping found: ${oracleKeyHex} -> ${oracleId}`
           );
-          console.log('✅ Oracle ID found, ready for Sui submission');
+          console.log('Oracle ID found, ready for Sui submission');
         } else {
-          console.warn(`⚠️ Oracle ID not found for key: ${oracleKeyHex}`);
+          console.warn(`Oracle ID not found for key: ${oracleKeyHex}`);
           console.log(
-            `🔍 Available oracle keys:`,
+            `Available oracle keys:`,
             Array.from(oracleMapping.keys()).slice(0, 3)
           );
         }
       } catch (error) {
-        console.error('❌ Failed to process oracle mapping:', error);
+        console.error('Failed to process oracle mapping:', error);
       }
     }
 
@@ -256,7 +279,7 @@ if (!keypair) {
     });
 
     console.log(
-      `📥 Raw response queued (queue length: ${rawResponseQueue.length})`
+      `Raw response queued (queue length: ${rawResponseQueue.length})`
     );
 
     // Trigger queue processing
@@ -264,8 +287,6 @@ if (!keypair) {
   });
 
   console.log(
-    '📡 Listening for price updates (will simulate after 10 seconds)...'
+    'Listening for price updates (will simulate after 10 seconds)...'
   );
 })();
-
-

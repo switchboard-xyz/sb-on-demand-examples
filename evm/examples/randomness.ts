@@ -41,7 +41,7 @@ const NETWORKS: Record<string, NetworkConfig> = {
     name: 'Monad Testnet',
     chainId: 10143,
     rpcUrl: 'https://testnet-rpc.monad.xyz',
-    switchboard: '0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33',
+    switchboard: '0x90E0B788EfA1986D49c587223b30C8Cb4A3F5c99',
     blockExplorer: 'https://testnet.monadexplorer.com',
     symbol: 'MON',
   },

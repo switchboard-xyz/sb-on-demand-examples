@@ -31,7 +31,7 @@ import "../src/SwitchboardPriceConsumer.sol";
  */
 contract DeploySwitchboardPriceConsumer is Script {
     // Monad Switchboard addresses
-    address constant MONAD_TESTNET_SWITCHBOARD = 0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33;
+    address constant MONAD_TESTNET_SWITCHBOARD = 0x90E0B788EfA1986D49c587223b30C8Cb4A3F5c99;
     address constant MONAD_MAINNET_SWITCHBOARD = 0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67;
 
     function run() external {

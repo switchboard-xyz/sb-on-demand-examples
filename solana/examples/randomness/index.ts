@@ -261,6 +261,31 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
 
   console.log(`\nAnd the random result is ... ${result}!`);
 
+  // Test closing the randomness account
+  console.log("\nClosing randomness account...");
+  const closeIx = await randomness.closeIx();
+  const closeTx = await sb.asV0Tx({
+    connection: sbProgram.provider.connection,
+    ixs: [closeIx],
+    payer: keypair.publicKey,
+    signers: [keypair],
+    computeUnitPrice: 75_000,
+    computeUnitLimitMultiple: 1.3,
+  });
+  const closeSig = await connection.sendTransaction(closeTx, txOpts);
+  await connection.confirmTransaction(closeSig, COMMITMENT);
+  console.log("  Transaction Signature closeTx", closeSig);
+
+  // Verify account is closed
+  const accountInfo = await connection.getAccountInfo(randomness.pubkey);
+  if (accountInfo === null) {
+    console.log("  Randomness account successfully closed!");
+    // Clean up the keypair file since account is closed
+    fs.unlinkSync(RANDOMNESS_KEYPAIR_PATH);
+  } else {
+    console.log("  WARNING: Randomness account still exists!");
+  }
+
   console.log("\nGame completed!");
   process.exit(0);
 })();

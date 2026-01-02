@@ -52,7 +52,7 @@ export async function initializeMyProgram(
   provider: anchor.Provider
 ): Promise<anchor.Program> {
   const myProgramPath =
-    "../target/deploy/sb_randomness-keypair.json";
+    "../../target/deploy/sb_randomness-keypair.json";
   const myProgram = await myAnchorProgram(provider, myProgramPath);
   console.log("My program", myProgram.programId.toString());
   return myProgram;

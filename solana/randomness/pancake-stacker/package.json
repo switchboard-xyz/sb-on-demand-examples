@@ -4,7 +4,8 @@
   "description": "Pancake stacking game using Switchboard randomness",
   "type": "module",
   "scripts": {
-    "start": "bun run server.ts",
+    "ui": "cd ui && npm run dev",
+    "ui:build": "cd ui && npm run build",
     "flip": "NODE_OPTIONS='--no-warnings' ts-node scripts/index.ts",
     "build": "cargo build-sbf",
     "test": "cargo test"
@@ -25,6 +26,7 @@
     "@solana/web3.js": "^1.98.2",
     "@switchboard-xyz/common": "^5.2.2",
     "@switchboard-xyz/on-demand": "^3.2.0",
+    "axios": "^1.7.0",
     "readline-sync": "^1.4.10",
     "tsx": "^4.19.1",
     "yargs": "^17.7.2"

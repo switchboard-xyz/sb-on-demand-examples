@@ -5,14 +5,14 @@ resolution = true
 skip-lint = true
 
 [programs.devnet]
-pancake_stacker = "PANCAKE_STACKER_PROGRAM_ID"
+pancake_stacker = "11111111111111111111111111111111"
 
 [programs.mainnet]
-pancake_stacker = "PANCAKE_STACKER_PROGRAM_ID"
+pancake_stacker = "B1vzUMwC97q7XKDH45viyH73MPeZAjuB7rwgmaaNW3Ub"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"

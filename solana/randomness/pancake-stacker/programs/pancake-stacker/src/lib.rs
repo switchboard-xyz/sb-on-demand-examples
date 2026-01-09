@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::accounts::RandomnessAccountData;
 
-declare_id!("PANCAKE_STACKER_PROGRAM_ID");
+declare_id!("B1vzUMwC97q7XKDH45viyH73MPeZAjuB7rwgmaaNW3Ub");
 
 #[program]
 pub mod pancake_stacker {
@@ -149,7 +149,6 @@ pub struct FlipPancake<'info> {
     pub user: Signer<'info>,
     /// CHECK: The account's data is validated manually within the handler.
     pub randomness_account_data: AccountInfo<'info>,
-    #[account(address = player_state.authority)]
     pub authority: Signer<'info>,
 }
 

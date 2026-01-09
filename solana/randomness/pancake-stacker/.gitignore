@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+target/
+.anchor/
+
+# Lockfiles
+Cargo.lock
+bun.lock
+
+# UI build artifacts
+ui/main.js
+ui/package-lock.json
+
+# Environment files
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# Randomness keypair (contains secret key - do not commit!)
+scripts/randomness-keypair.json

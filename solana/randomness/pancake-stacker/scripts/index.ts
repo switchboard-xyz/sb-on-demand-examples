@@ -156,7 +156,6 @@ async function loadOrCreateRandomnessAccount(
       computeUnitLimitMultiple: 1.3,
     });
 
-    const sim = await connection.simulateTransaction(createRandomnessTx, txOpts);
     const sig1 = await connection.sendTransaction(createRandomnessTx, txOpts);
     await connection.confirmTransaction(sig1, "finalized");
     console.log("  Transaction Signature for randomness account creation:", sig1);
@@ -207,7 +206,6 @@ async function loadOrCreateRandomnessAccount(
     computeUnitLimitMultiple: 1.3,
   });
 
-  const sim4 = await connection.simulateTransaction(commitTx, txOpts);
   const sig4 = await connection.sendTransaction(commitTx, txOpts);
   await connection.confirmTransaction(sig4, COMMITMENT);
   console.log("  Transaction Signature (flip):", sig4);
@@ -234,7 +232,6 @@ async function loadOrCreateRandomnessAccount(
     computeUnitLimitMultiple: 1.3,
   });
 
-  const sim5 = await connection.simulateTransaction(revealTx, txOpts);
   const sig5 = await connection.sendTransaction(revealTx, txOpts);
   await connection.confirmTransaction(sig5, COMMITMENT);
   console.log("  Transaction Signature (catch):", sig5);

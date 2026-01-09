@@ -18,8 +18,7 @@ export async function myAnchorProgram(
   const pid = myProgramKeypair.publicKey;
   const idl = (await anchor.Program.fetchIdl(pid, provider))!;
   if (idl == null) {
-    console.error("IDL not found for the program at", pid.toString());
-    process.exit(1);
+    throw new Error(`IDL not found for the program at ${pid.toString()}`);
   }
   if (idl?.address == undefined || idl?.address == null) {
     idl.address = pid.toString();
@@ -54,8 +53,7 @@ export async function setupQueue(program: anchor.Program): Promise<PublicKey> {
   try {
     await queueAccount.loadData();
   } catch (err) {
-    console.error("Queue not found, ensure you are using devnet in your env");
-    process.exit(1);
+    throw new Error("Queue not found, ensure you are using devnet in your env");
   }
   return queueAccount.pubkey;
 }

@@ -56,11 +56,17 @@ contract CoinFlip {
         Wager memory wager = wagers[msg.sender];
         require(wager.amount > 0, "No pending wager");
 
+        // Clear the wager BEFORE external calls (CEI pattern)
+        delete wagers[msg.sender];
+
         // Try to settle the randomness
         try switchboard.settleRandomness(encodedRandomness) {
             // Check that randomness is resolved
             SwitchboardTypes.Randomness memory randomness = switchboard.getRandomness(wager.randomnessId);
             require(randomness.value != 0, "Randomness not resolved");
+
+            // Verify the randomness ID matches the wager
+            require(randomness.randId == wager.randomnessId, "Randomness ID mismatch");
 
             // Determine win/lose: even = win, odd = lose
             bool won = uint256(randomness.value) % 2 == 0;
@@ -80,9 +86,6 @@ contract CoinFlip {
             // This could be due to oracle issues or malformed randomness
             emit SettlementFailed(msg.sender);
         }
-
-        // Clear the wager regardless of outcome
-        delete wagers[msg.sender];
     }
 
     // View function to get the wager randomness ID

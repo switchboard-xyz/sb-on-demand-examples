@@ -46,9 +46,13 @@ async function main() {
     const wagerData = await coinFlipContract.getWagerData(wallet.address);
     console.log("Wager data:", wagerData);
 
+    // Get the chain ID dynamically from the provider
+    const network = await provider.getNetwork();
+    const chainId = Number(network.chainId);
+
     // Get the randomness from Switchboard
     const { encoded } = await crossbar.resolveEVMRandomness({
-        chainId: 143,
+        chainId,
         randomnessId: wagerRandomnessId,
         timestamp: Number(wagerData.rollTimestamp),
         minStalenessSeconds: Number(wagerData.minSettlementDelay),

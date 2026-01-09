@@ -23,6 +23,7 @@ contract PancakeStacker {
     ISwitchboard public switchboard;
 
     constructor(address _switchboard) {
+        require(_switchboard != address(0), "Invalid switchboard address");
         switchboard = ISwitchboard(_switchboard);
     }
 
@@ -51,6 +52,9 @@ contract PancakeStacker {
         bytes32 randomnessId = pendingFlips[msg.sender];
         require(randomnessId != bytes32(0), "No pending flip");
 
+        // Clear the pending flip BEFORE external calls (CEI pattern)
+        delete pendingFlips[msg.sender];
+
         // give the randomness object to the switchboard contract
         // and ask it to verify that it's correct
         try switchboard.settleRandomness(encodedRandomness) {
@@ -58,7 +62,10 @@ contract PancakeStacker {
             // verification succeeded, now get the randomness value
             SwitchboardTypes.Randomness memory randomness = switchboard.getRandomness(randomnessId);
 
-            // 2/3 chance to land (roll 0-1), 1/3 chance to knock over 
+            // Verify the randomness ID matches what we requested
+            require(randomness.randId == randomnessId, "Randomness ID mismatch");
+
+            // 2/3 chance to land (roll 0-1), 1/3 chance to knock over
             bool landed = uint256(randomness.value) % 3 < 2;
 
             if (landed) {
@@ -71,15 +78,11 @@ contract PancakeStacker {
                 emit StackKnockedOver(msg.sender);
             }
 
-            // Clear the request
-            delete pendingFlips[msg.sender];
-        
         // if switchboard failed to parse the encoded randomness
         } catch {
             // Caution: could be an issue with the oracle or malformed randomness for another reason
             // to be safe we make the player reset their stack and start over
             stackHeight[msg.sender] = 0;
-            delete pendingFlips[msg.sender];
             emit StackKnockedOver(msg.sender);
             emit SettlementFailed(msg.sender);
         }

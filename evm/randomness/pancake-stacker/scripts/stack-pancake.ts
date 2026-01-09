@@ -28,7 +28,8 @@ async function main() {
     }
 
     // initialize RPC, wallet, crossbar server
-    const provider = new ethers.JsonRpcProvider("https://rpc.monad.xyz");
+    const rpcUrl = process.env.RPC_URL || "https://rpc.monad.xyz";
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
     const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");
 
@@ -48,10 +49,14 @@ async function main() {
     // get data of the randomness you requested
     const flipData = await contract.getFlipData(wallet.address);
 
+    // get chain ID dynamically from the provider
+    const network = await provider.getNetwork();
+    const chainId = Number(network.chainId);
+
     // ask crossbar to talk to oracle and retrieve randomness
     console.log("Resolving randomness...");
     const { encoded } = await crossbar.resolveEVMRandomness({
-        chainId: 143,
+        chainId,
         randomnessId: flipData.randomnessId,
         timestamp: Number(flipData.rollTimestamp),
         minStalenessSeconds: Number(flipData.minSettlementDelay),

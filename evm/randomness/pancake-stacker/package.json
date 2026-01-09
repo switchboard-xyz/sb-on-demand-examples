@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "bun run server.ts",
-    "flip": "bun run scripts/stack-pancake.ts",
+    "flip": "bun run scripts/stackPancake.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Switchboard Labs",

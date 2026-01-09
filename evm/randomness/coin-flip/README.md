@@ -142,7 +142,7 @@ function getWagerData(address user) public view returns (
 
 ### Off-Chain: Resolving Randomness with Crossbar
 
-The `scripts/flip-coin.ts` script demonstrates the complete off-chain flow:
+The `scripts/flipCoin.ts` script demonstrates the complete off-chain flow:
 
 #### 1. Setup the Crossbar Client
 
@@ -241,7 +241,7 @@ forge script deploy/CoinFlip.s.sol:CoinFlipScript \
 After deploying, add the contract address to your `.env` file, then run:
 
 ```bash
-bun run scripts/flip-coin.ts
+bun run scripts/flipCoin.ts
 ```
 
 ---

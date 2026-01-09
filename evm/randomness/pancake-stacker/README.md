@@ -124,7 +124,7 @@ function catchPancake(bytes calldata encodedRandomness) public {
 
 ### Off-Chain: Resolving Randomness with Crossbar
 
-The `scripts/stack-pancake.ts` script demonstrates the complete flow:
+The `scripts/stackPancake.ts` script demonstrates the complete flow:
 
 ```typescript
 import { ethers } from "ethers";
@@ -193,7 +193,7 @@ forge script deploy/PancakeStacker.s.sol:PancakeStackerScript \
 After deploying, add the contract address to your `.env` file, then run:
 
 ```bash
-bun run scripts/stack-pancake.ts
+bun run scripts/stackPancake.ts
 ```
 
 ---

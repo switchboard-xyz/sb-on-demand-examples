@@ -37,7 +37,7 @@ bun run example
 cd evm/randomness/coin-flip   # or pancake-stacker
 bun install && forge build
 cp .env.example .env  # Edit .env with your private key
-bun run scripts/flip-coin.ts
+bun run scripts/flipCoin.ts
 ```
 
 ## 📁 Directory Structure
@@ -229,7 +229,7 @@ bun install && forge build
 cp .env.example .env  # Edit .env with your private key and contract address
 
 # Run the example
-bun run scripts/flip-coin.ts
+bun run scripts/flipCoin.ts
 ```
 
 ### Integration Example

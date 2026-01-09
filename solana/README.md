@@ -242,7 +242,8 @@ solana/
 - **`advanced/`** - Pinocchio Framework integration (performance-optimized)
 
 ### `/randomness/` - VRF Examples
-- Verifiable random function (VRF) integration for games
+- **`coin-flip/`** - Simple coin flip game with betting
+- **`pancake-stacker/`** - Pancake stacking game ⚠️ *WIP: CLI works, browser UI not functional*
 
 ### `/prediction-market/` - Prediction Markets
 - Kalshi prediction market feed verification

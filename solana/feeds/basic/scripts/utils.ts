@@ -646,13 +646,11 @@ export async function basicReadOracleIx(
   return await program.methods
     .readOracleData()
     .accounts({
-      queue: queue, // accounts[1]
-      quoteAccount: quoteAccount, // accounts[2]
-      ixSysvar: sb.SPL_SYSVAR_INSTRUCTIONS_ID, // accounts[3]
-      slotSysvar: sb.SPL_SYSVAR_SLOT_HASHES_ID, // accounts[4]
-      clockSysvar: SYSVAR_CLOCK_PUBKEY, // accounts[5]
-      payer: payer, // accounts[6]
-      systemProgram: anchor.web3.SystemProgram.programId, // accounts[7]
+      queue: queue,
+      quoteAccount: quoteAccount,
+      clockSysvar: SYSVAR_CLOCK_PUBKEY,
+      payer: payer,
+      systemProgram: anchor.web3.SystemProgram.programId,
     })
     .instruction();
 }

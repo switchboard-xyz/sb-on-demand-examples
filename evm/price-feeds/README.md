@@ -23,6 +23,16 @@ npm install
 forge install
 ```
 
+### Configure Environment
+
+> **Security:** Never use `export PRIVATE_KEY=...` or pass private keys as command-line arguments—they appear in shell history and process listings. Use a `.env` file instead.
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your private key and network configuration.
+
 ## Build
 
 ```bash

@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
-use switchboard_on_demand::{
-    SlotHashes, Instructions, default_queue, SwitchboardQuoteExt, SwitchboardQuote
-};
+use switchboard_on_demand::{default_queue, SwitchboardQuoteExt, SwitchboardQuote};
 
 declare_id!("9kVBXoCrvZgKYWTJ74w3S8wAp7daEB7zpG7kwiXxkCVN");
 
@@ -82,6 +80,4 @@ pub struct ReadOracleData<'info> {
 #[derive(Accounts)]
 pub struct Sysvars<'info> {
     pub clock: Sysvar<'info, Clock>,
-    pub slothashes: Sysvar<'info, SlotHashes>,
-    pub instructions: Sysvar<'info, Instructions>,
 }

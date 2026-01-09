@@ -40,7 +40,7 @@
  */
 
 import { ethers } from 'ethers';
-import { CrossbarClient } from '@switchboard-xyz/common';
+import { CrossbarClient, SWITCHBOARD_ABI } from '@switchboard-xyz/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -108,12 +108,6 @@ const PRICE_CONSUMER_ABI = [
   'function owner() external view returns (address)',
   'event PriceUpdated(bytes32 indexed feedId, int128 oldPrice, int128 newPrice, uint256 timestamp, uint64 slotNumber)',
   'event PriceValidationFailed(bytes32 indexed feedId, string reason)',
-];
-
-const SWITCHBOARD_ABI = [
-  'function updateFeeds(bytes[] calldata updates) external payable',
-  'function getFee(bytes[] calldata updates) external view returns (uint256)',
-  'function latestUpdate(bytes32 feedId) external view returns (tuple(bytes32 feedId, int128 result, uint256 timestamp, uint64 slotNumber))',
 ];
 
 // ============================================================================

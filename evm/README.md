@@ -24,16 +24,20 @@ Detailed setup and integration guides for each network:
 
 Each example is a standalone Foundry project. Navigate to the specific example and follow its README.
 
+> **Security:** Never use `export PRIVATE_KEY=...` or pass private keys as command-line arguments—they appear in shell history and process listings. Use a `.env` file instead.
+
 ```bash
 # Price Feeds Example
 cd evm/price-feeds
 bun install && forge build
-PRIVATE_KEY=0x... NETWORK=monad-testnet bun run example
+cp .env.example .env  # Edit .env with your private key
+bun run example
 
 # Randomness Examples
-cd evm/randomness/coin-flip-simple   # or coin-flip-advanced, pancake-flipper
+cd evm/randomness/coin-flip   # or pancake-stacker
 bun install && forge build
-PRIVATE_KEY=0x... bun run flip
+cp .env.example .env  # Edit .env with your private key
+bun run scripts/flip-coin.ts
 ```
 
 ## 📁 Directory Structure
@@ -218,11 +222,14 @@ Cryptographically secure verifiable randomness for gaming, NFTs, and DeFi.
 
 ```bash
 # Navigate to a randomness example
-cd evm/randomness/coin-flip-simple  # or coin-flip-advanced, pancake-flipper
+cd evm/randomness/coin-flip  # or pancake-stacker
 bun install && forge build
 
+# Configure environment
+cp .env.example .env  # Edit .env with your private key and contract address
+
 # Run the example
-PRIVATE_KEY=0x... bun run flip
+bun run scripts/flip-coin.ts
 ```
 
 ### Integration Example

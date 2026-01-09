@@ -184,8 +184,12 @@ const wagerData = await coinFlipContract.getWagerData(wallet.address);
 #### 4. Resolve Randomness via Crossbar
 
 ```typescript
+// Get the chain ID dynamically from the provider
+const network = await provider.getNetwork();
+const chainId = Number(network.chainId);
+
 const { encoded } = await crossbar.resolveEVMRandomness({
-    chainId: 143,  // Monad chain ID
+    chainId,
     randomnessId: wagerRandomnessId,
     timestamp: Number(wagerData.rollTimestamp),
     minStalenessSeconds: Number(wagerData.minSettlementDelay),
@@ -212,20 +216,31 @@ console.log("Flip settled:", tx2.hash);
 forge build
 ```
 
-### 2. Deploy the Contract
+### 2. Configure Environment
+
+> **Security:** Never use `export PRIVATE_KEY=...` or pass private keys as command-line arguments—they appear in shell history and process listings. Use a `.env` file instead.
 
 ```bash
-forge script script/CoinFlip.s.sol:CoinFlipScript \
-    --rpc-url <your_rpc_url> \
-    --private-key <your_private_key> \
+cp .env.example .env
+```
+
+Edit `.env` with your private key and RPC URL.
+
+### 3. Deploy the Contract
+
+```bash
+source .env
+forge script deploy/CoinFlip.s.sol:CoinFlipScript \
+    --rpc-url $RPC_URL \
+    --private-key $PRIVATE_KEY \
     --broadcast
 ```
 
-### 3. Run the Coin Flip Script
+### 4. Run the Coin Flip Script
+
+After deploying, add the contract address to your `.env` file, then run:
 
 ```bash
-PRIVATE_KEY=<your_private_key> \
-COIN_FLIP_CONTRACT_ADDRESS=<deployed_contract_address> \
 bun run scripts/flip-coin.ts
 ```
 

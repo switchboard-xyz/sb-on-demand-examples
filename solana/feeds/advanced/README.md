@@ -28,6 +28,8 @@ cargo build-sbf
 
 ## Usage
 
+NOTE: program and its IDL should be deployed before running this.
+
 Run the update script:
 
 ```bash

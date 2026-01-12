@@ -2,7 +2,6 @@
   "name": "basic-oracle-example",
   "version": "1.0.0",
   "description": "Basic Switchboard oracle integration using managed feeds",
-  "type": "module",
   "scripts": {
     "start": "ts-node scripts/managedUpdate.ts",
     "update": "ts-node scripts/managedUpdate.ts",

@@ -37,6 +37,8 @@ npm run create-feed
 
 ### Update Feed Prices
 
+NOTE: program and its IDL should be deployed before running this.
+
 ```bash
 npm run update
 # or

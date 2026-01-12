@@ -1,0 +1,27 @@
+[workspace]
+resolver = "2"
+members = [
+    "feeds/basic/programs/basic-oracle-example",
+    "feeds/advanced/programs/advanced-oracle-example",
+    "prediction-market/programs/prediction-market",
+    "randomness/coin-flip/programs/sb-randomness",
+    "randomness/pancake-stacker/programs/pancake-stacker",
+    "legacy/variable-overrides/programs/*",
+]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = true
+strip = "symbols"
+
+[profile.release.build-override]
+opt-level = 3
+incremental = false
+codegen-units = 1
+
+[profile.bpf]
+inherits = "release"
+overflow-checks = false

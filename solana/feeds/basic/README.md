@@ -24,7 +24,7 @@ npm install
 ```bash
 npm run build
 # or
-cargo build-sbf
+anchor build
 ```
 
 ## Usage

@@ -9,7 +9,7 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 
 ## Quick Links
 
-- **[User Guide and Technical Documentation](https://docs.switchboard.xyz/tooling-and-resources/technical-resources-and-documentation)** - Detailed information on getting started, usage examples, and API references.
+- **[User Guide and Technical Documentation](https://docs.switchboard.xyz/)** - Detailed information on getting started, usage examples, and API references.
 - **[Common TypeDoc Documentation](https://switchboardxyz-common.netlify.app/)** - TypeDoc for @switchboard-xyz/common shared utilities.
 - **[Feed Builder](https://explorer.switchboardlabs.xyz/feed-builder)** - Build and verify custom price feeds with checksum validation.
 - **[Feed Builder Documentation](https://explorer.switchboardlabs.xyz/task-docs)** - Documentation for oracle tasks and feed building.
@@ -22,11 +22,11 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 The Solana examples demonstrate Switchboard On-Demand functionality on the Solana blockchain:
 
 - **[📊 On-Demand Feeds](./solana)** - Price feeds and data oracles
-- **[🎲 On-Demand Randomness](./solana/examples/randomness)** - Verifiable Random Function (VRF)
+- **[🎲 On-Demand Randomness](./solana/randomness)** - Verifiable Random Function (VRF)
 - **[🔧 Variable Overrides](./common/variable-overrides)** - Secure credential management with variable substitution
 
 **JavaScript/TypeScript Client Code:**
-- **[📁 Client Examples](./solana/examples/)** - Complete JavaScript/TypeScript examples for integrating Switchboard On-Demand
+- **[📁 Client Examples](./solana/)** - Complete JavaScript/TypeScript examples for integrating Switchboard On-Demand
   - Feed operations, streaming, benchmarks, and utilities
   - Ready-to-run examples for oracle quotes, Surge WebSocket streaming, and more
 
@@ -44,7 +44,7 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 - On-demand feed updates with aggregated results from multiple oracles
 
 **JavaScript/TypeScript Client Code:**
-- **[📁 Feed Examples](./sui/examples/)** - Complete TypeScript examples for Sui integration
+- **[📁 Feed Examples](./sui/)** - Complete TypeScript examples for Sui integration
   - Oracle data fetching, feed reading, transaction simulation
   - No private key required for data reading and simulation
 
@@ -57,7 +57,7 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 The EVM examples showcase Switchboard functionality on EVM-compatible chains:
 
 - **[📈 Price Feeds](./evm)** - Real-time price data for DeFi applications
-- **[🎲 On-Demand Randomness](./evm/examples/randomness.ts)** - Verifiable Random Function (VRF)
+- **[🎲 On-Demand Randomness](./evm/randomness/)** - Verifiable Random Function (VRF)
 
 **Supported Networks:**
 - Monad (Mainnet & Testnet)

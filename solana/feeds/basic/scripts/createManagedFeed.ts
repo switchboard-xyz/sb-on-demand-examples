@@ -1,7 +1,7 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { CrossbarClient, OracleJob, OracleFeed } from "@switchboard-xyz/common";
 import yargs from "yargs";
-import { TX_CONFIG, buildBinanceJob, buildCoinbaseJob } from "../utils";
+import { TX_CONFIG, buildBinanceJob, buildCoinbaseJob } from "./utils";
 
 const argv = yargs(process.argv)
   .options({

@@ -16,7 +16,7 @@ import {
   DEFAULT_FEED_ID,
   logFeedId,
   handleSimulationError,
-} from "@/utils";
+} from "./utils";
 
 const argv = yargs(process.argv)
   .options({

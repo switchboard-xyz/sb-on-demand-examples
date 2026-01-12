@@ -98,10 +98,10 @@ const argv = yargs(process.argv)
       try {
         const decodedQuote = sb.OracleQuote.decode(ed25519Ix.data);
         console.log("📊 Decoded Oracle Quote:");
-        console.log(`  Recent Slot: ${decodedQuote.recentSlot.toString()}`);
+        console.log(`  Recent Slot: ${decodedQuote.slot.toString()}`);
 
-        if (decodedQuote.feedInfos.length > 0) {
-          const feed = decodedQuote.feedInfos[0];
+        if (decodedQuote.feeds.length > 0) {
+          const feed = decodedQuote.feeds[0];
           console.log(`  Feed Hash: ${feed.feedHash.toString("hex")}`);
 
           // Convert i128 to decimal (18 decimals precision)

@@ -20,5 +20,5 @@ Support will permanently continue, but for new projects use `../basic/scripts/ma
 
 **Usage**:
 ```bash
-ts-node runFeed.ts --feed GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
+ts-node runFeed.ts --feed GgGVgSLWAyL9Xf4fGaAQQCkmWetBjX7PCNz8kTK97DKB
 ```

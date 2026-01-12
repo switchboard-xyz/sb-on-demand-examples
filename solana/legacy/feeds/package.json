@@ -2,6 +2,9 @@
   "name": "legacy-feeds-example",
   "version": "1.0.0",
   "description": "Legacy (Pull Feed) Switchboard oracle integration",
+  "scripts": {
+    "start": "ts-node runFeed.ts --feed GgGVgSLWAyL9Xf4fGaAQQCkmWetBjX7PCNz8kTK97DKB"
+  },
   "author": "Switchboard Labs",
   "license": "MIT",
   "dependencies": {

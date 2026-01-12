@@ -1,5 +1,4 @@
 import * as sb from '@switchboard-xyz/on-demand';
-import { CrossbarClient } from '@switchboard-xyz/common';
 import { SuiClient } from '@mysten/sui/client';
 import {
   SwitchboardClient,
@@ -196,17 +195,14 @@ if (!keypair) {
 
 (async function main() {
   console.log(`Starting Surge streaming demo (${network})...`);
-
-  const apiKey = process.env.SURGE_API_KEY!;
+  console.log(`Using keypair: ${keypair!.toSuiAddress()}`);
 
   const latencies: number[] = [];
 
+  // Initialize Surge with keypair and connection (uses on-chain subscription)
   const surge = new sb.Surge({
-    gatewayUrl: (
-      await CrossbarClient.default().fetchGateway(network)
-    ).endpoint(),
-    apiKey,
-    verbose: false,
+    connection: suiClient,
+    keypair: keypair!,
     signatureScheme: 'secp256k1',
   });
 

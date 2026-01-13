@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::{default_queue, SwitchboardQuoteExt, SwitchboardQuote};
 
-declare_id!("5awHMeXj6rSCEcPnShB51cmwkCbKGzdSk74unKREr3Jt");
+declare_id!("11111111111111111111111111111111");
 
 /// Basic Oracle Example Program
 ///

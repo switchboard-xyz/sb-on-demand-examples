@@ -5,10 +5,10 @@ resolution = true
 skip-lint = true
 
 [programs.devnet]
-basic_oracle_example = "4ZK7w1R7R4GJrFBSUZrNPnmzsUeG8bvVKvk6z7bvQ2zZ"
+basic_oracle_example = "11111111111111111111111111111111"
 
 [programs.mainnet]
-basic_oracle_example = "5awHMeXj6rSCEcPnShB51cmwkCbKGzdSk74unKREr3Jt"
+basic_oracle_example = "11111111111111111111111111111111"
 
 [registry]
 url = "https://api.apr.dev"

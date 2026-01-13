@@ -18,3 +18,4 @@ codegen-units = 1
 [profile.bpf]
 inherits = "release"
 overflow-checks = false
+

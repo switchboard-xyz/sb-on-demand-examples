@@ -8,7 +8,7 @@ skip-lint = true
 sb_randomness = "44wNsyMPUQxCDhJpKqwNu8XGjqYbThqgRPUpQCARyrUc"
 
 [programs.mainnet]
-sb_randomness = "93tkpep2PYDxweHHi2vQBpi7eTBF23y8LGdiLMt5R9f2"
+sb_randomness = "DVM7r1LWrVYivfL2AYNWP7Kovj8bx8kh3VxeEw3zFVHB"
 
 [registry]
 url = "https://api.apr.dev"

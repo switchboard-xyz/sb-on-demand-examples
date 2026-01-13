@@ -4,7 +4,7 @@ This directory contains deprecated feed scripts that are maintained for compatib
 
 ## Deprecation Notice
 
-Support will permanently continue, but for new projects use `../basic/managedUpdate.ts` instead, which provides:
+Support will permanently continue, but for new projects use `../basic/scripts/managedUpdate.ts` instead, which provides:
 - 90% lower costs through quote aggregation
 - Better performance with reduced network calls
 - Simplified implementation with fewer moving parts
@@ -14,11 +14,11 @@ Support will permanently continue, but for new projects use `../basic/managedUpd
 
 ### runFeed.ts - Individual Feed Updates
 
-**Status**: Legacy - Use `../basic/managedUpdate.ts` instead
+**Status**: Legacy - Use `../basic/scripts/managedUpdate.ts` instead
 
 **Purpose**: Update specific pull feed accounts with detailed oracle response visibility.
 
 **Usage**:
 ```bash
-ts-node runFeed.ts --feed GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
+ts-node runFeed.ts --feed GgGVgSLWAyL9Xf4fGaAQQCkmWetBjX7PCNz8kTK97DKB
 ```

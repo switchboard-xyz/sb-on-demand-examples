@@ -6,7 +6,6 @@ target/
 .anchor/
 
 # Lockfiles
-Cargo.lock
 bun.lock
 
 # UI build artifacts

@@ -22,4 +22,7 @@ anchor-lang = "0.31.1"
 solana-program = ">=2,<3"
 bytemuck = "1.15.0"
 switchboard-on-demand = { version = "0.10.0", features = ["anchor"] }
+# Pin these to avoid constant_time_eq v0.4.2 which requires edition2024
+blake3 = "=1.8.2"
+constant_time_eq = "=0.3.1"
 

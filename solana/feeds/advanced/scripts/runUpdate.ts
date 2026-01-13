@@ -1,6 +1,6 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { OracleQuote } from "@switchboard-xyz/on-demand";
-import { PublicKey, TransactionInstruction } from "@solana/web3.js";
+import { Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import yargs from "yargs";
 import * as fs from "fs";
 import {
@@ -16,7 +16,7 @@ import {
   DEFAULT_FEED_ID,
   logFeedId,
   handleSimulationError,
-} from "@/utils";
+} from "./utils";
 
 const argv = yargs(process.argv)
   .options({
@@ -63,7 +63,12 @@ const argv = yargs(process.argv)
   console.log("🔧 Crossbar network:", crossbar.getNetwork());
 
   // Check if advanced program is deployed
-  if (!fs.existsSync(ADVANCED_PROGRAM_PATH)) {
+  const contents = fs.readFileSync(ADVANCED_PROGRAM_PATH, 'utf-8');
+  const programKeypair = Keypair.fromSecretKey(new Uint8Array(JSON.parse(contents)));
+  const programId = programKeypair.publicKey;
+  const doesProgramExist = await connection.getAccountInfo(programId);
+
+  if (!doesProgramExist) {
     console.log("ℹ️  Skipping advanced program: not deployed");
     console.log("   To deploy, run: anchor build && anchor deploy");
     console.log("\n🔄 Fetching oracle quote only (without crank)...\n");

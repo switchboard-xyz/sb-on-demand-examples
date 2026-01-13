@@ -19,12 +19,28 @@ This example demonstrates the simplest way to integrate Switchboard price feeds 
 npm install
 ```
 
-## Build
+## Build & Deploy
+
+### 1. Generate Program Keypair
 
 ```bash
-npm run build
-# or
-cargo build-sbf
+mkdir -p target/deploy
+solana-keygen new -o target/deploy/basic_oracle_example-keypair.json --no-bip39-passphrase
+```
+
+### 2. Sync Program ID
+
+This updates the program ID in both `lib.rs` and `Anchor.toml`:
+
+```bash
+anchor keys sync
+```
+
+### 3. Build and Deploy
+
+```bash
+anchor build
+anchor deploy
 ```
 
 ## Usage
@@ -36,6 +52,8 @@ npm run create-feed
 ```
 
 ### Update Feed Prices
+
+NOTE: program and its IDL should be deployed before running this.
 
 ```bash
 npm run update

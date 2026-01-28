@@ -44,7 +44,7 @@ anchor idl init --filepath target/idl/sb_randomness.json YOUR_PROGRAM_ADDRESS
 ```
 Install deps:
 ```bash
-cd solana/examples/randomness
+cd solana/randomness/coin-flip/scripts
 pnpm i
 pnpm update
 ```

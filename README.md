@@ -22,13 +22,13 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 The Solana examples demonstrate Switchboard On-Demand functionality on the Solana blockchain:
 
 - **[📊 On-Demand Feeds](./solana)** - Price feeds and data oracles
-- **[🎲 On-Demand Randomness](./solana/examples/randomness)** - Verifiable Random Function (VRF)
+- **[🎲 On-Demand Randomness](./solana/randomness)** - Verifiable Random Function (VRF)
 - **[🔧 Variable Overrides](./common/variable-overrides)** - Secure credential management with variable substitution
 
 **JavaScript/TypeScript Client Code:**
-- **[📁 Client Examples](./solana/examples/)** - Complete JavaScript/TypeScript examples for integrating Switchboard On-Demand
-  - Feed operations, streaming, benchmarks, and utilities
-  - Ready-to-run examples for oracle quotes, Surge WebSocket streaming, and more
+- **[📁 Feed Scripts](./solana/feeds/basic/scripts/)** - Complete JavaScript/TypeScript examples for integrating Switchboard On-Demand
+  - Feed operations, streaming, and utilities
+  - Ready-to-run examples for oracle quotes and Surge WebSocket streaming
 
 **Resources:**
 - [Rust Crate](https://crates.io/crates/switchboard-on-demand)
@@ -44,7 +44,7 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 - On-demand feed updates with aggregated results from multiple oracles
 
 **JavaScript/TypeScript Client Code:**
-- **[📁 Feed Examples](./sui/examples/)** - Complete TypeScript examples for Sui integration
+- **[📁 Feed Examples](./sui/feeds/basic/)** - Complete TypeScript examples for Sui integration
   - Oracle data fetching, feed reading, transaction simulation
   - No private key required for data reading and simulation
 
@@ -57,7 +57,7 @@ The Sui examples demonstrate Switchboard On-Demand oracle functionality on the S
 The EVM examples showcase Switchboard functionality on EVM-compatible chains:
 
 - **[📈 Price Feeds](./evm)** - Real-time price data for DeFi applications
-- **[🎲 On-Demand Randomness](./evm/examples/randomness.ts)** - Verifiable Random Function (VRF)
+- **[🎲 On-Demand Randomness](./evm/randomness/)** - Verifiable Random Function (VRF)
 
 **Supported Networks:**
 - Monad (Mainnet & Testnet)

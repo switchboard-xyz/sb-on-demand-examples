@@ -48,8 +48,8 @@ This example uses only the `@switchboard-xyz/on-demand` package's Surge client, 
 
 For examples that integrate streaming data with on-chain transactions:
 
-- **Solana**: See `solana/examples/streaming/runSurge.ts` - Demonstrates signed price updates with Solana program integration
-- **Sui**: See `sui/examples/surge/surgeUpdate.ts` - Shows how to use Surge with Sui transactions
+- **Solana**: See `solana/surge/` - Demonstrates signed price updates with Solana program integration
+- **Sui**: See `sui/surge/` - Shows how to use Surge with Sui transactions
 - **EVM**: Coming soon
 
 ## Requirements
@@ -109,8 +109,8 @@ surge.on("unsignedPriceUpdate", (update: sb.UnsignedPriceUpdate) => {
 ## Related Examples
 
 - **Job Testing**: `../job-testing/` - Test custom oracle job definitions
-- **Solana Streaming**: `../../solana/examples/streaming/` - Signed updates with Solana integration
-- **Sui Streaming**: `../../sui/examples/surge/surgeUpdate.ts` - Surge integration for Sui
+- **Solana Streaming**: `../../solana/surge/` - Signed updates with Solana integration
+- **Sui Streaming**: `../../sui/surge/` - Surge integration for Sui
 
 ---
 

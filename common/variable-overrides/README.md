@@ -179,7 +179,7 @@ const response = await oracle.fetchUpdateMany({
 });
 ```
 
-See: `../solana/examples/` for complete Solana examples
+See: `../solana/feeds/basic/scripts/` for complete Solana examples
 
 ### EVM
 
@@ -207,7 +207,7 @@ const response = await Aggregator.fetchUpdateTx(
 );
 ```
 
-See: `../sui/examples/` for complete Sui examples
+See: `../sui/feeds/basic/` for complete Sui examples
 
 ## Use Cases
 

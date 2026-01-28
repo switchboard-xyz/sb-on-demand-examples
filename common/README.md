@@ -83,7 +83,7 @@ npm start username_here
 ## Related Examples
 
 Once you've tested your job definitions, see chain-specific examples for implementation:
-- **Solana**: `../solana/examples/` - Oracle quotes, streaming, VRF
+- **Solana**: `../solana/feeds/basic/scripts/` - Oracle quotes and feed operations
 - **EVM**: `../evm/` - Price feeds on EVM-compatible chains
 - **Sui**: `../sui/` - Pull-based oracle feeds
 

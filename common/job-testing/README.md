@@ -308,10 +308,9 @@ gateway: "https://crossbar.switchboard.xyz"
 
 ## 🔗 Related Examples
 
-- **Production Feed Examples**: See `solana/examples/feeds/` for optimized oracle quote operations
-- **Streaming Examples**: See `solana/examples/streaming/` for real-time data streaming
-- **Benchmarks**: See `solana/examples/benchmarks/` for performance testing
-- **Randomness**: See `solana/examples/randomness/` for VRF examples
+- **Production Feed Examples**: See `solana/feeds/basic/scripts/` for optimized oracle quote operations
+- **Streaming Examples**: See `solana/surge/` for real-time data streaming
+- **Randomness**: See `solana/randomness/` for VRF examples
 - **Variable Overrides**: See `common/variable-overrides/` for credential management
 
 ## 📖 Additional Resources
@@ -323,4 +322,4 @@ gateway: "https://crossbar.switchboard.xyz"
 
 ---
 
-**Note**: This testing script is designed for development and validation. For production applications, use the optimized examples in `solana/examples/feeds/` and `solana/examples/streaming/`.
+**Note**: This testing script is designed for development and validation. For production applications, use the optimized examples in `solana/feeds/basic/scripts/` and `solana/surge/`.

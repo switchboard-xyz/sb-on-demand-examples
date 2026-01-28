@@ -1,7 +1,7 @@
 # Switchboard Oracle Quote Verifier Example for Sui
 
 <div align="center">
-  <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" width="120" />
+  <img src="https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png" width="120" />
   
   <h3>Get up and running with Switchboard oracles in 5 minutes</h3>
   
@@ -173,19 +173,19 @@ validate_price_deviation(&last_price, &new_price, max_deviation_bps);
 ## 📁 Project Structure
 
 ```
-sui/
+feeds/basic/
 ├── Move.toml              # Mainnet configuration
 ├── Move.testnet.toml      # Testnet configuration
 ├── sources/
 │   └── example.move       # Quote Consumer contract with verifier
 ├── scripts/
-│   └── run.ts            # Complete TypeScript example
-├── examples/
-│   ├── quotes.ts                # Simple quote fetching example
-│   ├── mainnet_surge_stream.ts  # Advanced mainnet streaming with Sui integration
-│   └── testnet_surge_stream.ts  # Advanced testnet streaming with Sui integration
+│   ├── run.ts             # Complete TypeScript example
+│   └── quotes.ts          # Simple quote fetching example
 ├── package.json
 └── README.md
+
+# Surge streaming examples are in:
+sui/surge/basic/scripts/stream.ts
 ```
 
 ## 🛠️ Available Scripts
@@ -211,13 +211,9 @@ npm run example
 
 # Run simple quote fetching example
 npm run quotes
-
-# Run mainnet Surge streaming example
-npx tsx examples/mainnet_surge_stream.ts
-
-# Run testnet Surge streaming example  
-npx tsx examples/testnet_surge_stream.ts
 ```
+
+For Surge streaming examples, see `sui/surge/basic/`.
 
 ## 📖 Detailed Examples
 
@@ -242,7 +238,7 @@ npm run example
 
 ### 2. Simple Quote Fetching
 
-The `examples/quotes.ts` file shows how to fetch quotes without Move integration:
+The `scripts/quotes.ts` file shows how to fetch quotes without Move integration:
 
 ```bash
 # Simulate transaction (default)
@@ -264,33 +260,20 @@ npm run quotes -- --network testnet
 
 ### 3. Surge Streaming with Sui Integration
 
-Real-time price streaming with full Sui blockchain integration:
+For real-time price streaming examples, see the `sui/surge/basic/` directory:
 
-#### Mainnet Surge Streaming
 ```bash
-# Set up your Surge API key
-export SURGE_API_KEY="sb_live_your_api_key_here"
-
-# Run the mainnet surge streaming example
-npx tsx examples/mainnet_surge_stream.ts
+cd ../../surge/basic
+npm install
+SURGE_API_KEY="sb_live_your_api_key_here" npx tsx scripts/stream.ts
 ```
 
-#### Testnet Surge Streaming
-```bash
-# Set up your Surge API key
-export SURGE_API_KEY="sb_live_your_api_key_here"
-
-# Run the testnet surge streaming example
-npx tsx examples/testnet_surge_stream.ts
-```
-
-These examples demonstrate:
+Surge streaming demonstrates:
 - ✅ Real-time BTC/USD price streaming via WebSocket
 - ✅ Oracle mapping and verification
 - ✅ Transaction queue management for Sui blockchain
 - ✅ Automatic retry and error handling
 - ✅ Latency statistics and performance monitoring
-- ✅ Full integration with Sui's `emitSurgeQuote` functionality
 
 ## 🔧 Customizing for Your Use Case
 

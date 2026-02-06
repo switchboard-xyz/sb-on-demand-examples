@@ -555,6 +555,36 @@ export function buildEdgeJob(id: string): OracleJob {
 }
 
 /**
+ * Builds an oracle job using Switchboard Surge for live spot prices
+ *
+ * Fetches prices from Switchboard's global Surge websocket cache.
+ * Supports multiple sources: PYTH, BINANCE, BYBIT, OKX, BITGET, TITAN, WEIGHTED, AUTO.
+ *
+ * @param {string} symbol - Trading pair in format "BASE/QUOTE" (e.g., "USDC/USD", "BTC/USD")
+ * @param {string} source - Exchange source (default: "WEIGHTED")
+ * @returns {OracleJob} Oracle job configuration for Surge price fetch
+ *
+ * @example
+ * ```typescript
+ * const usdcJob = buildSurgeJob("USDC/USD", "PYTH");
+ * const btcJob = buildSurgeJob("BTC/USD", "BINANCE");
+ * const ethJob = buildSurgeJob("ETH/USD"); // Uses WEIGHTED by default
+ * ```
+ */
+export function buildSurgeJob(symbol: string, source: string = "WEIGHTED"): OracleJob {
+  return OracleJob.fromObject({
+    tasks: [
+      {
+        switchboardSurgeTask: {
+          source,
+          symbol,
+        },
+      },
+    ],
+  });
+}
+
+/**
  * Sends and confirms a versioned transaction
  *
  * This utility function handles the common pattern of signing, sending,

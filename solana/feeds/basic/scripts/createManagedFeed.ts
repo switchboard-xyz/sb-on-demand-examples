@@ -1,7 +1,7 @@
 import * as sb from "@switchboard-xyz/on-demand";
 import { CrossbarClient, OracleJob, OracleFeed } from "@switchboard-xyz/common";
 import yargs from "yargs";
-import { TX_CONFIG, buildBinanceJob, buildCoinbaseJob } from "./utils";
+import { TX_CONFIG, buildSurgeJob } from "./utils";
 
 const argv = yargs(process.argv)
   .options({
@@ -52,9 +52,19 @@ const argv = yargs(process.argv)
 
   // Step 3: Define oracle jobs
   // Create jobs that fetch price data from multiple exchanges
+  const base = "USDC";
+  const quote = "USD";
+  const source = "PYTH";
+
   const jobs: OracleJob[] = [
-    buildBinanceJob(`${argv.base}USDT`),
+    buildSurgeJob(`${base}/${quote}`, source),
   ];
+
+  console.log("\n📋 Oracle Job Configuration:");
+  console.log(`  Base: ${base}`);
+  console.log(`  Quote: ${quote}`);
+  console.log(`  Source: ${source}`);
+  console.log(`  Job: ${JSON.stringify(jobs[0].toJSON(), null, 2)}`);
 
   // Step 4: Create OracleFeed object with configuration
   const oracleFeed = OracleFeed.fromObject({
@@ -110,7 +120,7 @@ const argv = yargs(process.argv)
           const price = Number(feed.value) / Number(divisor);
           oracleValue = price;
 
-          console.log(`  Decoded Price: $${price.toLocaleString()}\n`);
+          console.log(`  Decoded Price: $${price.toFixed(18)}\n`);
         }
       } catch (decodeError: any) {
         console.warn("Could not decode oracle quote:", decodeError.message);

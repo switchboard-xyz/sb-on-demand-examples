@@ -32,10 +32,13 @@ import { ensureEscrowFunded } from "./utils";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
 const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
 const COMMITMENT = "confirmed";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const RANDOMNESS_KEYPAIR_PATH = path.join(__dirname, "randomness-keypair.json");
 
 async function retryCommitRandomness(randomness: sb.Randomness, queue: any, maxRetries: number = 3, delayMs: number = 2000): Promise<anchor.web3.TransactionInstruction> {

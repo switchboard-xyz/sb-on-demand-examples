@@ -200,9 +200,10 @@ if (!keypair) {
   const latencies: number[] = [];
 
   // Initialize Surge with keypair and connection (uses on-chain subscription)
+  // Surge subscriptions are managed on Solana — subscribe at https://explorer.switchboardlabs.xyz/subscriptions
   const surge = new sb.Surge({
-    connection: suiClient,
-    keypair: keypair!,
+    connection: suiClient as any,
+    keypair: keypair as any,
     signatureScheme: 'secp256k1',
   });
 

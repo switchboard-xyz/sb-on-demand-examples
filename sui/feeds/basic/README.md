@@ -265,7 +265,7 @@ For real-time price streaming examples, see the `sui/surge/basic/` directory:
 ```bash
 cd ../../surge/basic
 npm install
-SURGE_API_KEY="sb_live_your_api_key_here" npx tsx scripts/stream.ts
+npx tsx scripts/stream.ts
 ```
 
 Surge streaming demonstrates:

@@ -9,7 +9,7 @@ import {
   basicReadOracleIx,
   BASIC_PROGRAM_PATH,
   DEFAULT_FEED_ID,
-} from "@/utils";
+} from "./utils";
 
 (async function main() {
   console.log("🚀 Starting Surge streaming demo...");
@@ -43,25 +43,13 @@ import {
   let hasRunSimulation = false;
   let updateCount = 0;
 
-  // Initialize Surge client
-  // Authentication options:
-  //   - API key: { apiKey: process.env.SURGE_API_KEY }
-  //   - Keypair/connection: { connection, keypair }
-  const surgeConfig = {
-    // apiKey: process.env.SURGE_API_KEY,
+  // Initialize Surge client with keypair auth (uses on-chain subscription)
+  // Subscribe at https://explorer.switchboardlabs.xyz/subscriptions
+  const surge = new sb.Surge({
     connection,
     keypair,
     verbose: false,
-  };
-
-  // Only validate API key if the config uses apiKey authentication
-  if ('apiKey' in surgeConfig && !surgeConfig.apiKey) {
-    console.error("❌ Error: SURGE_API_KEY environment variable is not set");
-    console.error("Please set SURGE_API_KEY before running this script");
-    process.exit(1);
-  }
-
-  const surge = new sb.Surge(surgeConfig);
+  });
   
   await surge.connectAndSubscribe([{ symbol: ticker }]);
 

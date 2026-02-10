@@ -1,12 +1,14 @@
 import * as sb from "@switchboard-xyz/on-demand";
 
 (async function main() {
-  const apiKey = process.env.SURGE_API_KEY!;
+  // Load keypair and connection from environment (ANCHOR_WALLET, ANCHOR_PROVIDER_URL)
+  const { keypair, connection } = await sb.AnchorUtils.loadEnv();
 
+  // Initialize Surge with keypair auth (uses on-chain subscription)
+  // Subscribe at https://explorer.switchboardlabs.xyz/subscriptions
   const surge = new sb.Surge({
-    apiKey: apiKey,
-    crossbarUrl: "https://crossbar.switchboardlabs.xyz",
-    crossbarMode: true,
+    connection,
+    keypair,
     verbose: true,
   });
 

@@ -24,21 +24,14 @@ npx ts-node surge/runSurge.ts -p
 
 ## Authentication
 
-Two authentication modes are supported. Configure in the `surgeConfig` object:
+Surge uses keypair-based authentication with an on-chain subscription managed on Solana. Subscribe at [explorer.switchboardlabs.xyz/subscriptions](https://explorer.switchboardlabs.xyz/subscriptions).
 
 ```typescript
-// Option 1: Keypair/connection (default, on-chain subscription)
-const surgeConfig = {
+const surge = new sb.Surge({
   connection,
   keypair,
   verbose: false,
-};
-
-// Option 2: API key
-const surgeConfig = {
-  apiKey: process.env.SURGE_API_KEY,
-  verbose: false,
-};
+});
 ```
 
 ## Output Example

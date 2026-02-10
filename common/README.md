@@ -64,9 +64,9 @@ POLYGON_API_KEY=your_key bun run runJob.ts
 
 ### Streaming
 ```bash
-# Stream unsigned price data (requires API key)
+# Stream unsigned price data (requires Surge subscription)
 cd common/streaming
-SURGE_API_KEY=your_key bun run crossbarStream.ts
+bun run crossbarStream.ts
 ```
 
 ### Twitter Follower Count

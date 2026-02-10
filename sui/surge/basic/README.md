@@ -17,6 +17,7 @@ Surge provides low-latency, real-time price updates via WebSocket. This example:
 - Node.js 18+
 - Sui CLI configured with a funded wallet
 - Active Surge subscription ([subscribe here](https://explorer.switchboardlabs.xyz/subscriptions))
+- Sui keypair in your keystore (`~/.sui/sui_config/sui.keystore`)
 
 ## Setup
 
@@ -29,6 +30,7 @@ npm install
 2. Ensure your Sui keystore has an active subscription:
 
 Your keypair in `~/.sui/sui_config/sui.keystore` must have an active Surge subscription.
+
 
 ## Usage
 

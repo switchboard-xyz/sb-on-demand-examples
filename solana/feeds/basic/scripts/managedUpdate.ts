@@ -84,15 +84,20 @@ const argv = yargs(process.argv)
   const ixs = [...instructions];
 
   if (fs.existsSync(BASIC_PROGRAM_PATH)) {
-    const basicProgram = await loadBasicProgram(program!.provider);
-    const readOracleIx = await basicReadOracleIx(
-      basicProgram,
-      quoteAccount,
-      queue.pubkey,
-      keypair.publicKey
-    );
-    ixs.push(readOracleIx);
-    console.log("  - Basic oracle program crank instruction");
+    try {
+      const basicProgram = await loadBasicProgram(program!.provider);
+      const readOracleIx = await basicReadOracleIx(
+        basicProgram,
+        quoteAccount,
+        queue.pubkey,
+        keypair.publicKey
+      );
+      ixs.push(readOracleIx);
+      console.log("  - Basic oracle program crank instruction");
+    } catch {
+      console.log("ℹ️  Skipping crank: basic_oracle_example program not deployed on-chain");
+      console.log("   To deploy, run: anchor build && anchor deploy");
+    }
   } else {
     console.log("ℹ️  Skipping crank: basic_oracle_example program not deployed");
     console.log("   To deploy, run: anchor build && anchor deploy");

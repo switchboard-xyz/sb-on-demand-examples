@@ -12,7 +12,7 @@ A minimal example demonstrating how to stream unsigned price updates from Switch
 
 ```bash
 cd common/streaming
-SURGE_API_KEY=your_api_key bun run crossbarStream.ts
+bun run crossbarStream.ts
 ```
 
 #### Features:
@@ -54,12 +54,13 @@ For examples that integrate streaming data with on-chain transactions:
 
 ## Requirements
 
-### API Key
-Get a Surge API key from [Switchboard Dashboard](https://explorer.switchboard.xyz)
+### Surge Subscription
+Subscribe to Surge at [explorer.switchboardlabs.xyz/subscriptions](https://explorer.switchboardlabs.xyz/subscriptions). Subscriptions are managed on Solana and paid in SWTCH tokens.
 
 ### Environment Setup
 ```bash
-export SURGE_API_KEY="sb_live_your_api_key_here"
+export ANCHOR_WALLET=~/.config/solana/id.json
+export ANCHOR_PROVIDER_URL=https://api.mainnet-beta.solana.com
 ```
 
 ### Installation
@@ -71,15 +72,15 @@ bun install  # or npm install
 
 ## Technical Details
 
-### Crossbar Mode
+### Keypair Authentication
 
-This example uses Surge in "Crossbar mode", which streams unsigned price data:
+Surge authenticates using your keypair and an on-chain subscription:
 
 ```typescript
+const { keypair, connection } = await sb.AnchorUtils.loadEnv();
 const surge = new sb.Surge({
-  apiKey: apiKey,
-  crossbarUrl: "https://crossbar.switchboardlabs.xyz",
-  crossbarMode: true,  // ← Enables unsigned streaming
+  connection,
+  keypair,
   verbose: true,
 });
 ```

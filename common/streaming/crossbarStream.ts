@@ -1,7 +1,7 @@
 import * as sb from "@switchboard-xyz/on-demand";
 
 (async function main() {
-  // Load keypair and connection from environment (ANCHOR_WALLET, ANCHOR_PROVIDER_URL)
+  // Load Solana keypair and connection from environment (ANCHOR_WALLET, ANCHOR_PROVIDER_URL)
   const { keypair, connection } = await sb.AnchorUtils.loadEnv();
 
   // Initialize Surge with keypair auth (uses on-chain subscription)

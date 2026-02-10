@@ -64,7 +64,7 @@ POLYGON_API_KEY=your_key bun run runJob.ts
 
 ### Streaming
 ```bash
-# Stream unsigned price data (requires Surge subscription)
+# Stream unsigned price data (requires Surge subscription on a Solana keypair)
 cd common/streaming
 bun run crossbarStream.ts
 ```

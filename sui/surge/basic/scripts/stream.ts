@@ -6,6 +6,7 @@ import {
 } from '@switchboard-xyz/sui-sdk';
 import { fromB64 } from '@mysten/bcs';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+import { Keypair as SolanaKeypair } from '@solana/web3.js';
 import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
@@ -86,7 +87,7 @@ async function processTransactionQueue(): Promise<void> {
 
     const result = await suiClient.signAndExecuteTransaction({
       transaction: transaction,
-      signer: keypair!,
+      signer: suiKeypair!,
       options: {
         showEvents: true,
         showEffects: true,
@@ -165,7 +166,7 @@ export function calculateStatistics(latencies: number[]) {
   };
 }
 
-let keypair: Ed25519Keypair | null = null;
+let suiKeypair: Ed25519Keypair | null = null;
 
 try {
   // Read the keystore file (usually in JSON format)
@@ -184,27 +185,46 @@ try {
 
   // Access the 1st key (index 0) and decode from base64
   const secretKey = fromB64(keystore[0]);
-  keypair = Ed25519Keypair.fromSecretKey(secretKey.slice(1)); // Slice to remove the first byte if needed
+  suiKeypair = Ed25519Keypair.fromSecretKey(secretKey.slice(1)); // Slice to remove the first byte if needed
 } catch (error) {
-  console.log('Error:', error);
+  console.log('Error loading Sui keypair:', error);
 }
 
-if (!keypair) {
-  throw new Error('Keypair not loaded');
+let solanaKeypair: SolanaKeypair | null = null;
+
+try {
+  const solanaKeypairPath =
+    process.env.SOLANA_KEYPAIR_PATH ||
+    path.join(os.homedir(), '.config', 'solana', 'id.json');
+  const secretKey = Uint8Array.from(
+    JSON.parse(fs.readFileSync(solanaKeypairPath, 'utf-8'))
+  );
+  solanaKeypair = SolanaKeypair.fromSecretKey(secretKey);
+} catch (error) {
+  console.log('Error loading Solana keypair:', error);
+}
+
+if (!suiKeypair) {
+  throw new Error('Sui keypair not loaded');
+}
+
+if (!solanaKeypair) {
+  throw new Error('Solana keypair not loaded');
 }
 
 (async function main() {
   console.log(`Starting Surge streaming demo (${network})...`);
-  console.log(`Using keypair: ${keypair!.toSuiAddress()}`);
+  console.log(`Using Sui keypair: ${suiKeypair!.toSuiAddress()}`);
+  console.log(`Using Solana keypair: ${solanaKeypair!.publicKey.toBase58()}`);
 
   const latencies: number[] = [];
 
-  // Initialize Surge with keypair and connection (uses on-chain subscription)
+  // Initialize Surge with Solana keypair (uses on-chain subscription)
   // Surge subscriptions are managed on Solana — subscribe at https://explorer.switchboardlabs.xyz/subscriptions
   const surge = new sb.Surge({
     connection: suiClient as any,
-    keypair: keypair as any,
-    signatureScheme: 'secp256k1',
+    keypair: solanaKeypair as any,
+    signatureScheme: 'ed25519',
   });
 
   await surge.connectAndSubscribe([{ symbol: 'BTC/USD' }]);

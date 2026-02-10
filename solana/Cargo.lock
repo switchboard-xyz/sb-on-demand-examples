@@ -531,7 +531,9 @@ name = "basic-oracle-example"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "blake3",
  "bytemuck",
+ "constant_time_eq",
  "hex",
  "litesvm",
  "openssl",
@@ -577,16 +579,15 @@ dependencies = [
 
 [[package]]
 name = "blake3"
-version = "1.8.3"
+version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2468ef7d57b3fb7e16b576e8377cdbde2320c60e1491e961d11da40fc4f02a2d"
+checksum = "3888aaa89e4b2a40fca9848e400f6a658a5a3978de7be858e209cafa8be9a4a0"
 dependencies = [
  "arrayref",
  "arrayvec",
  "cc",
  "cfg-if",
  "constant_time_eq",
- "cpufeatures",
  "digest 0.10.7",
 ]
 
@@ -902,9 +903,9 @@ checksum = "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8"
 
 [[package]]
 name = "constant_time_eq"
-version = "0.4.2"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d52eff69cd5e647efe296129160853a42795992097e8af39800e1060caeea9b"
+checksum = "7c74b8349d32d297c9134b8c88677813a227df8f779daa29bfc29c183fe3dca6"
 
 [[package]]
 name = "core-foundation"
@@ -2461,7 +2462,9 @@ name = "pancake-stacker"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "blake3",
  "bytemuck",
+ "constant_time_eq",
  "solana-program 2.2.1",
  "switchboard-on-demand 0.10.3",
 ]
@@ -3158,7 +3161,9 @@ name = "sb-randomness"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "blake3",
  "bytemuck",
+ "constant_time_eq",
  "solana-program 2.2.1",
  "switchboard-on-demand 0.10.3",
 ]

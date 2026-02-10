@@ -59,6 +59,7 @@ Subscribe to Surge at [explorer.switchboardlabs.xyz/subscriptions](https://explo
 
 ### Environment Setup
 ```bash
+# Solana keypair that owns the Surge subscription
 export ANCHOR_WALLET=~/.config/solana/id.json
 export ANCHOR_PROVIDER_URL=https://api.mainnet-beta.solana.com
 ```
@@ -74,7 +75,7 @@ bun install  # or npm install
 
 ### Keypair Authentication
 
-Surge authenticates using your keypair and an on-chain subscription:
+Surge authenticates using your Solana keypair and an on-chain subscription:
 
 ```typescript
 const { keypair, connection } = await sb.AnchorUtils.loadEnv();
@@ -84,6 +85,8 @@ const surge = new sb.Surge({
   verbose: true,
 });
 ```
+
+If you're building for a non-Solana chain, you still authenticate the Surge connection with a Solana keypair; chain-specific signing happens in the chain-specific examples.
 
 **Unsigned vs Signed:**
 - **Unsigned** (this example): Fast, low-overhead, suitable for display

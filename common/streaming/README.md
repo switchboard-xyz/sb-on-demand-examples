@@ -12,7 +12,7 @@ A minimal example demonstrating how to stream unsigned price updates from Switch
 
 ```bash
 cd common/streaming
-SURGE_API_KEY=your_api_key bun run crossbarStream.ts
+bun run crossbarStream.ts
 ```
 
 #### Features:
@@ -48,18 +48,20 @@ This example uses only the `@switchboard-xyz/on-demand` package's Surge client, 
 
 For examples that integrate streaming data with on-chain transactions:
 
-- **Solana**: See `solana/examples/streaming/runSurge.ts` - Demonstrates signed price updates with Solana program integration
-- **Sui**: See `sui/examples/surge/surgeUpdate.ts` - Shows how to use Surge with Sui transactions
+- **Solana**: See `solana/surge/` - Demonstrates signed price updates with Solana program integration
+- **Sui**: See `sui/surge/` - Shows how to use Surge with Sui transactions
 - **EVM**: Coming soon
 
 ## Requirements
 
-### API Key
-Get a Surge API key from [Switchboard Dashboard](https://explorer.switchboard.xyz)
+### Surge Subscription
+Subscribe to Surge at [explorer.switchboardlabs.xyz/subscriptions](https://explorer.switchboardlabs.xyz/subscriptions). Subscriptions are managed on Solana and paid in SWTCH tokens.
 
 ### Environment Setup
 ```bash
-export SURGE_API_KEY="sb_live_your_api_key_here"
+# Solana keypair that owns the Surge subscription
+export ANCHOR_WALLET=~/.config/solana/id.json
+export ANCHOR_PROVIDER_URL=https://api.mainnet-beta.solana.com
 ```
 
 ### Installation
@@ -71,18 +73,20 @@ bun install  # or npm install
 
 ## Technical Details
 
-### Crossbar Mode
+### Keypair Authentication
 
-This example uses Surge in "Crossbar mode", which streams unsigned price data:
+Surge authenticates using your Solana keypair and an on-chain subscription:
 
 ```typescript
+const { keypair, connection } = await sb.AnchorUtils.loadEnv();
 const surge = new sb.Surge({
-  apiKey: apiKey,
-  crossbarUrl: "https://crossbar.switchboardlabs.xyz",
-  crossbarMode: true,  // ← Enables unsigned streaming
+  connection,
+  keypair,
   verbose: true,
 });
 ```
+
+If you're building for a non-Solana chain, you still authenticate the Surge connection with a Solana keypair; chain-specific signing happens in the chain-specific examples.
 
 **Unsigned vs Signed:**
 - **Unsigned** (this example): Fast, low-overhead, suitable for display
@@ -109,8 +113,8 @@ surge.on("unsignedPriceUpdate", (update: sb.UnsignedPriceUpdate) => {
 ## Related Examples
 
 - **Job Testing**: `../job-testing/` - Test custom oracle job definitions
-- **Solana Streaming**: `../../solana/examples/streaming/` - Signed updates with Solana integration
-- **Sui Streaming**: `../../sui/examples/surge/surgeUpdate.ts` - Surge integration for Sui
+- **Solana Streaming**: `../../solana/surge/` - Signed updates with Solana integration
+- **Sui Streaming**: `../../sui/surge/` - Surge integration for Sui
 
 ---
 

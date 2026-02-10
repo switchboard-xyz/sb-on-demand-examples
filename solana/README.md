@@ -392,7 +392,7 @@ X402 is a payment protocol that extends HTTP with payment capabilities. When int
 │                 │     │                 │     │                 │
 └─────────────────┘     └─────────────────┘     └────────┬────────┘
         │                       │                         │
-        │ 1. Feed Hash          │ 2. Derive X402 Header   │ 3. Fetch Data
+        │ 1. Feed Hash          │ 2. Derive PAYMENT-SIGNATURE │ 3. Fetch Data
         │ ─────────────────────▶│ ──────────────────────▶ │    with Header
         │                       │                         │
         │                       │                         ▼
@@ -412,32 +412,24 @@ X402Update.ts uses the standard Anchor environment configuration (Anchor.toml or
 
 ```bash
 # Access paywalled RPC with X402 headers via inline feed definition
-bun run examples/feeds/x402Update.ts --rpcUrl https://helius.api.corbits.dev --method getBlockHeight
+cd solana/x402
+npm install
+npm run start
 
 # Example output:
 # 🔧 Initializing X402 variable override demo...
 # 👤 Wallet: YourWalletAddress...
-# 🌐 Paywalled RPC: https://helius.api.corbits.dev
 # 📡 RPC Method: getBlockHeight
-# 💰 Payment token: USDC
-# 🔐 X402 manager initialized
+# 🔐 X402 v2 client initialized
 #
-# 🔑 Deriving X402 payment header...
-# ✅ X402 payment header generated
-# 🌐 Queue: CkvizjVnm2zA5Wuwan34NhVT3zFc7vqUyGnA6tuEF5aE
+# 🔑 Deriving X402 PAYMENT-SIGNATURE...
+# ✅ X402 PAYMENT-SIGNATURE generated
 #
-# 📝 Creating inline oracle feed definition...
-# ✅ Oracle feed defined with X402 header placeholder
-#
-# 🧪 Simulating feed with Crossbar...
-# ✅ Simulation successful:
-#    Result: 285473829
-#
-# 📋 Fetching managed update instructions with X402 variable override...
+# 📋 Fetching managed update instructions with X402 variable overrides...
 # ✅ Generated instructions: 2
 #    - Ed25519 signature verification
 #    - Quote program verified_update
-#    - Variable override: X402_PAYMENT_HEADER
+#    - Variable overrides: X402_PAYMENT_SIGNATURE
 #
 # 🔨 Building transaction...
 # 🧪 Simulating transaction...
@@ -447,32 +439,36 @@ bun run examples/feeds/x402Update.ts --rpcUrl https://helius.api.corbits.dev --m
 #
 # 💡 Key Takeaways:
 #    • Feed defined inline (not stored on IPFS)
-#    • X402 header passed via variable override
+#    • X402 PAYMENT-SIGNATURE passed via variable override
 #    • Oracle authenticated with paywalled RPC
 #    • Data stored in quote account
-#    • Similar pattern to prediction market example
 ```
 
 ### X402 Implementation Example
 
 ```typescript
-import { X402FetchManager } from "@switchboard-xyz/x402-utils";
-import { createLocalWallet } from "@faremeter/wallet-solana";
-import { exact } from "@faremeter/payment-solana";
+import { x402Client, x402HTTPClient } from "@x402/fetch";
+import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { toClientSvmSigner } from "@x402/svm";
+import { createKeyPairSignerFromBytes } from "@solana/kit";
 import * as sb from "@switchboard-xyz/on-demand";
 
-// Setup X402 payment handler
+// Setup X402 v2 client
 const { keypair, connection } = await sb.AnchorUtils.loadEnv();
-const wallet = await createLocalWallet("mainnet-beta", keypair);
-const usdcMint = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
-const paymentHandler = exact.createPaymentHandler(wallet, usdcMint, connection);
+const signer = await createKeyPairSignerFromBytes(keypair.secretKey);
+const client = new x402Client();
+registerExactSvmScheme(client, { signer: toClientSvmSigner(signer) });
 
-// Initialize X402 manager and derive payment header
-const x402Manager = new X402FetchManager(paymentHandler);
-const paymentHeader = await x402Manager.derivePaymentHeader(
-  "https://api.example.com/data",
-  { method: "GET" }
+// Derive PAYMENT-SIGNATURE from a 402 response
+const httpClient = new x402HTTPClient(client);
+const response = await fetch("https://api.example.com/data", { method: "GET" });
+const paymentRequired = httpClient.getPaymentRequiredResponse(
+  name => response.headers.get(name),
+  await response.json().catch(() => undefined)
 );
+const paymentPayload = await client.createPaymentPayload(paymentRequired);
+const paymentHeaders = httpClient.encodePaymentSignatureHeader(paymentPayload);
+const paymentSignature = paymentHeaders["PAYMENT-SIGNATURE"];
 
 // Define oracle feed inline (like prediction market example)
 const oracleFeed = {
@@ -490,8 +486,8 @@ const oracleFeed = {
           }),
           headers: [
             {
-              key: "X-PAYMENT",
-              value: "${X402_PAYMENT_HEADER}", // Placeholder for variable override
+              key: "PAYMENT-SIGNATURE",
+              value: "${X402_PAYMENT_SIGNATURE}", // Placeholder for variable override
             },
             {
               key: "Content-Type",
@@ -517,7 +513,7 @@ const instructions = await queue.fetchManagedUpdateIxs(
   {
     numSignatures: 1,
     variableOverrides: {
-      X402_PAYMENT_HEADER: paymentHeader, // Replaces ${X402_PAYMENT_HEADER}
+      X402_PAYMENT_SIGNATURE: paymentSignature, // Replaces ${X402_PAYMENT_SIGNATURE}
     },
     instructionIdx: 0,
     payer: keypair.publicKey,
@@ -545,17 +541,17 @@ await connection.sendTransaction(tx);
 
 ### X402 Variable Override Flow
 
-The X402FetchManager handles deriving payment headers that are passed to oracle jobs:
+The x402 v2 client derives a PAYMENT-SIGNATURE header that gets passed to oracle jobs:
 
-1. **Derive Payment Header**: X402Manager creates a signed payment authorization header
+1. **Derive PAYMENT-SIGNATURE**: Create a signed payment authorization header from a 402 response
    ```typescript
-   const header = await x402Manager.derivePaymentHeader(apiUrl, options);
+   const paymentSignature = await derivePaymentSignatureHeader(client, apiUrl, options);
    ```
 
 2. **Pass as Variable Override**: Header is passed to the oracle job via variableOverrides
    ```typescript
    variableOverrides: {
-     X402_PAYMENT_HEADER: paymentHeader,
+     X402_PAYMENT_SIGNATURE: paymentSignature,
    }
    ```
 
@@ -569,8 +565,8 @@ The X402FetchManager handles deriving payment headers that are passed to oracle 
          "body": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBlockHeight\"}",
          "headers": [
            {
-             "key": "X-PAYMENT",
-             "value": "${X402_PAYMENT_HEADER}"
+             "key": "PAYMENT-SIGNATURE",
+             "value": "${X402_PAYMENT_SIGNATURE}"
            },
            {
              "key": "Content-Type",
@@ -654,18 +650,11 @@ Data Flow:
 
 ### Getting Started with Surge
 
-#### Step 1: Get Your API Key
+#### Step 1: Subscribe to Surge
 
-Contact the Switchboard team to obtain a `SURGE_API_KEY` for accessing the WebSocket gateway.
+Subscribe to Surge at [explorer.switchboardlabs.xyz/subscriptions](https://explorer.switchboardlabs.xyz/subscriptions). Subscriptions are managed on Solana and paid in SWTCH tokens.
 
-#### Step 2: Set Environment Variables
-
-```bash
-# Add to your .env file
-SURGE_API_KEY=your_surge_api_key_here
-```
-
-#### Step 3: Run the Surge Example
+#### Step 2: Run the Surge Example
 
 ```bash
 # Stream real-time BTC/USDT prices
@@ -688,10 +677,11 @@ bun run surge/runSurge.ts
 ```typescript
 import * as sb from "@switchboard-xyz/on-demand";
 
-// Initialize Surge client
+// Initialize Surge client with keypair auth (uses on-chain subscription)
+const { keypair, connection } = await sb.AnchorUtils.loadEnv();
 const surge = new sb.Surge({
-  apiKey: process.env.SURGE_API_KEY!,
-  gatewayUrl: 'https://92.222.100.185.xip.switchboard-oracles.xyz/devnet',
+  connection,
+  keypair,
   verbose: true,
 });
 
@@ -859,7 +849,6 @@ solana airdrop 2
 # Create a .env file (see .env.example)
 export ANCHOR_WALLET=~/.config/solana/id.json
 export ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
-export SURGE_API_KEY=your_surge_api_key_here  # Optional: For Surge WebSocket streaming
 ```
 
 ## 🚨 Troubleshooting
@@ -934,8 +923,8 @@ Yes! The oracle quote method has no write locks, allowing unlimited parallel rea
 ### What is Switchboard Surge?
 Surge is a WebSocket-based streaming service that provides ultra-low latency (<100ms) price updates. It's ideal for high-frequency trading, real-time dashboards, and applications that need the absolute fastest price data. Surge streams prices directly to your application via WebSocket and can convert updates to on-chain oracle quotes when needed.
 
-### How do I get a Surge API key?
-Contact the Switchboard team through their [Discord](https://discord.gg/switchboard) or support channels to request access to Surge. The API key is required to authenticate with the WebSocket gateway.
+### How do I subscribe to Surge?
+Subscribe at [explorer.switchboardlabs.xyz/subscriptions](https://explorer.switchboardlabs.xyz/subscriptions). Subscriptions are managed on Solana and paid in SWTCH tokens. Once subscribed, use your keypair and connection to authenticate with the Surge WebSocket gateway.
 
 ### When should I use Surge vs regular oracle quotes?
 - **Use Surge** when you need the absolute lowest latency (<100ms), continuous price streaming, or are building high-frequency trading systems

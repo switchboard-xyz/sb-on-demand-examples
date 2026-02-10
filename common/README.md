@@ -64,9 +64,9 @@ POLYGON_API_KEY=your_key bun run runJob.ts
 
 ### Streaming
 ```bash
-# Stream unsigned price data (requires API key)
+# Stream unsigned price data (requires Surge subscription on a Solana keypair)
 cd common/streaming
-SURGE_API_KEY=your_key bun run crossbarStream.ts
+bun run crossbarStream.ts
 ```
 
 ### Twitter Follower Count
@@ -83,7 +83,7 @@ npm start username_here
 ## Related Examples
 
 Once you've tested your job definitions, see chain-specific examples for implementation:
-- **Solana**: `../solana/examples/` - Oracle quotes, streaming, VRF
+- **Solana**: `../solana/feeds/basic/scripts/` - Oracle quotes and feed operations
 - **EVM**: `../evm/` - Price feeds on EVM-compatible chains
 - **Sui**: `../sui/` - Pull-based oracle feeds
 

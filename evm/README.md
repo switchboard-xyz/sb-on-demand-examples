@@ -13,13 +13,6 @@ Switchboard On-Demand oracle functionality for EVM-compatible chains.
 
 > For legacy EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/).
 
-## 🌐 Network Guides
-
-Detailed setup and integration guides for each network:
-
-- **[Monad](./docs/MONAD.md)** - High-performance EVM blockchain
-- **[Hyperliquid](./docs/HYPERLIQUID.md)** - Layer 1 with native perpetual futures
-
 ## 🚀 Quick Start
 
 Each example is a standalone Foundry project. Navigate to the specific example and follow its README.
@@ -50,13 +43,9 @@ evm/
 │   └── scripts/                # TypeScript examples
 │
 ├── randomness/                 # Randomness examples
-│   ├── coin-flip-simple/       # Basic coin flip
-│   ├── coin-flip-advanced/     # Coin flip with wagering
-│   └── pancake-flipper/        # Pancake stacking game
-│
-├── docs/                       # Network-specific guides
-│   ├── MONAD.md
-│   └── HYPERLIQUID.md
+│   ├── coin-flip/              # Coin flip example
+│   ├── pancake-stacker/        # Pancake stacking game
+│   └── randomness.ts           # Core randomness utilities
 │
 └── legacy/                     # Archived implementation
 ```

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@switchboard-xyz/common": "^5.4.0",
+    "@switchboard-xyz/on-demand": "^3.7.3",
     "yaml": "^2.8.2"
   }
 }

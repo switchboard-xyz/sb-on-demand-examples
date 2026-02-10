@@ -2,7 +2,6 @@
   "name": "surge-streaming-example",
   "version": "1.0.0",
   "description": "Real-time WebSocket streaming of signed Switchboard oracle prices",
-  "type": "module",
   "scripts": {
     "start": "ts-node scripts/runSurge.ts",
     "stream": "ts-node scripts/runSurge.ts"

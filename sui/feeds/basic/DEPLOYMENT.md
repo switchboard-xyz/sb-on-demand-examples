@@ -207,7 +207,6 @@ After successful deployment:
 
 3. **Monitor real-time prices with Surge**
    ```bash
-   export SURGE_API_KEY=your_api_key
    npm run surge
    ```
 

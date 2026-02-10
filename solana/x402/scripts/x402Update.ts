@@ -1,27 +1,17 @@
 import { PublicKey, Connection, TransactionInstruction, Keypair } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import { OracleQuote } from "@switchboard-xyz/on-demand";
-import { CrossbarClient, FeedHash, IOracleFeed, OracleJob } from "@switchboard-xyz/common";
-import { createLocalWallet } from "@faremeter/wallet-solana";
-import { exact } from "@faremeter/payment-solana";
-import { X402FetchManager } from "@switchboard-xyz/x402-utils";
+import { FeedHash, OracleJob, IOracleFeed } from "@switchboard-xyz/common";
+import { x402Client, x402HTTPClient } from "@x402/fetch";
+import { registerExactSvmScheme } from "@x402/svm/exact/client";
+import { toClientSvmSigner } from "@x402/svm";
+import { createKeyPairSignerFromBytes } from "@solana/kit";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
-import { TX_CONFIG, loadBasicProgram, basicReadOracleIx } from "../utils";
+import { TX_CONFIG, loadBasicProgram, basicReadOracleIx } from "./utils";
 
 const URL = "https://helius.api.corbits.dev";
 const RPC_METHOD = "getBlockHeight";
 const USDC = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
-
-/**
- * Build JSON-RPC request body
- */
-function buildJsonRpcBody(method: string): string {
-  return JSON.stringify({
-    jsonrpc: "2.0",
-    id: 1,
-    method,
-  });
-}
 
 /**
  * Check and display the USDC balance for a given keypair on mainnet
@@ -95,15 +85,15 @@ const ORACLE_FEED: IOracleFeed = {
           httpTask: {
             url: URL,
             method: OracleJob.HttpTask.Method.METHOD_POST,
-            body: buildJsonRpcBody(RPC_METHOD),
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id: 1,
+              method: RPC_METHOD,
+            }),
             headers: [
               {
-                key: "X-PAYMENT",
-                value: "${X402_PAYMENT_HEADER}",
-              },
-              {
-                key: "X-SWITCHBOARD-PAYMENT",
-                value: "${X402_SWITCHBOARD_PAYMENT_HEADER}",
+                key: "PAYMENT-SIGNATURE",
+                value: "${X402_PAYMENT_SIGNATURE}",
               },
             ],
           },
@@ -119,17 +109,16 @@ const ORACLE_FEED: IOracleFeed = {
 };
 
 /**
- * X402 Variable Override Example - Paywalled RPC Access
+ * X402 Variable Override Example - Paywalled RPC Access (v2 API)
  *
- * This example demonstrates using X402 authentication headers as variable overrides
- * to access paywalled RPC endpoints. Similar to the prediction market example, the
- * feed is defined inline rather than stored on IPFS.
+ * This example demonstrates using X402 v2 authentication headers as variable overrides
+ * to access paywalled RPC endpoints. The feed is defined inline rather than stored on IPFS.
  *
  * Key concepts:
- * 1. Define oracle feed inline with ${X402_PAYMENT_HEADER} placeholder
- * 2. Derive X402 payment header for the paywalled RPC endpoint
- * 3. Pass header as variable override to oracle job
- * 4. Oracle uses the header to authenticate JSON-RPC calls
+ * 1. Define oracle feed inline with ${X402_PAYMENT_SIGNATURE} placeholder
+ * 2. Use x402 v2 client to derive payment signature for the paywalled RPC endpoint
+ * 3. Pass signature as variable override to oracle job
+ * 4. Oracle uses the signature to authenticate JSON-RPC calls
  * 5. Extract $.result from JSON-RPC response
  * 6. Verified data is returned in the Ed25519 instruction
  *
@@ -138,42 +127,52 @@ const ORACLE_FEED: IOracleFeed = {
  * - Dynamic authentication without IPFS storage
  * - JSON-RPC methods on premium infrastructure
  * - Custom authentication schemes
- *
- * Unlike managed updates (which use feed IDs from IPFS), this creates the feed
- * definition on-the-fly and passes authentication dynamically.
  */
 (async function main() {
-  console.log("🔧 Initializing X402 variable override demo...");
+  console.log("🔧 Initializing X402 v2 variable override demo...");
 
   // Step 1: Load Solana environment configuration (`$ solana config get`)
   const { program, keypair, connection, crossbar } = await sb.AnchorUtils.loadEnv();
   console.log("👤 Wallet:", keypair.publicKey.toBase58());
   console.log("📡 RPC Method:", RPC_METHOD);
 
-  // Step 2: Create Faremeter wallet for X402 payments
-  const wallet = await createLocalWallet("mainnet-beta", keypair);
-
-  // Step 3: Configure USDC payment handler
-  const paymentHandler = exact.createPaymentHandler(wallet, USDC, connection);
-  console.log("💰 Payment token: USDC");
-
-  // Check USDC balance on mainnet
+  // Step 2: Check USDC balance on mainnet
   await checkUsdcBalance(connection, keypair, USDC);
 
-  // Step 4: Initialize X402FetchManager to derive payment headers
-  const x402Manager = new X402FetchManager(paymentHandler);
-  console.log("🔐 X402 manager initialized");
+  // Step 3: Create x402 v2 client with Solana signer
+  console.log("\n🔐 Initializing x402 v2 client...");
+  const signer = await createKeyPairSignerFromBytes(keypair.secretKey);
+  const client = new x402Client();
+  registerExactSvmScheme(client, { signer: toClientSvmSigner(signer) });
+  console.log("✅ x402 v2 client initialized");
 
-  // Step 5: Derive X402 payment headers for the paywalled RPC
-  // These headers will be passed as variable overrides to the oracle job
-  console.log("\n🔑 Deriving X402 payment headers...");
-  const paymentHeaders = await x402Manager.derivePaymentHeaders(URL, {
-    method: "POST",
-    body: buildJsonRpcBody(RPC_METHOD),
+  // Step 4: Fetch 402 payment requirements from the paywalled endpoint
+  console.log("\n🔑 Fetching payment requirements (402) from paywalled RPC...");
+  const requestBody = JSON.stringify({
+    jsonrpc: "2.0",
+    id: 1,
+    method: RPC_METHOD,
   });
-  const paymentHeader = paymentHeaders.xPaymentHeader;
-  const switchboardPaymentHeader = paymentHeaders.xSwitchboardPayment;
-  console.log("✅ X402 payment headers generated");
+
+  const response = await fetch(URL, {
+    method: "POST",
+    body: requestBody,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  // Step 5: Derive X402 PAYMENT-SIGNATURE header
+  console.log("🔐 Deriving PAYMENT-SIGNATURE header...");
+  const httpClient = new x402HTTPClient(client);
+  const paymentRequired = httpClient.getPaymentRequiredResponse(
+    name => response.headers.get(name),
+    await response.json().catch(() => undefined)
+  );
+  const paymentPayload = await client.createPaymentPayload(paymentRequired);
+  const paymentHeaders = httpClient.encodePaymentSignatureHeader(paymentPayload);
+  const paymentSignature = paymentHeaders["PAYMENT-SIGNATURE"];
+  console.log("✅ X402 payment signature generated");
 
   // Step 6: Load Switchboard queue
   const queue = await sb.Queue.loadDefault(program!);
@@ -186,11 +185,10 @@ const ORACLE_FEED: IOracleFeed = {
   const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [feedId]);
   console.log("📍 Quote Account:", quoteAccount.toBase58());
 
-  // NOTE: You must not simulate with the same x402 header or you will pay twice!
-  // const simFeed = await crossbar.simulateFeed(ORACLE_FEED, true, { X402_PAYMENT_HEADER: paymentHeader });
-  // console.log(simFeed);
+  // NOTE: You must not simulate with the same x402 signature or you will pay twice!
+  // const simFeed = await crossbar.simulateFeed(ORACLE_FEED, true, { X402_PAYMENT_SIGNATURE: paymentSignature });
 
-  // Step 9: Fetch managed update instructions with X402 headers as variable overrides
+  // Step 9: Fetch managed update instructions with X402 signature as variable override
   console.log("\n📋 Fetching managed update instructions with X402 variable overrides...");
   const instructions = await queue.fetchManagedUpdateIxs(
     crossbar,
@@ -198,11 +196,10 @@ const ORACLE_FEED: IOracleFeed = {
     {
       // NOTE: NUM_SIGNATURES MUST BE 1 FOR x402 REQUESTS
       numSignatures: 1,
-      // Pass the X402 payment headers as variable overrides
-      // These replace ${X402_PAYMENT_HEADER} and ${X402_SWITCHBOARD_PAYMENT_HEADER} in the job definition
+      // Pass the X402 payment signature as variable override
+      // This replaces ${X402_PAYMENT_SIGNATURE} in the job definition
       variableOverrides: {
-        X402_PAYMENT_HEADER: paymentHeader,
-        X402_SWITCHBOARD_PAYMENT_HEADER: switchboardPaymentHeader,
+        X402_PAYMENT_SIGNATURE: paymentSignature,
       },
       instructionIdx: 0,
       payer: keypair.publicKey,
@@ -212,7 +209,7 @@ const ORACLE_FEED: IOracleFeed = {
   console.log("✅ Generated instructions:", instructions.length);
   console.log("   - Ed25519 signature verification");
   console.log("   - Quote program verified_update");
-  console.log("   - Variable overrides: X402_PAYMENT_HEADER, X402_SWITCHBOARD_PAYMENT_HEADER");
+  console.log("   - Variable override: X402_PAYMENT_SIGNATURE");
 
   // Step 10: Load basic program and create read instruction
   const basicProgram = await loadBasicProgram(program!.provider);

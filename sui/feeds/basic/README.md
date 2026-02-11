@@ -6,7 +6,7 @@
   <h3>Get up and running with Switchboard oracles in 5 minutes</h3>
   
   <p>
-    <a href="https://discord.gg/switchboardxyz">
+    <a href="https://discord.gg/TJAv6ZYvPC">
       <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
     </a>
     <a href="https://twitter.com/switchboardxyz">
@@ -497,7 +497,7 @@ npm run build:testnet
 - 🌐 [Switchboard Explorer](https://explorer.switchboard.xyz)
 - 🔧 [Feed Builder Tool](https://explorer.switchboard.xyz/feed-builder)
 - 📦 [Sui SDK NPM Package](https://www.npmjs.com/package/@switchboard-xyz/sui-sdk)
-- 💬 [Discord Community](https://discord.gg/switchboardxyz)
+- 💬 [Discord Community](https://discord.gg/TJAv6ZYvPC)
 - 🐦 [Twitter Updates](https://x.com/switchboardxyz)
 - 🐛 [Report Issues](https://github.com/switchboard-xyz/sui/issues)
 

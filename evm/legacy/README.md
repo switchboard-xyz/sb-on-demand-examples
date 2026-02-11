@@ -96,7 +96,7 @@ See the [main README](../README.md) for the new implementation.
 
 - [Switchboard Documentation](https://docs.switchboard.xyz)
 - [Legacy Contract Addresses](https://docs.switchboard.xyz/product-documentation/data-feeds/evm/contract-addresses)
-- [Discord Community](https://discord.gg/switchboardxyz)
+- [Discord Community](https://discord.gg/TJAv6ZYvPC)
 
 ---
 

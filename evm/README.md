@@ -283,4 +283,4 @@ const diceRoll = Number((result.value % 6n) + 1n);
 - [Switchboard Explorer](https://explorer.switchboard.xyz)
 - [Feed Builder](https://explorer.switchboard.xyz/feed-builder)
 - [Solidity SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand-solidity)
-- [Discord](https://discord.gg/switchboardxyz)
+- [Discord](https://discord.gg/TJAv6ZYvPC)

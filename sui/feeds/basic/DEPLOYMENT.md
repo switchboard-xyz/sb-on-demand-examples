@@ -219,6 +219,6 @@ After successful deployment:
 
 If you encounter issues:
 - 📖 [Switchboard Documentation](https://docs.switchboard.xyz)
-- 💬 [Discord Community](https://discord.gg/switchboardxyz)
+- 💬 [Discord Community](https://discord.gg/TJAv6ZYvPC)
 - 🐛 [GitHub Issues](https://github.com/switchboard-xyz/sui/issues)
 

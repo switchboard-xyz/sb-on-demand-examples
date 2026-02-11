@@ -36,6 +36,7 @@ function calculateStatistics(latencies: number[]) {
 
   const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
   const queue = await sb.Queue.loadDefault(program!);
+  const queueLut = await queue.loadLookupTable();
   const feedAccount = new sb.PullFeed(program!, argv.feed!);
   const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");
   await feedAccount.preHeatLuts();
@@ -85,7 +86,7 @@ function calculateStatistics(latencies: number[]) {
       signers: [keypair],
       computeUnitPrice: 200_000,
       computeUnitLimitMultiple: 1.3,
-      lookupTables: luts,
+      lookupTables: [...luts, queueLut],
     });
 
     const sim = await connection.simulateTransaction(tx, TX_CONFIG);

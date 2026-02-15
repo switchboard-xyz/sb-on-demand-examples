@@ -34,6 +34,14 @@ const surge = new sb.Surge({
 });
 ```
 
+## End-to-End Surge Flow
+
+1. Subscribe on-chain in the explorer UI (creates the Surge subscription tied to your Solana keypair).
+2. Load the Solana keypair that owns the subscription.
+3. Create a Solana `Connection` and pass `connection + keypair` into the Surge SDK.
+4. The SDK signs/authenticates with your keypair (signature-based auth).
+5. Connect and subscribe to price streams over WebSocket.
+
 ## Output Example
 
 ```

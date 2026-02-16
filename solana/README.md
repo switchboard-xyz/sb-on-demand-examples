@@ -85,7 +85,7 @@ Oracle → Oracle Quote → Your Program (direct use)
 | **Transaction Cost** | Subscription | ~0.00015 SOL | ~0.002 SOL |
 | **Connection Type** | WebSocket (persistent) | HTTP/RPC | HTTP/RPC |
 | **Write Locks** | None | None | Required |
-| **Setup Time** | API key required | Instant | 5-10 minutes |
+| **Setup Time** | Solana keypair + subscription | Instant | 5-10 minutes |
 | **Maintenance** | None | None | Crank required |
 | **Parallelization** | Unlimited | Unlimited | Limited |
 | **Best Use Case** | HFT, Real-time apps | DeFi, Smart contracts | Analytics, History |

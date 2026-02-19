@@ -4,13 +4,76 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
-  Commitment,
 } from "@solana/web3.js";
+import type { Commitment } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
 import * as reader from "readline-sync";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 const COMMITMENT = "confirmed";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchIdlWithRetry(
+  programId: PublicKey,
+  provider: anchor.Provider,
+  label: string,
+  attempts: number = 3,
+  delayMs: number = 500
+): Promise<anchor.Idl | null> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const idl = await anchor.Program.fetchIdl(programId, provider);
+      if (idl) {
+        return idl;
+      }
+      lastError = new Error(`IDL not found for ${label}`);
+    } catch (err) {
+      lastError = err;
+    }
+
+    if (attempt < attempts) {
+      await sleep(delayMs);
+      delayMs = Math.min(delayMs * 2, 4000);
+    }
+  }
+
+  if (lastError) {
+    console.warn(`Failed to fetch IDL for ${label} after ${attempts} attempts`, lastError);
+  }
+  return null;
+}
+
+function loadLocalIdl(idlPath: string, programId: PublicKey, label: string): anchor.Idl {
+  if (!fs.existsSync(idlPath)) {
+    throw new Error(`Local IDL not found for ${label} at ${idlPath}`);
+  }
+  const idl = JSON.parse(fs.readFileSync(idlPath, "utf8")) as anchor.Idl;
+  const anyIdl = idl as anchor.Idl & {
+    accounts?: Array<{ name: string; type?: unknown }>;
+    types?: Array<{ name: string; type: unknown }>;
+  };
+  if (Array.isArray(anyIdl.accounts) && Array.isArray(anyIdl.types)) {
+    const typeMap = new Map(anyIdl.types.map((t) => [t.name, t.type]));
+    for (const account of anyIdl.accounts) {
+      if (!account.type && typeMap.has(account.name)) {
+        account.type = typeMap.get(account.name);
+      }
+    }
+  }
+  if (!idl.address) {
+    (idl as anchor.Idl & { address?: string }).address = programId.toString();
+  }
+  return idl;
+}
 
 export async function myAnchorProgram(
   provider: anchor.Provider,
@@ -18,25 +81,34 @@ export async function myAnchorProgram(
 ): Promise<anchor.Program> {
   const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
   const pid = myProgramKeypair.publicKey;
-  const idl = (await anchor.Program.fetchIdl(pid, provider))!;
-  if (idl == null) {
-    console.error("IDL not found for the program at", pid.toString());
-    process.exit(1);
+  let idl = await fetchIdlWithRetry(pid, provider, "coin-flip program");
+  if (!idl) {
+    const localIdlPath = path.join(__dirname, "../target/idl/sb_randomness.json");
+    console.warn(`Falling back to local IDL at ${localIdlPath}`);
+    idl = loadLocalIdl(localIdlPath, pid, "coin-flip program");
   }
-  if (idl?.address == undefined || idl?.address == null) {
-    idl.address = pid.toString();
+  if (!idl.address) {
+    (idl as anchor.Idl & { address?: string }).address = pid.toString();
   }
-  const program = new anchor.Program(idl, provider);
-  return program;
+  return new anchor.Program(idl, provider);
 }
 
 export async function loadSbProgram(
   provider: anchor.Provider
 ): Promise<anchor.Program> {
   const sbProgramId = await sb.getProgramId(provider.connection);
-  const sbIdl = await anchor.Program.fetchIdl(sbProgramId, provider);
-  const sbProgram = new anchor.Program(sbIdl!, provider);
-  return sbProgram;
+  const sbIdl = await fetchIdlWithRetry(
+    sbProgramId,
+    provider,
+    "Switchboard On-Demand program"
+  );
+  if (!sbIdl) {
+    throw new Error("Failed to fetch Switchboard On-Demand IDL after retries.");
+  }
+  if (!sbIdl.address) {
+    (sbIdl as anchor.Idl & { address?: string }).address = sbProgramId.toString();
+  }
+  return new anchor.Program(sbIdl, provider);
 }
 
 // export async function loadSVMSwitchboardProgram(
@@ -51,8 +123,27 @@ export async function loadSbProgram(
 export async function initializeMyProgram(
   provider: anchor.Provider
 ): Promise<anchor.Program> {
-  const myProgramPath =
-    "../target/deploy/sb_randomness-keypair.json";
+  const overrideProgramId = process.env.COIN_FLIP_PROGRAM_ID;
+  if (overrideProgramId) {
+    const pid = new PublicKey(overrideProgramId);
+    let idl = await fetchIdlWithRetry(pid, provider, "coin-flip program");
+    if (!idl) {
+      const localIdlPath = path.join(__dirname, "../target/idl/sb_randomness.json");
+      console.warn(`Falling back to local IDL at ${localIdlPath}`);
+      idl = loadLocalIdl(localIdlPath, pid, "coin-flip program");
+    }
+    if (!idl.address) {
+      (idl as anchor.Idl & { address?: string }).address = pid.toString();
+    }
+    const program = new anchor.Program(idl, provider);
+    console.log("My program", program.programId.toString());
+    return program;
+  }
+
+  const myProgramPath = path.join(
+    __dirname,
+    "../target/deploy/sb_randomness-keypair.json"
+  );
   const myProgram = await myAnchorProgram(provider, myProgramPath);
   console.log("My program", myProgram.programId.toString());
   return myProgram;
@@ -66,8 +157,9 @@ export async function setupQueue(program: anchor.Program): Promise<PublicKey> {
   try {
     await queueAccount.loadData();
   } catch (err) {
-    console.error("Queue not found, ensure you are using devnet in your env");
-    process.exit(1);
+    throw new Error(
+      "Queue not found, ensure you are using devnet in your env"
+    );
   }
   return queueAccount.pubkey;
 }

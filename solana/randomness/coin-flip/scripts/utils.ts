@@ -9,8 +9,13 @@ import {
 import * as sb from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
 import * as reader from "readline-sync";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
 
 const COMMITMENT = "confirmed";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export async function myAnchorProgram(
   provider: anchor.Provider,
@@ -18,10 +23,17 @@ export async function myAnchorProgram(
 ): Promise<anchor.Program> {
   const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
   const pid = myProgramKeypair.publicKey;
-  const idl = (await anchor.Program.fetchIdl(pid, provider))!;
+  let idl = await anchor.Program.fetchIdl(pid, provider);
   if (idl == null) {
-    console.error("IDL not found for the program at", pid.toString());
-    process.exit(1);
+    const localIdlPath = path.join(__dirname, "../target/idl/sb_randomness.json");
+    if (!fs.existsSync(localIdlPath)) {
+      console.error("IDL not found for the program at", pid.toString());
+      console.error("Missing local IDL at", localIdlPath);
+      process.exit(1);
+    }
+    const raw = fs.readFileSync(localIdlPath, "utf8");
+    idl = JSON.parse(raw);
+    console.log("Loaded local IDL from", localIdlPath);
   }
   if (idl?.address == undefined || idl?.address == null) {
     idl.address = pid.toString();
@@ -51,8 +63,10 @@ export async function loadSbProgram(
 export async function initializeMyProgram(
   provider: anchor.Provider
 ): Promise<anchor.Program> {
-  const myProgramPath =
-    "../target/deploy/sb_randomness-keypair.json";
+  const myProgramPath = path.join(
+    __dirname,
+    "../target/deploy/sb_randomness-keypair.json"
+  );
   const myProgram = await myAnchorProgram(provider, myProgramPath);
   console.log("My program", myProgram.programId.toString());
   return myProgram;
@@ -99,6 +113,14 @@ export function getUserGuessFromCommandLine(): boolean {
   }
 
   return userGuessInput === "heads"; // Convert "heads" to true, "tails" to false
+}
+
+export async function accountExists(
+  connection: Connection,
+  pubkey: PublicKey
+): Promise<boolean> {
+  const accountInfo = await connection.getAccountInfo(pubkey);
+  return accountInfo !== null;
 }
 
 /**

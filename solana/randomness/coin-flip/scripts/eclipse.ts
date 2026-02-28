@@ -11,13 +11,13 @@ import {
   initializeGame,
   loadSbProgram,
   loadSVMSwitchboardProgram,
-} from "./utils";
-import { setupSVMQueue } from "./utils";
-import { getUserGuessFromCommandLine } from "./utils";
-import { initializeMyProgram } from "./utils";
-import { createCoinFlipInstruction } from "./utils";
-import { settleFlipInstruction } from "./utils";
-import { ensureEscrowFunded } from "./utils";
+} from "./utils.ts";
+import { setupSVMQueue } from "./utils.ts";
+import { getUserGuessFromCommandLine } from "./utils.ts";
+import { initializeMyProgram } from "./utils.ts";
+import { createCoinFlipInstruction } from "./utils.ts";
+import { settleFlipInstruction } from "./utils.ts";
+import { ensureEscrowFunded } from "./utils.ts";
 
 const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";

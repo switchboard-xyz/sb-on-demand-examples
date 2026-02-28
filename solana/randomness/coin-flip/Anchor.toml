@@ -5,14 +5,14 @@ resolution = true
 skip-lint = true
 
 [programs.devnet]
-sb_randomness = "11111111111111111111111111111111"
+sb_randomness = "twKsQnuRXRC9qHgwXfiMMU8qHKzr6qUjW7hkd86ABgW"
 
 [programs.mainnet]
-sb_randomness = "11111111111111111111111111111111"
+sb_randomness = "twKsQnuRXRC9qHgwXfiMMU8qHKzr6qUjW7hkd86ABgW"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "https://api.mainnet-beta.solana.com"
 wallet = "~/.config/solana/id.json"

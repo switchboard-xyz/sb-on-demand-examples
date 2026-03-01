@@ -23,17 +23,10 @@ export async function myAnchorProgram(
 ): Promise<anchor.Program> {
   const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
   const pid = myProgramKeypair.publicKey;
-  let idl = await anchor.Program.fetchIdl(pid, provider);
+  const idl = await anchor.Program.fetchIdl(pid, provider);
   if (idl == null) {
-    const localIdlPath = path.join(__dirname, "../target/idl/sb_randomness.json");
-    if (!fs.existsSync(localIdlPath)) {
-      console.error("IDL not found for the program at", pid.toString());
-      console.error("Missing local IDL at", localIdlPath);
-      process.exit(1);
-    }
-    const raw = fs.readFileSync(localIdlPath, "utf8");
-    idl = JSON.parse(raw);
-    console.log("Loaded local IDL from", localIdlPath);
+    console.error("IDL not found for the program at", pid.toString());
+    process.exit(1);
   }
   if (idl?.address == undefined || idl?.address == null) {
     idl.address = pid.toString();

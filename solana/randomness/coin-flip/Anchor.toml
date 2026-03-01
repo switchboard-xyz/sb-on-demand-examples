@@ -5,10 +5,7 @@ resolution = true
 skip-lint = true
 
 [programs.devnet]
-sb_randomness = "11111111111111111111111111111111"
-
-[programs.mainnet]
-sb_randomness = "11111111111111111111111111111111"
+sb_randomness = "Dqq2Daxxnb7pEiJMVQ7UnJ973pJCtg8B5FRN6v58cU3r"
 
 [registry]
 url = "https://api.apr.dev"

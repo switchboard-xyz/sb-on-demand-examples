@@ -242,7 +242,6 @@ solana/
 
 ### `/randomness/` - VRF Examples
 - **`coin-flip/`** - Simple coin flip game with betting
-- **`pancake-stacker/`** - Pancake stacking game ⚠️ *WIP: CLI works, browser UI not functional*
 
 ### `/prediction-market/` - Prediction Markets
 - Kalshi prediction market feed verification

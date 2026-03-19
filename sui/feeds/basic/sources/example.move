@@ -389,7 +389,7 @@ fun test_collateral_ratio_calculation() {
     let mut consumer = init_quote_consumer(queue_id, 300_000, 1000, ctx);
     
     // Set a mock price (this would normally come from quotes)
-    let mock_price = decimal::new(50_000_000_000, false); // $50,000 with 9 decimals
+    let mock_price = decimal::new(50_000_000_000_000, false); // $50,000 with 9 decimals
     consumer.last_price = option::some(mock_price);
     consumer.last_update_time = 1000;
     
@@ -410,4 +410,3 @@ fun test_collateral_ratio_calculation() {
     object::delete(id);
     test_scenario::end(scenario);
 }
-

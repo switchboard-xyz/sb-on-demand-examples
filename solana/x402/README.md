@@ -15,7 +15,7 @@ This example demonstrates how to use Switchboard with the X402 micropayment prot
 ## Setup
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ npm install
 Run the X402 update script:
 
 ```bash
-npm run start
+pnpm start
 ```
 
 ## Project Structure
@@ -39,6 +39,5 @@ x402/
 
 This example uses the following X402-specific packages:
 
-- `@faremeter/payment-solana` - X402 payment handling
-- `@faremeter/wallet-solana` - Wallet integration
-- `@switchboard-xyz/x402-utils` - Switchboard X402 utilities
+- `@x402/fetch` - X402-aware fetch wrapper
+- `@x402/svm` - Solana micropayment support for X402

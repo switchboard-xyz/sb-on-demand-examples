@@ -1,6 +1,9 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
 
+const DEFAULT_RPC_URL = "https://testnet-rpc.monad.xyz";
+const DEFAULT_NATIVE_SYMBOL = "MON";
+
 async function main() {
 
     const privateKey = process.env.PRIVATE_KEY;
@@ -8,7 +11,9 @@ async function main() {
         throw new Error("PRIVATE_KEY is not set");
     }
 
-    const provider = new ethers.JsonRpcProvider("https://rpc.monad.xyz");
+    const rpcUrl = process.env.RPC_URL || DEFAULT_RPC_URL;
+    const nativeSymbol = process.env.NATIVE_SYMBOL || DEFAULT_NATIVE_SYMBOL;
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
 
     // Initialize Crossbar
@@ -82,7 +87,7 @@ async function main() {
         console.log("\n========================================");
         if (won) {
             console.log("🎉 YOU WON!");
-            console.log(`💰 Payout: ${ethers.formatEther(payout)} ETH`);
+            console.log(`💰 Payout: ${ethers.formatEther(payout)} ${nativeSymbol}`);
         } else {
             console.log("😔 YOU LOST");
             console.log("💸 Better luck next time!");

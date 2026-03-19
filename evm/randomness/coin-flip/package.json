@@ -4,8 +4,9 @@
   "description": "Coin flip example with wagering using Switchboard randomness",
   "type": "module",
   "scripts": {
+    "build": "forge build",
     "flip": "bun run scripts/flipCoin.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "forge test"
   },
   "author": "Switchboard Labs",
   "license": "MIT",

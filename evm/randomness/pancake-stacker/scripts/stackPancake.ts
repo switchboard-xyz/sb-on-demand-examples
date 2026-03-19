@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
 
+const DEFAULT_RPC_URL = "https://testnet-rpc.monad.xyz";
+
 // defines interface for the pancake flipper contract we interact with
 const PANCAKE_STACKER_ABI = [
     "function flipPancake() public",
@@ -28,7 +30,7 @@ async function main() {
     }
 
     // initialize RPC, wallet, crossbar server
-    const rpcUrl = process.env.RPC_URL || "https://rpc.monad.xyz";
+    const rpcUrl = process.env.RPC_URL || DEFAULT_RPC_URL;
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
     const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");

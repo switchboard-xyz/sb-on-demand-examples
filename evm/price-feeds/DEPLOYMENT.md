@@ -65,7 +65,7 @@ Compiler run successful!
 #### Monad Testnet
 
 ```bash
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
   --rpc-url https://testnet-rpc.monad.xyz \
   --private-key $PRIVATE_KEY \
   --broadcast \
@@ -75,7 +75,7 @@ forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceC
 #### Monad Mainnet
 
 ```bash
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
   --rpc-url $MONAD_RPC_URL \
   --private-key $PRIVATE_KEY \
   --broadcast \
@@ -86,7 +86,7 @@ forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceC
 
 ```bash
 SWITCHBOARD_ADDRESS=0xYOUR_SWITCHBOARD_ADDRESS \
-forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
   --rpc-url $RPC_URL \
   --private-key $PRIVATE_KEY \
   --broadcast \
@@ -347,4 +347,3 @@ If you encounter issues:
 - 📖 [Switchboard Documentation](https://docs.switchboard.xyz)
 - 💬 [Discord Community](https://discord.gg/TJAv6ZYvPC)
 - 🐛 [GitHub Issues](https://github.com/switchboard-xyz/evm-on-demand/issues)
-

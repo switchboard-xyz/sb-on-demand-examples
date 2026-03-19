@@ -36,7 +36,8 @@ cp Move.testnet.toml Move.toml
 # Switch to mainnet
 sui client switch --env mainnet
 
-# The default Move.toml is already configured for mainnet
+# Copy mainnet configuration
+cp Move.mainnet.toml Move.toml
 ```
 
 ## Step 2: Build the Contract
@@ -221,4 +222,3 @@ If you encounter issues:
 - 📖 [Switchboard Documentation](https://docs.switchboard.xyz)
 - 💬 [Discord Community](https://discord.gg/TJAv6ZYvPC)
 - 🐛 [GitHub Issues](https://github.com/switchboard-xyz/sui/issues)
-

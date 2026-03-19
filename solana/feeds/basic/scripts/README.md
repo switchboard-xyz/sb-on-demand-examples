@@ -14,7 +14,7 @@ A more detailed example demonstrating:
 **Perfect for**: Understanding the full flow, implementing in production apps (https://explorer.switchboardlabs.xyz/)
 
 ```bash
-npm run feeds:managed --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
+npm run update -- --feedId 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
 
 ## Key Concepts

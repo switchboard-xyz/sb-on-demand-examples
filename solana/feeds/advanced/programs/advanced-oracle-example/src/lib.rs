@@ -1,4 +1,6 @@
-use pinocchio::{entrypoint, msg, ProgramResult};
+#[cfg(target_os = "solana")]
+use pinocchio::entrypoint;
+use pinocchio::{msg, ProgramResult};
 use switchboard_on_demand::{
     QuoteVerifier, check_pubkey_eq, OracleQuote, Instructions, get_slot
 };
@@ -9,6 +11,7 @@ use pinocchio::pubkey::Pubkey;
 mod utils;
 use utils::{init_quote_account_if_needed, init_state_account_if_needed};
 
+#[cfg(target_os = "solana")]
 entrypoint!(process_instruction);
 
 /// Advanced Oracle Example Program

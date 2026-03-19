@@ -134,7 +134,7 @@ fn test_oracle_integration_with_litesvm() {
     // Step 8: Create instruction to call the oracle program
     println!("\n📝 Creating program instruction...");
 
-    let program_id = basic_oracle_example::ID.clone();
+    let program_id = basic_oracle_example::ID;
     println!("   Program ID: {}", program_id);
 
     // Build account metas manually (since Sysvars struct has lifetimes)

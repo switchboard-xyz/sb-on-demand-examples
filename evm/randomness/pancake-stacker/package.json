@@ -4,9 +4,10 @@
   "description": "Pancake stacking game using Switchboard randomness",
   "type": "module",
   "scripts": {
+    "build": "forge build",
     "start": "bun run server.ts",
     "flip": "bun run scripts/stackPancake.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "forge test"
   },
   "author": "Switchboard Labs",
   "license": "MIT",

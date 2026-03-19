@@ -34,7 +34,7 @@ import * as sb from "@switchboard-xyz/on-demand";
 
   // Connect and subscribe
   await surge.connectAndSubscribe([
-    { symbol: "2Z/USD" },
+    { symbol: "BTC/USD" },
   ]);
   console.log("🎧 Streaming prices...\n");
 })();

@@ -18,4 +18,8 @@ idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
 anchor-lang = "0.31.1"
-switchboard-on-demand = "0.4.7"
+switchboard-on-demand = "=0.4.7"
+# Pin these to avoid constant_time_eq v0.4.2 which requires edition2024
+blake3 = "=1.8.2"
+constant_time_eq = "=0.3.1"
+base64ct = "=1.7.3"

@@ -23,7 +23,7 @@ Configure the `anchor.toml` file to point to your solana wallet and the Solana c
 Then, to see the power of on-demand feeds, run the following:
 
 ```bash
-cd ..
+cd /path/to/sb-on-demand-examples/solana/randomness/coin-flip
 anchor build
 ```
 After building, take note of your program address and insert it in your program `lib.rs` file here:
@@ -44,9 +44,7 @@ anchor idl init --filepath target/idl/sb_randomness.json YOUR_PROGRAM_ADDRESS
 ```
 Install deps:
 ```bash
-cd solana/randomness/coin-flip/scripts
-pnpm i
-pnpm update
+npm install
 ```
 
 ## Running the example
@@ -60,7 +58,9 @@ Randomness is demonstrated through the simple Coin Flip Challenge game! You must
 
 To run this example coin-flip game: 
 
-`pnpm start {YOUR_GUESS}`
+```bash
+npm run start -- heads
+```
 
 
 For a full explanation of the code, please see our gitbook tutorial [here!](https://docs.switchboard.xyz/docs/switchboard/switchboard-randomness/getting-started)

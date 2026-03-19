@@ -40,7 +40,7 @@
  */
 
 import { ethers } from 'ethers';
-import { CrossbarClient, SWITCHBOARD_ABI } from '@switchboard-xyz/common';
+import { CrossbarClient } from '@switchboard-xyz/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -110,6 +110,10 @@ const PRICE_CONSUMER_ABI = [
   'event PriceValidationFailed(bytes32 indexed feedId, string reason)',
 ];
 
+const SWITCHBOARD_CONTRACT_ABI = [
+  'function getFee(bytes[] calldata updates) external view returns (uint256)',
+];
+
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -132,44 +136,45 @@ function formatValue(value: bigint, decimals: number = 18): string {
   return `${whole}.${trimmed}`;
 }
 
-async function fetchFeedData(feedHash: string) {
+async function fetchFeedData(feedHash: string, networkConfig: NetworkConfig) {
   const normalizedHash = normalizeFeedHash(feedHash);
-  const feedHashForCrossbar = normalizedHash.startsWith('0x')
-    ? normalizedHash.slice(2)
-    : normalizedHash;
 
   console.log('📡 Fetching feed data from Switchboard Crossbar...');
   console.log(`   Feed: ${normalizedHash}`);
+  console.log(`   Chain ID: ${networkConfig.chainId}`);
 
   try {
     const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-    const networkType = config.network.includes('testnet') ? 'testnet' : 'mainnet';
-    const response = await crossbar.fetchOracleQuote(
-      [feedHashForCrossbar],
-      networkType
-    );
+    const response = await crossbar.fetchEVMResults({
+      chainId: networkConfig.chainId,
+      aggregatorIds: [normalizedHash],
+    });
+    const failures = (response as { failures?: string[] }).failures;
 
-    if (!response.encoded) {
-      throw new Error('No encoded data in response');
+    if (!response.encoded.length) {
+      throw new Error(
+        failures?.join('; ') || 'No encoded data returned for this feed'
+      );
     }
 
-    const medianResponse = response.medianResponses?.[0];
-    if (!medianResponse) {
-      throw new Error('No median response in data');
+    const latestResult = response.results?.[0];
+    if (failures?.length) {
+      console.warn(`⚠️  Crossbar reported failures: ${failures.join('; ')}`);
     }
 
     console.log('✅ Feed data retrieved:');
-    console.log(`   Value: ${formatValue(BigInt(medianResponse.value))}`);
-    console.log(`   Timestamp: ${new Date(response.timestamp * 1000).toISOString()}`);
-    console.log(`   Slot: ${response.slot}`);
-    console.log(`   Oracles: ${response.oracleResponses.length}`);
+    if (latestResult?.result) {
+      console.log(`   Value: ${formatValue(BigInt(latestResult.result))}`);
+    }
+    if (latestResult?.timestamp) {
+      console.log(`   Timestamp: ${new Date(latestResult.timestamp * 1000).toISOString()}`);
+    }
+    console.log(`   Encoded updates: ${response.encoded.length}`);
 
     return {
       feedHash: normalizedHash,
-      value: medianResponse.value,
-      timestamp: response.timestamp,
-      slot: response.slot,
-      numOracles: response.oracleResponses.length,
+      value: latestResult?.result,
+      timestamp: latestResult?.timestamp,
       encoded: response.encoded,
     };
   } catch (error: any) {
@@ -246,6 +251,13 @@ async function main() {
   const balance = await provider.getBalance(signer.address);
   console.log(`   Balance: ${ethers.formatEther(balance)} ${networkConfig.name.includes('Monad') ? 'MON' : 'ETH'}\n`);
 
+  const switchboardCode = await provider.getCode(networkConfig.switchboard);
+  if (switchboardCode === '0x') {
+    throw new Error(
+      `No bytecode found at configured Switchboard address ${networkConfig.switchboard} on chain ${networkConfig.chainId}`
+    );
+  }
+
   // Deploy or use existing contract
   let contractAddress = config.contractAddress;
   if (!contractAddress) {
@@ -264,7 +276,7 @@ async function main() {
   console.log('Step 1: Fetching Oracle Data');
   console.log('='.repeat(80) + '\n');
 
-  const feedData = await fetchFeedData(config.feedHash);
+  const feedData = await fetchFeedData(config.feedHash, networkConfig);
 
   // ============================================================================
   // Step 2: Update Price On-Chain
@@ -277,16 +289,16 @@ async function main() {
   // Get the Switchboard contract to check fee
   const switchboard = new ethers.Contract(
     networkConfig.switchboard,
-    SWITCHBOARD_ABI,
+    SWITCHBOARD_CONTRACT_ABI,
     signer
   );
 
-  const fee = await switchboard.getFee([feedData.encoded]);
+  const fee = await switchboard.getFee(feedData.encoded);
   console.log(`💰 Update fee: ${ethers.formatEther(fee)} ${networkConfig.name.includes('Monad') ? 'MON' : 'ETH'}`);
 
   console.log('\n📤 Submitting transaction...');
   const feedIdForUpdate = normalizeFeedHash(config.feedHash);
-  const tx = await contract.updatePrices([feedData.encoded], [feedIdForUpdate], { value: fee });
+  const tx = await contract.updatePrices(feedData.encoded, [feedIdForUpdate], { value: fee });
   console.log(`   Transaction hash: ${tx.hash}`);
   console.log(`   Waiting for confirmation...`);
 
@@ -398,4 +410,3 @@ main().catch((error) => {
   console.error('\n❌ Error:', error.message);
   process.exit(1);
 });
-

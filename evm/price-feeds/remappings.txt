@@ -1,1 +1,2 @@
-@switchboard-xyz/on-demand-solidity/=node_modules/@switchboard-xyz/on-demand-solidity/ 
+forge-std/=../randomness/coin-flip/lib/forge-std/src/
+@switchboard-xyz/on-demand-solidity/=node_modules/@switchboard-xyz/on-demand-solidity/

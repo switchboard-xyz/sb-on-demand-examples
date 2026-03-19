@@ -10,21 +10,21 @@ import "../src/SwitchboardPriceConsumer.sol";
  * 
  * Usage:
  *   # Monad Testnet
- *   forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+ *   forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
  *     --rpc-url https://testnet-rpc.monad.xyz \
  *     --broadcast \
  *     --verify \
  *     -vvvv
  * 
  *   # Monad Mainnet
- *   forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+ *   forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
  *     --rpc-url https://rpc-mainnet.monadinfra.com/rpc/YOUR_KEY \
  *     --broadcast \
  *     --verify \
  *     -vvvv
  * 
  *   # With environment variables
- *   SWITCHBOARD_ADDRESS=0x... forge script script/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+ *   SWITCHBOARD_ADDRESS=0x... forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
  *     --rpc-url $RPC_URL \
  *     --broadcast \
  *     -vvvv
@@ -60,4 +60,3 @@ contract DeploySwitchboardPriceConsumer is Script {
         console.log("2. Run: CONTRACT_ADDRESS=", address(consumer), " bun scripts/run.ts");
     }
 }
-

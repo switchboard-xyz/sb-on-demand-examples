@@ -17,11 +17,10 @@
 ```bash
 # Clone and install
 git clone https://github.com/switchboard-xyz/sb-on-demand-examples.git
-cd solana
-bun install
+cd sb-on-demand-examples
 
 # Navigate to the basic feeds example
-cd feeds/basic
+cd solana/feeds/basic
 npm install
 
 # Get a feed ID from https://explorer.switchboardlabs.xyz/

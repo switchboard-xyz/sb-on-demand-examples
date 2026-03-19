@@ -68,17 +68,24 @@ Real-time oracle price data for DeFi applications.
 import { ethers } from 'ethers';
 import { CrossbarClient } from '@switchboard-xyz/common';
 
+const SWITCHBOARD_ABI = [
+  'function getFee(bytes[] calldata updates) external view returns (uint256)',
+];
+
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 const signer = new ethers.Wallet(privateKey, provider);
 
 // Fetch oracle data
 const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-const response = await crossbar.fetchOracleQuote([feedHash], 'mainnet');
+const { encoded } = await crossbar.fetchEVMResults({
+  chainId: 143,
+  aggregatorIds: [feedHash],
+});
 
 // Submit update
 const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
-const fee = await switchboard.getFee([response.encoded]);
-const tx = await contract.updatePrices([response.encoded], { value: fee });
+const fee = await switchboard.getFee(encoded);
+const tx = await contract.updatePrices(encoded, [feedHash], { value: fee });
 await tx.wait();
 
 // Query price

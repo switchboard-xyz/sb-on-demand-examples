@@ -8,11 +8,11 @@
     "example": "tsx scripts/run.ts",
     "build": "sui move build",
     "build:testnet": "cp Move.testnet.toml Move.toml && sui move build",
-    "build:mainnet": "cp Move.toml.bak Move.toml && sui move build || cp Move.toml.bak Move.toml",
+    "build:mainnet": "cp Move.mainnet.toml Move.toml && sui move build",
     "test": "sui move test",
     "deploy": "sui client publish --gas-budget 100000000",
     "deploy:testnet": "cp Move.testnet.toml Move.toml && sui client publish --gas-budget 100000000",
-    "deploy:mainnet": "sui client publish --gas-budget 100000000"
+    "deploy:mainnet": "cp Move.mainnet.toml Move.toml && sui client publish --gas-budget 100000000"
   },
   "keywords": [
     "switchboard",

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::accounts::RandomnessAccountData;
 
-declare_id!("11111111111111111111111111111111");
+declare_id!("Dqq2Daxxnb7pEiJMVQ7UnJ973pJCtg8B5FRN6v58cU3r");
 
 pub fn transfer<'a>(
     system_program: AccountInfo<'a>,
@@ -39,6 +39,9 @@ pub mod sb_randomness {
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         let player_state = &mut ctx.accounts.player_state;
+        if player_state.allowed_user != Pubkey::default() {
+            return Ok(());
+        }
         player_state.latest_flip_result = false;
         player_state.randomness_account = Pubkey::default(); // Placeholder, will be set in coin_flip
         player_state.wager = 100;
@@ -175,7 +178,7 @@ pub struct PlayerState {
 // === Instructions ===
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init,
+    #[account(init_if_needed,
         payer = user,
         seeds = [b"playerState".as_ref(), user.key().as_ref()],
         space = 8 + 100,

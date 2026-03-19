@@ -9,7 +9,7 @@
     "build": "forge build",
     "test": "forge test",
     "deploy": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --broadcast -vvvv",
-    "deploy:monad-testnet": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url https://testnet.monad.xyz --broadcast -vvvv",
+    "deploy:monad-testnet": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url https://testnet-rpc.monad.xyz --broadcast -vvvv",
     "deploy:monad-mainnet": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url $MONAD_RPC_URL --broadcast -vvvv",
     "verify": "forge verify-contract --chain-id $CHAIN_ID --watch $CONTRACT_ADDRESS src/SwitchboardPriceConsumer.sol:SwitchboardPriceConsumer"
   },

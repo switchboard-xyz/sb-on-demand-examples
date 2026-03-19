@@ -15,21 +15,21 @@ axios.defaults.timeout = 7000;
 
 import * as anchor from "@coral-xyz/anchor";
 import {
-  Connection,
   PublicKey,
   Keypair,
-  SystemProgram,
   Commitment,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
-import { initializeGame, loadSbProgram } from "./utils";
-import { setupQueue } from "./utils";
-import { getUserGuessFromCommandLine } from "./utils";
-import { initializeMyProgram } from "./utils";
-import { createCoinFlipInstruction } from "./utils";
-import { settleFlipInstruction } from "./utils";
-import { ensureEscrowFunded } from "./utils";
-import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import {
+  accountExists,
+  initializeGame,
+  setupQueue,
+  getUserGuessFromCommandLine,
+  initializeMyProgram,
+  createCoinFlipInstruction,
+  settleFlipInstruction,
+  ensureEscrowFunded,
+} from "./utils.ts";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -103,8 +103,18 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
     rngKp = Keypair.fromSecretKey(new Uint8Array(keypairData));
     console.log("Loaded randomness account", rngKp.publicKey.toString());
 
-    const randomness = new sb.Randomness(sbProgram, rngKp.publicKey);
-    return { randomness, rngKp };
+    const accountInfo = await sbProgram.provider.connection.getAccountInfo(
+      rngKp.publicKey
+    );
+    if (accountInfo) {
+      const randomness = new sb.Randomness(sbProgram, rngKp.publicKey);
+      return { randomness, rngKp };
+    }
+
+    console.log("Randomness account not found on chain. Recreating...");
+    const [randomness, ix] = await sb.Randomness.create(sbProgram, rngKp, queue);
+    console.log("Created randomness account", randomness.pubkey.toString());
+    return { randomness, rngKp, createIx: ix };
   } else {
     console.log("Creating new randomness account...");
     rngKp = Keypair.generate();
@@ -119,25 +129,14 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
   }
 }
 
-(async function main() {
+async function main() {
   console.clear();
-  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
-  // **** if sb.anchorUtils.loadEnv() is not working, you can use the following code: ****
-  //  const connection = new anchor.web3.Connection(
-  //   "https://api.devnet.solana.com",
-  //   "confirmed"
-  // );
-  // const keypair = await sb.AnchorUtils.initKeypairFromFile("** YOUR PATH **/.config/solana/id.json");
-  // const wallet = new NodeWallet(keypair);
-  // const provider = new anchor.AnchorProvider(connection,wallet)
-  // const pid = sb.ON_DEMAND_DEVNET_PID;
-  // const program = await anchor.Program.at(pid, provider);
+  const { keypair, connection, program: sbProgram } = await sb.AnchorUtils.loadEnv();
   console.log("\nSetup...");
-  console.log("Program", program!.programId.toString());
+  console.log("Switchboard program", sbProgram.programId.toString());
   const userGuess = getUserGuessFromCommandLine();
-  let queue = await setupQueue(program!);
-  const myProgram = await initializeMyProgram(program!.provider);
-  const sbProgram = await loadSbProgram(program!.provider);
+  const queue = await setupQueue(sbProgram);
+  const myProgram = await initializeMyProgram(sbProgram.provider);
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: false,
@@ -170,24 +169,35 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
   }
 
   // initilise example program accounts
-  const playerStateAccount = await PublicKey.findProgramAddressSync(
+  const playerStateAccount = PublicKey.findProgramAddressSync(
     [Buffer.from(PLAYER_STATE_SEED), keypair.publicKey.toBuffer()],
-    sbProgram.programId
+    myProgram.programId
   );
   // Find the escrow account PDA and initliaze the game
-  const [escrowAccount, escrowBump] = await PublicKey.findProgramAddressSync(
+  const [escrowAccount, escrowBump] = PublicKey.findProgramAddressSync(
     [Buffer.from(ESCROW_SEED)],
     myProgram.programId
   );
   console.log("\nInitialize the game states...");
-  await initializeGame(
-    myProgram,
-    playerStateAccount,
-    escrowAccount,
-    keypair,
-    sbProgram,
-    connection
+  const playerStateExists = await accountExists(
+    connection,
+    playerStateAccount[0]
   );
+  if (playerStateExists) {
+    console.log(
+      "Player state already initialized. Skipping initializeGame for",
+      playerStateAccount[0].toString()
+    );
+  } else {
+    await initializeGame(
+      myProgram,
+      playerStateAccount,
+      escrowAccount,
+      keypair,
+      sbProgram,
+      connection
+    );
+  }
   await ensureEscrowFunded(
     connection,
     escrowAccount,
@@ -216,7 +226,7 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
     payer: keypair.publicKey,
     signers: [keypair],
     computeUnitPrice: 75_000,
-    computeUnitLimitMultiple: 1.3,
+    computeUnitLimitMultiple: 1.6,
   });
 
   const sim4 = await connection.simulateTransaction(commitTx, txOpts);
@@ -244,7 +254,7 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
     payer: keypair.publicKey,
     signers: [keypair],
     computeUnitPrice: 75_000,
-    computeUnitLimitMultiple: 1.3,
+    computeUnitLimitMultiple: 1.6,
   });
 
   const sim5 = await connection.simulateTransaction(revealTx, txOpts);
@@ -265,5 +275,13 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
   console.log(`\nAnd the random result is ... ${result}!`);
 
   console.log("\nGame completed!");
-  process.exit(0);
-})();
+}
+
+if (import.meta.url === new URL(`file://${process.argv[1]}`).href) {
+  main()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+}

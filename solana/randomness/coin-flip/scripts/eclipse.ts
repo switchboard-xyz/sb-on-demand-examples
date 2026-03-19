@@ -1,23 +1,18 @@
 import * as anchor from "@coral-xyz/anchor";
 import {
-  Connection,
   PublicKey,
   Keypair,
-  SystemProgram,
   Commitment,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
 import {
   initializeGame,
-  loadSbProgram,
-  loadSVMSwitchboardProgram,
-} from "./utils";
-import { setupSVMQueue } from "./utils";
-import { getUserGuessFromCommandLine } from "./utils";
-import { initializeMyProgram } from "./utils";
-import { createCoinFlipInstruction } from "./utils";
-import { settleFlipInstruction } from "./utils";
-import { ensureEscrowFunded } from "./utils";
+  getUserGuessFromCommandLine,
+  initializeMyProgram,
+  createCoinFlipInstruction,
+  settleFlipInstruction,
+  ensureEscrowFunded,
+} from "./utils.ts";
 
 const PLAYER_STATE_SEED = "playerState";
 const ESCROW_SEED = "stateEscrow";
@@ -26,13 +21,10 @@ const COMMITMENT = "confirmed";
 (async function main() {
   console.clear();
 
-  console.log({
-    ...(await sb.AnchorUtils.loadEnv()),
-  });
-  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
+  const { keypair, connection, program: sbProgram } = await sb.AnchorUtils.loadEnv();
 
   console.log("\nSetup...");
-  console.log("Program", program!.programId.toString());
+  console.log("Switchboard program", sbProgram.programId.toString());
   const userGuess = getUserGuessFromCommandLine();
 
   const genesisHash = await connection.getGenesisHash();
@@ -51,8 +43,7 @@ const COMMITMENT = "confirmed";
     ? sb.ON_DEMAND_MAINNET_QUEUE_PDA
     : sb.ON_DEMAND_DEVNET_QUEUE_PDA;
 
-  const myProgram = await initializeMyProgram(program!.provider);
-  const sbProgram = await loadSVMSwitchboardProgram(program!.provider);
+  const myProgram = await initializeMyProgram(sbProgram.provider);
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: false,
@@ -94,7 +85,7 @@ const COMMITMENT = "confirmed";
   // initilise example program accounts
   const playerStateAccount = PublicKey.findProgramAddressSync(
     [Buffer.from(PLAYER_STATE_SEED), keypair.publicKey.toBuffer()],
-    sbProgram.programId
+    myProgram.programId
   );
   // Find the escrow account PDA and initliaze the game
   const [escrowAccount, escrowBump] = PublicKey.findProgramAddressSync(

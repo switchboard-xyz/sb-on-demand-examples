@@ -7,7 +7,6 @@ import {
   Commitment,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
-import yargs from "yargs";
 import * as reader from "readline-sync";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -16,51 +15,65 @@ import fs from "fs";
 const COMMITMENT = "confirmed";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const ANCHOR_TOML_PATH = path.join(__dirname, "../Anchor.toml");
+const PROGRAM_NAME = "sb_randomness";
 
-export async function myAnchorProgram(
-  provider: anchor.Provider,
-  keypath: string
+function parseProgramIdFromAnchorToml(cluster: string): PublicKey | null {
+  if (!fs.existsSync(ANCHOR_TOML_PATH)) {
+    return null;
+  }
+
+  const anchorToml = fs.readFileSync(ANCHOR_TOML_PATH, "utf8");
+  const sectionPattern = new RegExp(
+    `\\[programs\\.${cluster}\\][\\s\\S]*?${PROGRAM_NAME}\\s*=\\s*"([^"]+)"`,
+    "m"
+  );
+  const match = anchorToml.match(sectionPattern);
+
+  return match ? new PublicKey(match[1]) : null;
+}
+
+export async function resolveExampleProgramId(
+  connection: Connection
+): Promise<PublicKey> {
+  if (process.env.SB_RANDOMNESS_PROGRAM_ID) {
+    return new PublicKey(process.env.SB_RANDOMNESS_PROGRAM_ID);
+  }
+
+  const cluster = await sb.isMainnetConnection(connection) ? "mainnet" : "devnet";
+  const configuredProgramId = parseProgramIdFromAnchorToml(cluster);
+
+  if (configuredProgramId) {
+    return configuredProgramId;
+  }
+
+  throw new Error(
+    `No ${PROGRAM_NAME} program ID configured for ${cluster}. Set SB_RANDOMNESS_PROGRAM_ID or update Anchor.toml.`
+  );
+}
+
+export async function loadExampleProgram(
+  provider: anchor.Provider
 ): Promise<anchor.Program> {
-  const myProgramKeypair = await sb.AnchorUtils.initKeypairFromFile(keypath);
-  const pid = myProgramKeypair.publicKey;
-  const idl = await anchor.Program.fetchIdl(pid, provider);
+  const programId = await resolveExampleProgramId(provider.connection);
+  const idl = await anchor.Program.fetchIdl(programId, provider);
+
   if (idl == null) {
-    console.error("IDL not found for the program at", pid.toString());
-    process.exit(1);
+    throw new Error(`IDL not found for the example program at ${programId.toBase58()}`);
   }
-  if (idl?.address == undefined || idl?.address == null) {
-    idl.address = pid.toString();
+
+  if (idl.address == undefined || idl.address == null) {
+    idl.address = programId.toString();
   }
+
   const program = new anchor.Program(idl, provider);
   return program;
 }
 
-export async function loadSbProgram(
-  provider: anchor.Provider
-): Promise<anchor.Program> {
-  const sbProgramId = await sb.getProgramId(provider.connection);
-  const sbIdl = await anchor.Program.fetchIdl(sbProgramId, provider);
-  const sbProgram = new anchor.Program(sbIdl!, provider);
-  return sbProgram;
-}
-
-// export async function loadSVMSwitchboardProgram(
-// provider: anchor.Provider
-// ): Promise<anchor.Program> {
-// const svmProgramId = sb.ON_DEMAND_MAINNET_PID;
-// const svmIdl = await anchor.Program.fetchIdl(svmProgramId, provider);
-// const svmProgram = new anchor.Program(svmIdl!, provider);
-// return svmProgram;
-// }
-
 export async function initializeMyProgram(
   provider: anchor.Provider
 ): Promise<anchor.Program> {
-  const myProgramPath = path.join(
-    __dirname,
-    "../target/deploy/sb_randomness-keypair.json"
-  );
-  const myProgram = await myAnchorProgram(provider, myProgramPath);
+  const myProgram = await loadExampleProgram(provider);
   console.log("My program", myProgram.programId.toString());
   return myProgram;
 }
@@ -161,7 +174,7 @@ export async function initializeGame(
   const initIx = await myProgram.methods
     .initialize()
     .accounts({
-      playerState: playerStateAccount,
+      playerState: playerStateAccount[0],
       escrowAccount: escrowAccount,
       user: keypair.publicKey,
       systemProgram: SystemProgram.programId,
@@ -204,7 +217,7 @@ async function createCoinFlipInstruction(
   return await myProgram.methods
     .coinFlip(rngKpPublicKey, userGuess)
     .accounts({
-      playerState: playerStateAccount,
+      playerState: playerStateAccount[0],
       user: keypair.publicKey,
       randomnessAccountData: rngKpPublicKey,
       escrowAccount: escrowAccount,
@@ -234,7 +247,7 @@ export async function settleFlipInstruction(
   return await myProgram.methods
     .settleFlip(escrowBump)
     .accounts({
-      playerState: playerStateAccount,
+      playerState: playerStateAccount[0],
       randomnessAccountData: rngKpPublicKey,
       escrowAccount: escrowAccount,
       user: keypair.publicKey,

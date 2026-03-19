@@ -5,7 +5,6 @@ members = [
     "feeds/advanced/programs/advanced-oracle-example",
     "prediction-market/programs/prediction-market",
     "randomness/coin-flip/programs/sb-randomness",
-    "randomness/pancake-stacker/programs/pancake-stacker",
     "legacy/variable-overrides/programs/*",
 ]
 

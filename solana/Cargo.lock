@@ -2460,18 +2460,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pancake-stacker"
-version = "0.1.0"
-dependencies = [
- "anchor-lang",
- "blake3",
- "bytemuck",
- "constant_time_eq",
- "solana-program 2.2.1",
- "switchboard-on-demand 0.10.3",
-]
-
-[[package]]
 name = "parking_lot"
 version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"

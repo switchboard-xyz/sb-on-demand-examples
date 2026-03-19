@@ -4,8 +4,8 @@
   "description": "Switchboard randomness integration for on-chain games",
   "type": "module",
   "scripts": {
-    "start": "NODE_OPTIONS='--no-warnings' ts-node scripts/index.ts",
-    "start-eclipse": "NODE_OPTIONS='--no-warnings' ts-node scripts/eclipse.ts",
+    "start": "NODE_OPTIONS='--no-warnings' tsx scripts/index.ts",
+    "start-eclipse": "NODE_OPTIONS='--no-warnings' tsx scripts/eclipse.ts",
     "build": "cargo build-sbf",
     "test": "cargo test"
   },

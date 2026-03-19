@@ -15,21 +15,21 @@ axios.defaults.timeout = 7000;
 
 import * as anchor from "@coral-xyz/anchor";
 import {
-  Connection,
   PublicKey,
   Keypair,
-  SystemProgram,
   Commitment,
 } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/on-demand";
-import { accountExists, initializeGame, loadSbProgram } from "./utils";
-import { setupQueue } from "./utils";
-import { getUserGuessFromCommandLine } from "./utils";
-import { initializeMyProgram } from "./utils";
-import { createCoinFlipInstruction } from "./utils";
-import { settleFlipInstruction } from "./utils";
-import { ensureEscrowFunded } from "./utils";
-import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet.js";
+import {
+  accountExists,
+  initializeGame,
+  setupQueue,
+  getUserGuessFromCommandLine,
+  initializeMyProgram,
+  createCoinFlipInstruction,
+  settleFlipInstruction,
+  ensureEscrowFunded,
+} from "./utils.ts";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -131,23 +131,12 @@ async function loadOrCreateRandomnessAccount(sbProgram: anchor.Program, queue: a
 
 async function main() {
   console.clear();
-  const { keypair, connection, program } = await sb.AnchorUtils.loadEnv();
-  // **** if sb.anchorUtils.loadEnv() is not working, you can use the following code: ****
-  //  const connection = new anchor.web3.Connection(
-  //   "https://api.devnet.solana.com",
-  //   "confirmed"
-  // );
-  // const keypair = await sb.AnchorUtils.initKeypairFromFile("** YOUR PATH **/.config/solana/id.json");
-  // const wallet = new NodeWallet(keypair);
-  // const provider = new anchor.AnchorProvider(connection,wallet)
-  // const pid = sb.ON_DEMAND_DEVNET_PID;
-  // const program = await anchor.Program.at(pid, provider);
+  const { keypair, connection, program: sbProgram } = await sb.AnchorUtils.loadEnv();
   console.log("\nSetup...");
-  console.log("Program", program!.programId.toString());
+  console.log("Switchboard program", sbProgram.programId.toString());
   const userGuess = getUserGuessFromCommandLine();
-  let queue = await setupQueue(program!);
-  const myProgram = await initializeMyProgram(program!.provider);
-  const sbProgram = await loadSbProgram(program!.provider);
+  const queue = await setupQueue(sbProgram);
+  const myProgram = await initializeMyProgram(sbProgram.provider);
   const txOpts = {
     commitment: "processed" as Commitment,
     skipPreflight: false,
@@ -180,12 +169,12 @@ async function main() {
   }
 
   // initilise example program accounts
-  const playerStateAccount = await PublicKey.findProgramAddressSync(
+  const playerStateAccount = PublicKey.findProgramAddressSync(
     [Buffer.from(PLAYER_STATE_SEED), keypair.publicKey.toBuffer()],
-    sbProgram.programId
+    myProgram.programId
   );
   // Find the escrow account PDA and initliaze the game
-  const [escrowAccount, escrowBump] = await PublicKey.findProgramAddressSync(
+  const [escrowAccount, escrowBump] = PublicKey.findProgramAddressSync(
     [Buffer.from(ESCROW_SEED)],
     myProgram.programId
   );

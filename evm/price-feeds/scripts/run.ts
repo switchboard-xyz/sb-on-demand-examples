@@ -62,7 +62,7 @@ const NETWORKS: Record<string, NetworkConfig> = {
     name: 'Monad Testnet',
     chainId: 10143,
     explorer: 'https://testnet.monadscan.io',
-    switchboard: '0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33',
+    switchboard: '0x6724818814927e057a693f4e3A172b6cC1eA690C',
   },
   'monad-mainnet': {
     name: 'Monad Mainnet',

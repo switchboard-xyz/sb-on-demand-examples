@@ -1,0 +1,15 @@
+{
+  "name": "evm-randomness-core",
+  "version": "1.0.0",
+  "description": "Core Switchboard EVM randomness example",
+  "type": "module",
+  "scripts": {
+    "example": "bun randomness.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@switchboard-xyz/common": "^5.5.1",
+    "ethers": "^6.16.0",
+    "yaml": "^2.8.2"
+  }
+}

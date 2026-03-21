@@ -23,14 +23,6 @@ This installs:
 - `@switchboard-xyz/common` — Crossbar client for off-chain randomness resolution
 - `@switchboard-xyz/on-demand-solidity` — Solidity interfaces and libraries for Switchboard
 
-### 2. Install Foundry Libraries
-
-```bash
-forge install
-```
-
----
-
 ## Forge Remappings
 
 To import Switchboard interfaces and libraries in your Solidity contracts, configure forge remappings.
@@ -150,7 +142,7 @@ The `scripts/flipCoin.ts` script demonstrates the complete off-chain flow:
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
 
-const provider = new ethers.JsonRpcProvider("https://rpc.monad.xyz");
+const provider = new ethers.JsonRpcProvider("https://testnet-rpc.monad.xyz");
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 
 // Initialize the Crossbar client
@@ -167,7 +159,7 @@ const coinFlipContract = new ethers.Contract(
 );
 
 // Send the coin flip transaction (requests randomness)
-const tx = await coinFlipContract.coinFlip({ value: ethers.parseEther("1") });
+const tx = await coinFlipContract.coinFlip({ value: ethers.parseEther("0.01") });
 await tx.wait();
 ```
 
@@ -224,7 +216,7 @@ forge build
 cp .env.example .env
 ```
 
-Edit `.env` with your private key and RPC URL.
+Edit `.env` with your private key and RPC URL. The example defaults to Monad testnet and uses a `0.01` native-token wager.
 
 ### 3. Deploy the Contract
 
@@ -234,6 +226,9 @@ forge script deploy/CoinFlip.s.sol:CoinFlipScript \
     --rpc-url $RPC_URL \
     --private-key $PRIVATE_KEY \
     --broadcast
+
+# Add a small bankroll so wins can be paid out
+cast send $COIN_FLIP_CONTRACT_ADDRESS --rpc-url $RPC_URL --private-key $PRIVATE_KEY --value 0.05ether
 ```
 
 ### 4. Run the Coin Flip Script
@@ -241,7 +236,7 @@ forge script deploy/CoinFlip.s.sol:CoinFlipScript \
 After deploying, add the contract address to your `.env` file, then run:
 
 ```bash
-bun run scripts/flipCoin.ts
+bun run flip
 ```
 
 ---

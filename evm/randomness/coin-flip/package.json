@@ -12,6 +12,8 @@
   "license": "MIT",
   "dependencies": {
     "@switchboard-xyz/common": "^5.5.1",
-    "@switchboard-xyz/on-demand-solidity": "^1.1.0"
+    "@switchboard-xyz/on-demand-solidity": "^1.1.0",
+    "ethers": "^6.16.0",
+    "yaml": "^2.8.2"
   }
 }

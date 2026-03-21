@@ -14,9 +14,9 @@
  * - DeFi: Random liquidation selection, lottery mechanisms
  *
  * Run with:
- *   PRIVATE_KEY=0x... bun examples/randomness.ts
- *   PRIVATE_KEY=0x... NETWORK=monad-mainnet bun examples/randomness.ts
- *   PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun examples/randomness.ts
+ *   cd evm/randomness && bun install && PRIVATE_KEY=0x... bun run example
+ *   cd evm/randomness && bun install && PRIVATE_KEY=0x... NETWORK=monad-mainnet bun run example
+ *   cd evm/randomness && bun install && PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun run example
  */
 
 import { ethers } from 'ethers';
@@ -306,4 +306,3 @@ main().catch((error) => {
   console.error('\n❌ Error:', error.message || error);
   process.exit(1);
 });
-

@@ -22,16 +22,16 @@ This guide walks you through deploying the SwitchboardPriceConsumer contract to 
 
 ## Step 1: Configure Environment
 
-Create a `.env` file or export variables:
+Create a `.env` file:
 
 ```bash
-# Required
-export PRIVATE_KEY=0xyour_private_key_here
-export RPC_URL=https://your_rpc_url_here
+PRIVATE_KEY=0xyour_private_key_here
+RPC_URL=https://your_rpc_url_here
 
 # Optional (for specific networks)
-export SWITCHBOARD_ADDRESS=0x...  # Override default Switchboard address
-export NETWORK=monad-testnet      # Network name for scripts
+SWITCHBOARD_ADDRESS=0x...  # Override default Switchboard address
+NETWORK=monad-testnet      # Network name for scripts
+CONTRACT_ADDRESS=0x...     # Reuse an existing consumer instead of deploying a new one
 ```
 
 ### Network-Specific RPC URLs
@@ -43,10 +43,7 @@ export NETWORK=monad-testnet      # Network name for scripts
 ## Step 2: Build the Contract
 
 ```bash
-# Install dependencies
-forge install
-
-# Build the contract
+bun install
 forge build
 ```
 
@@ -170,11 +167,7 @@ forge verify-contract \
 
 ```bash
 # Complete example with deployment, update, and queries
-RPC_URL=$RPC_URL \
-PRIVATE_KEY=$PRIVATE_KEY \
-CONTRACT_ADDRESS=$CONTRACT_ADDRESS \
-NETWORK=monad-testnet \
-bun scripts/run.ts
+bun run example
 ```
 
 ## Troubleshooting

@@ -1,8 +1,11 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
+import { sleep } from "./utils";
 
 const DEFAULT_RPC_URL = "https://testnet-rpc.monad.xyz";
 const DEFAULT_NATIVE_SYMBOL = "MON";
+const DEFAULT_WAGER = "0.01";
+const SETTLEMENT_BUFFER_SECONDS = 10;
 
 async function main() {
 
@@ -38,18 +41,32 @@ async function main() {
     // CoinFlip contract
     const coinFlipContract = new ethers.Contract(COIN_FLIP_CONTRACT_ADDRESS, coinFlipAbi, wallet);
 
-    // Run the coin flip
-    const tx = await coinFlipContract.coinFlip({ value: ethers.parseEther("1") });
-    await tx.wait();
-    console.log("Coin flip transaction sent", tx);
+    let wagerRandomnessId: string = await coinFlipContract.getWagerRandomnessId(wallet.address);
 
-    // Get the wager randomness ID
-    const wagerRandomnessId: string = await coinFlipContract.getWagerRandomnessId(wallet.address);
-    console.log("Wager randomness ID:", wagerRandomnessId);
-    
+    if (wagerRandomnessId === ethers.ZeroHash) {
+        const wagerAmount = process.env.WAGER_AMOUNT || DEFAULT_WAGER;
+        const tx = await coinFlipContract.coinFlip({ value: ethers.parseEther(wagerAmount) });
+        await tx.wait();
+        console.log("Coin flip transaction sent", tx);
+
+        wagerRandomnessId = await coinFlipContract.getWagerRandomnessId(wallet.address);
+        console.log("Wager randomness ID:", wagerRandomnessId);
+    } else {
+        console.log("Found pending wager, resuming settlement:", wagerRandomnessId);
+    }
 
     const wagerData = await coinFlipContract.getWagerData(wallet.address);
     console.log("Wager data:", wagerData);
+
+    const settlementTime =
+        Number(wagerData.rollTimestamp) + Number(wagerData.minSettlementDelay);
+    const now = Math.floor(Date.now() / 1000);
+    const waitSeconds = Math.max(0, settlementTime - now + SETTLEMENT_BUFFER_SECONDS);
+
+    if (waitSeconds > 0) {
+        console.log(`Waiting ${waitSeconds}s for randomness settlement window...`);
+        await sleep(waitSeconds * 1000);
+    }
 
     // Get the chain ID dynamically from the provider
     const network = await provider.getNetwork();

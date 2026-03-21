@@ -19,8 +19,8 @@ This example demonstrates how to integrate Switchboard On-Demand oracle price fe
 ## Setup
 
 ```bash
-npm install
-forge install
+bun install
+forge build
 ```
 
 ### Configure Environment
@@ -31,32 +31,24 @@ forge install
 cp .env.example .env
 ```
 
-Edit `.env` with your private key and network configuration.
+Edit `.env` with your private key and network configuration. Set `CONTRACT_ADDRESS` only if you want to reuse a consumer you already deployed; otherwise `bun run example` deploys a new one for you.
 
 ## Build
 
 ```bash
-npm run build
-# or
 forge build
 ```
 
 ## Deploy
 
-Deploy to a network:
-
-```bash
-npm run deploy
-```
-
 Deploy to specific networks:
 
 ```bash
 # Monad Testnet
-npm run deploy:monad-testnet
+bun run deploy:monad-testnet
 
 # Monad Mainnet (requires MONAD_RPC_URL env var)
-npm run deploy:monad-mainnet
+bun run deploy:monad-mainnet
 ```
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
@@ -66,13 +58,11 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 Run the example script:
 
 ```bash
-npm run example
+bun run example
 ```
 
 ## Test
 
 ```bash
-npm run test
-# or
 forge test
 ```

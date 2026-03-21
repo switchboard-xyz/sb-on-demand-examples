@@ -155,7 +155,7 @@ forge verify-contract \
   --watch \
   $CONTRACT_ADDRESS \
   src/SwitchboardPriceConsumer.sol:SwitchboardPriceConsumer \
-  --constructor-args $(cast abi-encode "constructor(address)" 0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33)
+  --constructor-args $(cast abi-encode "constructor(address)" 0x6724818814927e057a693f4e3A172b6cC1eA690C)
 
 # Mainnet
 forge verify-contract \
@@ -219,7 +219,7 @@ Verify you're using the correct Switchboard contract for your network:
 
 | Network | Switchboard Address |
 |---------|-------------------|
-| Monad Testnet | `0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33` |
+| Monad Testnet | `0x6724818814927e057a693f4e3A172b6cC1eA690C` |
 | Monad Mainnet | `0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67` |
 
 ### Build Errors

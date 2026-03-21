@@ -1,7 +1,9 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
+import { sleep } from "./utils";
 
 const DEFAULT_RPC_URL = "https://testnet-rpc.monad.xyz";
+const SETTLEMENT_BUFFER_SECONDS = 10;
 
 // defines interface for the pancake flipper contract we interact with
 const PANCAKE_STACKER_ABI = [
@@ -39,17 +41,32 @@ async function main() {
     const contract = new ethers.Contract(contractAddress, PANCAKE_STACKER_ABI, wallet);
 
     // call contract to get current stats before flip
-    const [currentStack] = await contract.getPlayerStats(wallet.address);
+    const [currentStack, hasPendingFlip] = await contract.getPlayerStats(wallet.address);
     console.log(`\nCurrent stack: ${currentStack} pancakes`);
 
-    // call contract to flip a pancake
-    console.log("\nFlipping pancake...");
-    const tx = await contract.flipPancake();
-    await tx.wait();
-    console.log("Flip requested:", tx.hash);
-
     // get data of the randomness you requested
-    const flipData = await contract.getFlipData(wallet.address);
+    let flipData;
+
+    if (hasPendingFlip) {
+        console.log("\nFound pending flip, resuming settlement...");
+        flipData = await contract.getFlipData(wallet.address);
+    } else {
+        console.log("\nFlipping pancake...");
+        const tx = await contract.flipPancake();
+        await tx.wait();
+        console.log("Flip requested:", tx.hash);
+        flipData = await contract.getFlipData(wallet.address);
+    }
+
+    const settlementTime =
+        Number(flipData.rollTimestamp) + Number(flipData.minSettlementDelay);
+    const now = Math.floor(Date.now() / 1000);
+    const waitSeconds = Math.max(0, settlementTime - now + SETTLEMENT_BUFFER_SECONDS);
+
+    if (waitSeconds > 0) {
+        console.log(`Waiting ${waitSeconds}s for randomness settlement window...`);
+        await sleep(waitSeconds * 1000);
+    }
 
     // get chain ID dynamically from the provider
     const network = await provider.getNetwork();

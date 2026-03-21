@@ -143,8 +143,9 @@ async function fetchFeedData(feedHash: string, networkConfig: NetworkConfig) {
   console.log(`   Feed: ${normalizedHash}`);
   console.log(`   Chain ID: ${networkConfig.chainId}`);
 
+  const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
+
   try {
-    const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
     const response = await crossbar.fetchEVMResults({
       chainId: networkConfig.chainId,
       aggregatorIds: [normalizedHash],
@@ -178,7 +179,29 @@ async function fetchFeedData(feedHash: string, networkConfig: NetworkConfig) {
       encoded: response.encoded,
     };
   } catch (error: any) {
-    throw new Error(`Failed to fetch feed data: ${error.message}`);
+    console.warn(`⚠️  Chain-specific Crossbar lookup failed: ${error.message}`);
+    console.warn('   Falling back to the network-agnostic oracle quote endpoint...');
+
+    const response = await crossbar.fetchOracleQuote([normalizedHash], 'mainnet');
+    if (!response.encoded) {
+      throw new Error('Fallback oracle quote did not return encoded data');
+    }
+
+    const latestResult = response.medianResponses?.[0];
+
+    console.log('✅ Feed data retrieved via fallback endpoint:');
+    if (latestResult?.value) {
+      console.log(`   Value: ${formatValue(BigInt(latestResult.value))}`);
+    }
+    console.log(`   Timestamp: ${new Date(response.timestamp * 1000).toISOString()}`);
+    console.log('   Encoded updates: 1');
+
+    return {
+      feedHash: normalizedHash,
+      value: latestResult?.value,
+      timestamp: response.timestamp,
+      encoded: [response.encoded],
+    };
   }
 }
 

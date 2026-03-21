@@ -26,11 +26,16 @@ bun install && forge build
 cp .env.example .env  # Edit .env with your private key
 bun run example
 
-# Randomness Examples
-cd evm/randomness/coin-flip   # or pancake-stacker
+# Direct Randomness Example
+cd ../randomness
+bun install
+bun run example
+
+# Contract-backed Randomness Examples
+cd coin-flip   # or pancake-stacker
 bun install && forge build
-cp .env.example .env  # Edit .env with your private key
-bun run scripts/flipCoin.ts
+cp .env.example .env  # Edit .env with your private key and deployed contract address
+bun run flip
 ```
 
 ## 📁 Directory Structure
@@ -45,7 +50,9 @@ evm/
 ├── randomness/                 # Randomness examples
 │   ├── coin-flip/              # Coin flip example
 │   ├── pancake-stacker/        # Pancake stacking game
-│   └── randomness.ts           # Core randomness utilities
+│   ├── package.json            # Core randomness example package
+│   ├── randomness.ts           # Core randomness example
+│   └── utils.ts                # Shared helpers
 │
 └── legacy/                     # Archived implementation
 ```
@@ -77,15 +84,13 @@ const signer = new ethers.Wallet(privateKey, provider);
 
 // Fetch oracle data
 const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-const { encoded } = await crossbar.fetchEVMResults({
-  chainId: 143,
-  aggregatorIds: [feedHash],
-});
+const response = await crossbar.fetchOracleQuote([feedHash], 'mainnet');
+const updates = [response.encoded];
 
 // Submit update
 const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
-const fee = await switchboard.getFee(encoded);
-const tx = await contract.updatePrices(encoded, [feedHash], { value: fee });
+const fee = await switchboard.getFee(updates);
+const tx = await contract.updatePrices(updates, [feedHash], { value: fee });
 await tx.wait();
 
 // Query price
@@ -225,7 +230,7 @@ bun install && forge build
 cp .env.example .env  # Edit .env with your private key and contract address
 
 # Run the example
-bun run scripts/flipCoin.ts
+bun run flip
 ```
 
 ### Integration Example

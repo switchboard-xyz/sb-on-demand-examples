@@ -20,7 +20,7 @@ contract CoinFlip {
     event SettlementFailed(address indexed user);
 
     // minimum flip amount
-    uint256 public constant MIN_FLIP_AMOUNT = 1 ether; 
+    uint256 public constant MIN_FLIP_AMOUNT = 0.01 ether;
 
     // Wager data mapping
     mapping(address => Wager) public wagers;
@@ -36,7 +36,7 @@ contract CoinFlip {
 
     // do the flip
     function coinFlip() public payable {
-        require(msg.value == MIN_FLIP_AMOUNT, "Must send exactly 1 ETH");
+        require(msg.value == MIN_FLIP_AMOUNT, "Must send exactly 0.01 native token");
         require(wagers[msg.sender].amount == 0, "Already flipped");
         bytes32 randomnessId = keccak256(abi.encodePacked(msg.sender, blockhash(block.number - 1)));
         switchboard.createRandomness(randomnessId, 1);

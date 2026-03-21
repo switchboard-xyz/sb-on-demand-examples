@@ -28,14 +28,6 @@ This installs:
 - `@switchboard-xyz/common` — Crossbar client for off-chain randomness resolution
 - `@switchboard-xyz/on-demand-solidity` — Solidity interfaces and libraries for Switchboard
 
-### 2. Install Foundry Libraries
-
-```bash
-forge install
-```
-
----
-
 ## Forge Remappings
 
 To import Switchboard interfaces in your Solidity contracts, configure forge remappings.
@@ -131,7 +123,7 @@ import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
 
 // Initialize provider and crossbar
-const rpcUrl = process.env.RPC_URL || "https://rpc.monad.xyz";
+const rpcUrl = process.env.RPC_URL || "https://testnet-rpc.monad.xyz";
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");
 
@@ -176,7 +168,7 @@ forge build
 cp .env.example .env
 ```
 
-Edit `.env` with your private key and RPC URL.
+Edit `.env` with your private key and RPC URL. The script defaults to Monad testnet.
 
 ### 3. Deploy the Contract
 
@@ -193,7 +185,7 @@ forge script deploy/PancakeStacker.s.sol:PancakeStackerScript \
 After deploying, add the contract address to your `.env` file, then run:
 
 ```bash
-bun run scripts/stackPancake.ts
+bun run flip
 ```
 
 ---

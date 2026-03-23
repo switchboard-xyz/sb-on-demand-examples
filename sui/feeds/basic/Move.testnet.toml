@@ -12,5 +12,3 @@ rev = "testnet"
 example = "0x0"
 std = "0x1"
 sui = "0x2"
-switchboard = "0x28005599a66e977bff26aeb1905a02cda5272fd45bb16a5a9eb38e8659658cff"
-

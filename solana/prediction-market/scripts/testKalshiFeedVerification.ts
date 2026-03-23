@@ -25,14 +25,14 @@
  *
  * Usage:
  * ------
- *   bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
+ *   npm run start -- \
  *     --api-key-id YOUR_KALSHI_API_KEY_ID \
  *     --private-key-path /path/to/kalshi/private-key.pem \
  *     --order-id KALSHI_ORDER_ID
  *
  * Example:
  * --------
- *   bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
+ *   npm run start -- \
  *     --api-key-id abc123 \
  *     --private-key-path ~/.kalshi/key.pem \
  *     --order-id 12345678-1234-1234-1234-123456789012
@@ -47,7 +47,7 @@ import * as crypto from "crypto";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import * as pathModule from "path";
-import { TX_CONFIG, myAnchorProgram, PREDICTION_MARKET_PROGRAM_PATH } from "../utils";
+import { myAnchorProgram, PREDICTION_MARKET_PROGRAM_PATH } from "./utils.ts";
 
 interface Arguments {
   apiKeyId: string;

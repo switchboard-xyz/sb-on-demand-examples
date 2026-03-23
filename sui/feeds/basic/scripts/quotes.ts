@@ -8,10 +8,10 @@
  * see the scripts/run.ts file and the Move source code in sources/example.move
  *
  * Usage:
- *   tsx examples/quotes.ts
- *   tsx examples/quotes.ts --sign  # Sign and send transaction (requires SUI_PRIVATE_KEY)
- *   tsx examples/quotes.ts --feedHash 0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812
- *   tsx examples/quotes.ts --network testnet
+ *   npm run quotes
+ *   npm run quotes -- --sign  # Sign and send transaction (requires SUI_PRIVATE_KEY)
+ *   npm run quotes -- --feedHash 0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812
+ *   npm run quotes -- --network testnet
  */
 
 import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
@@ -49,6 +49,35 @@ const argv = yargs(hideBin(process.argv))
   .alias("help", "h")
   .parseSync();
 
+async function fetchQuotesWithRetry(
+  sb: SwitchboardClient,
+  tx: Transaction,
+  feedHashes: string[],
+  numOracles: number
+) {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await Quote.fetchUpdateQuote(sb, tx, {
+        feedHashes,
+        numOracles,
+      });
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`⚠️  Quote fetch attempt ${attempt} failed: ${message}`);
+
+      if (attempt < 3) {
+        console.log("   Retrying in 2s...\n");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 async function main() {
   console.log("🔮 Switchboard Oracle Quotes Example for Sui\n");
   console.log("Configuration:");
@@ -76,10 +105,12 @@ async function main() {
 
   // Fetch quotes for the feed using the Quote API
   // This fetches signed oracle data from multiple oracles via Crossbar
-  const quotes = await Quote.fetchUpdateQuote(sb, tx, {
-    feedHashes: [argv.feedHash],
-    numOracles: argv.numOracles,
-  });
+  const quotes = await fetchQuotesWithRetry(
+    sb,
+    tx,
+    [argv.feedHash],
+    argv.numOracles
+  );
 
   console.log("✅ Successfully fetched oracle quotes!\n");
 

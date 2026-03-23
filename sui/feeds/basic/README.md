@@ -37,31 +37,34 @@ A smart contract that:
 
 ```bash
 # 1. Clone and navigate
-cd sb-on-demand-examples/sui
+cd sb-on-demand-examples/sui/feeds/basic
 
 # 2. Install dependencies
 npm install
-# or
-bun install
 
-# 3. Build the Move contract
-npm run build
+# 3. Smoke-test quote fetching (defaults to mainnet and does not require deployment)
+npm run quotes
 
-# 4. Deploy to testnet
+# 4. Build the Move contract for testnet
+npm run build:testnet
+
+# 5. Deploy to testnet
 npm run deploy:testnet
 
-# 5. Run the example (replace with your deployed package ID)
-EXAMPLE_PACKAGE_ID=0xYOUR_PACKAGE_ID npm run example
+# 6. Run the full example (replace with your deployed package ID)
+SUI_NETWORK=testnet EXAMPLE_PACKAGE_ID=0xYOUR_PACKAGE_ID npm run example
 ```
 
 ## 📊 Expected Output
+
+The output below is from the full Move-integrated flow after a testnet deploy.
 
 ```
 🚀 Switchboard Oracle Quote Verifier Example
 
 Configuration:
-  Network: mainnet
-  RPC URL: https://fullnode.mainnet.sui.io:443
+  Network: testnet
+  RPC URL: https://fullnode.testnet.sui.io:443
   Package: 0xYOUR_PACKAGE_ID
   Feed: 0x4cd1cad962425681af07b9254b7d804de3ca3446fbfd1371bb258d2c75059812
   Oracles: 3
@@ -70,7 +73,7 @@ Configuration:
 ✅ Switchboard Connected:
    Oracle Queue: 0xe9324b82374f18d17de601ae5a19cd72e8c9f57f54661bf9e41a76f8948e80b5
    Guardian Queue: 0x...
-   Network: Mainnet
+   Network: Testnet
 
 📝 Step 1: Creating QuoteConsumer with Quote Verifier...
    Max Age: 300000ms (300s)
@@ -174,8 +177,9 @@ validate_price_deviation(&last_price, &new_price, max_deviation_bps);
 
 ```
 feeds/basic/
-├── Move.toml              # Mainnet configuration
-├── Move.testnet.toml      # Testnet configuration
+├── Move.toml              # Checked-in default Move config (testnet)
+├── Move.testnet.toml      # Explicit testnet configuration
+├── Move.mainnet.toml      # Explicit mainnet configuration
 ├── sources/
 │   └── example.move       # Quote Consumer contract with verifier
 ├── scripts/
@@ -191,26 +195,29 @@ sui/surge/basic/scripts/stream.ts
 ## 🛠️ Available Scripts
 
 ```bash
-# Build the Move contract
-npm run build
-
-# Build for testnet
+# Build explicitly for testnet
 npm run build:testnet
+
+# Build explicitly for mainnet
+npm run build:mainnet
 
 # Run Move tests
 npm run test
 
-# Deploy to mainnet
-npm run deploy
-
 # Deploy to testnet
 npm run deploy:testnet
+
+# Deploy to mainnet
+npm run deploy:mainnet
 
 # Run the complete example with Move integration
 npm run example
 
-# Run simple quote fetching example
+# Run simple quote fetching example (defaults to mainnet)
 npm run quotes
+
+# Run simple quote fetching example on testnet
+npm run quotes -- --network testnet
 ```
 
 For Surge streaming examples, see `sui/surge/basic/`.
@@ -485,10 +492,12 @@ const result = await client.signAndExecuteTransaction({
 ```bash
 # Clean and rebuild
 rm -rf build/
-npm run build
 
 # For testnet
 npm run build:testnet
+
+# For mainnet
+npm run build:mainnet
 ```
 
 ## 📚 Additional Resources

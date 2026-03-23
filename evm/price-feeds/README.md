@@ -69,6 +69,12 @@ Run the example script:
 npm run example
 ```
 
+Convert a sample Surge payload to EVM-encoded bytes:
+
+```bash
+npm run surge-convert
+```
+
 ## Test
 
 ```bash

@@ -21,6 +21,9 @@ npm install
 
 ## Build & Deploy
 
+Deploy the example program if you want `npm run update` to invoke the on-chain
+consumer instruction after the managed update.
+
 ### 1. Generate Program Keypair
 
 ```bash
@@ -53,7 +56,13 @@ npm run create-feed
 
 ### Update Feed Prices
 
-NOTE: program and its IDL should be deployed before running this.
+`npm run update` always fetches a fresh managed update and submits the
+Switchboard quote transaction.
+
+If `target/deploy/basic_oracle_example-keypair.json` exists and the program is
+deployed, the same command also appends the example consumer instruction.
+Otherwise the script logs that it skipped the consumer step and only updates the
+quote account.
 
 ```bash
 npm run update

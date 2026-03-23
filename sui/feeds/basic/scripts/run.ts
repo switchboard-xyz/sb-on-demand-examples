@@ -76,6 +76,35 @@ function loadKeypair(): Ed25519Keypair {
   }
 }
 
+async function fetchQuotesWithRetry(
+  sb: SwitchboardClient,
+  tx: Transaction,
+  feedHashes: string[],
+  numOracles: number
+) {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await Quote.fetchUpdateQuote(sb, tx, {
+        feedHashes,
+        numOracles,
+      });
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`⚠️  Quote fetch attempt ${attempt} failed: ${message}`);
+
+      if (attempt < 3) {
+        console.log("   Retrying in 2s...\n");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 // ============================================================================
 // Main Script
 // ============================================================================
@@ -183,10 +212,12 @@ async function main() {
   // - Signatures from multiple oracles
   // - Price data for the requested feed
   // - Timestamp and slot information
-  const quotes = await Quote.fetchUpdateQuote(sb, updateTx, {
-    feedHashes: [config.feedHash],
-    numOracles: config.numOracles,
-  });
+  const quotes = await fetchQuotesWithRetry(
+    sb,
+    updateTx,
+    [config.feedHash],
+    config.numOracles
+  );
 
   console.log("✅ Oracle data fetched successfully\n");
 
@@ -277,4 +308,3 @@ main().catch((error) => {
   console.error("\n❌ Error:", error.message);
   process.exit(1);
 });
-

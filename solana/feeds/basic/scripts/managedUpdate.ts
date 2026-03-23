@@ -82,6 +82,7 @@ const argv = yargs(process.argv)
   // This instruction will read from the quote account that was just updated
   // Load the basic oracle example program
   const ixs = [...instructions];
+  let includesBasicProgramIx = false;
 
   if (fs.existsSync(BASIC_PROGRAM_PATH)) {
     try {
@@ -93,6 +94,7 @@ const argv = yargs(process.argv)
         keypair.publicKey
       );
       ixs.push(readOracleIx);
+      includesBasicProgramIx = true;
       console.log("  - Basic oracle program crank instruction");
     } catch {
       console.log("ℹ️  Skipping crank: basic_oracle_example program not deployed on-chain");
@@ -119,6 +121,19 @@ const argv = yargs(process.argv)
     if (sim.value.err) {
       await handleSimulationError(sim.value.err, connection, keypair.publicKey);
       return;
+    }
+
+    const sig = await connection.sendTransaction(tx, TX_CONFIG);
+    console.log("✅ Transaction sent:", sig);
+    await connection.confirmTransaction(sig, TX_CONFIG.commitment);
+
+    if (includesBasicProgramIx) {
+      console.log("✅ Managed update and example consumer instruction confirmed");
+    } else {
+      console.log("✅ Managed update confirmed");
+      console.log(
+        "ℹ️  The quote account was updated without the example consumer instruction"
+      );
     }
   } catch (error) {
     console.error("❌ Transaction failed:", error);

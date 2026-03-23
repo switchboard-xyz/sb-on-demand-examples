@@ -173,7 +173,7 @@ anchor build
 ### Running the Example
 
 ```bash
-bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
+npm run start -- \
   --api-key-id YOUR_KALSHI_API_KEY_ID \
   --private-key-path /path/to/kalshi/private-key.pem \
   --order-id KALSHI_ORDER_ID
@@ -181,7 +181,7 @@ bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
 
 **Example:**
 ```bash
-bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
+npm run start -- \
   --api-key-id abc123def456 \
   --private-key-path ~/.kalshi/private-key.pem \
   --order-id 12345678-1234-1234-1234-123456789012
@@ -199,7 +199,7 @@ The example script demonstrates the complete verification flow:
 6. **Create verification instruction** calling `verify_kalshi_feed`
 7. **Simulate transaction** to verify feed ID matches on-chain
 
-See `scripts/prediction-market-examples/testKalshiFeedVerification.ts` for the complete implementation.
+See `scripts/testKalshiFeedVerification.ts` for the complete implementation.
 
 ## Security Considerations
 
@@ -302,7 +302,7 @@ faster-hex = "0.10.0"
 ### Integration Test
 
 ```bash
-bun run scripts/prediction-market-examples/testKalshiFeedVerification.ts \
+npm run start -- \
   --api-key-id test-key \
   --private-key-path ./test-key.pem \
   --order-id test-order-id

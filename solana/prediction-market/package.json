@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "ts-node scripts/testKalshiFeedVerification.ts",
-    "test": "ts-node scripts/testKalshiFeedVerification.ts",
+    "test": "npm run start -- --help",
     "build": "cargo build-sbf"
   },
   "author": "Switchboard Labs",

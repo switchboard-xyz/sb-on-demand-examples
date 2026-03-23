@@ -13,6 +13,28 @@ Switchboard On-Demand oracle functionality for EVM-compatible chains.
 
 > For legacy EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/).
 
+## Network Switch
+
+All runnable EVM examples now use the same network contract:
+
+- `NETWORK=monad-testnet` or `NETWORK=monad-mainnet`
+- `RPC_URL` is optional and overrides the default RPC for the selected network
+- `PRIVATE_KEY` is required for any transaction
+- `SWITCHBOARD_ADDRESS` is an advanced override only
+
+Defaults:
+
+- `NETWORK=monad-testnet`
+- Monad testnet RPC: `https://testnet-rpc.monad.xyz`
+- Monad mainnet RPC: `https://rpc.monad.xyz`
+
+Guardrails:
+
+- Unknown `NETWORK` values fail fast
+- A mismatched `RPC_URL` fails before broadcast
+- Monad examples reject a `SWITCHBOARD_ADDRESS` that does not match the canonical address for the selected network
+- Reused contract addresses are checked for deployed bytecode before use
+
 ## 🚀 Quick Start
 
 Each example is a standalone Foundry project. Navigate to the specific example and follow its README.
@@ -24,18 +46,24 @@ Each example is a standalone Foundry project. Navigate to the specific example a
 cd evm/price-feeds
 bun install && forge build
 cp .env.example .env  # Edit .env with your private key
+
+# Default: Monad testnet
 bun run example
 
-# Direct Randomness Example
-cd ../randomness
+# Flip everything to Monad mainnet with one env var
+NETWORK=monad-mainnet bun run example
+
+# Randomness Examples
+cd ../randomness/coin-flip   # or pancake-stacker
+bun install && forge build
+cp .env.example .env  # Edit .env with your private key
+bun run deploy
+bun run flip
+
+# Generic randomness helper
+cd ../
 bun install
 bun run example
-
-# Contract-backed Randomness Examples
-cd coin-flip   # or pancake-stacker
-bun install && forge build
-cp .env.example .env  # Edit .env with your private key and deployed contract address
-bun run flip
 ```
 
 ## 📁 Directory Structure
@@ -50,9 +78,7 @@ evm/
 ├── randomness/                 # Randomness examples
 │   ├── coin-flip/              # Coin flip example
 │   ├── pancake-stacker/        # Pancake stacking game
-│   ├── package.json            # Core randomness example package
-│   ├── randomness.ts           # Core randomness example
-│   └── utils.ts                # Shared helpers
+│   └── randomness.ts           # Core randomness utilities
 │
 └── legacy/                     # Archived implementation
 ```
@@ -84,13 +110,15 @@ const signer = new ethers.Wallet(privateKey, provider);
 
 // Fetch oracle data
 const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-const response = await crossbar.fetchOracleQuote([feedHash], 'mainnet');
-const updates = [response.encoded];
+const { encoded } = await crossbar.fetchEVMResults({
+  chainId: 143,
+  aggregatorIds: [feedHash],
+});
 
 // Submit update
 const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
-const fee = await switchboard.getFee(updates);
-const tx = await contract.updatePrices(updates, [feedHash], { value: fee });
+const fee = await switchboard.getFee(encoded);
+const tx = await contract.updatePrices(encoded, [feedHash], { value: fee });
 await tx.wait();
 
 // Query price
@@ -295,4 +323,4 @@ const diceRoll = Number((result.value % 6n) + 1n);
 - [Switchboard Explorer](https://explorer.switchboard.xyz)
 - [Feed Builder](https://explorer.switchboard.xyz/feed-builder)
 - [Solidity SDK](https://www.npmjs.com/package/@switchboard-xyz/on-demand-solidity)
-- [Discord](https://discord.gg/TJAv6ZYvPC)
+- [Discord](https://discord.gg/switchboardxyz)

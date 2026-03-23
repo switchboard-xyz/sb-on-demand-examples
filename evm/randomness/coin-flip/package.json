@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "forge build",
+    "deploy": "bun run scripts/deploy.ts",
+    "deploy:monad-testnet": "NETWORK=monad-testnet bun run scripts/deploy.ts",
+    "deploy:monad-mainnet": "NETWORK=monad-mainnet bun run scripts/deploy.ts",
     "flip": "bun run scripts/flipCoin.ts",
     "test": "forge test"
   },
@@ -13,7 +16,6 @@
   "dependencies": {
     "@switchboard-xyz/common": "^5.5.1",
     "@switchboard-xyz/on-demand-solidity": "^1.1.0",
-    "ethers": "^6.16.0",
-    "yaml": "^2.8.2"
+    "ethers": "^6.15.0"
   }
 }

@@ -1,9 +1,11 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
-import { sleep } from "./utils";
-
-const DEFAULT_RPC_URL = "https://testnet-rpc.monad.xyz";
-const SETTLEMENT_BUFFER_SECONDS = 10;
+import {
+    MONAD_NETWORKS,
+    getValidatedNetwork,
+    requireDeployedContract,
+    requirePrivateKey,
+} from "../../../network";
 
 // defines interface for the pancake flipper contract we interact with
 const PANCAKE_STACKER_ABI = [
@@ -20,62 +22,50 @@ const PANCAKE_STACKER_ABI = [
 async function main() {
 
     // load your private key for your wallet
-    const privateKey = process.env.PRIVATE_KEY;
-    if (!privateKey) {
-        throw new Error("PRIVATE_KEY is not set");
-    }
+    const privateKey = requirePrivateKey();
+    const config = await getValidatedNetwork({
+        allowedNetworks: MONAD_NETWORKS,
+    });
+    const provider = new ethers.JsonRpcProvider(config.rpcUrl);
 
     // load on-chain contract address
-    const contractAddress = process.env.PANCAKE_STACKER_CONTRACT_ADDRESS;
-    if (!contractAddress) {
-        throw new Error("PANCAKE_STACKER_CONTRACT_ADDRESS is not set");
-    }
+    const contractAddress = await requireDeployedContract(
+        config,
+        "PANCAKE_STACKER_CONTRACT_ADDRESS",
+        "PancakeStacker"
+    );
 
     // initialize RPC, wallet, crossbar server
-    const rpcUrl = process.env.RPC_URL || DEFAULT_RPC_URL;
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
     const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");
+
+    console.log(`Network: ${config.name} (${config.key})`);
+    console.log(`Chain ID: ${config.chainId}`);
+    console.log(`RPC URL: ${config.rpcUrl}`);
+    console.log(`Switchboard: ${config.switchboard}`);
+    console.log(`PancakeStacker: ${contractAddress}`);
+    console.log(`Wallet: ${wallet.address}`);
 
     // initialize contract instance to call
     const contract = new ethers.Contract(contractAddress, PANCAKE_STACKER_ABI, wallet);
 
     // call contract to get current stats before flip
-    const [currentStack, hasPendingFlip] = await contract.getPlayerStats(wallet.address);
+    const [currentStack] = await contract.getPlayerStats(wallet.address);
     console.log(`\nCurrent stack: ${currentStack} pancakes`);
 
+    // call contract to flip a pancake
+    console.log("\nFlipping pancake...");
+    const tx = await contract.flipPancake();
+    await tx.wait();
+    console.log("Flip requested:", tx.hash);
+
     // get data of the randomness you requested
-    let flipData;
-
-    if (hasPendingFlip) {
-        console.log("\nFound pending flip, resuming settlement...");
-        flipData = await contract.getFlipData(wallet.address);
-    } else {
-        console.log("\nFlipping pancake...");
-        const tx = await contract.flipPancake();
-        await tx.wait();
-        console.log("Flip requested:", tx.hash);
-        flipData = await contract.getFlipData(wallet.address);
-    }
-
-    const settlementTime =
-        Number(flipData.rollTimestamp) + Number(flipData.minSettlementDelay);
-    const now = Math.floor(Date.now() / 1000);
-    const waitSeconds = Math.max(0, settlementTime - now + SETTLEMENT_BUFFER_SECONDS);
-
-    if (waitSeconds > 0) {
-        console.log(`Waiting ${waitSeconds}s for randomness settlement window...`);
-        await sleep(waitSeconds * 1000);
-    }
-
-    // get chain ID dynamically from the provider
-    const network = await provider.getNetwork();
-    const chainId = Number(network.chainId);
+    const flipData = await contract.getFlipData(wallet.address);
 
     // ask crossbar to talk to oracle and retrieve randomness
     console.log("Resolving randomness...");
     const { encoded } = await crossbar.resolveEVMRandomness({
-        chainId,
+        chainId: config.chainId,
         randomnessId: flipData.randomnessId,
         timestamp: Number(flipData.rollTimestamp),
         minStalenessSeconds: Number(flipData.minSettlementDelay),
@@ -120,4 +110,7 @@ async function main() {
     console.log(`Your stack: ${finalStack} pancakes`);
 }
 
-main();
+main().catch((error) => {
+    console.error("Error:", error.message || error);
+    process.exit(1);
+});

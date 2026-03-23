@@ -59,6 +59,11 @@ The EVM examples showcase Switchboard functionality on EVM-compatible chains:
 - **[📈 Price Feeds](./evm)** - Real-time price data for DeFi applications
 - **[🎲 On-Demand Randomness](./evm/randomness/)** - Verifiable Random Function (VRF)
 
+**Monad Network Switch:**
+- The runnable Monad EVM examples now use a single env var: `NETWORK=monad-testnet` or `NETWORK=monad-mainnet`
+- `RPC_URL` is optional and overrides the default endpoint for the selected network
+- The packaged scripts validate chain ID, Switchboard address, and reused contract addresses before broadcast
+
 **Supported Networks:**
 - Monad (Mainnet & Testnet)
 - Hyperliquid (Mainnet)

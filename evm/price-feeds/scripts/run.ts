@@ -10,30 +10,30 @@
  *
  * Prerequisites:
  * - Bun runtime: https://bun.sh
- * - RPC URL for your target network
  * - Private key with native tokens for gas
  *
  * Installation:
  *   bun add ethers @switchboard-xyz/common
  *
  * Environment Variables:
- *   RPC_URL      - EVM RPC endpoint (required)
+ *   NETWORK      - Network name (monad-testnet, monad-mainnet)
+ *   RPC_URL      - Optional RPC override for the selected network
  *   PRIVATE_KEY  - Private key for transactions (required)
- *   NETWORK      - Network name (monad-testnet, monad-mainnet, arbitrum, etc.)
+ *   SWITCHBOARD_ADDRESS - Advanced override only
  *
  * Usage:
  *   # Deploy and run complete example
- *   RPC_URL=https://... PRIVATE_KEY=0x... bun scripts/run.ts
+ *   PRIVATE_KEY=0x... bun scripts/run.ts
  *
  *   # Use existing contract
- *   RPC_URL=https://... PRIVATE_KEY=0x... CONTRACT_ADDRESS=0x... bun scripts/run.ts
+ *   PRIVATE_KEY=0x... CONTRACT_ADDRESS=0x... bun scripts/run.ts
  *
  * Examples:
  *   # Monad Testnet
- *   RPC_URL=https://testnet-rpc.monad.xyz PRIVATE_KEY=0x... NETWORK=monad-testnet bun scripts/run.ts
+ *   PRIVATE_KEY=0x... NETWORK=monad-testnet bun scripts/run.ts
  *
  *   # Monad Mainnet
- *   RPC_URL=https://rpc-mainnet.monadinfra.com/rpc/YOUR_KEY PRIVATE_KEY=0x... NETWORK=monad-mainnet bun scripts/run.ts
+ *   PRIVATE_KEY=0x... NETWORK=monad-mainnet bun scripts/run.ts
  *
  * @author Switchboard Labs
  * @license MIT
@@ -43,43 +43,19 @@ import { ethers } from 'ethers';
 import { CrossbarClient } from '@switchboard-xyz/common';
 import * as fs from 'fs';
 import * as path from 'path';
-
-// ============================================================================
-// Network Configurations
-// ============================================================================
-
-interface NetworkConfig {
-  name: string;
-  chainId: number;
-  explorer: string;
-  switchboard: string;
-  verifier?: string;
-  queue?: string;
-}
-
-const NETWORKS: Record<string, NetworkConfig> = {
-  'monad-testnet': {
-    name: 'Monad Testnet',
-    chainId: 10143,
-    explorer: 'https://testnet.monadscan.io',
-    switchboard: '0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33',
-  },
-  'monad-mainnet': {
-    name: 'Monad Mainnet',
-    chainId: 143,
-    explorer: 'https://mainnet-beta.monvision.io',
-    switchboard: '0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67',
-  },
-};
+import {
+  MONAD_NETWORKS,
+  assertContractCode,
+  getValidatedNetwork,
+  type ResolvedNetworkConfig,
+} from '../../network';
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
 const config = {
-  rpcUrl: process.env.RPC_URL || '',
   privateKey: process.env.PRIVATE_KEY || '',
-  network: (process.env.NETWORK || 'monad-testnet') as keyof typeof NETWORKS,
   contractAddress: process.env.CONTRACT_ADDRESS || '',
   
   // Feed configuration
@@ -136,7 +112,10 @@ function formatValue(value: bigint, decimals: number = 18): string {
   return `${whole}.${trimmed}`;
 }
 
-async function fetchFeedData(feedHash: string, networkConfig: NetworkConfig) {
+async function fetchFeedData(
+  feedHash: string,
+  networkConfig: ResolvedNetworkConfig
+) {
   const normalizedHash = normalizeFeedHash(feedHash);
 
   console.log('📡 Fetching feed data from Switchboard Crossbar...');
@@ -182,7 +161,10 @@ async function fetchFeedData(feedHash: string, networkConfig: NetworkConfig) {
   }
 }
 
-async function deployContract(signer: ethers.Wallet, networkConfig: NetworkConfig) {
+async function deployContract(
+  signer: ethers.Wallet,
+  networkConfig: ResolvedNetworkConfig
+) {
   console.log('\n📝 Deploying SwitchboardPriceConsumer...');
   
   // Read the compiled contract
@@ -220,49 +202,39 @@ async function deployContract(signer: ethers.Wallet, networkConfig: NetworkConfi
 async function main() {
   console.log('🚀 Switchboard Price Consumer Example\n');
 
-  // Validate configuration
-  if (!config.rpcUrl) {
-    throw new Error('RPC_URL environment variable is required');
-  }
   if (!config.privateKey) {
     throw new Error('PRIVATE_KEY environment variable is required');
   }
 
-  const networkConfig = NETWORKS[config.network];
-  if (!networkConfig) {
-    throw new Error(`Unknown network: ${config.network}`);
-  }
+  const networkConfig = await getValidatedNetwork({
+    allowedNetworks: MONAD_NETWORKS,
+  });
+  const provider = new ethers.JsonRpcProvider(networkConfig.rpcUrl);
 
   console.log('Configuration:');
   console.log(`  Network: ${networkConfig.name}`);
   console.log(`  Chain ID: ${networkConfig.chainId}`);
-  console.log(`  RPC: ${config.rpcUrl}`);
+  console.log(`  RPC: ${networkConfig.rpcUrl}`);
+  console.log(`  Switchboard: ${networkConfig.switchboard}`);
   console.log(`  Feed: ${config.feedHash}`);
   console.log('');
 
-  // Setup provider and signer
-  const network = new ethers.Network(networkConfig.name, networkConfig.chainId);
-  const provider = new ethers.JsonRpcProvider(config.rpcUrl, network, {
-    staticNetwork: true,
-  });
   const signer = new ethers.Wallet(config.privateKey, provider);
 
   console.log(`👤 Signer: ${signer.address}`);
   const balance = await provider.getBalance(signer.address);
-  console.log(`   Balance: ${ethers.formatEther(balance)} ${networkConfig.name.includes('Monad') ? 'MON' : 'ETH'}\n`);
-
-  const switchboardCode = await provider.getCode(networkConfig.switchboard);
-  if (switchboardCode === '0x') {
-    throw new Error(
-      `No bytecode found at configured Switchboard address ${networkConfig.switchboard} on chain ${networkConfig.chainId}`
-    );
-  }
+  console.log(`   Balance: ${ethers.formatEther(balance)} ${networkConfig.nativeSymbol}\n`);
 
   // Deploy or use existing contract
   let contractAddress = config.contractAddress;
   if (!contractAddress) {
     contractAddress = await deployContract(signer, networkConfig);
   } else {
+    contractAddress = await assertContractCode(
+      networkConfig,
+      contractAddress,
+      'price consumer'
+    );
     console.log(`📋 Using existing contract: ${contractAddress}\n`);
   }
 
@@ -294,7 +266,7 @@ async function main() {
   );
 
   const fee = await switchboard.getFee(feedData.encoded);
-  console.log(`💰 Update fee: ${ethers.formatEther(fee)} ${networkConfig.name.includes('Monad') ? 'MON' : 'ETH'}`);
+  console.log(`💰 Update fee: ${ethers.formatEther(fee)} ${networkConfig.nativeSymbol}`);
 
   console.log('\n📤 Submitting transaction...');
   const feedIdForUpdate = normalizeFeedHash(config.feedHash);

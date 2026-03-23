@@ -8,9 +8,9 @@
     "surge-convert": "bun scripts/surgeToEvmConversion.ts",
     "build": "forge build",
     "test": "forge test",
-    "deploy": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --broadcast -vvvv",
-    "deploy:monad-testnet": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url https://testnet-rpc.monad.xyz --broadcast -vvvv",
-    "deploy:monad-mainnet": "forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer --rpc-url $MONAD_RPC_URL --broadcast -vvvv",
+    "deploy": "bun scripts/deploy.ts",
+    "deploy:monad-testnet": "NETWORK=monad-testnet bun scripts/deploy.ts",
+    "deploy:monad-mainnet": "NETWORK=monad-mainnet bun scripts/deploy.ts",
     "verify": "forge verify-contract --chain-id $CHAIN_ID --watch $CONTRACT_ADDRESS src/SwitchboardPriceConsumer.sol:SwitchboardPriceConsumer"
   },
   "keywords": [

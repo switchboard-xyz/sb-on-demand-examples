@@ -1,0 +1,14 @@
+{
+  "name": "evm-randomness-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "example": "bun randomness.ts",
+    "example:monad-mainnet": "NETWORK=monad-mainnet bun randomness.ts",
+    "example:hyperliquid-mainnet": "NETWORK=hyperliquid-mainnet bun randomness.ts"
+  },
+  "dependencies": {
+    "@switchboard-xyz/common": "^5.5.1",
+    "ethers": "^6.16.0"
+  }
+}

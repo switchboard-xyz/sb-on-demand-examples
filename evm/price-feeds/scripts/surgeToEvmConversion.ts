@@ -14,10 +14,10 @@
  *
  * Usage:
  *   # Basic conversion with sample data
- *   npm run surge-convert
+ *   bun run surge-convert
  *
  *   # With custom surge data (JSON file)
- *   SURGE_DATA_FILE=path/to/surge-data.json npm run surge-convert
+ *   SURGE_DATA_FILE=path/to/surge-data.json bun run surge-convert
  *
  * @author Switchboard Labs
  * @license MIT

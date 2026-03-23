@@ -9,40 +9,49 @@ import "../src/SwitchboardPriceConsumer.sol";
  * @notice Deployment script for the SwitchboardPriceConsumer contract
  * 
  * Usage:
- *   # Monad Testnet
- *   forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
- *     --rpc-url https://testnet-rpc.monad.xyz \
- *     --broadcast \
- *     --verify \
- *     -vvvv
- * 
- *   # Monad Mainnet
- *   forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
- *     --rpc-url https://rpc-mainnet.monadinfra.com/rpc/YOUR_KEY \
- *     --broadcast \
- *     --verify \
- *     -vvvv
- * 
- *   # With environment variables
- *   SWITCHBOARD_ADDRESS=0x... forge script deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
+ *   # Preferred: use the packaged wrapper so NETWORK and RPC stay in sync
+ *   bun run deploy
+ *
+ *   # Direct forge execution
+ *   NETWORK=monad-testnet RPC_URL=https://testnet-rpc.monad.xyz forge script \
+ *     deploy/DeploySwitchboardPriceConsumer.s.sol:DeploySwitchboardPriceConsumer \
  *     --rpc-url $RPC_URL \
  *     --broadcast \
  *     -vvvv
  */
 contract DeploySwitchboardPriceConsumer is Script {
-    // Monad Switchboard addresses
-    address constant MONAD_TESTNET_SWITCHBOARD = 0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33;
+    address constant MONAD_TESTNET_SWITCHBOARD = 0x6724818814927e057a693f4e3A172b6cC1eA690C;
     address constant MONAD_MAINNET_SWITCHBOARD = 0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67;
 
     function run() external {
-        // Get Switchboard address from environment or use default (testnet)
-        address switchboardAddress = vm.envOr("SWITCHBOARD_ADDRESS", MONAD_TESTNET_SWITCHBOARD);
-        
-        console.log("Deploying SwitchboardPriceConsumer...");
-        console.log("Switchboard address:", switchboardAddress);
-        console.log("Deployer:", msg.sender);
+        uint256 privateKey = vm.envUint("PRIVATE_KEY");
+        string memory networkName = vm.envString("NETWORK");
+        (address expectedSwitchboard, uint256 expectedChainId) =
+            resolveNetwork(networkName);
+        address switchboardAddress =
+            vm.envOr("SWITCHBOARD_ADDRESS", expectedSwitchboard);
 
-        vm.startBroadcast();
+        require(
+            switchboardAddress == expectedSwitchboard,
+            "SWITCHBOARD_ADDRESS must match NETWORK"
+        );
+        require(
+            block.chainid == expectedChainId,
+            "RPC chain ID does not match NETWORK"
+        );
+        require(
+            switchboardAddress.code.length > 0,
+            "No code at Switchboard address"
+        );
+
+        address deployer = vm.addr(privateKey);
+
+        console.log("Deploying SwitchboardPriceConsumer...");
+        console.log("Network:", networkName);
+        console.log("Switchboard address:", switchboardAddress);
+        console.log("Deployer:", deployer);
+
+        vm.startBroadcast(privateKey);
 
         SwitchboardPriceConsumer consumer = new SwitchboardPriceConsumer(switchboardAddress);
 
@@ -58,5 +67,29 @@ contract DeploySwitchboardPriceConsumer is Script {
         console.log("Next steps:");
         console.log("1. Save the contract address");
         console.log("2. Run: CONTRACT_ADDRESS=", address(consumer), " bun scripts/run.ts");
+    }
+
+    function resolveNetwork(string memory networkName)
+        internal
+        pure
+        returns (address switchboardAddress, uint256 chainId)
+    {
+        if (equal(networkName, "monad-testnet")) {
+            return (MONAD_TESTNET_SWITCHBOARD, 10143);
+        }
+
+        if (equal(networkName, "monad-mainnet")) {
+            return (MONAD_MAINNET_SWITCHBOARD, 143);
+        }
+
+        revert("Unsupported NETWORK");
+    }
+
+    function equal(string memory a, string memory b)
+        internal
+        pure
+        returns (bool)
+    {
+        return keccak256(bytes(a)) == keccak256(bytes(b));
     }
 }

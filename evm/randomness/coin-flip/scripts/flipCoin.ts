@@ -1,29 +1,35 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
-
-const DEFAULT_RPC_URL = "https://testnet-rpc.monad.xyz";
-const DEFAULT_NATIVE_SYMBOL = "MON";
+import {
+    MONAD_NETWORKS,
+    getValidatedNetwork,
+    requireDeployedContract,
+    requirePrivateKey,
+} from "../../../network";
 
 async function main() {
-
-    const privateKey = process.env.PRIVATE_KEY;
-    if (!privateKey) {
-        throw new Error("PRIVATE_KEY is not set");
-    }
-
-    const rpcUrl = process.env.RPC_URL || DEFAULT_RPC_URL;
-    const nativeSymbol = process.env.NATIVE_SYMBOL || DEFAULT_NATIVE_SYMBOL;
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const privateKey = requirePrivateKey();
+    const config = await getValidatedNetwork({
+        allowedNetworks: MONAD_NETWORKS,
+    });
+    const provider = new ethers.JsonRpcProvider(config.rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
 
     // Initialize Crossbar
     const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");
 
-    const COIN_FLIP_CONTRACT_ADDRESS = process.env.COIN_FLIP_CONTRACT_ADDRESS;
+    const COIN_FLIP_CONTRACT_ADDRESS = await requireDeployedContract(
+        config,
+        "COIN_FLIP_CONTRACT_ADDRESS",
+        "CoinFlip"
+    );
 
-    if (!COIN_FLIP_CONTRACT_ADDRESS) {
-        throw new Error("COIN_FLIP_CONTRACT_ADDRESS is not set");
-    }
+    console.log(`Network: ${config.name} (${config.key})`);
+    console.log(`Chain ID: ${config.chainId}`);
+    console.log(`RPC URL: ${config.rpcUrl}`);
+    console.log(`Switchboard: ${config.switchboard}`);
+    console.log(`CoinFlip: ${COIN_FLIP_CONTRACT_ADDRESS}`);
+    console.log(`Wallet: ${wallet.address}`);
 
     // CoinFlip ABI
     const coinFlipAbi = [
@@ -51,13 +57,9 @@ async function main() {
     const wagerData = await coinFlipContract.getWagerData(wallet.address);
     console.log("Wager data:", wagerData);
 
-    // Get the chain ID dynamically from the provider
-    const network = await provider.getNetwork();
-    const chainId = Number(network.chainId);
-
     // Get the randomness from Switchboard
     const { encoded } = await crossbar.resolveEVMRandomness({
-        chainId,
+        chainId: config.chainId,
         randomnessId: wagerRandomnessId,
         timestamp: Number(wagerData.rollTimestamp),
         minStalenessSeconds: Number(wagerData.minSettlementDelay),
@@ -87,7 +89,7 @@ async function main() {
         console.log("\n========================================");
         if (won) {
             console.log("🎉 YOU WON!");
-            console.log(`💰 Payout: ${ethers.formatEther(payout)} ${nativeSymbol}`);
+            console.log(`💰 Payout: ${ethers.formatEther(payout)} ${config.nativeSymbol}`);
         } else {
             console.log("😔 YOU LOST");
             console.log("💸 Better luck next time!");
@@ -100,4 +102,7 @@ async function main() {
     }
 }
 
-main();
+main().catch((error) => {
+    console.error("Error:", error.message || error);
+    process.exit(1);
+});

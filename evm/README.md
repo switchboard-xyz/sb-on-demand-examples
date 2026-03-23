@@ -7,11 +7,33 @@ Switchboard On-Demand oracle functionality for EVM-compatible chains.
 | Network | Chain ID | Switchboard Contract |
 |---------|----------|---------------------|
 | **Monad Mainnet** | 143 | `0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67` |
-| **Monad Testnet** | 10143 | `0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33` |
+| **Monad Testnet** | 10143 | `0x6724818814927e057a693f4e3A172b6cC1eA690C` |
 | **Hyperliquid Mainnet** | 999 | `0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347` |
 | **Hyperliquid Testnet** | 998 | TBD |
 
 > For legacy EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/).
+
+## Network Switch
+
+All runnable EVM examples now use the same network contract:
+
+- `NETWORK=monad-testnet` or `NETWORK=monad-mainnet`
+- `RPC_URL` is optional and overrides the default RPC for the selected network
+- `PRIVATE_KEY` is required for any transaction
+- `SWITCHBOARD_ADDRESS` is an advanced override only
+
+Defaults:
+
+- `NETWORK=monad-testnet`
+- Monad testnet RPC: `https://testnet-rpc.monad.xyz`
+- Monad mainnet RPC: `https://rpc.monad.xyz`
+
+Guardrails:
+
+- Unknown `NETWORK` values fail fast
+- A mismatched `RPC_URL` fails before broadcast
+- Monad examples reject a `SWITCHBOARD_ADDRESS` that does not match the canonical address for the selected network
+- Reused contract addresses are checked for deployed bytecode before use
 
 ## 🚀 Quick Start
 
@@ -24,13 +46,24 @@ Each example is a standalone Foundry project. Navigate to the specific example a
 cd evm/price-feeds
 bun install && forge build
 cp .env.example .env  # Edit .env with your private key
+
+# Default: Monad testnet
 bun run example
 
+# Flip everything to Monad mainnet with one env var
+NETWORK=monad-mainnet bun run example
+
 # Randomness Examples
-cd evm/randomness/coin-flip   # or pancake-stacker
+cd ../randomness/coin-flip   # or pancake-stacker
 bun install && forge build
 cp .env.example .env  # Edit .env with your private key
-bun run scripts/flipCoin.ts
+bun run deploy
+bun run flip
+
+# Generic randomness helper
+cd ../
+bun install
+bun run example
 ```
 
 ## 📁 Directory Structure
@@ -225,7 +258,7 @@ bun install && forge build
 cp .env.example .env  # Edit .env with your private key and contract address
 
 # Run the example
-bun run scripts/flipCoin.ts
+bun run flip
 ```
 
 ### Integration Example

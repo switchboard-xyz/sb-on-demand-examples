@@ -14,54 +14,14 @@
  * - DeFi: Random liquidation selection, lottery mechanisms
  *
  * Run with:
- *   PRIVATE_KEY=0x... bun examples/randomness.ts
- *   PRIVATE_KEY=0x... NETWORK=monad-mainnet bun examples/randomness.ts
- *   PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun examples/randomness.ts
+ *   PRIVATE_KEY=0x... bun randomness/randomness.ts
+ *   PRIVATE_KEY=0x... NETWORK=monad-mainnet bun randomness/randomness.ts
+ *   PRIVATE_KEY=0x... NETWORK=hyperliquid-mainnet bun randomness/randomness.ts
  */
 
 import { ethers } from 'ethers';
 import { CrossbarClient } from '@switchboard-xyz/common';
-import { sleep } from './utils';
-
-// =============================================================================
-// Configuration
-// =============================================================================
-
-interface NetworkConfig {
-  name: string;
-  chainId: number;
-  rpcUrl: string;
-  switchboard: string;
-  blockExplorer: string;
-  symbol: string;
-}
-
-const NETWORKS: Record<string, NetworkConfig> = {
-  'monad-testnet': {
-    name: 'Monad Testnet',
-    chainId: 10143,
-    rpcUrl: 'https://testnet-rpc.monad.xyz',
-    switchboard: '0xD3860E2C66cBd5c969Fa7343e6912Eff0416bA33',
-    blockExplorer: 'https://testnet.monadexplorer.com',
-    symbol: 'MON',
-  },
-  'monad-mainnet': {
-    name: 'Monad Mainnet',
-    chainId: 143,
-    rpcUrl: process.env.MONAD_RPC_URL || 'https://rpc.monad.xyz',
-    switchboard: '0xB7F03eee7B9F56347e32cC71DaD65B303D5a0E67',
-    blockExplorer: 'https://monadexplorer.com',
-    symbol: 'MON',
-  },
-  'hyperliquid-mainnet': {
-    name: 'Hyperliquid Mainnet',
-    chainId: 999,
-    rpcUrl: 'https://rpc.hyperliquid.xyz/evm',
-    switchboard: '0xcDb299Cb902D1E39F83F54c7725f54eDDa7F3347',
-    blockExplorer: 'https://explorer.hyperliquid.xyz',
-    symbol: 'ETH',
-  },
-};
+import { getValidatedNetwork, requirePrivateKey, sleep } from '../network';
 
 // Switchboard ABI for randomness functions
 const SWITCHBOARD_ABI = [
@@ -100,43 +60,35 @@ async function main() {
   console.log('═'.repeat(60));
 
   // Get configuration
-  const privateKey = process.env.PRIVATE_KEY;
-  if (!privateKey) {
-    throw new Error('PRIVATE_KEY environment variable is required');
-  }
-
-  const networkName = process.env.NETWORK || 'monad-testnet';
-  const network = NETWORKS[networkName];
-  if (!network) {
-    const available = Object.keys(NETWORKS).join(', ');
-    throw new Error(`Unknown network: ${networkName}. Available: ${available}`);
-  }
+  const privateKey = requirePrivateKey();
+  const network = await getValidatedNetwork();
+  const provider = new ethers.JsonRpcProvider(network.rpcUrl);
 
   const crossbarUrl = process.env.CROSSBAR_URL || 'https://crossbar.switchboard.xyz';
 
   // Setup provider and wallet
-  const provider = new ethers.JsonRpcProvider(network.rpcUrl);
   const wallet = new ethers.Wallet(privateKey, provider);
   const switchboard = new ethers.Contract(network.switchboard, SWITCHBOARD_ABI, wallet);
 
   console.log(`\n📋 Configuration:`);
-  console.log(`   Network:      ${network.name} (${networkName})`);
+  console.log(`   Network:      ${network.name} (${network.key})`);
   console.log(`   Chain ID:     ${network.chainId}`);
   console.log(`   Switchboard:  ${network.switchboard}`);
   console.log(`   Wallet:       ${wallet.address}`);
+  console.log(`   RPC URL:      ${network.rpcUrl}`);
   console.log(`   Crossbar:     ${crossbarUrl}`);
 
   // Check balance
   const balance = await provider.getBalance(wallet.address);
-  console.log(`   Balance:      ${ethers.formatEther(balance)} ${network.symbol}`);
+  console.log(`   Balance:      ${ethers.formatEther(balance)} ${network.nativeSymbol}`);
 
   if (balance === 0n) {
-    throw new Error(`Wallet has no balance. Get ${network.symbol} first.`);
+    throw new Error(`Wallet has no balance. Get ${network.nativeSymbol} first.`);
   }
 
   // Get update fee
   const updateFee = await switchboard.updateFee();
-  console.log(`   Update Fee:   ${ethers.formatEther(updateFee)} ${network.symbol}`);
+  console.log(`   Update Fee:   ${ethers.formatEther(updateFee)} ${network.nativeSymbol}`);
 
   // =========================================================================
   // STEP 1: Create Randomness Request
@@ -158,7 +110,7 @@ async function main() {
 
   const createTx = await switchboard.createRandomness(randomnessId, minSettlementDelay);
   console.log(`   TX Hash:  ${createTx.hash}`);
-  console.log(`   Explorer: ${network.blockExplorer}/tx/${createTx.hash}`);
+  console.log(`   Explorer: ${network.explorer}/tx/${createTx.hash}`);
 
   const createReceipt = await createTx.wait();
   console.log(`   ✅ Confirmed in block ${createReceipt.blockNumber}`);
@@ -237,7 +189,7 @@ async function main() {
 
   const settleTx = await switchboard.settleRandomness(encodedRandomness, { value: updateFee });
   console.log(`   TX Hash:  ${settleTx.hash}`);
-  console.log(`   Explorer: ${network.blockExplorer}/tx/${settleTx.hash}`);
+  console.log(`   Explorer: ${network.explorer}/tx/${settleTx.hash}`);
 
   const settleReceipt = await settleTx.wait();
   console.log(`   ✅ Settled in block ${settleReceipt.blockNumber}`);
@@ -291,8 +243,8 @@ Summary:
   • Random Value:  ${finalData.value}
 
 Transactions:
-  • Create: ${network.blockExplorer}/tx/${createTx.hash}
-  • Settle: ${network.blockExplorer}/tx/${settleTx.hash}
+  • Create: ${network.explorer}/tx/${createTx.hash}
+  • Settle: ${network.explorer}/tx/${settleTx.hash}
 
 Integration Tips:
   • Use the raw 256-bit value (finalData.value) for maximum entropy
@@ -306,4 +258,3 @@ main().catch((error) => {
   console.error('\n❌ Error:', error.message || error);
   process.exit(1);
 });
-

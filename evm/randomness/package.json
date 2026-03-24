@@ -8,7 +8,8 @@
     "example:hyperliquid-mainnet": "NETWORK=hyperliquid-mainnet bun randomness.ts"
   },
   "dependencies": {
-    "@switchboard-xyz/common": "^5.5.1",
-    "ethers": "^6.16.0"
+    "@switchboard-xyz/common": "^5.7.0",
+    "ethers": "^6.16.0",
+    "yaml": "^2.8.3"
   }
 }

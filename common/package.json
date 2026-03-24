@@ -9,8 +9,8 @@
     "twitter": "bun run twitter-follower-count/getFollowerCount.ts"
   },
   "dependencies": {
-    "@switchboard-xyz/common": "^5.4.0",
-    "@switchboard-xyz/on-demand": "^3.7.3",
+    "@switchboard-xyz/common": "^5.7.0",
+    "@switchboard-xyz/on-demand": "^3.9.0",
     "yaml": "^2.8.2"
   }
 }

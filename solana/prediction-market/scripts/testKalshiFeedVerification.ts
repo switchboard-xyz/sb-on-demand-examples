@@ -41,13 +41,17 @@
 import { CrossbarClient } from "@switchboard-xyz/common";
 import * as sb from "@switchboard-xyz/on-demand";
 import { Program, AnchorProvider } from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
+import {
+  PublicKey,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+  SYSVAR_SLOT_HASHES_PUBKEY,
+} from "@solana/web3.js";
 import * as fs from "fs";
 import * as crypto from "crypto";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import * as pathModule from "path";
-import { myAnchorProgram, PREDICTION_MARKET_PROGRAM_PATH } from "./utils.ts";
+import { myAnchorProgram, PREDICTION_MARKET_PROGRAM_PATH } from "./utils";
 
 interface Arguments {
   apiKeyId: string;
@@ -145,7 +149,6 @@ function createSignature(
       await sb.AnchorUtils.loadEnv();
     const queue = await sb.Queue.loadDefault(anchorProgram!);
     const crossbar = new CrossbarClient(argv.crossbarUrl);
-    const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
 
     console.log("🔧 Solana Configuration:");
     console.log(`  Wallet: ${keypair.publicKey.toBase58()}`);
@@ -192,7 +195,7 @@ function createSignature(
     });
 
     console.log("  ✅ Simulation Result:");
-    console.log(`    Response: ${simulation.results[0]}...\n`);
+    console.log(`    Response: ${simulation.results?.[0]}...\n`);
 
     let quoteIx;
     let lastError;
@@ -210,7 +213,6 @@ function createSignature(
               KALSHI_API_KEY_ID: argv.apiKeyId,
             },
             instructionIdx: 0,
-            payer: keypair.publicKey,
           }
         );
         console.log(`  ✅ Successfully fetched quote instruction\n`);
@@ -237,8 +239,8 @@ function createSignature(
       .verifyKalshiFeed(argv.orderId)
     .accounts({
       queue: queue.pubkey,
-      slothashSysvar: sb.SYSVAR_SLOTHASHES_PUBKEY,
-      instructionSysvar: sb.SYSVAR_INSTRUCTIONS_PUBKEY,
+      slothashSysvar: SYSVAR_SLOT_HASHES_PUBKEY,
+      instructionSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
     .instruction();
 

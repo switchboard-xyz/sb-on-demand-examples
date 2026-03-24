@@ -19,7 +19,8 @@
   "author": "Switchboard",
   "license": "MIT",
   "dependencies": {
-    "@switchboard-xyz/common": "^5.2.2"
+    "@switchboard-xyz/common": "^5.7.0",
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",

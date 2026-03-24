@@ -1,5 +1,5 @@
 import { CrossbarClient, OracleJob } from "@switchboard-xyz/common";
-import { getAccessToken } from "./oauth.ts";
+import { getAccessToken } from "./oauth";
 
 /**
  * Creates an Oracle Job definition to fetch Twitter/X follower count
@@ -94,7 +94,7 @@ function getTwitterFollowerCountJob(username: string): OracleJob {
   // Mask any tokens in error messages
   let errorMessage = error.message || String(error);
   // Replace any long alphanumeric strings that look like tokens
-  errorMessage = errorMessage.replace(/[A-Za-z0-9]{20,}/g, (match) => {
+  errorMessage = errorMessage.replace(/[A-Za-z0-9]{20,}/g, (match: string) => {
     return match.slice(0, 5) + "***";
   });
 

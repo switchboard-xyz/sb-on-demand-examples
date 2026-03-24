@@ -7,23 +7,22 @@
  *
  * Prerequisites:
  * - Bun runtime: https://bun.sh
- * - Access to Switchboard Surge updates
+ * - `npm install` in this package directory
  *
  * Installation:
- *   bun add @switchboard-xyz/common
+ *   npm install
  *
  * Usage:
  *   # Basic conversion with sample data
- *   bun examples/surgeToEvmConversion.ts
+ *   bun run surge-convert
  *
  *   # With custom surge data (JSON file)
- *   SURGE_DATA_FILE=path/to/surge-data.json bun examples/surgeToEvmConversion.ts
+ *   SURGE_DATA_FILE=path/to/surge-data.json bun run surge-convert
  *
  * @author Switchboard Labs
  * @license MIT
  */
 
-// Import from the local common library since we just added the new functionality
 import { EVMUtils, type SurgeRawGatewayResponse } from '@switchboard-xyz/common';
 import * as fs from 'fs';
 

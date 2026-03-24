@@ -1,32 +1,35 @@
 import { ethers } from "ethers";
 import { CrossbarClient } from "@switchboard-xyz/common";
-import { sleep } from "./utils";
-
-const DEFAULT_RPC_URL = "https://testnet-rpc.monad.xyz";
-const DEFAULT_NATIVE_SYMBOL = "MON";
-const DEFAULT_WAGER = "0.01";
-const SETTLEMENT_BUFFER_SECONDS = 10;
+import {
+    MONAD_NETWORKS,
+    getValidatedNetwork,
+    requireDeployedContract,
+    requirePrivateKey,
+} from "../../../network";
 
 async function main() {
-
-    const privateKey = process.env.PRIVATE_KEY;
-    if (!privateKey) {
-        throw new Error("PRIVATE_KEY is not set");
-    }
-
-    const rpcUrl = process.env.RPC_URL || DEFAULT_RPC_URL;
-    const nativeSymbol = process.env.NATIVE_SYMBOL || DEFAULT_NATIVE_SYMBOL;
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const privateKey = requirePrivateKey();
+    const config = await getValidatedNetwork({
+        allowedNetworks: MONAD_NETWORKS,
+    });
+    const provider = new ethers.JsonRpcProvider(config.rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);
 
     // Initialize Crossbar
     const crossbar = new CrossbarClient("https://crossbar.switchboard.xyz");
 
-    const COIN_FLIP_CONTRACT_ADDRESS = process.env.COIN_FLIP_CONTRACT_ADDRESS;
+    const COIN_FLIP_CONTRACT_ADDRESS = await requireDeployedContract(
+        config,
+        "COIN_FLIP_CONTRACT_ADDRESS",
+        "CoinFlip"
+    );
 
-    if (!COIN_FLIP_CONTRACT_ADDRESS) {
-        throw new Error("COIN_FLIP_CONTRACT_ADDRESS is not set");
-    }
+    console.log(`Network: ${config.name} (${config.key})`);
+    console.log(`Chain ID: ${config.chainId}`);
+    console.log(`RPC URL: ${config.rpcUrl}`);
+    console.log(`Switchboard: ${config.switchboard}`);
+    console.log(`CoinFlip: ${COIN_FLIP_CONTRACT_ADDRESS}`);
+    console.log(`Wallet: ${wallet.address}`);
 
     // CoinFlip ABI
     const coinFlipAbi = [
@@ -41,40 +44,22 @@ async function main() {
     // CoinFlip contract
     const coinFlipContract = new ethers.Contract(COIN_FLIP_CONTRACT_ADDRESS, coinFlipAbi, wallet);
 
-    let wagerRandomnessId: string = await coinFlipContract.getWagerRandomnessId(wallet.address);
+    // Run the coin flip
+    const tx = await coinFlipContract.coinFlip({ value: ethers.parseEther("1") });
+    await tx.wait();
+    console.log("Coin flip transaction sent", tx);
 
-    if (wagerRandomnessId === ethers.ZeroHash) {
-        const wagerAmount = process.env.WAGER_AMOUNT || DEFAULT_WAGER;
-        const tx = await coinFlipContract.coinFlip({ value: ethers.parseEther(wagerAmount) });
-        await tx.wait();
-        console.log("Coin flip transaction sent", tx);
-
-        wagerRandomnessId = await coinFlipContract.getWagerRandomnessId(wallet.address);
-        console.log("Wager randomness ID:", wagerRandomnessId);
-    } else {
-        console.log("Found pending wager, resuming settlement:", wagerRandomnessId);
-    }
+    // Get the wager randomness ID
+    const wagerRandomnessId: string = await coinFlipContract.getWagerRandomnessId(wallet.address);
+    console.log("Wager randomness ID:", wagerRandomnessId);
+    
 
     const wagerData = await coinFlipContract.getWagerData(wallet.address);
     console.log("Wager data:", wagerData);
 
-    const settlementTime =
-        Number(wagerData.rollTimestamp) + Number(wagerData.minSettlementDelay);
-    const now = Math.floor(Date.now() / 1000);
-    const waitSeconds = Math.max(0, settlementTime - now + SETTLEMENT_BUFFER_SECONDS);
-
-    if (waitSeconds > 0) {
-        console.log(`Waiting ${waitSeconds}s for randomness settlement window...`);
-        await sleep(waitSeconds * 1000);
-    }
-
-    // Get the chain ID dynamically from the provider
-    const network = await provider.getNetwork();
-    const chainId = Number(network.chainId);
-
     // Get the randomness from Switchboard
     const { encoded } = await crossbar.resolveEVMRandomness({
-        chainId,
+        chainId: config.chainId,
         randomnessId: wagerRandomnessId,
         timestamp: Number(wagerData.rollTimestamp),
         minStalenessSeconds: Number(wagerData.minSettlementDelay),
@@ -104,7 +89,7 @@ async function main() {
         console.log("\n========================================");
         if (won) {
             console.log("🎉 YOU WON!");
-            console.log(`💰 Payout: ${ethers.formatEther(payout)} ${nativeSymbol}`);
+            console.log(`💰 Payout: ${ethers.formatEther(payout)} ${config.nativeSymbol}`);
         } else {
             console.log("😔 YOU LOST");
             console.log("💸 Better luck next time!");
@@ -117,4 +102,7 @@ async function main() {
     }
 }
 
-main();
+main().catch((error) => {
+    console.error("Error:", error.message || error);
+    process.exit(1);
+});

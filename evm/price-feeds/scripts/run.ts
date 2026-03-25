@@ -112,8 +112,8 @@ function formatValue(value: bigint, decimals: number = 18): string {
   return `${whole}.${trimmed}`;
 }
 
-function getCrossbarNetwork(networkName: string): 'mainnet' | 'testnet' {
-  return networkName === 'monad-mainnet' ? 'mainnet' : 'testnet';
+function getCrossbarNetwork(networkKey: string): 'mainnet' | 'testnet' {
+  return networkKey === 'monad-mainnet' ? 'mainnet' : 'testnet';
 }
 
 async function fetchFeedData(
@@ -121,7 +121,7 @@ async function fetchFeedData(
   networkConfig: ResolvedNetworkConfig
 ) {
   const normalizedHash = normalizeFeedHash(feedHash);
-  const crossbarNetwork = getCrossbarNetwork(networkConfig.name);
+  const crossbarNetwork = getCrossbarNetwork(networkConfig.key);
 
   console.log('📡 Fetching feed data from Switchboard Crossbar...');
   console.log(`   Feed: ${normalizedHash}`);

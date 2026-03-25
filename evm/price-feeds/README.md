@@ -43,6 +43,10 @@ The deploy and runtime scripts enforce guardrails before broadcast:
 
 ```bash
 bun install
+(
+  cd ../randomness/coin-flip
+  [ -d lib/forge-std ] || forge install foundry-rs/forge-std --no-git --shallow
+)
 forge build
 cp .env.example .env
 ```

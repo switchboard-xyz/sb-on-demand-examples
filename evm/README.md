@@ -44,10 +44,12 @@ Each example is a standalone Foundry project. Navigate to the specific example a
 ```bash
 # Price Feeds Example
 cd evm/price-feeds
-bun install && forge build
+bun install
+(cd ../randomness/coin-flip && ([ -d lib/forge-std ] || forge install foundry-rs/forge-std --no-git --shallow))
+forge build
 cp .env.example .env  # Edit .env with your private key
 
-# Default: Monad testnet
+# Default: Monad testnet. If CONTRACT_ADDRESS is unset, this deploys a fresh consumer automatically.
 bun run example
 
 # Flip everything to Monad mainnet with one env var
@@ -55,14 +57,19 @@ NETWORK=monad-mainnet bun run example
 
 # Randomness Examples
 cd ../randomness/coin-flip   # or pancake-stacker
-bun install && forge build
+bun install
+[ -d lib/forge-std ] || forge install foundry-rs/forge-std --no-git --shallow
+forge build
 cp .env.example .env  # Edit .env with your private key
 bun run deploy
+# Save the emitted contract address back into .env before running the CLI.
+# For coin-flip, fund the contract bankroll before the first flip.
 bun run flip
 
 # Generic randomness helper
 cd ../
 bun install
+cp .env.example .env  # Edit .env with your private key
 bun run example
 ```
 
@@ -275,12 +282,15 @@ Cryptographically secure verifiable randomness for gaming, NFTs, and DeFi.
 ```bash
 # Navigate to a randomness example
 cd evm/randomness/coin-flip  # or pancake-stacker
-bun install && forge build
+bun install
+[ -d lib/forge-std ] || forge install foundry-rs/forge-std --no-git --shallow
+forge build
 
 # Configure environment
 cp .env.example .env  # Edit .env with your private key and contract address
 
-# Run the example
+# Deploy, save the emitted contract address into .env, then run the example.
+# For coin-flip, fund the contract bankroll before the first flip.
 bun run flip
 ```
 

@@ -7,6 +7,8 @@ import {
     requirePrivateKey,
 } from "../../../network";
 
+const DEFAULT_WAGER_AMOUNT = ethers.parseEther("0.01");
+
 async function main() {
     const privateKey = requirePrivateKey();
     const config = await getValidatedNetwork({
@@ -30,6 +32,9 @@ async function main() {
     console.log(`Switchboard: ${config.switchboard}`);
     console.log(`CoinFlip: ${COIN_FLIP_CONTRACT_ADDRESS}`);
     console.log(`Wallet: ${wallet.address}`);
+    console.log(
+        `Default wager: ${ethers.formatEther(DEFAULT_WAGER_AMOUNT)} ${config.nativeSymbol}`
+    );
 
     // CoinFlip ABI
     const coinFlipAbi = [
@@ -43,9 +48,24 @@ async function main() {
 
     // CoinFlip contract
     const coinFlipContract = new ethers.Contract(COIN_FLIP_CONTRACT_ADDRESS, coinFlipAbi, wallet);
+    const contractBalance = await provider.getBalance(COIN_FLIP_CONTRACT_ADDRESS);
+
+    console.log(
+        `Contract bankroll: ${ethers.formatEther(contractBalance)} ${config.nativeSymbol}`
+    );
+
+    if (contractBalance < DEFAULT_WAGER_AMOUNT) {
+        throw new Error(
+            `CoinFlip bankroll is too low for the default ${ethers.formatEther(
+                DEFAULT_WAGER_AMOUNT
+            )} ${config.nativeSymbol} wager. Fund the contract with at least ${ethers.formatEther(
+                DEFAULT_WAGER_AMOUNT
+            )} ${config.nativeSymbol} before running bun run flip.`
+        );
+    }
 
     // Run the coin flip
-    const tx = await coinFlipContract.coinFlip({ value: ethers.parseEther("1") });
+    const tx = await coinFlipContract.coinFlip({ value: DEFAULT_WAGER_AMOUNT });
     await tx.wait();
     console.log("Coin flip transaction sent", tx);
 

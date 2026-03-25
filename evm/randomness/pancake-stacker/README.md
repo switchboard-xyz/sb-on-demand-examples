@@ -41,6 +41,7 @@ Guardrails:
 
 ```bash
 bun install
+[ -d lib/forge-std ] || forge install foundry-rs/forge-std --no-git --shallow
 forge build
 cp .env.example .env
 ```

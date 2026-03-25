@@ -7,6 +7,8 @@ This example shows the standard EVM randomness flow with a simple wagering game:
 3. Ask Crossbar for the encoded randomness reveal
 4. Call `settleFlip(encoded)` to verify and use the result on-chain
 
+The contract accepts any positive wager. The packaged CLI uses a `0.01 MON` smoke-test wager by default.
+
 ## Prerequisites
 
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
@@ -42,6 +44,7 @@ Guardrails:
 
 ```bash
 bun install
+[ -d lib/forge-std ] || forge install foundry-rs/forge-std --no-git --shallow
 forge build
 cp .env.example .env
 ```
@@ -79,6 +82,15 @@ bun run deploy:monad-mainnet
 
 After deployment, save the emitted contract address into `COIN_FLIP_CONTRACT_ADDRESS`.
 
+Before running the CLI, fund the contract with a separate bankroll so it can pay winning flips. For the packaged `0.01 MON` smoke test, a minimal example is:
+
+```bash
+cast send $COIN_FLIP_CONTRACT_ADDRESS \
+  --rpc-url ${RPC_URL:-https://testnet-rpc.monad.xyz} \
+  --private-key $PRIVATE_KEY \
+  --value 0.01ether
+```
+
 ## Run The Coin Flip
 
 ```bash
@@ -91,7 +103,8 @@ The runtime script will:
 - verify the RPC chain ID
 - verify the Switchboard contract exists on that chain
 - verify `COIN_FLIP_CONTRACT_ADDRESS` exists on that chain
-- submit the flip
+- check the contract bankroll for the default `0.01 MON` wager
+- submit the flip with a `0.01 MON` wager
 - resolve the randomness through Crossbar
 - settle the result on-chain
 
@@ -112,3 +125,5 @@ forge script deploy/CoinFlip.s.sol:CoinFlipScript \
   --rpc-url $RPC_URL \
   --broadcast
 ```
+
+After the Forge deploy completes, save the emitted contract address into `COIN_FLIP_CONTRACT_ADDRESS`, fund the bankroll, and then run `bun run flip` with the same `.env` file.

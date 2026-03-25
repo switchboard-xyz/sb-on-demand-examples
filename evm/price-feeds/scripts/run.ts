@@ -112,49 +112,54 @@ function formatValue(value: bigint, decimals: number = 18): string {
   return `${whole}.${trimmed}`;
 }
 
+function getCrossbarNetwork(networkName: string): 'mainnet' | 'testnet' {
+  return networkName === 'monad-mainnet' ? 'mainnet' : 'testnet';
+}
+
 async function fetchFeedData(
   feedHash: string,
   networkConfig: ResolvedNetworkConfig
 ) {
   const normalizedHash = normalizeFeedHash(feedHash);
+  const crossbarNetwork = getCrossbarNetwork(networkConfig.name);
 
   console.log('📡 Fetching feed data from Switchboard Crossbar...');
   console.log(`   Feed: ${normalizedHash}`);
   console.log(`   Chain ID: ${networkConfig.chainId}`);
+  console.log(`   Crossbar network: ${crossbarNetwork}`);
 
   try {
     const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-    const response = await crossbar.fetchEVMResults({
-      chainId: networkConfig.chainId,
-      aggregatorIds: [normalizedHash],
+    const response = await crossbar.fetchV2Update([normalizedHash], {
+      chain: 'evm',
+      network: crossbarNetwork,
+      use_timestamp: true,
     });
-    const failures = (response as { failures?: string[] }).failures;
 
-    if (!response.encoded.length) {
-      throw new Error(
-        failures?.join('; ') || 'No encoded data returned for this feed'
-      );
+    if (!response.encoded) {
+      throw new Error('No encoded data returned for this feed');
     }
 
-    const latestResult = response.results?.[0];
-    if (failures?.length) {
-      console.warn(`⚠️  Crossbar reported failures: ${failures.join('; ')}`);
+    const latestResult =
+      response.medianResponses.find(
+        medianResponse =>
+          medianResponse.feedHash.toLowerCase() === normalizedHash.toLowerCase()
+      ) ?? response.medianResponses[0];
+
+    if (!latestResult) {
+      throw new Error('No median response returned for this feed');
     }
 
     console.log('✅ Feed data retrieved:');
-    if (latestResult?.result) {
-      console.log(`   Value: ${formatValue(BigInt(latestResult.result))}`);
-    }
-    if (latestResult?.timestamp) {
-      console.log(`   Timestamp: ${new Date(latestResult.timestamp * 1000).toISOString()}`);
-    }
-    console.log(`   Encoded updates: ${response.encoded.length}`);
+    console.log(`   Value: ${formatValue(BigInt(latestResult.value))}`);
+    console.log(`   Timestamp: ${new Date(response.timestamp * 1000).toISOString()}`);
+    console.log('   Encoded updates: 1');
 
     return {
       feedHash: normalizedHash,
-      value: latestResult?.result,
-      timestamp: latestResult?.timestamp,
-      encoded: response.encoded,
+      value: latestResult.value,
+      timestamp: response.timestamp,
+      encoded: [response.encoded],
     };
   } catch (error: any) {
     throw new Error(`Failed to fetch feed data: ${error.message}`);

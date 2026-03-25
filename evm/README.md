@@ -95,30 +95,53 @@ evm/
 
 Real-time oracle price data for DeFi applications.
 
+For Feed Builder and custom feeds on Monad, use the v2 feed-hash flow. The legacy `fetchEVMResults` path is kept only under [legacy examples](./legacy/).
+
 ### Integration Example
 
 ```typescript
 import { ethers } from 'ethers';
 import { CrossbarClient } from '@switchboard-xyz/common';
 
+const privateKey = process.env.PRIVATE_KEY!;
+const contractAddress = process.env.CONTRACT_ADDRESS!;
+const switchboardAddress = process.env.SWITCHBOARD_ADDRESS!;
+const rpcUrl = process.env.RPC_URL ?? 'https://testnet-rpc.monad.xyz';
+
 const SWITCHBOARD_ABI = [
   'function getFee(bytes[] calldata updates) external view returns (uint256)',
+];
+const PRICE_CONSUMER_ABI = [
+  'function updatePrices(bytes[] calldata updates, bytes32[] calldata feedIds) external payable',
+  'function getPrice(bytes32 feedId) external view returns (int128 value, uint256 timestamp, uint64 slotNumber)',
 ];
 
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 const signer = new ethers.Wallet(privateKey, provider);
+const crossbarNetwork = process.env.NETWORK === 'monad-mainnet' ? 'mainnet' : 'testnet';
+const feedId = '0xa0950ee5ee117b2e2c30f154a69e17bfb489a7610c508dc5f67eb2a14616d8ea';
 
 // Fetch oracle data
 const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
-const { encoded } = await crossbar.fetchEVMResults({
-  chainId: 143,
-  aggregatorIds: [feedHash],
+await crossbar.simulateFeed(feedId, false, undefined, crossbarNetwork);
+
+const response = await crossbar.fetchV2Update([feedId], {
+  chain: 'evm',
+  network: crossbarNetwork,
+  use_timestamp: true,
 });
 
+if (!response.encoded) {
+  throw new Error('Crossbar returned no encoded update payload');
+}
+
+const updates = [response.encoded];
+
 // Submit update
+const contract = new ethers.Contract(contractAddress, PRICE_CONSUMER_ABI, signer);
 const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
-const fee = await switchboard.getFee(encoded);
-const tx = await contract.updatePrices(encoded, [feedHash], { value: fee });
+const fee = await switchboard.getFee(updates);
+const tx = await contract.updatePrices(updates, [feedId], { value: fee });
 await tx.wait();
 
 // Query price

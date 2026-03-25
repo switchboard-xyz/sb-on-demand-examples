@@ -2,6 +2,8 @@
 
 This directory contains the previous version of the EVM examples using the older Switchboard implementation.
 
+This is the only EVM example set that intentionally uses the legacy `aggregatorId` + `fetchEVMResults()` flow. New Monad and Feed Builder integrations in the parent directory use `fetchV2Update()` instead.
+
 ## 📁 Contents
 
 - **`src/Example.sol`** - Basic example contract using the legacy Switchboard interface
@@ -96,9 +98,8 @@ See the [main README](../README.md) for the new implementation.
 
 - [Switchboard Documentation](https://docs.switchboard.xyz)
 - [Legacy Contract Addresses](https://docs.switchboard.xyz/product-documentation/data-feeds/evm/contract-addresses)
-- [Discord Community](https://discord.gg/TJAv6ZYvPC)
+- [Discord Community](https://discord.gg/switchboardxyz)
 
 ---
 
 **Note**: This legacy implementation is maintained for reference and compatibility with existing deployments on non-Monad chains. For new projects, please use the updated implementation in the parent directory.
-

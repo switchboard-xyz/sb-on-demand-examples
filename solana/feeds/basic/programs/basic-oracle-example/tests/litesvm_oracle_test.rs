@@ -1,19 +1,3 @@
-/// Litesvm Integration Test for Switchboard Oracle
-///
-/// This test demonstrates how to use litesvm for fast, local testing
-/// of Switchboard oracle integrations without needing a validator.
-///
-/// Key concepts:
-/// 1. Use QuoteBuilder to create mock quote data with oracle feeds
-/// 2. Set up the quote account in litesvm's in-memory ledger
-/// 3. Call your program that consumes oracle data
-/// 4. Verify results instantly
-///
-/// Benefits:
-/// - No validator needed (tests run in ~10ms vs ~10s)
-/// - Deterministic testing with controlled feed values
-/// - Perfect for CI/CD and TDD workflows
-
 use anchor_lang::InstructionData;
 use litesvm::LiteSVM;
 use solana_sdk::{
@@ -23,22 +7,30 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
-use switchboard_on_demand::{on_demand::oracle_quote::QuoteBuilder, default_queue, QUOTE_PROGRAM_ID};
+use switchboard_on_demand::{
+    default_queue,
+    on_demand::oracle_quote::QuoteBuilder,
+    QUOTE_PROGRAM_ID,
+};
 
-// Re-export the program module so we can access instruction builders
 use basic_oracle_example;
 
-#[test]
-fn test_oracle_integration_with_litesvm() {
-    println!("\n🚀 Starting Litesvm Oracle Integration Test\n");
+const BTC_FEED: [u8; 32] = [
+    0xef, 0x0d, 0x8b, 0x6f, 0xcd, 0x01, 0x04, 0xe3,
+    0xe7, 0x50, 0x96, 0x91, 0x2f, 0xc8, 0xe1, 0xe4,
+    0x32, 0x89, 0x3d, 0xa4, 0xf1, 0x8f, 0xae, 0xda,
+    0xac, 0xca, 0x7e, 0x58, 0x75, 0xda, 0x62, 0x0f,
+];
 
-    // Step 1: Initialize litesvm
-    println!("📦 Initializing litesvm...");
-    let mut svm = LiteSVM::new();
+const ETH_FEED: [u8; 32] = [
+    0x84, 0xc2, 0xdd, 0xe9, 0x63, 0x3d, 0x93, 0xd1,
+    0xbc, 0xad, 0x84, 0xe7, 0xdc, 0x41, 0xc9, 0xd5,
+    0x65, 0x78, 0xb7, 0xec, 0x52, 0xfa, 0xbe, 0xdc,
+    0x1f, 0x33, 0x5d, 0x67, 0x3d, 0xf0, 0xa7, 0xc1,
+];
 
-    // Load the program
+fn load_program(svm: &mut LiteSVM) {
     let program_id = Pubkey::from(basic_oracle_example::ID.to_bytes());
-    println!("📚 Loading program: {}", program_id);
     let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let program_path = manifest_dir
         .parent()
@@ -46,387 +38,201 @@ fn test_oracle_integration_with_litesvm() {
         .parent()
         .unwrap()
         .join("target/deploy/basic_oracle_example.so");
+
+    assert!(
+        program_path.exists(),
+        "Program artifact missing at {}. Run `anchor build` before `cargo test`.",
+        program_path.display()
+    );
+
     svm.add_program_from_file(program_id, program_path.to_str().unwrap())
-        .expect("Failed to load program");
-
-    // Step 2: Create and fund a payer
-    let payer = Keypair::new();
-    println!("💰 Payer: {}", payer.pubkey());
-    svm.airdrop(&payer.pubkey(), 10_000_000_000).unwrap();
-
-    // Step 3: Use the default devnet queue
-    let queue_key = default_queue();
-    println!("🔗 Queue: {}", queue_key);
-
-    // Step 4: Create mock oracle data using QuoteBuilder
-    println!("\n📊 Creating mock oracle data...");
-    // BTC/USD feed ID from Switchboard Explorer
-    let feed_bytes: [u8; 32] = [
-        0xef, 0x0d, 0x8b, 0x6f, 0xcd, 0x01, 0x04, 0xe3,
-        0xe7, 0x50, 0x96, 0x91, 0x2f, 0xc8, 0xe1, 0xe4,
-        0x32, 0x89, 0x3d, 0xa4, 0xf1, 0x8f, 0xae, 0xda,
-        0xac, 0xca, 0x7e, 0x58, 0x75, 0xda, 0x62, 0x0f,
-    ];
-    let btc_price = 95000.0;
-
-    // Warp to slot 1000 to create the quote
-    svm.warp_to_slot(1000);
-    let quote_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
-    println!("   Quote slot: {}", quote_slot);
-
-    // Build the quote with our test data
-    let quote = QuoteBuilder::new(queue_key)
-        .add_feed(&feed_bytes, btc_price)
-        .slot(quote_slot)
-        .build()
-        .expect("Failed to build quote");
-
-    println!("   Feed ID: 0x{}", hex::encode(&feed_bytes));
-    println!("   Price: ${}", btc_price);
-
-    // Serialize to account data format (includes discriminator)
-    let account_data = quote.to_account_data().expect("Failed to serialize");
-    println!("   Account data size: {} bytes", account_data.len());
-    println!("   First 8 bytes (discriminator): {:?}", &account_data[0..8]);
-
-    // Step 5: Derive the canonical quote account address using the quote's canonical_key method
-    // This ensures we use the same derivation logic as the program
-    let quote_account = Pubkey::new_from_array(
-        quote.canonical_key(
-            &queue_key,
-            &Pubkey::from(QUOTE_PROGRAM_ID.to_bytes())
-        ).to_bytes()
-    );
-    println!("\n📍 Quote Account (PDA): {}", quote_account);
-
-    // Step 6: Create the quote account in litesvm
-    println!("   Creating quote account in litesvm...");
-    svm.set_account(
-        quote_account,
-        Account {
-            lamports: 1_000_000, // Rent-exempt amount
-            data: account_data.clone(),
-            owner: Pubkey::from(QUOTE_PROGRAM_ID.to_bytes()),
-            executable: false,
-            rent_epoch: 0,
-        }
-    ).expect("Failed to create quote account");
-
-    // Verify the account was created
-    let account_info = svm.get_account(&quote_account).expect("Account should exist");
-    println!("   ✓ Quote account created with {} bytes, owner: {}", account_info.data.len(), account_info.owner);
-
-    // Advance time to demonstrate staleness
-    svm.warp_to_slot(1050);
-    let current_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
-    println!("   ⏰ Advanced to slot: {} (quote is {} slots old)", current_slot, current_slot - quote_slot);
-
-    // Step 7: Get sysvars required by the program
-    let clock_sysvar = solana_sdk::sysvar::clock::id();
-    let slothashes_sysvar = solana_sdk::sysvar::slot_hashes::id();
-    let instructions_sysvar = solana_sdk::sysvar::instructions::id();
-
-    println!("\n🔧 System accounts:");
-    println!("   Clock: {}", clock_sysvar);
-    println!("   SlotHashes: {}", slothashes_sysvar);
-    println!("   Instructions: {}", instructions_sysvar);
-
-    // Step 8: Create instruction to call the oracle program
-    println!("\n📝 Creating program instruction...");
-
-    let program_id = basic_oracle_example::ID;
-    println!("   Program ID: {}", program_id);
-
-    // Build account metas manually (since Sysvars struct has lifetimes)
-    let accounts = vec![
-        AccountMeta::new_readonly(quote_account, false),  // quote_account
-        AccountMeta::new_readonly(clock_sysvar, false),    // sysvars.clock
-        AccountMeta::new_readonly(slothashes_sysvar, false), // sysvars.slothashes
-        AccountMeta::new_readonly(instructions_sysvar, false), // sysvars.instructions
-    ];
-
-    let instruction = Instruction {
-        program_id,
-        accounts,
-        data: basic_oracle_example::instruction::ReadOracleData {}.data(),
-    };
-
-    // Step 9: Create and send transaction
-    println!("\n📤 Sending transaction...");
-    let blockhash = svm.latest_blockhash();
-    let transaction = Transaction::new_signed_with_payer(
-        &[instruction],
-        Some(&payer.pubkey()),
-        &[&payer],
-        blockhash,
-    );
-
-    // Execute the transaction
-    let result = svm.send_transaction(transaction);
-
-    // Step 10: Verify the result
-    println!("\n✅ Verifying results...");
-    match result {
-        Ok(metadata) => {
-            println!("   ✓ Transaction succeeded!");
-            println!("   Compute units used: {:?}", metadata.compute_units_consumed);
-
-            // Print all logs
-            println!("\n📋 Program logs:");
-            for log in &metadata.logs {
-                println!("   {}", log);
-
-                // Verify we processed the feed
-                if log.contains("Number of feeds: 1") {
-                    println!("   ✓ Correctly processed 1 feed");
-                }
-
-                // Verify the feed ID was logged
-                if log.contains("ef0d8b6fcd") {
-                    println!("   ✓ Feed ID matches");
-                }
-
-                // Verify the price value (scaled to 18 decimals)
-                if log.contains("95000") {
-                    println!("   ✓ Price value correct: ${}", btc_price);
-                }
-            }
-
-            println!("\n🎉 Test completed successfully!");
-        }
-        Err(e) => {
-            // Print logs even on failure
-            if let litesvm::types::FailedTransactionMetadata { meta, .. } = &e {
-                println!("\n📋 Program logs (from failed transaction):");
-                for log in &meta.logs {
-                    println!("   {}", log);
-                }
-            }
-            panic!("❌ Transaction failed: {:?}", e);
-        }
-    }
+        .expect("Failed to load basic_oracle_example program");
 }
 
-#[test]
-fn test_multiple_feeds() {
-    println!("\n🚀 Testing Multiple Oracle Feeds\n");
-
-    let mut svm = LiteSVM::new();
-
-    // Load the program
-    let program_id = Pubkey::from(basic_oracle_example::ID.to_bytes());
-    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let program_path = manifest_dir
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .join("target/deploy/basic_oracle_example.so");
-    svm.add_program_from_file(program_id, program_path.to_str().unwrap())
-        .expect("Failed to load program");
-
+fn funded_payer(svm: &mut LiteSVM) -> Keypair {
     let payer = Keypair::new();
     svm.airdrop(&payer.pubkey(), 10_000_000_000).unwrap();
+    payer
+}
 
+fn store_quote(
+    svm: &mut LiteSVM,
+    feeds: &[([u8; 32], f64)],
+    quote_slot: u64,
+) -> Pubkey {
     let queue_key = default_queue();
+    let quote_program_id = Pubkey::from(QUOTE_PROGRAM_ID.to_bytes());
 
-    // Create a quote with multiple feeds
-    let btc_feed: [u8; 32] = [
-        0xef, 0x0d, 0x8b, 0x6f, 0xcd, 0x01, 0x04, 0xe3,
-        0xe7, 0x50, 0x96, 0x91, 0x2f, 0xc8, 0xe1, 0xe4,
-        0x32, 0x89, 0x3d, 0xa4, 0xf1, 0x8f, 0xae, 0xda,
-        0xac, 0xca, 0x7e, 0x58, 0x75, 0xda, 0x62, 0x0f,
-    ];
+    let mut builder = QuoteBuilder::new(queue_key);
+    builder = builder.slot(quote_slot);
+    for (feed_id, value) in feeds {
+        builder = builder.add_feed(feed_id, *value);
+    }
 
-    let eth_feed: [u8; 32] = [
-        0x84, 0xc2, 0xdd, 0xe9, 0x63, 0x3d, 0x93, 0xd1,
-        0xbc, 0xad, 0x84, 0xe7, 0xdc, 0x41, 0xc9, 0xd5,
-        0x65, 0x78, 0xb7, 0xec, 0x52, 0xfa, 0xbe, 0xdc,
-        0x1f, 0x33, 0x5d, 0x67, 0x3d, 0xf0, 0xa7, 0xc1,
-    ];
-
-    println!("📊 Creating quote with multiple feeds:");
-    println!("   BTC/USD: $95000");
-    println!("   ETH/USD: $3500");
-
-    // Get current slot from litesvm
-    let current_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
-    println!("   Current slot: {}", current_slot);
-
-    let quote = QuoteBuilder::new(queue_key)
-        .add_feed(&btc_feed, 95000.0)
-        .add_feed(&eth_feed, 3500.0)
-        .slot(current_slot)
-        .build()
-        .expect("Failed to build quote");
-
-    let account_data = quote.to_account_data().expect("Failed to serialize");
-
-    // Derive oracle account using the quote's canonical_key method
+    let quote = builder.build().expect("Failed to build quote");
     let quote_account = Pubkey::new_from_array(
-        quote.canonical_key(
-            &queue_key,
-            &Pubkey::from(QUOTE_PROGRAM_ID.to_bytes())
-        ).to_bytes()
+        quote
+            .canonical_key(&queue_key, &quote_program_id)
+            .to_bytes(),
     );
+    let account_data = quote.to_account_data().expect("Failed to serialize quote");
 
     svm.set_account(
         quote_account,
         Account {
             lamports: 1_000_000,
             data: account_data,
-            owner: Pubkey::from(QUOTE_PROGRAM_ID.to_bytes()),
+            owner: quote_program_id,
             executable: false,
             rent_epoch: 0,
-        }
-    ).unwrap();
+        },
+    )
+    .expect("Failed to create quote account");
 
-    // Call the program
-    let accounts = vec![
-        AccountMeta::new_readonly(quote_account, false),  // quote_account
-        AccountMeta::new_readonly(solana_sdk::sysvar::clock::id(), false),    // sysvars.clock
-        AccountMeta::new_readonly(solana_sdk::sysvar::slot_hashes::id(), false), // sysvars.slothashes
-        AccountMeta::new_readonly(solana_sdk::sysvar::instructions::id(), false), // sysvars.instructions
-    ];
+    quote_account
+}
 
-    let instruction = Instruction {
+fn read_oracle_data_ix(quote_account: Pubkey) -> Instruction {
+    Instruction {
         program_id: Pubkey::from(basic_oracle_example::ID.to_bytes()),
-        accounts,
+        accounts: vec![
+            AccountMeta::new_readonly(quote_account, false),
+            AccountMeta::new_readonly(solana_sdk::sysvar::clock::id(), false),
+        ],
         data: basic_oracle_example::instruction::ReadOracleData {}.data(),
-    };
+    }
+}
+
+fn print_logs(logs: &[String]) {
+    println!("\n📋 Program logs:");
+    for log in logs {
+        println!("   {}", log);
+    }
+}
+
+#[test]
+fn test_oracle_integration_with_litesvm() {
+    println!("\n🚀 Testing single-feed basic oracle integration\n");
+
+    let mut svm = LiteSVM::new();
+    load_program(&mut svm);
+    let payer = funded_payer(&mut svm);
+
+    svm.warp_to_slot(1000);
+    let quote_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
+    let quote_account = store_quote(&mut svm, &[(BTC_FEED, 95_000.0)], quote_slot);
+
+    svm.warp_to_slot(1001);
 
     let transaction = Transaction::new_signed_with_payer(
-        &[instruction],
+        &[read_oracle_data_ix(quote_account)],
         Some(&payer.pubkey()),
         &[&payer],
         svm.latest_blockhash(),
     );
 
-    let result = svm.send_transaction(transaction);
-
-    match result {
+    match svm.send_transaction(transaction) {
         Ok(metadata) => {
-            println!("\n✅ Multiple feeds processed successfully!");
-            println!("   Compute units used: {:?}", metadata.compute_units_consumed);
-
-            println!("\n📋 Program logs:");
-            for log in &metadata.logs {
-                println!("   {}", log);
-                if log.contains("Number of feeds: 2") {
-                    println!("   ✓ Correctly processed 2 feeds");
-                }
-            }
+            print_logs(&metadata.logs);
+            assert!(metadata.logs.iter().any(|log| log.contains("Feed count: 1")));
+            assert!(metadata.logs.iter().any(|log| log.contains("Staleness: 1 slots")));
+            assert!(metadata.logs.iter().any(|log| log.contains("Feed ID: ef0d8b6f")));
+            assert!(
+                metadata
+                    .logs
+                    .iter()
+                    .any(|log| log.contains("Feed value (human-readable): 95000"))
+            );
         }
-        Err(e) => {
-            // Print logs even on failure
-            if let litesvm::types::FailedTransactionMetadata { meta, .. } = &e {
-                println!("\n📋 Program logs (from failed transaction):");
-                for log in &meta.logs {
-                    println!("   {}", log);
-                }
-            }
-            panic!("❌ Transaction failed: {:?}", e);
+        Err(error) => {
+            let litesvm::types::FailedTransactionMetadata { meta, .. } = &error;
+            print_logs(&meta.logs);
+            panic!("Single-feed oracle integration should succeed: {:?}", error);
         }
     }
+}
 
-    println!("\n🎉 Multi-feed test completed!");
+#[test]
+fn test_multiple_feeds_still_uses_feed_zero() {
+    println!("\n🚀 Testing multi-feed quote with single-feed basic consumer\n");
+
+    let mut svm = LiteSVM::new();
+    load_program(&mut svm);
+    let payer = funded_payer(&mut svm);
+
+    svm.warp_to_slot(2000);
+    let quote_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
+    let quote_account = store_quote(
+        &mut svm,
+        &[(BTC_FEED, 95_000.0), (ETH_FEED, 3_500.0)],
+        quote_slot,
+    );
+
+    let transaction = Transaction::new_signed_with_payer(
+        &[read_oracle_data_ix(quote_account)],
+        Some(&payer.pubkey()),
+        &[&payer],
+        svm.latest_blockhash(),
+    );
+
+    match svm.send_transaction(transaction) {
+        Ok(metadata) => {
+            print_logs(&metadata.logs);
+            assert!(metadata.logs.iter().any(|log| log.contains("Feed count: 2")));
+            assert!(
+                metadata
+                    .logs
+                    .iter()
+                    .any(|log| log.contains("Using feed[0] in this basic example"))
+            );
+            assert!(metadata.logs.iter().any(|log| log.contains("Feed ID: ef0d8b6f")));
+            assert!(
+                !metadata.logs.iter().any(|log| {
+                    log.contains("84c2dde9") || log.contains("Feed value (human-readable): 3500")
+                })
+            );
+        }
+        Err(error) => {
+            let litesvm::types::FailedTransactionMetadata { meta, .. } = &error;
+            print_logs(&meta.logs);
+            panic!("Multi-feed quote should still be readable: {:?}", error);
+        }
+    }
 }
 
 #[test]
 fn test_price_extremes() {
-    println!("\n🚀 Testing Price Extremes\n");
+    println!("\n🚀 Testing large human-readable values\n");
 
     let mut svm = LiteSVM::new();
+    load_program(&mut svm);
+    let payer = funded_payer(&mut svm);
 
-    // Load the program
-    let program_id = Pubkey::from(basic_oracle_example::ID.to_bytes());
-    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let program_path = manifest_dir
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .join("target/deploy/basic_oracle_example.so");
-    svm.add_program_from_file(program_id, program_path.to_str().unwrap())
-        .expect("Failed to load program");
-
-    let payer = Keypair::new();
-    svm.airdrop(&payer.pubkey(), 10_000_000_000).unwrap();
-
-    let queue_key = default_queue();
-    let feed_id: [u8; 32] = [0x42; 32];
-
-    // Test with an extreme price
-    let extreme_price = 1_000_000.0;
-    println!("📊 Testing with extreme price: ${}", extreme_price);
-
-    // Get current slot from litesvm
-    let current_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
-    println!("   Current slot: {}", current_slot);
-
-    let quote = QuoteBuilder::new(queue_key)
-        .add_feed(&feed_id, extreme_price)
-        .slot(current_slot)
-        .build()
-        .expect("Failed to build quote");
-
-    let account_data = quote.to_account_data().expect("Failed to serialize");
-
-    // Derive oracle account using the quote's canonical_key method
-    let quote_account = quote.canonical_key(&queue_key, &QUOTE_PROGRAM_ID);
-
-    svm.set_account(
-        quote_account,
-        Account {
-            lamports: 1_000_000,
-            data: account_data,
-            owner: Pubkey::from(QUOTE_PROGRAM_ID.to_bytes()),
-            executable: false,
-            rent_epoch: 0,
-        }
-    ).unwrap();
-
-    let accounts = vec![
-        AccountMeta::new_readonly(quote_account, false),  // quote_account
-        AccountMeta::new_readonly(solana_sdk::sysvar::clock::id(), false),    // sysvars.clock
-        AccountMeta::new_readonly(solana_sdk::sysvar::slot_hashes::id(), false), // sysvars.slothashes
-        AccountMeta::new_readonly(solana_sdk::sysvar::instructions::id(), false), // sysvars.instructions
-    ];
-
-    let instruction = Instruction {
-        program_id: Pubkey::from(basic_oracle_example::ID.to_bytes()),
-        accounts,
-        data: basic_oracle_example::instruction::ReadOracleData {}.data(),
-    };
+    svm.warp_to_slot(3000);
+    let quote_slot = svm.get_sysvar::<solana_sdk::clock::Clock>().slot;
+    let quote_account = store_quote(&mut svm, &[([0x42; 32], 1_000_000.0)], quote_slot);
 
     let transaction = Transaction::new_signed_with_payer(
-        &[instruction],
+        &[read_oracle_data_ix(quote_account)],
         Some(&payer.pubkey()),
         &[&payer],
         svm.latest_blockhash(),
     );
 
-    let result = svm.send_transaction(transaction);
-
-    match result {
+    match svm.send_transaction(transaction) {
         Ok(metadata) => {
-            println!("\n✅ Extreme price handled correctly!");
-            println!("   Compute units used: {:?}", metadata.compute_units_consumed);
-
-            println!("\n📋 Program logs:");
-            for log in &metadata.logs {
-                println!("   {}", log);
-            }
+            print_logs(&metadata.logs);
+            assert!(
+                metadata
+                    .logs
+                    .iter()
+                    .any(|log| log.contains("Feed value (human-readable): 1000000"))
+            );
         }
-        Err(e) => {
-            // Print logs even on failure
-            if let litesvm::types::FailedTransactionMetadata { meta, .. } = &e {
-                println!("\n📋 Program logs (from failed transaction):");
-                for log in &meta.logs {
-                    println!("   {}", log);
-                }
-            }
-            panic!("❌ Should handle extreme price values. Transaction failed: {:?}", e);
+        Err(error) => {
+            let litesvm::types::FailedTransactionMetadata { meta, .. } = &error;
+            print_logs(&meta.logs);
+            panic!("Large prices should still be readable: {:?}", error);
         }
     }
 }

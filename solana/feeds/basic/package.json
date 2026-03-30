@@ -6,8 +6,9 @@
     "start": "ts-node scripts/managedUpdate.ts",
     "update": "ts-node scripts/managedUpdate.ts",
     "create-feed": "ts-node scripts/createManagedFeed.ts",
-    "build": "cargo build-sbf",
-    "test": "cargo test"
+    "build": "npm run build:sbf && ts-node scripts/writeBasicIdl.ts",
+    "build:sbf": "bash scripts/run-cargo-build-sbf.sh",
+    "test": "npm run build:sbf && cargo test"
   },
   "author": "Switchboard Labs",
   "license": "MIT",

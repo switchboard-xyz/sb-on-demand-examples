@@ -1,0 +1,287 @@
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: "/common"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      bun:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/common/twitter-follower-count"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/common/variable-overrides"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"
+
+  - package-ecosystem: cargo
+    directory: "/common/rust-feed-creation"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      rust:
+        patterns:
+          - "*"
+
+  - package-ecosystem: bun
+    directory: "/evm/price-feeds"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      bun:
+        patterns:
+          - "*"
+
+  - package-ecosystem: bun
+    directory: "/evm/randomness"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      bun:
+        patterns:
+          - "*"
+
+  - package-ecosystem: bun
+    directory: "/evm/randomness/coin-flip"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      bun:
+        patterns:
+          - "*"
+
+  - package-ecosystem: bun
+    directory: "/evm/randomness/pancake-stacker"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      bun:
+        patterns:
+          - "*"
+
+  - package-ecosystem: cargo
+    directory: "/solana"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      rust:
+        patterns:
+          - "*"
+
+  - package-ecosystem: cargo
+    directory: "/solana/feeds/advanced"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      rust:
+        patterns:
+          - "*"
+
+  - package-ecosystem: cargo
+    directory: "/solana/feeds/basic"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      rust:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/solana/feeds/basic"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/solana/legacy/feeds"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"
+
+  - package-ecosystem: cargo
+    directory: "/solana/legacy/variable-overrides"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      rust:
+        patterns:
+          - "*"
+
+  - package-ecosystem: bun
+    directory: "/solana/legacy/variable-overrides"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      bun:
+        patterns:
+          - "*"
+
+  - package-ecosystem: cargo
+    directory: "/solana/prediction-market"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      rust:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/solana/prediction-market"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"
+
+  - package-ecosystem: cargo
+    directory: "/solana/randomness/coin-flip"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      rust:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/solana/randomness/coin-flip/scripts"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/solana/surge"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/solana/x402"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: "/sui/surge/basic"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      javascript:
+        patterns:
+          - "*"

@@ -1,0 +1,654 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "randomnessId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint64",
+        "name": "minSettlementDelay",
+        "type": "uint64"
+      }
+    ],
+    "name": "createRandomness",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "oracle",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "randomnessId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint64",
+        "name": "minSettlementDelay",
+        "type": "uint64"
+      },
+      {
+        "internalType": "address",
+        "name": "oracle",
+        "type": "address"
+      }
+    ],
+    "name": "createRandomnessWithOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "feedId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "feedExists",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "exists",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "aggregatorId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "findCurrentResult",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "int128",
+            "name": "result",
+            "type": "int128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int128",
+            "name": "minResult",
+            "type": "int128"
+          },
+          {
+            "internalType": "int128",
+            "name": "maxResult",
+            "type": "int128"
+          },
+          {
+            "internalType": "int128",
+            "name": "stdev",
+            "type": "int128"
+          },
+          {
+            "internalType": "int128",
+            "name": "range",
+            "type": "int128"
+          },
+          {
+            "internalType": "int128",
+            "name": "mean",
+            "type": "int128"
+          }
+        ],
+        "internalType": "struct SwitchboardTypes.CurrentResult",
+        "name": "currentResult",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getActiveFeedCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "offset",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getActiveFeedIds",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "feedIds",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "total",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllActiveFeedIds",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "feedIds",
+        "type": "bytes32[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "updates",
+        "type": "bytes[]"
+      }
+    ],
+    "name": "getFee",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint64",
+            "name": "slotNumber",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "timestamp",
+            "type": "uint64"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "feedId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "int128",
+                "name": "value",
+                "type": "int128"
+              },
+              {
+                "internalType": "uint8",
+                "name": "minOracleSamples",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct SwitchboardTypes.FeedInfo[]",
+            "name": "feedInfos",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bytes[]",
+            "name": "signatures",
+            "type": "bytes[]"
+          }
+        ],
+        "internalType": "struct SwitchboardTypes.FeedUpdateData",
+        "name": "updateData",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "feedId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getFeedValue",
+    "outputs": [
+      {
+        "internalType": "int256",
+        "name": "value",
+        "type": "int256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint64",
+        "name": "slotNumber",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "feedId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getLatestUpdate",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "int128",
+            "name": "result",
+            "type": "int128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint64",
+            "name": "slotNumber",
+            "type": "uint64"
+          }
+        ],
+        "internalType": "struct SwitchboardTypes.Update",
+        "name": "update",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "feedId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getLatestValue",
+    "outputs": [
+      {
+        "internalType": "int128",
+        "name": "value",
+        "type": "int128"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint64",
+        "name": "slotNumber",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "randomnessId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getRandomness",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "randId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "authority",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rollTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint64",
+            "name": "minSettlementDelay",
+            "type": "uint64"
+          },
+          {
+            "internalType": "address",
+            "name": "oracle",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "settledAt",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SwitchboardTypes.Randomness",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "implementation",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "feedId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isFeedActive",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "exists",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "randomnessId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isRandomnessReady",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "ready",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "feedId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "latestUpdate",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "feedId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "int128",
+            "name": "result",
+            "type": "int128"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint64",
+            "name": "slotNumber",
+            "type": "uint64"
+          }
+        ],
+        "internalType": "struct SwitchboardTypes.LegacyUpdate",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "randomnessId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "rerollRandomness",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "oracle",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "randomnessId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "oracle",
+        "type": "address"
+      }
+    ],
+    "name": "rerollRandomnessWithOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "encodedRandomness",
+        "type": "bytes"
+      }
+    ],
+    "name": "settleRandomness",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updateFee",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "feeds",
+        "type": "bytes"
+      }
+    ],
+    "name": "updateFeeds",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint64",
+            "name": "slotNumber",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "timestamp",
+            "type": "uint64"
+          },
+          {
+            "components": [
+              {
+                "internalType": "bytes32",
+                "name": "feedId",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "int128",
+                "name": "value",
+                "type": "int128"
+              },
+              {
+                "internalType": "uint8",
+                "name": "minOracleSamples",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct SwitchboardTypes.FeedInfo[]",
+            "name": "feedInfos",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "bytes[]",
+            "name": "signatures",
+            "type": "bytes[]"
+          }
+        ],
+        "internalType": "struct SwitchboardTypes.FeedUpdateData",
+        "name": "updateData",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes[]",
+        "name": "updates",
+        "type": "bytes[]"
+      }
+    ],
+    "name": "updateFeeds",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "verifierAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "version",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  }
+]

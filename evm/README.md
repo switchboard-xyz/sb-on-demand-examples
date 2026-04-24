@@ -13,6 +13,12 @@ Switchboard On-Demand oracle functionality for EVM-compatible chains.
 
 > For legacy EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/).
 
+For JS/TS integrations, the canonical Switchboard ABI now lives at
+`@switchboard-xyz/on-demand-solidity/abis/Switchboard.json`.
+The current randomness surface is `createRandomness`, `settleRandomness`, and
+`getRandomness`. `revealRandomness` and `getRandomnessResult` are not part of
+the current EVM interface.
+
 ## Network Switch
 
 All runnable EVM examples now use the same network contract:
@@ -109,15 +115,13 @@ For Feed Builder and custom feeds on Monad, use the v2 feed-hash flow. The legac
 ```typescript
 import { ethers } from 'ethers';
 import { CrossbarClient } from '@switchboard-xyz/common';
+import SwitchboardAbi from '@switchboard-xyz/on-demand-solidity/abis/Switchboard.json';
 
 const privateKey = process.env.PRIVATE_KEY!;
 const contractAddress = process.env.CONTRACT_ADDRESS!;
 const switchboardAddress = process.env.SWITCHBOARD_ADDRESS!;
 const rpcUrl = process.env.RPC_URL ?? 'https://testnet-rpc.monad.xyz';
 
-const SWITCHBOARD_ABI = [
-  'function getFee(bytes[] calldata updates) external view returns (uint256)',
-];
 const PRICE_CONSUMER_ABI = [
   'function updatePrices(bytes[] calldata updates, bytes32[] calldata feedIds) external payable',
   'function getPrice(bytes32 feedId) external view returns (int128 value, uint256 timestamp, uint64 slotNumber)',
@@ -146,7 +150,7 @@ const updates = [response.encoded];
 
 // Submit update
 const contract = new ethers.Contract(contractAddress, PRICE_CONSUMER_ABI, signer);
-const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
+const switchboard = new ethers.Contract(switchboardAddress, SwitchboardAbi, signer);
 const fee = await switchboard.getFee(updates);
 const tx = await contract.updatePrices(updates, [feedId], { value: fee });
 await tx.wait();
@@ -299,8 +303,9 @@ bun run flip
 ```typescript
 import { ethers } from 'ethers';
 import { CrossbarClient } from '@switchboard-xyz/common';
+import SwitchboardAbi from '@switchboard-xyz/on-demand-solidity/abis/Switchboard.json';
 
-const switchboard = new ethers.Contract(switchboardAddress, SWITCHBOARD_ABI, signer);
+const switchboard = new ethers.Contract(switchboardAddress, SwitchboardAbi, signer);
 const crossbar = new CrossbarClient('https://crossbar.switchboard.xyz');
 
 // 1. Create randomness request

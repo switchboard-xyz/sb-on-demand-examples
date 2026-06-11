@@ -2,6 +2,8 @@
 
 Advanced Switchboard oracle integration using Pinocchio framework with Address Lookup Table (ALT) optimization.
 
+> Latest-SDK verification is currently blocked for this example. It remains pinned to its previous Switchboard SDK because `switchboard-on-demand 0.13.0` expects `solana_account_view::AccountView`, while this Pinocchio example is still written against `pinocchio::AccountInfo`.
+
 ## Overview
 
 This example demonstrates an optimized approach to integrating Switchboard price feeds on Solana using the Pinocchio framework instead of Anchor. This approach provides better performance and smaller program size.

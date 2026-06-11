@@ -17,6 +17,18 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 
 ## 🌐 Examples by Chain
 
+## Current SDK Version Guidance
+
+Latest-SDK verification in this repo used:
+
+- `@switchboard-xyz/on-demand@^3.10.3`
+- `@switchboard-xyz/common@^5.8.2`
+- `@switchboard-xyz/sui-sdk@^0.1.16`
+- `@switchboard-xyz/on-demand-solidity@^1.1.0`
+- Rust `switchboard-on-demand = "0.13.0"` for verified current Rust examples
+
+Legacy folders are compatibility references only and were not part of latest-SDK verification. Current examples are under the chain folders outside `evm/legacy/**` and `solana/legacy/**`.
+
 ### Solana
 
 The Solana examples demonstrate Switchboard On-Demand functionality on the Solana blockchain:

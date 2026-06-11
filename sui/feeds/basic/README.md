@@ -54,6 +54,29 @@ npm run deploy:testnet
 EXAMPLE_PACKAGE_ID=0xYOUR_PACKAGE_ID npm run example
 ```
 
+## SDK Verification Status
+
+Current SDK install:
+
+```bash
+npm install @switchboard-xyz/on-demand@^3.10.3 @switchboard-xyz/sui-sdk@^0.1.16
+```
+
+The TypeScript scripts compile against the updated npm SDKs:
+
+```bash
+./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop scripts/run.ts scripts/quotes.ts
+```
+
+Latest-SDK Move verification is blocked in the current container because `sui` CLI is not installed. Re-run these local gates in a Sui CLI environment before treating the Move contract as verified:
+
+```bash
+npm run build:testnet
+npm test
+```
+
+Deploys and signed example transactions still require Sui wallet credentials and funded gas.
+
 ## 📊 Expected Output
 
 ```

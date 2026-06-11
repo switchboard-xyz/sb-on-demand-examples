@@ -70,6 +70,20 @@ npm install
 bun install
 ```
 
+Current SDK install:
+
+```bash
+bun add @switchboard-xyz/common@^5.8.2
+```
+
+Verified local command:
+
+```bash
+./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop testVariableOverrides.ts
+```
+
+`bun run test` was intentionally treated as credential-dependent because the example requires `POLYGON_API_KEY`.
+
 ### Environment Setup
 
 Create a `.env` file in the repository root:

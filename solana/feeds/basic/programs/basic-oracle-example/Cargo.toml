@@ -19,7 +19,7 @@ anchor-debug = []
 
 [dependencies]
 anchor-lang = "0.31.1"
-switchboard-on-demand = { version = "=0.10.3", features = ["anchor", "devnet"] }
+switchboard-on-demand = { version = "0.13.0", features = ["anchor", "devnet"] }
 bytemuck = "1.14"
 # Pin these to avoid constant_time_eq v0.4.2 which requires edition2024
 blake3 = "=1.8.2"

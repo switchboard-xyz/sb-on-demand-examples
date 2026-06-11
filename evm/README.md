@@ -12,6 +12,7 @@ Switchboard On-Demand oracle functionality for EVM-compatible chains.
 | **Hyperliquid Testnet** | 998 | TBD |
 
 > For legacy EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/).
+> Legacy examples are compatibility references and were not part of latest-SDK verification.
 
 For JS/TS integrations, the canonical Switchboard ABI now lives at
 `@switchboard-xyz/on-demand-solidity/abis/Switchboard.json`.
@@ -46,6 +47,20 @@ Guardrails:
 Each example is a standalone Foundry project. Navigate to the specific example and follow its README.
 
 > **Security:** Never use `export PRIVATE_KEY=...` or pass private keys as command-line arguments—they appear in shell history and process listings. Use a `.env` file instead.
+
+Current SDK installs:
+
+```bash
+bun add @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand-solidity@^1.1.0
+```
+
+Verified local gates:
+- `evm/price-feeds`: `forge build && forge test`
+- `evm/randomness`: `./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop --resolveJsonModule randomness.ts`
+- `evm/randomness/coin-flip`: `forge build && forge test`
+- `evm/randomness/pancake-stacker`: `forge build && forge test`
+
+Live randomness scripts, deploy scripts, broadcasts, and the Pancake Stacker UI server were intentionally skipped during SDK verification.
 
 ```bash
 # Price Feeds Example

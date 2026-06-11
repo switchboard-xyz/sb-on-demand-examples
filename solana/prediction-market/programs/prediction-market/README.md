@@ -290,11 +290,17 @@ Extend this pattern to verify multiple oracle feeds and ensure data aggregation 
 ```toml
 [dependencies]
 anchor-lang = "0.31.1"
-switchboard-on-demand = { version = "0.9.2", features = ["anchor", "devnet"] }
-switchboard-protos = { version = "^0.2.1", features = ["serde"] }
+switchboard-on-demand = { version = "0.13.0", features = ["anchor", "devnet"] }
+switchboard-protos = { version = "0.2.6", features = ["serde"] }
 prost = "0.13"
 solana-program = "3.0.0"
 faster-hex = "0.10.0"
+```
+
+Verified local command:
+
+```bash
+cargo build-sbf
 ```
 
 ## Testing

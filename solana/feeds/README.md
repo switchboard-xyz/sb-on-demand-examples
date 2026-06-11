@@ -23,6 +23,8 @@ Compute-optimized examples with performance best practices:
 Examples using the older Pull Feed system (still supported):
 - **`runFeed.ts`** - Individual feed updates with granular control
 
+Legacy feed examples are compatibility references and were not part of latest-SDK verification.
+
 ## Quick Start
 
 ### Create a New Feed
@@ -36,11 +38,15 @@ cd basic/
 npm run feeds:managed --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
 
+The basic feed example was verified with `@switchboard-xyz/on-demand@^3.10.3`, `@switchboard-xyz/common@^5.8.2`, and Rust `switchboard-on-demand = "0.13.0"` using `npm run build:sbf` and `cargo test`.
+
 ### For Advanced Users
 ```bash
 cd advanced/
 npm run feeds:advanced --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
+
+The advanced Pinocchio example remains on its previous SDK pin; latest-SDK migration is blocked by the `solana_account_view::AccountView` API change in `switchboard-on-demand 0.13.0`.
 
 ## Key Differences
 
@@ -75,6 +81,8 @@ The legacy system provides:
 - **Backwards compatibility**: Existing integrations continue to work
 
 Examples: `legacy/` directory
+
+Legacy examples remain useful for compatibility and migration reference, but they are not part of latest-SDK verification.
 
 ## Integration Patterns
 

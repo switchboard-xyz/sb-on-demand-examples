@@ -32,6 +32,31 @@ npx ts-node scripts/managedUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433
 
 That's it! You're now fetching real-time oracle prices. 🎉
 
+## Latest SDK Verification
+
+Current Solana examples use:
+
+```bash
+npm install @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
+```
+
+Current on-chain examples that passed latest-SDK verification use:
+
+```toml
+switchboard-on-demand = { version = "0.13.0", features = ["anchor", "devnet"] }
+```
+
+Verified local gates:
+- `solana/feeds/basic`: `npm run build:sbf` and `cargo test`
+- `solana/prediction-market`: `npm test` and `cargo build-sbf`
+- `solana/randomness/coin-flip`: `cargo build-sbf` and `cargo test`
+- `solana/surge`: TypeScript compile/import check only; live stream skipped
+- `solana/x402`: TypeScript compile/import check only; paid/live x402 calls skipped
+
+`solana/feeds/advanced` remains on its previous Pinocchio SDK pin because `switchboard-on-demand 0.13.0` now expects `solana_account_view::AccountView`, and porting that Pinocchio example is a larger API migration.
+
+Legacy Solana examples are compatibility references and were not part of latest-SDK verification.
+
 ## 📋 Prerequisites
 
 - **Node.js** 16+ and **Bun** (or npm/yarn)

@@ -27,6 +27,20 @@ Surge provides low-latency, real-time price updates via WebSocket. This example:
 npm install
 ```
 
+Current SDK install:
+
+```bash
+npm install @switchboard-xyz/on-demand@^3.10.3 @switchboard-xyz/sui-sdk@^0.1.16
+```
+
+Verified local command:
+
+```bash
+./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop scripts/stream.ts
+```
+
+Live streaming and Sui transactions were intentionally skipped during SDK verification because they require a Surge subscription, Solana keypair, and Sui signing key.
+
 2. Ensure your Solana keypair has an active subscription:
 
 Your Solana keypair (default `~/.config/solana/id.json` or `SOLANA_KEYPAIR_PATH`) must have an active Surge subscription. The Sui keypair is only used to sign Sui transactions.

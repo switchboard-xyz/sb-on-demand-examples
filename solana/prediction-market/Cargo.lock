@@ -2485,9 +2485,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "switchboard-on-demand"
-version = "0.10.3"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1cc3cee039a2fed6c088099625df8786a16c10eacb9faf73bb16100d4008feec"
+checksum = "bc7a36809592252cc73f9ec01623b89628654a2fba00dbf5c339c286eb040d40"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2508,9 +2508,9 @@ dependencies = [
 
 [[package]]
 name = "switchboard-protos"
-version = "0.2.4"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d807f905f076b3feee4cdd05eb7fd6850eb0fb9a49039bcf3734bd5846f7a2a"
+checksum = "dfe8595504af7819a8b0cf16825a0ea992ac60fc0bab6ff22d96c05081161769"
 dependencies = [
  "pbjson",
  "pbjson-build",

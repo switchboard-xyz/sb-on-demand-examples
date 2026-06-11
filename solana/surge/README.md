@@ -15,6 +15,22 @@ npx ts-node surge/runSurge.ts -t ETH
 npx ts-node surge/runSurge.ts -p
 ```
 
+## Latest SDK Verification
+
+Current SDK install:
+
+```bash
+npm install @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
+```
+
+Verified local command:
+
+```bash
+./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop scripts/runSurge.ts
+```
+
+Live streaming was intentionally skipped during SDK verification because it requires a Surge subscription and Solana keypair.
+
 ## CLI Options
 
 | Flag | Alias | Description | Default |

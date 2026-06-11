@@ -80,6 +80,23 @@ Oracle jobs use `${VARIABLE_NAME}` syntax for dynamic parameters. The script dem
 
 ## 🚀 Getting Started
 
+## Latest SDK Verification
+
+Current install:
+
+```bash
+bun add @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
+```
+
+Verified local command:
+
+```bash
+cd common
+./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop job-testing/runJob.ts
+```
+
+Live API examples still require the matching credentials, such as `POLYGON_API_KEY`.
+
 ### 1. **Basic Testing**
 ```bash
 # Run the basic value job

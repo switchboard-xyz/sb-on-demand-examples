@@ -39,6 +39,20 @@ This example shows how to:
 npm install
 ```
 
+Current SDK install:
+
+```bash
+npm install @switchboard-xyz/common@^5.8.2
+```
+
+Verified local command:
+
+```bash
+npm test
+```
+
+The local gate runs help mode and does not require a Twitter Bearer Token. Running the full example still requires Twitter/X API credentials.
+
 ### 3. Run the Example
 
 ```bash

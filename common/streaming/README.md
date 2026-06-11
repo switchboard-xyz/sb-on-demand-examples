@@ -71,6 +71,23 @@ cd common/streaming
 bun install  # or npm install
 ```
 
+## Latest SDK Verification
+
+Current install:
+
+```bash
+bun add @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
+```
+
+Verified local command:
+
+```bash
+cd common
+./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop streaming/crossbarStream.ts
+```
+
+Live streaming was intentionally skipped during SDK verification because it requires a Surge subscription and Solana keypair.
+
 ## Technical Details
 
 ### Keypair Authentication

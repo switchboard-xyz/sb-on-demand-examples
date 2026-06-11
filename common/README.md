@@ -45,20 +45,6 @@ This means you can:
 
 ## Quick Start
 
-## Latest SDK Verification
-
-Current common examples use:
-
-```bash
-bun add @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
-```
-
-Verified local gates:
-- `common/job-testing/runJob.ts`: `./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop job-testing/runJob.ts`
-- `common/streaming/crossbarStream.ts`: `./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop streaming/crossbarStream.ts`
-
-Live execution of `streaming/crossbarStream.ts` still requires a Surge subscription and Solana keypair. API-backed job tests still require the relevant API credentials.
-
 ### Variable Overrides
 ```bash
 # Test variable overrides with Polygon.io stock data

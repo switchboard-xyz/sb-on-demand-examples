@@ -19,27 +19,6 @@ This example demonstrates the simplest way to integrate Switchboard price feeds 
 npm install
 ```
 
-Current SDK install:
-
-```bash
-npm install @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
-```
-
-Current on-chain SDK:
-
-```toml
-switchboard-on-demand = { version = "0.13.0", features = ["anchor", "devnet"] }
-```
-
-Verified local commands:
-
-```bash
-npm run build:sbf
-cargo test
-```
-
-Live devnet updates and deployments were intentionally skipped during SDK verification.
-
 ## Build & Deploy
 
 ### 1. Generate Program Keypair

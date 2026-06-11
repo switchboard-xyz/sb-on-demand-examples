@@ -19,27 +19,6 @@ This example demonstrates how to use Switchboard's verifiable randomness for on-
 npm install
 ```
 
-Current SDK install:
-
-```bash
-npm install @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
-```
-
-Current on-chain SDK:
-
-```toml
-switchboard-on-demand = { version = "0.13.0", features = ["anchor"] }
-```
-
-Verified local commands:
-
-```bash
-cargo build-sbf
-cargo test
-```
-
-Live randomness requests and deployments were intentionally skipped during SDK verification.
-
 ## Build & Deploy
 
 ### 1. Generate Program Keypair

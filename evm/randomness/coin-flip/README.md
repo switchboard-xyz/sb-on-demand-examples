@@ -49,20 +49,6 @@ forge build
 cp .env.example .env
 ```
 
-Current SDK install:
-
-```bash
-bun add @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand-solidity@^1.1.0
-```
-
-Verified local command:
-
-```bash
-forge build && forge test
-```
-
-Live deploys, bankroll funding, and flip transactions were intentionally skipped during SDK verification because they require funded network credentials.
-
 Edit `.env`:
 
 ```bash

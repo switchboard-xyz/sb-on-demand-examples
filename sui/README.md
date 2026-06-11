@@ -25,19 +25,6 @@ npm install
 npm run stream
 ```
 
-## Latest SDK Verification
-
-Current Sui TypeScript examples use:
-
-```bash
-npm install @switchboard-xyz/on-demand@^3.10.3 @switchboard-xyz/sui-sdk@^0.1.16
-```
-
-Verified local gate:
-- `sui/surge/basic`: TypeScript compile/import check only; live stream and transactions skipped
-
-`sui/feeds/basic` could not complete `npm run build:testnet` or `npm test` in the verification container because the `sui` CLI is not installed there. Do not treat that Move example as latest-SDK verified until `sui move build` and `sui move test` pass in a Sui CLI environment.
-
 ## Prerequisites
 
 - [Sui CLI](https://docs.sui.io/guides/developer/getting-started/sui-install) installed and configured

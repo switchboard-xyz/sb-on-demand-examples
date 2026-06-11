@@ -9,22 +9,6 @@ This project demonstrates how to create and simulate Switchboard On-Demand feeds
 
 ## Usage
 
-## Latest SDK Verification
-
-Current Rust SDK:
-
-```toml
-switchboard-on-demand = { version = "0.13.0", features = ["client"] }
-```
-
-Verified local command:
-
-```bash
-cargo check
-```
-
-`cargo run` and the integration-style tests still reach live Crossbar endpoints.
-
 ### Run the Example
 The main program creates a BTC/USD feed, stores it, simulates it, and prints a JSON payload suitable for the Vulcan Forge API.
 

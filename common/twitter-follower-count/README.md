@@ -39,20 +39,6 @@ This example shows how to:
 npm install
 ```
 
-Current SDK install:
-
-```bash
-npm install @switchboard-xyz/common@^5.8.2
-```
-
-Verified local command:
-
-```bash
-npm test
-```
-
-`npm test` runs a TypeScript compile/import check and does not require a Twitter Bearer Token or live API call. `npm start` and `npm run test:live` run the full Twitter/Crossbar flow and require Twitter/X API credentials.
-
 ### 3. Run the Example
 
 ```bash

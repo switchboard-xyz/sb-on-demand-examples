@@ -18,20 +18,6 @@ This example demonstrates how to use Switchboard with the X402 micropayment prot
 pnpm install
 ```
 
-Current SDK install:
-
-```bash
-pnpm add @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
-```
-
-Verified local command:
-
-```bash
-./node_modules/.bin/tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution bundler --esModuleInterop scripts/x402Update.ts
-```
-
-Paid/live x402 calls were intentionally skipped during SDK verification.
-
 ## Usage
 
 Run the X402 update script:

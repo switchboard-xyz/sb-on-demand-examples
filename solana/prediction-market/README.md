@@ -18,28 +18,6 @@ This example demonstrates how to integrate Switchboard oracle feeds for predicti
 npm install
 ```
 
-Current SDK install:
-
-```bash
-npm install @switchboard-xyz/common@^5.8.2 @switchboard-xyz/on-demand@^3.10.3
-```
-
-Current on-chain SDKs:
-
-```toml
-switchboard-on-demand = { version = "0.13.0", features = ["anchor", "devnet"] }
-switchboard-protos = { version = "0.2.6", features = ["serde"] }
-```
-
-Verified local commands:
-
-```bash
-npm test
-cargo build-sbf
-```
-
-`npm test` runs help mode and does not require Kalshi credentials. Full Kalshi verification still requires API credentials, a private key PEM, and live Solana RPC access.
-
 ## Build
 
 ```bash

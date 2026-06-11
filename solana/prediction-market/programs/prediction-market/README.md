@@ -297,12 +297,6 @@ solana-program = "3.0.0"
 faster-hex = "0.10.0"
 ```
 
-Verified local command:
-
-```bash
-cargo build-sbf
-```
-
 ## Testing
 
 ### Integration Test

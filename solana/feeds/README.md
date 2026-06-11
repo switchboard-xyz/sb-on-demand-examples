@@ -38,8 +38,6 @@ cd basic/
 npm run feeds:managed --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
 
-The basic feed example was verified with `@switchboard-xyz/on-demand@^3.10.3`, `@switchboard-xyz/common@^5.8.2`, and Rust `switchboard-on-demand = "0.13.0"` using `npm run build:sbf` and `cargo test`.
-
 ### For Advanced Users
 ```bash
 cd advanced/

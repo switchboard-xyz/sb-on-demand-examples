@@ -44,7 +44,7 @@ cd advanced/
 npm run feeds:advanced --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
 
-The advanced Pinocchio example remains on its previous SDK pin; latest-SDK migration is blocked by the `solana_account_view::AccountView` API change in `switchboard-on-demand 0.13.0`.
+The advanced Pinocchio example is ported to the current Pinocchio and Switchboard SDKs. Devnet transaction simulation for the generated advanced program ID is still pending because program deployment timed out against devnet RPC during verification.
 
 ## Key Differences
 

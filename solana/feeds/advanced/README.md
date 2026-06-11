@@ -2,7 +2,7 @@
 
 Advanced Switchboard oracle integration using Pinocchio framework with Address Lookup Table (ALT) optimization.
 
-> Latest-SDK verification is currently blocked for this example. It remains pinned to its previous Switchboard SDK because `switchboard-on-demand 0.13.0` expects `solana_account_view::AccountView`, while this Pinocchio example is still written against `pinocchio::AccountInfo`.
+> Latest-SDK static verification passes for this example, but devnet transaction simulation is still pending because deploying the generated advanced program ID timed out against devnet RPC during verification.
 
 ## Overview
 

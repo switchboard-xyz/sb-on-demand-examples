@@ -34,7 +34,7 @@ That's it! You're now fetching real-time oracle prices. 🎉
 
 ## Compatibility Notes
 
-`solana/feeds/advanced` remains on its previous Pinocchio SDK pin because `switchboard-on-demand 0.13.0` now expects `solana_account_view::AccountView`, and porting that Pinocchio example is a larger API migration.
+`solana/feeds/advanced` is ported to the current Pinocchio and Switchboard SDKs. Devnet transaction simulation for the generated advanced program ID is still pending because program deployment timed out against devnet RPC during verification.
 
 Legacy Solana examples are compatibility references. Current examples live outside `solana/legacy/**`.
 

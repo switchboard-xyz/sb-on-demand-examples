@@ -51,7 +51,7 @@ Verified local command:
 npm test
 ```
 
-The local gate runs help mode and does not require a Twitter Bearer Token. Running the full example still requires Twitter/X API credentials.
+`npm test` runs a TypeScript compile/import check and does not require a Twitter Bearer Token or live API call. `npm start` and `npm run test:live` run the full Twitter/Crossbar flow and require Twitter/X API credentials.
 
 ### 3. Run the Example
 

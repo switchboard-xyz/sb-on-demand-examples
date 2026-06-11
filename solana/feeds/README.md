@@ -44,7 +44,7 @@ cd advanced/
 npm run feeds:advanced --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
 
-The advanced Pinocchio example is ported to the current Pinocchio and Switchboard SDKs. Devnet transaction simulation for the generated advanced program ID is still pending because program deployment timed out against devnet RPC during verification.
+The advanced Pinocchio example is the current compute-optimized feed path. Legacy feed examples are compatibility references.
 
 ## Key Differences
 

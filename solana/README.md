@@ -34,7 +34,7 @@ That's it! You're now fetching real-time oracle prices. 🎉
 
 ## Compatibility Notes
 
-`solana/feeds/advanced` is ported to the current Pinocchio and Switchboard SDKs. Devnet transaction simulation for the generated advanced program ID is still pending because program deployment timed out against devnet RPC during verification.
+`solana/feeds/advanced` is the current compute-optimized Pinocchio feed example.
 
 Legacy Solana examples are compatibility references. Current examples live outside `solana/legacy/**`.
 

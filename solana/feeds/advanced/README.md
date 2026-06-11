@@ -2,8 +2,6 @@
 
 Advanced Switchboard oracle integration using Pinocchio framework with Address Lookup Table (ALT) optimization.
 
-> Latest-SDK static verification passes for this example, but devnet transaction simulation is still pending because deploying the generated advanced program ID timed out against devnet RPC during verification.
-
 ## Overview
 
 This example demonstrates an optimized approach to integrating Switchboard price feeds on Solana using the Pinocchio framework instead of Anchor. This approach provides better performance and smaller program size.

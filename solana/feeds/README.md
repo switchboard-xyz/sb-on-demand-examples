@@ -29,19 +29,23 @@ Legacy feed examples are compatibility references for older integrations.
 
 ### Create a New Feed
 ```bash
-ts-node scripts/feeds/createManagedFeed.ts --name "BTC/USD" --base BTC --quote USD
+cd basic/
+npm install
+npm run create-feed -- --name "BTC/USD" --base BTC --quote USD
 ```
 
 ### For Beginners (Recommended)
 ```bash
 cd basic/
-npm run feeds:managed --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
+npm install
+npm run update -- --feedId 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
 
 ### For Advanced Users
 ```bash
 cd advanced/
-npm run feeds:advanced --feedId=0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
+npm install
+npm run update -- --feedId 0xef0d8b6fcd0104e3e75096912fc8e1e432893da4f18faedaacca7e5875da620f
 ```
 
 The advanced Pinocchio example is the current compute-optimized feed path. Legacy feed examples are compatibility references.

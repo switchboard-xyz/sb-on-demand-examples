@@ -23,7 +23,7 @@ Compute-optimized examples with performance best practices:
 Examples using the older Pull Feed system (still supported):
 - **`runFeed.ts`** - Individual feed updates with granular control
 
-Legacy feed examples are compatibility references and were not part of latest-SDK verification.
+Legacy feed examples are compatibility references for older integrations.
 
 ## Quick Start
 
@@ -80,7 +80,7 @@ The legacy system provides:
 
 Examples: `legacy/` directory
 
-Legacy examples remain useful for compatibility and migration reference, but they are not part of latest-SDK verification.
+Legacy examples remain useful for compatibility and migration reference.
 
 ## Integration Patterns
 

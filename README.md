@@ -25,7 +25,7 @@ Current examples pin these Switchboard SDK versions in their manifests:
 - `@switchboard-xyz/on-demand-solidity@^1.1.0`
 - Rust `switchboard-on-demand = "0.13.0"` for current Rust examples
 
-Legacy folders are compatibility references only and were not part of latest-SDK verification. Current examples are under the chain folders outside `evm/legacy/**` and `solana/legacy/**`.
+Legacy folders are compatibility references only. Current examples are under the chain folders outside `evm/legacy/**` and `solana/legacy/**`.
 
 ## 🌐 Examples by Chain
 

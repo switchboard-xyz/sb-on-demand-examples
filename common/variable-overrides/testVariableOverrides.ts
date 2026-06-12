@@ -1,4 +1,4 @@
-import { CrossbarClient, OracleJob } from "@switchboard-xyz/common";
+import { CrossbarClient, IOracleFeed, OracleJob } from "@switchboard-xyz/common";
 import dotenv from "dotenv";
 
 /**
@@ -65,6 +65,10 @@ async function main() {
 
     // Build oracle job with API key placeholder
     const job = buildPolygonAuthJob();
+    const feed: IOracleFeed = {
+      name: "AAPL Price - Polygon Auth",
+      jobs: [job],
+    };
 
     console.log("📋 Job Definition:");
     console.log(JSON.stringify(job.toJSON(), null, 2));
@@ -74,7 +78,8 @@ async function main() {
     // Simulate feed with Crossbar
     console.log("⚡ Simulating feed with Crossbar...");
     const result = await crossbarClient.simulateFeed(
-      [job],
+      feed,
+      false,
       { POLYGON_API_KEY: process.env.POLYGON_API_KEY }
     );
 

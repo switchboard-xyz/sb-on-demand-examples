@@ -28,4 +28,3 @@ cargo test -- --nocapture
 - `src/main.rs`: Contains the logic.
     - `main()`: Runs the example flow.
     - `tests` module: Contains integration tests that hit the live Crossbar endpoints.
-

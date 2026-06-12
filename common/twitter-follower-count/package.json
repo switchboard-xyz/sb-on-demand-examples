@@ -6,7 +6,8 @@
   "main": "getFollowerCount.ts",
   "scripts": {
     "start": "tsx getFollowerCount.ts",
-    "test": "tsx getFollowerCount.ts"
+    "test": "tsc --noEmit --skipLibCheck --target ES2022 --module ESNext --moduleResolution node --esModuleInterop getFollowerCount.ts oauth.ts",
+    "test:live": "tsx getFollowerCount.ts"
   },
   "keywords": [
     "twitter",
@@ -19,7 +20,7 @@
   "author": "Switchboard",
   "license": "MIT",
   "dependencies": {
-    "@switchboard-xyz/common": "^5.7.0",
+    "@switchboard-xyz/common": "^5.8.2",
     "yaml": "^2.8.3"
   },
   "devDependencies": {

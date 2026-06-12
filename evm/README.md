@@ -12,6 +12,7 @@ Switchboard On-Demand oracle functionality for EVM-compatible chains.
 | **Hyperliquid Testnet** | 998 | TBD |
 
 > For legacy EVM chains (Arbitrum, Core, etc.), see the [legacy examples](./legacy/).
+> Legacy examples are compatibility references for older integrations.
 
 For JS/TS integrations, the canonical Switchboard ABI now lives at
 `@switchboard-xyz/on-demand-solidity/abis/Switchboard.json`.

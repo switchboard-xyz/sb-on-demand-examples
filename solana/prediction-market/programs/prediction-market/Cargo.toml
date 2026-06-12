@@ -19,8 +19,8 @@ anchor-debug = []
 
 [dependencies]
 anchor-lang = "0.31.1"
-switchboard-on-demand = { version = "=0.10.3", features = ["anchor", "devnet"] }
-switchboard-protos = { version = "^0.2.1", features = ["serde"] }
+switchboard-on-demand = { version = "0.13.0", features = ["anchor", "devnet"] }
+switchboard-protos = { version = "0.2.6", features = ["serde"] }
 bytemuck = "1.14"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 sha2 = "0.10"

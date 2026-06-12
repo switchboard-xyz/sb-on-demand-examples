@@ -32,6 +32,12 @@ npx ts-node scripts/managedUpdate.ts --feedId f01cc150052ba08171863e5920bdce7433
 
 That's it! You're now fetching real-time oracle prices. 🎉
 
+## Compatibility Notes
+
+`solana/feeds/advanced` is the current compute-optimized Pinocchio feed example.
+
+Legacy Solana examples are compatibility references. Current examples live outside `solana/legacy/**`.
+
 ## 📋 Prerequisites
 
 - **Node.js** 16+ and **Bun** (or npm/yarn)

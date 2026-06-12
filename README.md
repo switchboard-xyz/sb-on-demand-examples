@@ -15,6 +15,18 @@ Example repositories for Switchboard's latest on-demand functionality across mul
 - **[Feed Builder Documentation](https://explorer.switchboardlabs.xyz/task-docs)** - Documentation for oracle tasks and feed building.
 - **[Explorer](https://explorer.switchboard.xyz)** - Browse feeds, verify integrity, and view historical data.
 
+## Current SDK Versions
+
+Current examples pin these Switchboard SDK versions in their manifests:
+
+- `@switchboard-xyz/on-demand@^3.10.3`
+- `@switchboard-xyz/common@^5.8.2`
+- `@switchboard-xyz/sui-sdk@^0.1.16`
+- `@switchboard-xyz/on-demand-solidity@^1.1.0`
+- Rust `switchboard-on-demand = "0.13.0"` for current Rust examples
+
+Legacy folders are compatibility references only. Current examples are under the chain folders outside `evm/legacy/**` and `solana/legacy/**`.
+
 ## 🌐 Examples by Chain
 
 ### Solana

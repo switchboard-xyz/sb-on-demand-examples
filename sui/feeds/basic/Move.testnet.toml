@@ -7,10 +7,9 @@ version = "0.0.1"
 git = "https://github.com/switchboard-xyz/sui.git"
 subdir = "on_demand"
 rev = "testnet"
+addr_subst = { "switchboard" = "0x28005599a66e977bff26aeb1905a02cda5272fd45bb16a5a9eb38e8659658cff" }
 
 [addresses]
 example = "0x0"
 std = "0x1"
 sui = "0x2"
-switchboard = "0x28005599a66e977bff26aeb1905a02cda5272fd45bb16a5a9eb38e8659658cff"
-

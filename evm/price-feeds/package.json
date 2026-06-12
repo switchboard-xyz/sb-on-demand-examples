@@ -33,8 +33,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@switchboard-xyz/common": "^5.7.0",
-    "@switchboard-xyz/on-demand-solidity": "^0.0.4",
+    "@switchboard-xyz/common": "^5.8.2",
+    "@switchboard-xyz/on-demand-solidity": "^1.1.0",
     "@types/yargs": "^17.0.33",
     "ethers": "^6.13.1",
     "yaml": "^2.8.2",

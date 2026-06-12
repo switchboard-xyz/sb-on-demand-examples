@@ -15,7 +15,7 @@
   "author": "Switchboard Labs",
   "license": "MIT",
   "dependencies": {
-    "@switchboard-xyz/common": "^5.7.0",
+    "@switchboard-xyz/common": "^5.8.2",
     "@switchboard-xyz/on-demand-solidity": "^1.1.0",
     "ethers": "^6.15.0",
     "yaml": "^2.8.3"

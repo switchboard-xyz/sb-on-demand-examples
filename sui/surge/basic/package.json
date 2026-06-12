@@ -21,8 +21,8 @@
   "dependencies": {
     "@mysten/sui": "^1.38.0",
     "@solana/web3.js": "^1.98.4",
-    "@switchboard-xyz/on-demand": "^3.9.0",
-    "@switchboard-xyz/sui-sdk": "^0.1.14",
+    "@switchboard-xyz/on-demand": "^3.10.3",
+    "@switchboard-xyz/sui-sdk": "^0.1.16",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

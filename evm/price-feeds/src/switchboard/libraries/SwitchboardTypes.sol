@@ -24,7 +24,7 @@ library SwitchboardTypes {
      * @notice Structure containing feed information
      * @param feedId The unique identifier (checksum) of the feed
      * @param value The current value of the feed
-     * @param minOracleSamples Minimum number of oracle samples required for this feed
+     * @param minOracleSamples Minimum number of oracle samples required for this feed, unscaled
      */
     struct FeedInfo {
         bytes32 feedId;

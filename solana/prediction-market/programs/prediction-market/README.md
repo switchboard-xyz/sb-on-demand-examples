@@ -90,9 +90,9 @@ let feed = OracleFeed {
             weight: None,
         }
     ],
-    min_job_responses: Some(1),
-    min_oracle_samples: Some(1),
-    max_job_range_pct: Some(0),
+    min_job_responses: Some(1), // unscaled job/source quorum
+    min_oracle_samples: Some(1), // unscaled oracle/signature quorum
+    max_job_range_pct: Some(0), // Intentional for this single-source verification; use a positive scaled value for normal multi-source feeds.
 };
 ```
 

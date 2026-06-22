@@ -75,9 +75,9 @@ async function simulateTransaction(
 
 const ORACLE_FEED: IOracleFeed = {
   name: "X402 Paywalled RPC Call",
-  minJobResponses: 1,
-  minOracleSamples: 1,
-  maxJobRangePct: 0,
+  minJobResponses: 1, // unscaled job/source quorum
+  minOracleSamples: 1, // unscaled oracle/signature quorum
+  maxJobRangePct: 0, // Intentional for this single-use flow; use a positive scaled value for normal multi-source feeds.
   jobs: [
     {
       tasks: [

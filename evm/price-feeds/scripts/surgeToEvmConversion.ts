@@ -104,7 +104,7 @@ async function demonstrateSurgeToEvmConversion() {
 
     // Perform the conversion
     const evmEncoded = EVMUtils.convertSurgeUpdateToEvmFormat(surgeData, {
-      minOracleSamples: 1
+      minOracleSamples: 1 // unscaled oracle-sample quorum
     });
 
     console.log('✅ EVM Conversion Results:');

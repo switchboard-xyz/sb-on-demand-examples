@@ -60,9 +60,9 @@ const argv = yargs(process.argv)
   const oracleFeed = OracleFeed.fromObject({
     name: `${argv.base}/${argv.quote} Price Feed`,
     jobs: jobs,
-    minOracleSamples: 1,
-    minJobResponses: 1,
-    maxJobRangePct: 1,
+    minOracleSamples: 1, // unscaled oracle/signature quorum
+    minJobResponses: 1, // unscaled job/source quorum
+    maxJobRangePct: 1_000_000_000, // 1%, scaled by 1e9
   });
 
 

@@ -159,9 +159,9 @@ function createSignature(
 
     const oracleFeed = {
       name: "Kalshi Order Price",
-      minJobResponses: 1,
-      minOracleSamples: 1,
-      maxJobRangePct: 0,
+      minJobResponses: 1, // unscaled job/source quorum
+      minOracleSamples: 1, // unscaled oracle/signature quorum
+      maxJobRangePct: 0, // Intentional for this single-source verification; use a positive scaled value for normal multi-source feeds.
       jobs: [
         {
           tasks: [

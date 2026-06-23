@@ -1,4 +1,6 @@
 use anchor_lang::prelude::*;
+// Legacy classic PullFeed account example. New feed-hash integrations should
+// read canonical quote-program accounts instead of PullFeedAccountData.
 use switchboard_on_demand::on_demand::accounts::pull_feed::PullFeedAccountData;
 
 declare_id!("CeJiXcRwxWmFoCMy1GozyGrt4SoAXB9HmFTA1JAfmqQT");

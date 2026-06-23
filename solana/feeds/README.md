@@ -20,10 +20,12 @@ Compute-optimized examples with performance best practices:
 **Use when**: Building production apps, need maximum performance, handling high transaction volume
 
 ### 📁 `legacy/` - Previous Generation Examples
-Examples using the older Pull Feed system (still supported):
+Examples using the older classic PullFeed account system:
 - **`runFeed.ts`** - Individual feed updates with granular control
 
-Legacy feed examples are compatibility references for older integrations.
+Legacy feed examples are compatibility and migration references only. They
+require queue/gateway support for the classic PullFeed update path and are not
+the starting point for new feed-hash integrations.
 
 ## Quick Start
 
@@ -76,15 +78,17 @@ The new system uses the **quote program** to provide:
 Examples: `basic/` and `advanced/` directories
 
 ### 🔄 Legacy Pull Feed System
-The legacy system provides:
+The legacy system is for existing classic PullFeed account integrations that
+still have queue/gateway support for that path:
 - **Granular control**: Individual feed management
 - **Direct feed accounts**: Work with specific PullFeed accounts
 - **Detailed responses**: Visibility into individual oracle responses
-- **Backwards compatibility**: Existing integrations continue to work
+- **Compatibility reference**: Useful when migrating existing PullFeed code
 
 Examples: `legacy/` directory
 
-Legacy examples remain useful for compatibility and migration reference.
+Legacy examples remain useful for compatibility and migration reference. New
+Solana/SVM custom-feed integrations should use `basic/` or `advanced/`.
 
 ## Integration Patterns
 
@@ -289,6 +293,10 @@ If migrating from legacy Pull Feeds:
 3. **Update** program to use managed oracle accounts
 4. **Test** with basic examples first
 5. **Optimize** with advanced patterns
+
+If `PullFeed.fetchUpdateIx()` or `pullFeedSubmitResponseConsensus` returns
+`ORACLE_UNAVAILABLE` while managed Ed25519 quote updates work, the integration
+is using the legacy PullFeed path against quote-program infrastructure.
 
 ## Related Documentation
 

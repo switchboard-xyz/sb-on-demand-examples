@@ -1,6 +1,11 @@
 /**
  * @fileoverview Oracle Latency Benchmark Tool
  *
+ * Legacy classic PullFeed/secp benchmark. Do not use this script for new
+ * feed-hash integrations; use solana/feeds/basic/scripts/managedUpdate.ts or
+ * solana/feeds/advanced/scripts/runUpdate.ts and canonical quote-program
+ * accounts instead.
+ *
  * This script compares the latency of Switchboard On-Demand oracles against
  * other major oracle providers (Pyth, Redstone, Supra). It measures the time
  * from when price data is published to when it's available for use.

@@ -159,7 +159,7 @@ POLYGON_API_KEY=your_key bun run common/variable-overrides/testVariableOverrides
    ```
 
 3. **Use On-Chain**: When fetching oracle quotes, pass the same overrides
-   - Solana: Add to `fetchUpdateMany` options
+   - Solana/SVM: Add to `queue.fetchManagedUpdateIxs(...)` options
    - EVM: Add to contract call parameters
    - Sui: Add to transaction builder options
 
@@ -168,11 +168,15 @@ POLYGON_API_KEY=your_key bun run common/variable-overrides/testVariableOverrides
 ### Solana
 
 ```typescript
-import { Oracle } from "@switchboard-xyz/on-demand";
+import * as sb from "@switchboard-xyz/on-demand";
+import { CrossbarClient } from "@switchboard-xyz/common";
 
-const oracle = new Oracle({ ... });
-const response = await oracle.fetchUpdateMany({
-  feeds: [feedConfig],
+const { keypair, program } = await sb.AnchorUtils.loadEnv();
+const queue = await sb.Queue.loadDefault(program!);
+const crossbar = CrossbarClient.default();
+
+const instructions = await queue.fetchManagedUpdateIxs(crossbar, [feedId], {
+  payer: keypair.publicKey,
   variableOverrides: {
     API_KEY: process.env.API_KEY
   }

@@ -4,6 +4,10 @@ import yargs from "yargs";
 import { TX_CONFIG, sleep } from "./utils";
 import { DisplayState, render, initScreen, setupCleanupHandlers } from "./view";
 
+// Legacy classic PullFeed/secp path. Do not use this script for new
+// feed-hash integrations; use ../../feeds/basic/scripts/managedUpdate.ts and
+// canonical quote-program accounts instead.
+
 const argv = yargs(process.argv).options({ feed: { required: true } })
   .argv as any;
 

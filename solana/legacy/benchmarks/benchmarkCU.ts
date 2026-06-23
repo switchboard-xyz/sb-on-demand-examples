@@ -1,6 +1,11 @@
 /**
  * @fileoverview Compute Unit Benchmark Tool
  *
+ * Legacy classic PullFeed/secp benchmark. Do not use this script for new
+ * feed-hash integrations; use solana/feeds/basic/scripts/managedUpdate.ts or
+ * solana/feeds/advanced/scripts/runUpdate.ts and canonical quote-program
+ * accounts instead.
+ *
  * This script measures the compute units (CU) consumed by Switchboard
  * oracle updates with varying configurations. It helps developers:
  *

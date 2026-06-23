@@ -2,7 +2,7 @@
 
 ![Switchboard Logo](https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-# Switchboard On-Demand: Solana Pull Feed
+# Switchboard On-Demand: Solana Feeds
 
 **Get real-time oracle prices in your Solana program with sub-second latency and 90% lower costs.**
 
@@ -37,6 +37,10 @@ That's it! You're now fetching real-time oracle prices. 🎉
 `solana/feeds/advanced` is the current compute-optimized Pinocchio feed example.
 
 Legacy Solana examples are compatibility references. Current examples live outside `solana/legacy/**`.
+New feed-hash integrations should use `queue.fetchManagedUpdateIxs(...)` and
+canonical quote-program accounts. Classic `PullFeed.fetchUpdateIx(...)` is only
+for existing PullFeed account integrations with compatible queue/gateway
+support.
 
 ## 📋 Prerequisites
 
@@ -283,7 +287,7 @@ The oracle quote method (e.g., `feeds/advanced/scripts/runUpdate.ts`) is signifi
 #### 3. **Composable Architecture**
 The oracle quote method consists of two key components:
 
-##### a) **Secp256k1 Precompile Instruction**
+##### a) **Ed25519 Signature Verification Instruction**
 ```typescript
 const sigVerifyIx = await queue.fetchQuoteIx(crossbar, [
   argv.feedHash,
@@ -292,7 +296,7 @@ const sigVerifyIx = await queue.fetchQuoteIx(crossbar, [
   variableOverrides: {}
 });
 ```
-- Uses Solana's native secp256k1 precompile for signature verification
+- Uses Solana's native Ed25519 program for signature verification
 - Verifies oracle signatures without expensive on-chain compute
 - Batches multiple signature verifications in a single instruction
 

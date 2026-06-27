@@ -1,15 +1,17 @@
 import * as sb from "@switchboard-xyz/on-demand";
-import { OracleQuote, isMainnetConnection } from "@switchboard-xyz/on-demand";
+import { OracleQuote } from "@switchboard-xyz/on-demand";
 import yargs from "yargs";
 import * as fs from "fs";
 import {
-  TX_CONFIG,
   loadBasicProgram,
+  loadBasicEnv,
   basicReadOracleIx,
-  BASIC_PROGRAM_PATH,
+  BASIC_IDL_PATH,
   DEFAULT_FEED_ID,
   logFeedId,
   handleSimulationError,
+  normalizeFeedId,
+  sendAndConfirmTx,
 } from "./utils";
 
 const argv = yargs(process.argv)
@@ -18,7 +20,8 @@ const argv = yargs(process.argv)
       type: "string",
       required: false,
       default: DEFAULT_FEED_ID,
-      description: "The hexadecimal ID of the price feed (get from Switchboard Explorer)",
+      description:
+        "The 64-character hex feed ID (search the asset in Switchboard Explorer and pass the bare hex value)",
     },
   })
   .parseSync();
@@ -45,20 +48,24 @@ const argv = yargs(process.argv)
 (async function main() {
   // Load Solana environment configuration
   // Note: loadEnv automatically sets the crossbar network based on the detected RPC connection
-  const { program, keypair, connection, crossbar, queue, isMainnet } =
-    await sb.AnchorUtils.loadEnv();
+  const { program, keypair, connection, crossbar, queue, keypairPath, rpcUrl } =
+    await loadBasicEnv();
+  const feedId = normalizeFeedId(argv.feedId);
 
-  logFeedId(argv.feedId);
+  logFeedId(feedId);
+  console.log("🪪 Wallet:", keypair.publicKey.toBase58());
+  console.log("🔐 Keypair path:", keypairPath);
+  console.log("🔗 RPC endpoint:", rpcUrl);
   console.log("🌐 Queue selected:", queue.pubkey.toBase58());
   console.log("🔧 Crossbar network:", crossbar.getNetwork());
 
   // Step 1: Derive the canonical oracle account from feed hashes
   // This uses the same derivation logic as the quote program
-  const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [argv.feedId]);
+  const [quoteAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [feedId]);
   console.log("📍 Quote Account (derived):", quoteAccount.toBase58());
 
   // Simulate the feed - automatically uses the network configured in loadEnv
-  const simFeed = await crossbar.simulateFeed(argv.feedId);
+  const simFeed = await crossbar.simulateFeed(feedId);
   console.log(simFeed);
 
   // Step 2: Create managed update instructions
@@ -66,7 +73,7 @@ const argv = yargs(process.argv)
   // and the quote program instruction that stores the verified data
   const instructions = await queue.fetchManagedUpdateIxs(
     crossbar,
-    [argv.feedId],
+    [feedId],
     {
       variableOverrides: {},
       instructionIdx: 0, // Ed25519 instruction index
@@ -82,25 +89,29 @@ const argv = yargs(process.argv)
   // This instruction will read from the quote account that was just updated
   // Load the basic oracle example program
   const ixs = [...instructions];
+  let includedConsumerInstruction = false;
 
-  if (fs.existsSync(BASIC_PROGRAM_PATH)) {
+  if (fs.existsSync(BASIC_IDL_PATH)) {
     try {
       const basicProgram = await loadBasicProgram(program!.provider);
-      const readOracleIx = await basicReadOracleIx(
-        basicProgram,
-        quoteAccount,
-        queue.pubkey,
-        keypair.publicKey
-      );
-      ixs.push(readOracleIx);
-      console.log("  - Basic oracle program crank instruction");
-    } catch {
-      console.log("ℹ️  Skipping crank: basic_oracle_example program not deployed on-chain");
-      console.log("   To deploy, run: anchor build && anchor deploy");
+      const programAccount = await connection.getAccountInfo(basicProgram.programId);
+      if (programAccount?.executable) {
+        const readOracleIx = await basicReadOracleIx(basicProgram, quoteAccount);
+        ixs.push(readOracleIx);
+        includedConsumerInstruction = true;
+        console.log("  - Basic oracle program consumer instruction");
+      } else {
+        console.log("ℹ️  Skipping consumer step: basic_oracle_example is not deployed on-chain");
+        console.log(
+          "   To deploy, run: npm run build && solana program deploy --program-id target/deploy/basic_oracle_example-keypair.json target/deploy/basic_oracle_example.so"
+        );
+      }
+    } catch (error) {
+      console.log("ℹ️  Skipping consumer step:", error instanceof Error ? error.message : error);
     }
   } else {
-    console.log("ℹ️  Skipping crank: basic_oracle_example program not deployed");
-    console.log("   To deploy, run: anchor build && anchor deploy");
+    console.log("ℹ️  Skipping consumer step: local basic_oracle_example IDL not built");
+    console.log("   To enable it, run: npm run build");
   }
 
   // Step 4: Build and send the transaction
@@ -120,7 +131,19 @@ const argv = yargs(process.argv)
       await handleSimulationError(sim.value.err, connection, keypair.publicKey);
       return;
     }
+    const sig = await sendAndConfirmTx(connection, tx, [keypair]);
+    console.log("✅ Transaction sent:", sig);
+    console.log("✅ Managed update confirmed");
+    if (!includedConsumerInstruction) {
+      console.log("ℹ️  The quote account was updated without the example consumer instruction");
+    }
   } catch (error) {
     console.error("❌ Transaction failed:", error);
   }
-})();
+})().catch((error) => {
+  console.error("❌ Failed to build or send the basic managed update:", error);
+  console.error(
+    "💡 Feed IDs for this script should be 64 hex characters. If Explorer shows a 0x prefix, remove it before passing --feedId."
+  );
+  process.exit(1);
+});

@@ -45,6 +45,8 @@ export SOLANA_KEYPAIR_PATH=/path/to/your/solana/id.json
 4. The SDK signs/authenticates with your keypair (signature-based auth).
 5. Connect and subscribe to price streams over WebSocket, then use your Sui keypair only when you submit Sui transactions.
 
+> **Queue fees:** The checked-in `scripts/stream.ts` example calls `emitSurgeQuote(switchboardClient, transaction, rawResponse)` and remains correct for queues with `fee == 0`. If the queue accepts SUI as a fee type, the Sui SDK auto-splits the exact verifier fee from transaction gas. If the queue requires a non-SUI fee coin, you must call `emitSurgeQuote(switchboardClient, transaction, rawResponse, { feeCoin, feeType })`. That explicit non-SUI paid path is not covered by this minimal example.
+
 
 ## Usage
 

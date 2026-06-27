@@ -460,6 +460,8 @@ const result = await client.signAndExecuteTransaction({
 });
 ```
 
+> **Queue fees:** The checked-in Sui example scripts remain correct when `queue.fee == 0`. If the queue accepts SUI as a fee type, `Quote.fetchUpdateQuote(sb, tx, { ... })` still works unchanged because the SDK auto-splits the exact fee from transaction gas. If the queue requires a non-SUI fee coin, you must call `Quote.fetchUpdateQuote(sb, tx, { ..., feeCoin, feeType })` with an exact-amount coin accepted by the queue. That explicit non-SUI paid path is not wired into `scripts/run.ts` or `scripts/quotes.ts` today.
+
 ## 🐛 Troubleshooting
 
 ### "Quote Consumer ID not found"

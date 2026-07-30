@@ -201,7 +201,6 @@ const ORACLE_FEED: IOracleFeed = {
       variableOverrides: {
         X402_PAYMENT_SIGNATURE: paymentSignature,
       },
-      instructionIdx: 0,
       payer: keypair.publicKey,
     }
   );

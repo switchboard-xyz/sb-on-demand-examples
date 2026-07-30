@@ -86,7 +86,6 @@ const argv = yargs(process.argv)
       {
         numSignatures: 1,
         variableOverrides: {},
-        instructionIdx: 0,
         payer: keypair.publicKey,
       }
     );

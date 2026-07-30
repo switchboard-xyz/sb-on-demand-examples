@@ -69,7 +69,6 @@ const argv = yargs(process.argv)
     [argv.feedId],
     {
       variableOverrides: {},
-      instructionIdx: 0, // Ed25519 instruction index
       payer: keypair.publicKey,
     }
   );

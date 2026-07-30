@@ -212,7 +212,6 @@ function createSignature(
               KALSHI_TIMESTAMP: timestamp,
               KALSHI_API_KEY_ID: argv.apiKeyId,
             },
-            instructionIdx: 0,
           }
         );
         console.log(`  ✅ Successfully fetched quote instruction\n`);

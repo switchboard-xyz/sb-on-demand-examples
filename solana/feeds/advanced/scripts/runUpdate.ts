@@ -77,7 +77,6 @@ const argv = yargs(process.argv)
     const start = Date.now();
     const instruction = await queue.fetchQuoteIx(crossbar, [argv.feedId], {
       variableOverrides: {},
-      instructionIdx: 0,
     });
     const latency = Date.now() - start;
 
@@ -131,7 +130,6 @@ const argv = yargs(process.argv)
   // This gets both Ed25519 verification and quote program instructions
   const instruction = await queue.fetchQuoteIx(crossbar, [argv.feedId], {
     variableOverrides: {},
-    instructionIdx: 0, // Ed25519 instruction index
   });
 
   // Calculate and track fetch latency

@@ -96,7 +96,6 @@ Solana/SVM custom-feed integrations should use `basic/` or `advanced/`.
 ```typescript
 // 1. Auto-detect network and load appropriate queue
 const queue = await sb.Queue.loadDefault(program);
-const gateway = await queue.fetchGatewayFromCrossbar(crossbar);
 
 // 2. Derive canonical oracle account
 const [oracleAccount] = OracleQuote.getCanonicalPubkey(queue.pubkey, [feedId]);
@@ -106,10 +105,8 @@ const instructions = await queue.fetchManagedUpdateIxs(
   crossbar,
   [feedId],
   {
-    gateway: gateway,
     numSignatures: 1,
     variableOverrides: {},
-    instructionIdx: 0,
     payer: keypair.publicKey,
   }
 );
@@ -129,9 +126,8 @@ const tx = await sb.asV0Tx({
 
 ### Advanced Integration (Production)
 ```typescript
-// Auto-detect network and load queue with optimized gateway
+// Auto-detect network and load the queue
 const queue = await sb.Queue.loadDefault(program);
-const gateway = await queue.fetchGatewayByLatestVersion(crossbar);
 
 // Full optimization with LUT, monitoring, and error handling
 const lut = await queue.loadLookupTable();
@@ -141,10 +137,8 @@ const instructions = await queue.fetchManagedUpdateIxs(
   crossbar,
   feedIds,
   {
-    gateway: gateway,
     numSignatures: 3,
     variableOverrides: {},
-    instructionIdx: 0,
     payer: keypair.publicKey,
   }
 );

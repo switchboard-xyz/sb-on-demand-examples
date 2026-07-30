@@ -10,9 +10,9 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
     "@solana/web3.js": "^1.98.0",
-    "@switchboard-xyz/common": "^5.7.0",
-    "@switchboard-xyz/common-legacy": "^1.1.0",
-    "@switchboard-xyz/on-demand": "^3.9.0",
+    "@switchboard-xyz/common": "^5.8.5",
+    "@switchboard-xyz/common-legacy": "^1.1.1",
+    "@switchboard-xyz/on-demand": "^3.10.6",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

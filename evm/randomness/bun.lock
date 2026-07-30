@@ -5,7 +5,7 @@
     "": {
       "name": "evm-randomness-example",
       "dependencies": {
-        "@switchboard-xyz/common": "^5.8.2",
+        "@switchboard-xyz/common": "^5.8.5",
         "ethers": "^6.16.0",
         "yaml": "^2.8.3",
       },
@@ -52,7 +52,7 @@
 
     "@swc/helpers": ["@swc/helpers@0.5.19", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-QamiFeIK3txNjgUTNppE6MiG3p7TdninpZu0E0PbqVh1a9FNLT2FRhisaa4NcaX52XVhA5l7Pk58Ft7Sqi/2sA=="],
 
-    "@switchboard-xyz/common": ["@switchboard-xyz/common@5.8.2", "", { "dependencies": { "@solana/web3.js": "^1.98.2", "axios": "^1.9.0", "big.js": "^6.2.2", "bn.js": "^5.2.1", "bs58": "^6.0.0", "buffer": "^6.0.3", "decimal.js": "^10.4.3", "js-sha256": "^0.11.0", "protobufjs": "^7.4.0", "yaml": "^2.8.1" } }, "sha512-Wl2/pkOqbyku4fdOvO3lyai1VI0NfQtb+z/9dIgkh76M04+5PUyked44XTNo6GH4f92fZV9b3zoB4gW554Af9g=="],
+    "@switchboard-xyz/common": ["@switchboard-xyz/common@5.8.5", "", { "dependencies": { "@solana/web3.js": "^1.98.2", "axios": "^1.9.0", "big.js": "^6.2.2", "bn.js": "^5.2.1", "bs58": "^6.0.0", "buffer": "^6.0.3", "decimal.js": "^10.4.3", "js-sha256": "^0.11.0", "protobufjs": "^7.4.0", "yaml": "^2.8.1" } }, "sha512-FAbrTCdhQrOSMzxbpFIoJejeP95MJgXtgezzl+Hwms7wqSw9WTx52aHPLp/EUeGEj21rn9MuNlV0uvKNFxk5DA=="],
 
     "@types/connect": ["@types/connect@3.4.38", "", { "dependencies": { "@types/node": "*" } }, "sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug=="],
 

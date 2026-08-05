@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use switchboard_on_demand::{default_queue, SwitchboardQuoteExt, SwitchboardQuote};
 
-declare_id!("5awHMeXj6rSCEcPnShB51cmwkCbKGzdSk74unKREr3Jt");
+declare_id!("HWZNh846V4VVdp5mkeYaeYQjGo47F1Uax38ViYY1VvrK");
 
 /// Basic Oracle Example Program
 ///
@@ -12,72 +12,50 @@ declare_id!("5awHMeXj6rSCEcPnShB51cmwkCbKGzdSk74unKREr3Jt");
 pub mod basic_oracle_example {
     use super::*;
 
-    /// Read and verify oracle data from the managed oracle account
+    /// Read the first verified feed from the managed quote account.
     ///
-    /// This is the simplest way to consume Switchboard oracle data.
-    /// The oracle account is derived canonically from feed hashes and
-    /// updated by the quote program's verified_update instruction.
-    ///
-    /// ## Usage
-    /// 1. Call fetchManagedUpdateIxs to update the oracle account
-    /// 2. Call this instruction to read the verified data
-    ///
-    /// ## Parameters
-    /// - quote_account: The canonical oracle account (derived from feed hashes)
-    /// - queue: The Switchboard queue (auto-detected by network)
-    /// - sysvars: Required system variables for verification
+    /// This basic example is intentionally single-feed oriented: update one
+    /// feed with `fetchManagedUpdateIxs`, then read `feeds[0]` in your program.
     pub fn read_oracle_data(ctx: Context<ReadOracleData>) -> Result<()> {
-        // Access the oracle data directly
-        // The quote_account constraint validates it's the canonical account
         let feeds = &ctx.accounts.quote_account.feeds;
+        require!(!feeds.is_empty(), BasicOracleError::MissingFeed);
+        let feed = &feeds[0];
 
-        // Calculate staleness
         let current_slot = ctx.accounts.sysvars.clock.slot;
         let quote_slot = ctx.accounts.quote_account.slot;
         let staleness = current_slot.saturating_sub(quote_slot);
 
-        msg!("Number of feeds: {}", feeds.len());
-        msg!("📅 Quote slot: {}, Current slot: {}", quote_slot, current_slot);
-        msg!("⏰ Staleness: {} slots", staleness);
-
-        // Process each feed
-        for (i, feed) in feeds.iter().enumerate() {
-            msg!("📊 Feed {}: ID = {}", i, feed.hex_id());
-            msg!("💰 Feed {}: Value = {}", i, feed.value());
-
-            // Your business logic here!
-            // For example:
-            // - Store the price in your program state
-            // - Trigger events based on price changes
-            // - Use the price for calculations
+        msg!("Feed count: {}", feeds.len());
+        if feeds.len() > 1 {
+            msg!("Using feed[0] in this basic example");
         }
 
-        msg!("✅ Successfully read {} oracle feeds!", feeds.len());
+        msg!("Quote slot: {}, Current slot: {}", quote_slot, current_slot);
+        msg!("Staleness: {} slots", staleness);
+        let feed_id = feed.hex_id();
+        let feed_id = feed_id.strip_prefix("0x").unwrap_or(feed_id.as_str());
+        msg!("Feed ID: {}", feed_id);
+        msg!("Feed value (human-readable): {}", feed.value());
         Ok(())
     }
 }
 
-/// Account context for reading oracle data
-///
-/// This is designed to be as simple as possible while still being secure.
-/// The quote_account is the canonical account derived from feed hashes.
+/// Account context for reading oracle data from a canonical quote account.
 #[derive(Accounts)]
 pub struct ReadOracleData<'info> {
-    /// The canonical oracle account containing verified quote data
-    ///
-    /// This account is:
-    /// - Updated by the quote program's verified_update instruction
-    /// - Contains verified oracle data
-    /// - Validated to be the canonical account for the contained feeds
     #[account(address = quote_account.canonical_key(&default_queue()))]
     pub quote_account: Box<Account<'info, SwitchboardQuote>>,
 
-    /// System variables required for quote verification
     pub sysvars: Sysvars<'info>,
 }
 
-/// System variables required for oracle verification
 #[derive(Accounts)]
 pub struct Sysvars<'info> {
     pub clock: Sysvar<'info, Clock>,
+}
+
+#[error_code]
+pub enum BasicOracleError {
+    #[msg("quote_account did not contain any feeds")]
+    MissingFeed,
 }
